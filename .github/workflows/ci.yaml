@@ -1,0 +1,13 @@
+name: CI
+
+on: push
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    container: swift:5.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build & Test
+        run: swift test -c release --enable-test-discovery
