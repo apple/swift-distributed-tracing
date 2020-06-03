@@ -14,29 +14,6 @@ let server = FakeHTTPServer(
 print("=== Receive HTTP request on server ===")
 server.receive(FakeHTTPRequest(path: "/", headers: []))
 
-// MARK: - Instrumentation Middleware
-
-protocol InstrumentationMiddlewareProtocol {
-    associatedtype ExtractFrom
-    associatedtype InjectInto
-
-    func extract(from: ExtractFrom, into context: inout Context)
-    func inject(from context: Context, into: inout InjectInto)
-}
-
-struct InstrumentationMiddleware<InjectInto, ExtractFrom>: InstrumentationMiddlewareProtocol {
-    let extract: (ExtractFrom, inout Context) -> Void
-    let inject: (Context, inout InjectInto) -> Void
-
-    func extract(from: ExtractFrom, into context: inout Context) {
-        self.extract(from, &context)
-    }
-
-    func inject(from context: Context, into: inout InjectInto) {
-        self.inject(context, &into)
-    }
-}
-
 // MARK: - Fake HTTP Server
 
 typealias HTTPHeaders = [(String, String)]
