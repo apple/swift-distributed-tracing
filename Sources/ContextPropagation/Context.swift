@@ -11,7 +11,7 @@ public struct Context {
         dict[ObjectIdentifier(key)] = ValueContainer(value: value)
     }
 
-    public mutating func extract<Key: ContextKey>(_ key: Key.Type) -> Key.Value? {
+    public func extract<Key: ContextKey>(_ key: Key.Type) -> Key.Value? {
         dict[ObjectIdentifier(key)]?.forceUnwrap(key)
     }
 
