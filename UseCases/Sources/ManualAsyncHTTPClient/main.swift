@@ -18,9 +18,9 @@ let server = FakeHTTPServer(
 print("=== Receive HTTP request on server ===")
 server.receive(try! HTTPClient.Request(url: "https://swift.org"))
 
-// MARK: - InstrumentingHTTPClient
+// MARK: - InstrumentedHTTPClient
 
-struct InstrumentingHTTPClient {
+struct InstrumentedHTTPClient {
     private let client = HTTPClient(eventLoopGroupProvider: .createNew)
     private let instrumentationMiddlewares: [InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>]
 
@@ -51,11 +51,11 @@ struct FakeHTTPResponse {}
 private typealias HTTPHeadersInstrumentationMiddleware = InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
 
 struct FakeHTTPServer {
-    typealias Handler = (Context, HTTPClient.Request, InstrumentingHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (Context, HTTPClient.Request, InstrumentedHTTPClient) -> FakeHTTPResponse
 
     private let instrumentationMiddlewares: [InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>]
     private let catchAllHandler: Handler
-    private let client: InstrumentingHTTPClient
+    private let client: InstrumentedHTTPClient
 
     init<M: InstrumentationMiddlewareProtocol>(
         instrumentationMiddlewares: [M],
@@ -64,7 +64,7 @@ struct FakeHTTPServer {
         self.instrumentationMiddlewares = instrumentationMiddlewares.map {
             InstrumentationMiddleware(extract: $0.extract, inject: $0.inject)
         }
-        self.client = InstrumentingHTTPClient(instrumentationMiddlewares: instrumentationMiddlewares)
+        self.client = InstrumentedHTTPClient(instrumentationMiddlewares: instrumentationMiddlewares)
         self.catchAllHandler = catchAllHandler
     }
 
