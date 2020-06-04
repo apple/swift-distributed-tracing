@@ -1,61 +1,27 @@
+import AsyncHTTPClient
 import ContextPropagation
-
-// MARK: - Demo
+import NIOHTTP1
 
 let server = FakeHTTPServer(
     instrumentationMiddlewares: [FakeTracer.Middleware(tracer: FakeTracer())]
 ) { context, request, client -> FakeHTTPResponse in
     print("=== Perform subsequent request ===")
-    let outgoingRequest = FakeHTTPRequest(path: "/other-service", headers: [("Content-Type", "application/json")])
-    client.performRequest(context, request: outgoingRequest)
+    let outgoingRequest = try! HTTPClient.Request(
+        url: "https://swift.org",
+        headers: ["Accept": "application/json"]
+    )
+    client.execute(context, request: outgoingRequest)
+//    client.execute(request: outgoingRequest, inContext: context)
     return FakeHTTPResponse()
 }
 
 print("=== Receive HTTP request on server ===")
-server.receive(FakeHTTPRequest(path: "/", headers: []))
+server.receive(try! HTTPClient.Request(url: "https://swift.org"))
 
-// MARK: - Fake HTTP Server
+// MARK: - InstrumentingHTTPClient
 
-typealias HTTPHeaders = [(String, String)]
-
-struct FakeHTTPRequest {
-    let path: String
-    var headers: HTTPHeaders
-}
-
-struct FakeHTTPResponse {}
-
-typealias HTTPHeadersIntrumentationMiddleware = InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
-
-struct FakeHTTPServer {
-    typealias Handler = (Context, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
-
-    private let instrumentationMiddlewares: [InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>]
-    private let catchAllHandler: Handler
-    private let client: FakeHTTPClient
-
-    init<M: InstrumentationMiddlewareProtocol>(
-        instrumentationMiddlewares: [M],
-        catchAllHandler: @escaping Handler
-    ) where M.InjectInto == HTTPHeaders, M.ExtractFrom == HTTPHeaders {
-        self.instrumentationMiddlewares = instrumentationMiddlewares.map {
-            InstrumentationMiddleware(extract: $0.extract, inject: $0.inject)
-        }
-        self.catchAllHandler = catchAllHandler
-        self.client = FakeHTTPClient(instrumentationMiddlewares: instrumentationMiddlewares)
-    }
-
-    func receive(_ request: FakeHTTPRequest) {
-        var context = Context()
-        print("\(String(describing: Self.self)): Extracting context values from request headers into context")
-        instrumentationMiddlewares.forEach { $0.extract(from: request.headers, into: &context) }
-        _ = catchAllHandler(context, request, client)
-    }
-}
-
-// MARK: - Fake HTTP Client
-
-struct FakeHTTPClient {
+struct InstrumentingHTTPClient {
+    private let client = HTTPClient(eventLoopGroupProvider: .createNew)
     private let instrumentationMiddlewares: [InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>]
 
     init<M: InstrumentationMiddlewareProtocol>(
@@ -66,11 +32,47 @@ struct FakeHTTPClient {
         }
     }
 
-    func performRequest(_ context: Context, request: FakeHTTPRequest) {
+    func execute(request: HTTPClient.Request, inContext context: Context) {
+        execute(context, request: request)
+    }
+
+    func execute(_ context: Context, request: HTTPClient.Request) {
         var request = request
-        print("\(String(describing: Self.self)): Injecting context values into request headers")
         instrumentationMiddlewares.forEach { $0.inject(from: context, into: &request.headers) }
-        print(request)
+        print(request.headers)
+//        client.execute(request: request)
+    }
+}
+
+// MARK: - Fake HTTP Server
+
+struct FakeHTTPResponse {}
+
+private typealias HTTPHeadersInstrumentationMiddleware = InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
+
+struct FakeHTTPServer {
+    typealias Handler = (Context, HTTPClient.Request, InstrumentingHTTPClient) -> FakeHTTPResponse
+
+    private let instrumentationMiddlewares: [InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>]
+    private let catchAllHandler: Handler
+    private let client: InstrumentingHTTPClient
+
+    init<M: InstrumentationMiddlewareProtocol>(
+        instrumentationMiddlewares: [M],
+        catchAllHandler: @escaping Handler
+    ) where M.InjectInto == HTTPHeaders, M.ExtractFrom == HTTPHeaders {
+        self.instrumentationMiddlewares = instrumentationMiddlewares.map {
+            InstrumentationMiddleware(extract: $0.extract, inject: $0.inject)
+        }
+        self.client = InstrumentingHTTPClient(instrumentationMiddlewares: instrumentationMiddlewares)
+        self.catchAllHandler = catchAllHandler
+    }
+
+    func receive(_ request: HTTPClient.Request) {
+        var context = Context()
+        print("\(String(describing: Self.self)): Extracting context values from request headers into context")
+        instrumentationMiddlewares.forEach { $0.extract(from: request.headers, into: &context) }
+        _ = catchAllHandler(context, request, client)
     }
 }
 
@@ -95,7 +97,7 @@ private struct FakeTracer {
 
         func inject(from context: Context, into headers: inout HTTPHeaders) {
             guard let traceID = context.extract(FakeTraceID.self) else { return }
-            headers.append((FakeTraceID.headerName, traceID))
+            headers.add(name: FakeTraceID.headerName, value: traceID)
         }
     }
 
