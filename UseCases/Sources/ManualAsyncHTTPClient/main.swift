@@ -10,8 +10,7 @@ let server = FakeHTTPServer(
         url: "https://swift.org",
         headers: ["Accept": "application/json"]
     )
-    client.execute(context, request: outgoingRequest)
-//    client.execute(request: outgoingRequest, inContext: context)
+    client.execute(request: outgoingRequest, context: context)
     return FakeHTTPResponse()
 }
 
@@ -32,15 +31,10 @@ struct InstrumentedHTTPClient {
         }
     }
 
-    func execute(request: HTTPClient.Request, inContext context: Context) {
-        execute(context, request: request)
-    }
-
-    func execute(_ context: Context, request: HTTPClient.Request) {
+    func execute(request: HTTPClient.Request, context: Context) {
         var request = request
         instrumentationMiddlewares.forEach { $0.inject(from: context, into: &request.headers) }
         print(request.headers)
-//        client.execute(request: request)
     }
 }
 
