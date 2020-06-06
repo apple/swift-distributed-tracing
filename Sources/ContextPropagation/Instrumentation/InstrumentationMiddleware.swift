@@ -10,12 +10,13 @@ public struct InstrumentationMiddleware<InjectInto, ExtractFrom>: Instrumentatio
     private let extract: (ExtractFrom, inout Context) -> Void
     private let inject: (Context, inout InjectInto) -> Void
 
-    public init(
-        extract: @escaping (ExtractFrom, inout Context) -> Void,
-        inject: @escaping (Context, inout InjectInto) -> Void
-    ) {
-        self.extract = extract
-        self.inject = inject
+    public init<Middleware>(_ middleware: Middleware)
+        where
+        Middleware: InstrumentationMiddlewareProtocol,
+        Middleware.InjectInto == InjectInto,
+        Middleware.ExtractFrom == ExtractFrom {
+            self.extract = middleware.extract
+            self.inject = middleware.inject
     }
 
     public func extract(from: ExtractFrom, into context: inout Context) {
