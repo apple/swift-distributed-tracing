@@ -14,10 +14,10 @@ public struct MultiplexInstrumentationMiddleware<InjectInto, ExtractFrom> {
 
 extension MultiplexInstrumentationMiddleware: InstrumentationMiddlewareProtocol {
     public func extract(from: ExtractFrom, into context: inout Context) {
-        middlewares.forEach { $0.extract(from: from, into: &context) }
+        self.middlewares.forEach { $0.extract(from: from, into: &context) }
     }
 
     public func inject(from context: Context, into: inout InjectInto) {
-        middlewares.forEach { $0.inject(from: context, into: &into) }
+        self.middlewares.forEach { $0.inject(from: context, into: &into) }
     }
 }
