@@ -15,8 +15,8 @@ public struct InstrumentationMiddleware<InjectInto, ExtractFrom>: Instrumentatio
         Middleware: InstrumentationMiddlewareProtocol,
         Middleware.InjectInto == InjectInto,
         Middleware.ExtractFrom == ExtractFrom {
-            self.extract = middleware.extract
-            self.inject = middleware.inject
+        self.extract = middleware.extract
+        self.inject = middleware.inject
     }
 
     public func extract(from: ExtractFrom, into context: inout Context) {

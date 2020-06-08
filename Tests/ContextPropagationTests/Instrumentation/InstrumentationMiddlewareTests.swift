@@ -5,7 +5,7 @@ final class InstrumentationMiddlewareTests: XCTestCase {
     func testMultiplexInvokesAllMiddleware() {
         let middleware = MultiplexInstrumentationMiddleware([
             InstrumentationMiddleware(FirstFakeTracer.Middleware()),
-            InstrumentationMiddleware(SecondFakeTracer.Middleware())
+            InstrumentationMiddleware(SecondFakeTracer.Middleware()),
         ])
 
         var context = Context()
@@ -20,7 +20,7 @@ final class InstrumentationMiddlewareTests: XCTestCase {
 
         XCTAssertEqual(subsequentRequestHeaders, [
             FirstFakeTracer.headerName: FirstFakeTracer.defaultTraceID,
-            SecondFakeTracer.headerName: SecondFakeTracer.defaultTraceID
+            SecondFakeTracer.headerName: SecondFakeTracer.defaultTraceID,
         ])
     }
 }
@@ -34,7 +34,6 @@ private struct FirstFakeTracer {
     static let defaultTraceID = UUID().uuidString
 
     struct Middleware: InstrumentationMiddlewareProtocol {
-
         func extract(from headers: [String: String], into context: inout Context) {
             let traceID = headers.first(where: { $0.key == FirstFakeTracer.headerName })?.value ?? FirstFakeTracer.defaultTraceID
             context.inject(FirstFakeTracer.TraceID.self, value: traceID)
@@ -55,7 +54,6 @@ private struct SecondFakeTracer {
     static let defaultTraceID = UUID().uuidString
 
     struct Middleware: InstrumentationMiddlewareProtocol {
-
         func extract(from headers: [String: String], into context: inout Context) {
             let traceID = headers.first(where: { $0.key == SecondFakeTracer.headerName })?.value ?? SecondFakeTracer.defaultTraceID
             context.inject(SecondFakeTracer.TraceID.self, value: traceID)
