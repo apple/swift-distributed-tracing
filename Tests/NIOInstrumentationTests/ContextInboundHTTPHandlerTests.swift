@@ -5,15 +5,15 @@ import NIOInstrumentation
 import XCTest
 
 final class ContextInboundHTTPHandlerTests: XCTestCase {
-    override class func setUp() {
-        super.setUp()
-        Context.shared = Context()
-    }
-
     func testForwardsHTTPHeadersToInstrumentationMiddleware() throws {
         let traceID = "abc"
+        let callbackExpectation = expectation(description: "Expected onContext to be called")
 
-        let handler = ContextInboundHTTPHandler(instrumentationMiddleware: FakeTracer.Middleware())
+        var extractedContext: Context?
+        let handler = ContextInboundHTTPHandler(instrumentationMiddleware: FakeTracer.Middleware()) { context in
+            extractedContext = context
+            callbackExpectation.fulfill()
+        }
         let loop = EmbeddedEventLoop()
         let channel = EmbeddedChannel(handler: handler, loop: loop)
         var requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
@@ -21,6 +21,9 @@ final class ContextInboundHTTPHandlerTests: XCTestCase {
 
         try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
 
-        XCTAssertEqual(Context.shared.extract(FakeTracer.TraceID.self), traceID)
+        waitForExpectations(timeout: 0.5)
+
+        XCTAssertNotNil(extractedContext)
+        XCTAssertEqual(extractedContext!.extract(FakeTracer.TraceID.self), traceID)
     }
 }
