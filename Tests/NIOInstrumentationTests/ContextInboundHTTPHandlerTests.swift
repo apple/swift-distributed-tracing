@@ -1,17 +1,18 @@
-import ContextPropagation
+import BaggageContext
+import Instrumentation
 import NIO
 import NIOHTTP1
 import NIOInstrumentation
 import XCTest
 
-final class ContextInboundHTTPHandlerTests: XCTestCase {
+final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
     func testForwardsHTTPHeadersToInstrumentationMiddleware() throws {
         let traceID = "abc"
-        let callbackExpectation = expectation(description: "Expected onContext to be called")
+        let callbackExpectation = expectation(description: "Expected onBaggage to be called")
 
-        var extractedContext: Context?
-        let handler = ContextInboundHTTPHandler(instrumentationMiddleware: FakeTracer.Middleware()) { context in
-            extractedContext = context
+        var extractedBaggage: BaggageContext?
+        let handler = BaggageContextInboundHTTPHandler(instrument: FakeTracer()) { baggage in
+            extractedBaggage = baggage
             callbackExpectation.fulfill()
         }
         let loop = EmbeddedEventLoop()
@@ -23,7 +24,7 @@ final class ContextInboundHTTPHandlerTests: XCTestCase {
 
         waitForExpectations(timeout: 0.5)
 
-        XCTAssertNotNil(extractedContext)
-        XCTAssertEqual(extractedContext!.extract(FakeTracer.TraceID.self), traceID)
+        XCTAssertNotNil(extractedBaggage)
+        XCTAssertEqual(extractedBaggage![FakeTracer.TraceID.self], traceID)
     }
 }
