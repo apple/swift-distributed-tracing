@@ -2,22 +2,20 @@ import BaggageContext
 
 /// Conforming types are usually cross-cutting tools like tracers that extract values of one type (`ExtractFrom`) into a
 /// `BaggageContext` and inject values stored in a `BaggageContext` into another type (`InjectInto`).
-/// `ExtractFrom` and `InjectInto` may very well be of the same type, e.g. for a tracer that propagates baggage
-/// through HTTP headers.
+/// `ExtractFrom` and `InjectInto` may very well be of the same type, e.g. when a cross-cutting tool propagates
+/// baggage through HTTP headers.
 public protocol InstrumentProtocol {
     associatedtype InjectInto
     associatedtype ExtractFrom
 
-    /// Using this instrument, extract values from an `ExtractFrom` and inject them into the given
-    /// `BaggageContext`.
+    /// Extract values from an `ExtractFrom` and inject them into the given `BaggageContext`.
     ///
     /// - Parameters:
     ///   - from: The value from which relevant information will be extracted.
     ///   - baggage: The `BaggageContext` in which this relevant information will be stored.
     func extract(from: ExtractFrom, into baggage: inout BaggageContext)
 
-    /// Using this instrument, inject values into the given `InjectInto` which are stored in the given
-    /// `BaggageContext`.
+    /// Inject values into the given `InjectInto` which are stored in the given `BaggageContext`.
     ///
     /// - Parameters:
     ///   - baggage: The `BaggageContext` from which relevant information will be extracted.
