@@ -1,31 +1,33 @@
 /// A `BaggageContext` is a heterogenous storage type with value semantics for keyed values in a type-safe
-/// fashion. Its keys are uniquely identified via `BaggageContextKey`s. These keys also dictate the type of
+/// fashion. Its values are uniquely identified via `BaggageContextKey`s. These keys also dictate the type of
 /// value allowed for a specific key-value pair through their associated type `Value`.
 ///
-/// # Subscript access
+/// ## Subscript access
 /// You may access the stored values by subscripting with a key type conforming to `BaggageContextKey`.
 ///
-///     enum MyContextKey: BaggageContextKey {
+///     enum TestIDKey: BaggageContextKey {
 ///       typealias Value = String
 ///     }
 ///
 ///     var baggage = BaggageContext()
 ///     // set a new value
-///     baggage[MyContextKey.self] = "abc"
+///     baggage[TestIDKey.self] = "abc"
 ///     // retrieve a stored value
-///     baggage[MyContextKey.self] ?? "default"
+///     baggage[TestIDKey.self] ?? "default"
 ///     // remove a stored value
-///     baggage[MyCoolTraceID.self] = nil
+///     baggage[TestIDKey.self] = nil
+///
+/// ## Convenience extensions
 ///
 /// Libraries may also want to provide an extension, offering the values that users are expected to reach for
 /// using the following pattern:
 ///
 ///     extension BaggageContext {
-///       var myCoolTraceID: String {
+///       var testID: TestIDKey.Value {
 ///         get {
-///           self[MyContextKey.self]
+///           self[TestIDKey.self]
 ///         } set {
-///           self[MyContextKey.self] = newValue
+///           self[TestIDKey.self] = newValue
 ///         }
 ///       }
 ///     }
