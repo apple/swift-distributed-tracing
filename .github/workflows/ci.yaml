@@ -3,16 +3,23 @@ name: CI
 on: push
 
 jobs:
-  linux:
+  unit-test:
     runs-on: ubuntu-latest
     container: swift:5.2
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Resolve Swift dependencies
+        run: swift package resolve
       - name: Build & Test
         run: swift test -c release --enable-test-discovery
+  compile-usecases:
+    runs-on: ubuntu-latest
+    container: swift:5.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Resolve Swift dependencies
+        run: cd UseCases && swift package resolve
       - name: Compile UseCases
-        run: |
-          cd UseCases
-          swift package resolve
-          swift build
+        run: cd UseCases && swift build
