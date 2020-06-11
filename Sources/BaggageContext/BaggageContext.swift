@@ -1,10 +1,3 @@
-/// `BaggageContextKey`s are used as keys in a `BaggageContext`.
-/// Their associated type `Value` gurantees type-safety.
-public protocol BaggageContextKey {
-    /// The type of `Value` uniquely identified by this key.
-    associatedtype Value
-}
-
 /// A `BaggageContext` is a heterogenous storage type with value semantics for keyed values in a type-safe
 /// fashion. Its keys are uniquely identified via `BaggageContextKey`s. These keys also dictate the type of
 /// value allowed for a specific key-value pair through their associated type `Value`.
@@ -57,4 +50,10 @@ public struct BaggageContext {
             self.value as! Key.Value
         }
     }
+}
+
+/// `BaggageContextKey`s are used as keys in a `BaggageContext`. Their associated type `Value` gurantees type-safety.
+public protocol BaggageContextKey {
+    /// The type of `Value` uniquely identified by this key.
+    associatedtype Value
 }
