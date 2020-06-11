@@ -3,19 +3,42 @@ import XCTest
 
 final class BaggageContextTests: XCTestCase {
     func testSubscriptAccess() {
-        let value = 42
+        let testID = 42
 
         var baggage = BaggageContext()
-        XCTAssertNil(baggage[TestContextKey.self])
+        XCTAssertNil(baggage[TestIDKey.self])
 
-        baggage[TestContextKey.self] = value
-        XCTAssertEqual(baggage[TestContextKey], value)
+        baggage[TestIDKey.self] = testID
+        XCTAssertEqual(baggage[TestIDKey], testID)
 
-        baggage[TestContextKey.self] = nil
-        XCTAssertNil(baggage[TestContextKey.self])
+        baggage[TestIDKey.self] = nil
+        XCTAssertNil(baggage[TestIDKey.self])
+    }
+
+    func testRecommendedConvenienceExtension() {
+        let testID = 42
+
+        var baggage = BaggageContext()
+        XCTAssertNil(baggage.testID)
+
+        baggage.testID = testID
+        XCTAssertEqual(baggage.testID, testID)
+
+        baggage[TestIDKey.self] = nil
+        XCTAssertNil(baggage.testID)
     }
 }
 
-private enum TestContextKey: BaggageContextKey {
+private enum TestIDKey: BaggageContextKey {
     typealias Value = Int
+}
+
+private extension BaggageContext {
+    var testID: Int? {
+        get {
+            self[TestIDKey.self]
+        } set {
+            self[TestIDKey.self] = newValue
+        }
+    }
 }
