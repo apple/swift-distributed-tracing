@@ -5,6 +5,7 @@ let package = Package(
     name: "gsoc-swift-tracing",
     products: [
         .library(name: "BaggageContext", targets: ["BaggageContext"]),
+        .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "ContextPropagation", targets: ["ContextPropagation"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
@@ -15,14 +16,17 @@ let package = Package(
         .target(name: "BaggageContext"),
         .testTarget(name: "BaggageContextTests", dependencies: ["BaggageContext"]),
 
+        .target(name: "Instrumentation", dependencies: ["BaggageContext"]),
+        .testTarget(name: "InstrumentationTests", dependencies: ["Instrumentation", "BaggageContext"]),
+
         .target(name: "ContextPropagation"),
         .testTarget(name: "ContextPropagationTests", dependencies: ["ContextPropagation"]),
 
         .target(name: "NIOInstrumentation", dependencies: [
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "NIOHTTP1", package: "swift-nio"),
-            "ContextPropagation"
+            "Instrumentation"
         ]),
-        .testTarget(name: "NIOInstrumentationTests", dependencies: ["NIOInstrumentation"])
+        .testTarget(name: "NIOInstrumentationTests", dependencies: ["NIOInstrumentation", "Instrumentation"])
     ]
 )

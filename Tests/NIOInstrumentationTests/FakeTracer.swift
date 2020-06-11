@@ -1,22 +1,26 @@
-import ContextPropagation
+import BaggageContext
+import Foundation
+import Instrumentation
 import NIOHTTP1
 
-struct FakeTracer {
-    enum TraceID: ContextKey {
+struct FakeTracer: InstrumentProtocol {
+    enum TraceID: BaggageContextKey {
         typealias Value = String
     }
 
     static let headerName = "fake-trace-id"
+    static let defaultTraceID = UUID().uuidString
 
-    struct Middleware: InstrumentationMiddlewareProtocol {
-        func extract(from headers: HTTPHeaders, into context: inout Context) {
-            guard let traceID = headers.first(name: FakeTracer.headerName) else { return }
-            context.inject(FakeTracer.TraceID.self, value: traceID)
+    func inject(from baggage: BaggageContext, into headers: inout HTTPHeaders) {
+        if let traceID = baggage[TraceID.self] {
+            headers.replaceOrAdd(name: Self.headerName, value: traceID)
+        } else {
+            headers.remove(name: Self.headerName)
         }
+    }
 
-        func inject(from context: Context, into headers: inout HTTPHeaders) {
-            guard let traceID = context.extract(FakeTracer.TraceID.self) else { return }
-            headers.replaceOrAdd(name: FakeTracer.headerName, value: traceID)
-        }
+    func extract(from headers: HTTPHeaders, into baggage: inout BaggageContext) {
+        let traceID = headers.first(name: Self.headerName) ?? Self.defaultTraceID
+        baggage[TraceID.self] = traceID
     }
 }
