@@ -1,13 +1,13 @@
-import ContextPropagation
+import BaggageContext
+import Instrumentation
+import Foundation
 
 // MARK: - Demo
 
-let server = FakeHTTPServer(
-    instrumentationMiddleware: InstrumentationMiddleware(FakeTracer.Middleware(tracer: FakeTracer()))
-) { context, request, client -> FakeHTTPResponse in
+let server = FakeHTTPServer(instrument: Instrument(FakeTracer())) { baggage, request, client in
     print("=== Perform subsequent request ===")
     let outgoingRequest = FakeHTTPRequest(path: "/other-service", headers: [("Content-Type", "application/json")])
-    client.performRequest(context, request: outgoingRequest)
+    client.performRequest(baggage, request: outgoingRequest)
     return FakeHTTPResponse()
 }
 
@@ -25,82 +25,71 @@ struct FakeHTTPRequest {
 
 struct FakeHTTPResponse {}
 
-typealias HTTPHeadersIntrumentationMiddleware = InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
+typealias HTTPHeadersIntrument = Instrument<HTTPHeaders, HTTPHeaders>
 
 struct FakeHTTPServer {
-    typealias Handler = (Context, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (BaggageContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
 
-    private let instrumentationMiddleware: InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
+    private let instrument: HTTPHeadersIntrument
     private let catchAllHandler: Handler
     private let client: FakeHTTPClient
 
-    init<Middleware>(instrumentationMiddleware: Middleware, catchAllHandler: @escaping Handler)
+    init<I>(instrument: I, catchAllHandler: @escaping Handler)
         where
-        Middleware: InstrumentationMiddlewareProtocol,
-        Middleware.InjectInto == HTTPHeaders,
-        Middleware.ExtractFrom == HTTPHeaders {
-            self.instrumentationMiddleware = InstrumentationMiddleware(instrumentationMiddleware)
-            self.catchAllHandler = catchAllHandler
-            self.client = FakeHTTPClient(instrumentationMiddleware: instrumentationMiddleware)
+        I: InstrumentProtocol,
+        I.InjectInto == HTTPHeaders,
+        I.ExtractFrom == HTTPHeaders {
+        self.instrument = Instrument(instrument)
+        self.catchAllHandler = catchAllHandler
+        self.client = FakeHTTPClient(instrument: instrument)
     }
 
     func receive(_ request: FakeHTTPRequest) {
-        var context = Context()
+        var baggage = BaggageContext()
         print("\(String(describing: Self.self)): Extracting context values from request headers into context")
-        instrumentationMiddleware.extract(from: request.headers, into: &context)
-        _ = catchAllHandler(context, request, client)
+        self.instrument.extract(from: request.headers, into: &baggage)
+        _ = catchAllHandler(baggage, request, client)
     }
 }
 
 // MARK: - Fake HTTP Client
 
 struct FakeHTTPClient {
-    private let instrumentationMiddleware: InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
+    private let instrument: HTTPHeadersIntrument
 
-    init<Middleware>(instrumentationMiddleware: Middleware)
+    init<I>(instrument: I)
         where
-        Middleware: InstrumentationMiddlewareProtocol,
-        Middleware.InjectInto == HTTPHeaders,
-        Middleware.ExtractFrom == HTTPHeaders {
-            self.instrumentationMiddleware = InstrumentationMiddleware(instrumentationMiddleware)
+        I: InstrumentProtocol,
+        I.InjectInto == HTTPHeaders,
+        I.ExtractFrom == HTTPHeaders {
+        self.instrument = Instrument(instrument)
     }
 
-    func performRequest(_ context: Context, request: FakeHTTPRequest) {
+    func performRequest(_ baggage: BaggageContext, request: FakeHTTPRequest) {
         var request = request
         print("\(String(describing: Self.self)): Injecting context values into request headers")
-        instrumentationMiddleware.inject(from: context, into: &request.headers)
+        self.instrument.inject(from: baggage, into: &request.headers)
         print(request)
     }
 }
 
 // MARK: - Fake Tracer
 
-private struct FakeTracer {
-    func generateTraceID() -> String {
-        "3f59ef6fe1fe2b12dd84ec1452696599"
-    }
-
-    struct Middleware: InstrumentationMiddlewareProtocol {
-        private let tracer: FakeTracer
-
-        init(tracer: FakeTracer) {
-            self.tracer = tracer
-        }
-
-        func extract(from headers: HTTPHeaders, into context: inout Context) {
-            let traceID = headers.first(where: { $0.0 == FakeTraceID.headerName })?.1 ?? tracer.generateTraceID()
-            context.inject(FakeTraceID.self, value: traceID)
-        }
-
-        func inject(from context: Context, into headers: inout HTTPHeaders) {
-            guard let traceID = context.extract(FakeTraceID.self) else { return }
-            headers.append((FakeTraceID.headerName, traceID))
-        }
-    }
-
-    private enum FakeTraceID: ContextKey {
+private struct FakeTracer: InstrumentProtocol {
+    enum TraceID: BaggageContextKey {
         typealias Value = String
+    }
 
-        static let headerName = "fake-trace-id"
+    static let headerName = "fake-trace-id"
+    static let defaultTraceID = UUID().uuidString
+
+    func inject(from baggage: BaggageContext, into headers: inout HTTPHeaders) {
+        guard let traceID = baggage[TraceID.self] else { return }
+        headers.append((Self.headerName, traceID))
+    }
+
+    func extract(from headers: HTTPHeaders, into baggage: inout BaggageContext) {
+        let traceID = headers.first(where: { $0.0 == Self.headerName })?.1 ?? Self.defaultTraceID
+        baggage[TraceID.self] = traceID
     }
 }
