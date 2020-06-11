@@ -8,7 +8,7 @@ public final class BaggageContextInboundHTTPHandler: ChannelInboundHandler {
     public typealias InboundOut = HTTPServerRequestPart
 
     private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
-    private var onBaggage: (BaggageContext) -> Void
+    private var onBaggageExtracted: (BaggageContext) -> Void
 
     public init<I>(instrument: I, onBaggage: @escaping (BaggageContext) -> Void)
         where
@@ -16,13 +16,13 @@ public final class BaggageContextInboundHTTPHandler: ChannelInboundHandler {
         I.InjectInto == HTTPHeaders,
         I.ExtractFrom == HTTPHeaders {
         self.instrument = Instrument(instrument)
-        self.onBaggage = onBaggage
+        self.onBaggageExtracted = onBaggage
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         guard case .head(let head) = unwrapInboundIn(data) else { return }
         var baggage = BaggageContext()
         self.instrument.extract(from: head.headers, into: &baggage)
-        self.onBaggage(baggage)
+        self.onBaggageExtracted(baggage)
     }
 }

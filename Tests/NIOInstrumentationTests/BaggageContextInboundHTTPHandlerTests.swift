@@ -8,7 +8,7 @@ import XCTest
 final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
     func testForwardsHTTPHeadersToInstrumentationMiddleware() throws {
         let traceID = "abc"
-        let callbackExpectation = expectation(description: "Expected onBaggage to be called")
+        let callbackExpectation = expectation(description: "Expected onBaggageExtracted to be called")
 
         var extractedBaggage: BaggageContext?
         let handler = BaggageContextInboundHTTPHandler(instrument: FakeTracer()) { baggage in
