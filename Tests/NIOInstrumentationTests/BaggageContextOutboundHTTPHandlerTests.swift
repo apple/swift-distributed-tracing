@@ -5,7 +5,7 @@ import NIOHTTP1
 import NIOInstrumentation
 import XCTest
 
-final class ContextOutboundHTTPHandlerTests: XCTestCase {
+final class BaggageContextOutboundHTTPHandlerTests: XCTestCase {
     func testUsesInstrumentationMiddlewareToInjectHTTPHeadersFromContext() throws {
         let traceID = "abc"
 
