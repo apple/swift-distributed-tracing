@@ -7,7 +7,7 @@ public final class ContextInboundHTTPHandler: ChannelInboundHandler {
     public typealias InboundOut = HTTPServerRequestPart
 
     private let instrumentationMiddleware: InstrumentationMiddleware<HTTPHeaders, HTTPHeaders>
-    private var onContext: ((Context) -> Void)?
+    private var onContext: (Context) -> Void
 
     public init<Middleware>(instrumentationMiddleware: Middleware, onContext: @escaping (Context) -> Void)
         where
@@ -22,6 +22,6 @@ public final class ContextInboundHTTPHandler: ChannelInboundHandler {
         guard case .head(let head) = unwrapInboundIn(data) else { return }
         var context = Context()
         self.instrumentationMiddleware.extract(from: head.headers, into: &context)
-        self.onContext?(context)
+        self.onContext(context)
     }
 }
