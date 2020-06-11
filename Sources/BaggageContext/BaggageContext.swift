@@ -13,7 +13,7 @@ public protocol BaggageContextKey {
 /// You may access the stored values by subscripting with a key type conforming to `BaggageContextKey`.
 ///
 ///     enum MyContextKey: BaggageContextKey {
-///         typealias Value = String
+///       typealias Value = String
 ///     }
 ///
 ///     var baggage = BaggageContext()
@@ -22,7 +22,20 @@ public protocol BaggageContextKey {
 ///     // retrieve a stored value
 ///     baggage[MyContextKey.self] ?? "default"
 ///     // remove a stored value
-///     baggage[MyContextKey.self] = nil
+///     baggage[MyCoolTraceID.self] = nil
+///
+/// Libraries may also want to provide an extension, offering the values that users are expected to reach for
+/// using the following pattern:
+///
+///     extension BaggageContext {
+///       var myCoolTraceID: String {
+///         get {
+///           self[MyContextKey.self]
+///         } set {
+///           self[MyContextKey.self] = newValue
+///         }
+///       }
+///     }
 public struct BaggageContext {
     private var _storage = [ObjectIdentifier: ValueContainer]()
 
