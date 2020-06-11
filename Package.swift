@@ -6,7 +6,6 @@ let package = Package(
     products: [
         .library(name: "BaggageContext", targets: ["BaggageContext"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
-        .library(name: "ContextPropagation", targets: ["ContextPropagation"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
     dependencies: [
@@ -18,9 +17,6 @@ let package = Package(
 
         .target(name: "Instrumentation", dependencies: ["BaggageContext"]),
         .testTarget(name: "InstrumentationTests", dependencies: ["Instrumentation", "BaggageContext"]),
-
-        .target(name: "ContextPropagation"),
-        .testTarget(name: "ContextPropagationTests", dependencies: ["ContextPropagation"]),
 
         .target(name: "NIOInstrumentation", dependencies: [
             .product(name: "NIO", package: "swift-nio"),

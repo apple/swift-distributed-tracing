@@ -13,10 +13,12 @@ let package = Package(
     ],
     targets: [
         .target(name: "ManualContextPropagation", dependencies: [
-            .product(name: "ContextPropagation", package: "gsoc-swift-tracing")
+            .product(name: "BaggageContext", package: "gsoc-swift-tracing"),
+            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
         ]),
         .target(name: "ManualAsyncHTTPClient", dependencies: [
-            .product(name: "ContextPropagation", package: "gsoc-swift-tracing"),
+            .product(name: "BaggageContext", package: "gsoc-swift-tracing"),
+            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
             .product(name: "AsyncHTTPClient", package: "async-http-client")
         ])
     ]
