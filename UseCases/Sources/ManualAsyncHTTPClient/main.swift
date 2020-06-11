@@ -1,12 +1,12 @@
 import AsyncHTTPClient
 import BaggageContext
-import Instrumentation
 import Foundation
+import Instrumentation
 import NIOHTTP1
 
 let server = FakeHTTPServer(
     instrument: FakeTracer()
-) { context, request, client -> FakeHTTPResponse in
+) { context, _, client -> FakeHTTPResponse in
     print("=== Perform subsequent request ===")
     let outgoingRequest = try! HTTPClient.Request(
         url: "https://swift.org",
@@ -67,7 +67,7 @@ struct FakeHTTPServer {
         var baggage = BaggageContext()
         print("\(String(describing: Self.self)): Extracting context values from request headers into context")
         self.instrument.extract(from: request.headers, into: &baggage)
-        _ = catchAllHandler(baggage, request, client)
+        _ = self.catchAllHandler(baggage, request, self.client)
     }
 }
 

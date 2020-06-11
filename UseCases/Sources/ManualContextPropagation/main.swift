@@ -1,10 +1,10 @@
 import BaggageContext
-import Instrumentation
 import Foundation
+import Instrumentation
 
 // MARK: - Demo
 
-let server = FakeHTTPServer(instrument: Instrument(FakeTracer())) { baggage, request, client in
+let server = FakeHTTPServer(instrument: Instrument(FakeTracer())) { baggage, _, client in
     print("=== Perform subsequent request ===")
     let outgoingRequest = FakeHTTPRequest(path: "/other-service", headers: [("Content-Type", "application/json")])
     client.performRequest(baggage, request: outgoingRequest)
@@ -48,7 +48,7 @@ struct FakeHTTPServer {
         var baggage = BaggageContext()
         print("\(String(describing: Self.self)): Extracting context values from request headers into context")
         self.instrument.extract(from: request.headers, into: &baggage)
-        _ = catchAllHandler(baggage, request, client)
+        _ = self.catchAllHandler(baggage, request, self.client)
     }
 }
 
