@@ -1,4 +1,4 @@
-import BaggageContext
+import Baggage
 import XCTest
 
 final class BaggageContextTests: XCTestCase {

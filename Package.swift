@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "gsoc-swift-tracing",
     products: [
-        .library(name: "BaggageContext", targets: ["BaggageContext"]),
+        .library(name: "Baggage", targets: ["Baggage"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
@@ -12,11 +12,11 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0")
     ],
     targets: [
-        .target(name: "BaggageContext"),
-        .testTarget(name: "BaggageContextTests", dependencies: ["BaggageContext"]),
+        .target(name: "Baggage"),
+        .testTarget(name: "BaggageTests", dependencies: ["Baggage"]),
 
-        .target(name: "Instrumentation", dependencies: ["BaggageContext"]),
-        .testTarget(name: "InstrumentationTests", dependencies: ["Instrumentation", "BaggageContext"]),
+        .target(name: "Instrumentation", dependencies: ["Baggage"]),
+        .testTarget(name: "InstrumentationTests", dependencies: ["Instrumentation", "Baggage"]),
 
         .target(name: "NIOInstrumentation", dependencies: [
             .product(name: "NIO", package: "swift-nio"),

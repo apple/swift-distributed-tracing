@@ -1,4 +1,4 @@
-import BaggageContext
+import Baggage
 import Instrumentation
 import XCTest
 
