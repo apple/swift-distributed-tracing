@@ -1,4 +1,4 @@
-import BaggageContext
+import Baggage
 
 /// Conforming types are usually cross-cutting tools like tracers that extract values of one type (`ExtractFrom`) into a
 /// `BaggageContext` and inject values stored in a `BaggageContext` into another type (`InjectInto`).

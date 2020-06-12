@@ -1,4 +1,4 @@
-import BaggageContext
+import Baggage
 
 /// A pseudo-`Instrument` that may be used to instrument using multiple other `Instrument`s
 /// across a common `BaggageContext`.
