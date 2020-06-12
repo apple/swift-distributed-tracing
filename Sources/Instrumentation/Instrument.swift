@@ -19,7 +19,8 @@ public protocol InstrumentProtocol {
     ///
     /// - Parameters:
     ///   - baggage: The `BaggageContext` from which relevant information will be extracted.
-    ///   - into: The `InjectInto` into which this information will be injected.
+    ///   - into: The `InjectInto` into which this information will be injected. In general, you shouldn't remove values from this
+    ///   but only update/add, as other tools may be interested in the values you're about to remove.
     func inject(from baggage: BaggageContext, into: inout InjectInto)
 }
 
