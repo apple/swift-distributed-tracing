@@ -14,6 +14,23 @@ final class BaggageLoggingTests: XCTestCase {
         XCTAssertEqual(context.logger[metadataKey: "SimpleTraceIDKey"], "\(simpleTraceID)")
         XCTAssertEqual(context.logger[metadataKey: "CustomTraceIDKey"], "\(customTraceID)")
     }
+
+    func testItUsesAnInjectedBaseLogger() {
+        var logger = Logger(label: #function)
+        logger.logLevel = .critical
+        logger[metadataKey: "unit-testing"] = "\(true)"
+
+        var context = BaggageContext()
+        context[BaggageContext.BaseLoggerKey.self] = logger
+
+        let simpleTraceID = 42
+        context[SimpleTraceIDKey.self] = simpleTraceID
+
+        XCTAssertEqual(context.logger.label, #function)
+        XCTAssertEqual(context.logger.logLevel, .critical)
+        XCTAssertEqual(context.logger[metadataKey: "unit-testing"], "\(true)")
+        XCTAssertEqual(context.logger[metadataKey: "SimpleTraceIDKey"], "\(simpleTraceID)")
+    }
 }
 
 enum SimpleTraceIDKey: BaggageContextKey {
