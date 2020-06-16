@@ -41,7 +41,10 @@ public struct BaggageContext {
         get {
             self._storage[ObjectIdentifier(key)]?.forceUnwrap(key)
         } set {
-            self._storage[ObjectIdentifier(key)] = newValue == nil ? nil : ValueContainer(keyName: String(describing: key.self), value: newValue!)
+            self._storage[ObjectIdentifier(key)] = newValue.map {
+                // TODO: consider if keys should allow optional string names; static property on the type?
+                ValueContainer(keyName: String(describing: key.self), value: $0)
+            }
         }
     }
 
