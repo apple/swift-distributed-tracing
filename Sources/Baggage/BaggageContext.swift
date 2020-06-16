@@ -41,11 +41,21 @@ public struct BaggageContext {
         get {
             self._storage[ObjectIdentifier(key)]?.forceUnwrap(key)
         } set {
-            self._storage[ObjectIdentifier(key)] = newValue == nil ? nil : ValueContainer(value: newValue!)
+            self._storage[ObjectIdentifier(key)] = newValue == nil ? nil : ValueContainer(keyName: String(describing: key.self), value: newValue!)
         }
     }
 
+    public var printableMetadata: [String: CustomStringConvertible] {
+        var description = [String: CustomStringConvertible]()
+        for (_, value) in self._storage {
+            // TODO: key could be not unique
+            description[value.keyName] = String(describing: value.value)
+        }
+        return description
+    }
+
     private struct ValueContainer {
+        let keyName: String
         let value: Any
 
         func forceUnwrap<Key: BaggageContextKey>(_ key: Key.Type) -> Key.Value {
