@@ -1,4 +1,4 @@
-/// A `BaggageContext` is a heterogenous storage type with value semantics for keyed values in a type-safe
+/// A `BaggageContext` is a heterogeneous storage type with value semantics for keyed values in a type-safe
 /// fashion. Its values are uniquely identified via `BaggageContextKey`s. These keys also dictate the type of
 /// value allowed for a specific key-value pair through their associated type `Value`.
 ///
