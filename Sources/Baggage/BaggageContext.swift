@@ -42,23 +42,20 @@ public struct BaggageContext {
             self._storage[AnyBaggageContextKey(key)]?.forceUnwrap(key)
         } set {
             self._storage[AnyBaggageContextKey(key)] = newValue.map {
-                ValueContainer(value: $0, key: AnyBaggageContextKey(key))
+                ValueContainer(value: $0)
             }
         }
     }
 
     public var baggageItems: [AnyBaggageContextKey: Any] {
-        var description = [AnyBaggageContextKey: Any]()
-        for (_, value) in self._storage {
-            // TODO: key may not be unique
-            description[value.key] = value.value
+        // TODO: key may not be unique
+        self._storage.reduce(into: [:]) {
+            $0[$1.key] = $1.value.value
         }
-        return description
     }
 
     private struct ValueContainer {
         let value: Any
-        let key: AnyBaggageContextKey
 
         func forceUnwrap<Key: BaggageContextKey>(_ key: Key.Type) -> Key.Value {
             self.value as! Key.Value
