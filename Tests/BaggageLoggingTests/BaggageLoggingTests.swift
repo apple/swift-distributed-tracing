@@ -7,12 +7,12 @@ final class BaggageLoggingTests: XCTestCase {
     func testItAddsMetadataToTheLogger() {
         var context = BaggageContext()
         let simpleTraceID = 42
-        context[SimpleTraceIDKey.self] = 42
+        context[SimpleTraceIDKey.self] = simpleTraceID
         let customTraceID = CustomTraceID(id: UUID(), name: "janedoe")
         context[CustomTraceIDKey.self] = customTraceID
 
         XCTAssertEqual(context.logger[metadataKey: "SimpleTraceIDKey"], "\(simpleTraceID)")
-        XCTAssertEqual(context.logger[metadataKey: "CustomTraceIDKey"], "\(customTraceID)")
+        XCTAssertEqual(context.logger[metadataKey: "MyTraceID"], "\(customTraceID)")
     }
 
     func testItUsesAnInjectedBaseLogger() {
@@ -44,4 +44,5 @@ struct CustomTraceID {
 
 enum CustomTraceIDKey: BaggageContextKey {
     typealias Value = CustomTraceID
+    static let name: String? = "MyTraceID"
 }
