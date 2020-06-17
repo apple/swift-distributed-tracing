@@ -32,34 +32,33 @@
 ///       }
 ///     }
 public struct BaggageContext {
-    private var _storage = [ObjectIdentifier: ValueContainer]()
+    private var _storage = [AnyBaggageContextKey: ValueContainer]()
 
     /// Create an empty `BaggageContext`.
     public init() {}
 
     public subscript<Key: BaggageContextKey>(_ key: Key.Type) -> Key.Value? {
         get {
-            self._storage[ObjectIdentifier(key)]?.forceUnwrap(key)
+            self._storage[AnyBaggageContextKey(key)]?.forceUnwrap(key)
         } set {
-            self._storage[ObjectIdentifier(key)] = newValue.map {
-                // TODO: consider if keys should allow optional string names; static property on the type?
-                ValueContainer(keyName: String(describing: key.self), value: $0)
+            self._storage[AnyBaggageContextKey(key)] = newValue.map {
+                ValueContainer(value: $0, key: AnyBaggageContextKey(key))
             }
         }
     }
 
-    public var printableMetadata: [String: CustomStringConvertible] {
-        var description = [String: CustomStringConvertible]()
+    public var baggageItems: [AnyBaggageContextKey: Any] {
+        var description = [AnyBaggageContextKey: Any]()
         for (_, value) in self._storage {
-            // TODO: key could be not unique
-            description[value.keyName] = String(describing: value.value)
+            // TODO: key may not be unique
+            description[value.key] = value.value
         }
         return description
     }
 
     private struct ValueContainer {
-        let keyName: String
         let value: Any
+        let key: AnyBaggageContextKey
 
         func forceUnwrap<Key: BaggageContextKey>(_ key: Key.Type) -> Key.Value {
             self.value as! Key.Value
@@ -68,7 +67,42 @@ public struct BaggageContext {
 }
 
 /// `BaggageContextKey`s are used as keys in a `BaggageContext`. Their associated type `Value` gurantees type-safety.
+/// To give your `BaggageContextKey` an explicit name you may override the `name` property.
 public protocol BaggageContextKey {
     /// The type of `Value` uniquely identified by this key.
     associatedtype Value
+
+    /// The human-readable name of this key. Defaults to `nil`.
+    static var name: String? { get }
+}
+
+extension BaggageContextKey {
+    public static var name: String? { nil }
+}
+
+public struct AnyBaggageContextKey {
+    public let keyType: Any.Type
+
+    private let _name: String?
+
+    /// A human-readable String representation of the underlying key.
+    /// If no explicit name has been set on the wrapped key the type name is used.
+    public var name: String {
+        self._name ?? String(describing: self.keyType.self)
+    }
+
+    public init<Key>(_ keyType: Key.Type) where Key: BaggageContextKey {
+        self.keyType = keyType.self
+        self._name = keyType.name
+    }
+}
+
+extension AnyBaggageContextKey: Hashable {
+    public static func == (lhs: AnyBaggageContextKey, rhs: AnyBaggageContextKey) -> Bool {
+        ObjectIdentifier(lhs.keyType) == ObjectIdentifier(rhs.keyType)
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self.keyType))
+    }
 }
