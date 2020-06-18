@@ -89,7 +89,7 @@ public struct AnyBaggageContextKey {
     }
 
     public init<Key>(_ keyType: Key.Type) where Key: BaggageContextKey {
-        self.keyType = keyType.self
+        self.keyType = keyType
         self._name = keyType.name
     }
 }
