@@ -12,21 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import Baggage
+import Foundation
 
 @inline(never)
 func take1(context: BaggageContext) -> Int {
     take2(context: context)
 }
+
 @inline(never)
 func take2(context: BaggageContext) -> Int {
     take3(context: context)
 }
+
 @inline(never)
 func take3(context: BaggageContext) -> Int {
     take4(context: context)
 }
+
 @inline(never)
 func take4(context: BaggageContext) -> Int {
     42
@@ -35,9 +38,11 @@ func take4(context: BaggageContext) -> Int {
 enum StringKey1: BaggageContextKey {
     typealias Value = String
 }
+
 enum StringKey2: BaggageContextKey {
     typealias Value = String
 }
+
 enum StringKey3: BaggageContextKey {
     typealias Value = String
 }
