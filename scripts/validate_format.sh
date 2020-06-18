@@ -9,7 +9,7 @@ printf "=> Checking format\n"
 FIRST_OUT="$(git status --porcelain)"
 # swiftformat does not scale so we loop ourselves
 shopt -u dotglob
-find Sources/* Tests/* UseCases/* -type d | while IFS= read -r d; do
+find Sources/* Tests/* IntegrationTests/* UseCases/* -type d | while IFS= read -r d; do
   printf "   * checking $d... "
   out=$(swiftformat $d 2>&1)
   SECOND_OUT="$(git status --porcelain)"

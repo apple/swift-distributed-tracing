@@ -23,7 +23,7 @@ func run(identifier: String) {
         context[StringKey3.self] = "three"
 
         var numberDone = 1
-        for _ in 0..<1000 {
+        for _ in 0 ..< 1000 {
             let res = take1(context: context)
             precondition(res == 42)
             numberDone += 1
