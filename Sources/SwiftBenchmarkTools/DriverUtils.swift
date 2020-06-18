@@ -1,15 +1,12 @@
-//===----------------------------------------------------------------------===//
+//===--- DriverUtils.swift ------------------------------------------------===//
 //
-// This source file is part of the GSoC Swift Distributed Tracing open source project
-// Based on: https://github.com/apple/swift/tree/cf53143a47278c2a465409a67376642515956777/benchmark/utils
+// This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2020 Apple Inc. and the GSoC Swift Tracing project authors
-// Licensed under Apache License v2.0
+// Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
 //
-// See LICENSE.txt for license information
-// See CONTRIBUTORS.md for the list of GSoC Swift Tracing project authors
-//
-// SPDX-License-Identifier: Apache-2.0
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
 //
 //===----------------------------------------------------------------------===//
 
