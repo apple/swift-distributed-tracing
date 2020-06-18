@@ -14,26 +14,80 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-log.git", from: "1.2.0")
     ],
     targets: [
-        .target(name: "Baggage"),
-        .testTarget(name: "BaggageTests", dependencies: ["Baggage"]),
-        
-        .target(name: "BaggageLogging", dependencies: [
-            "Baggage",
-            .product(name: "Logging", package: "swift-log")
-        ]),
-        .testTarget(name: "BaggageLoggingTests", dependencies: [
-            "BaggageLogging",
-            .product(name: "Logging", package: "swift-log")
-        ]),
-        
-        .target(name: "Instrumentation", dependencies: ["Baggage"]),
-        .testTarget(name: "InstrumentationTests", dependencies: ["Instrumentation", "Baggage"]),
-        
-        .target(name: "NIOInstrumentation", dependencies: [
-            .product(name: "NIO", package: "swift-nio"),
-            .product(name: "NIOHTTP1", package: "swift-nio"),
-            "Instrumentation"
-        ]),
-        .testTarget(name: "NIOInstrumentationTests", dependencies: ["NIOInstrumentation", "Instrumentation"])
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Baggage
+
+        .target(
+            name: "Baggage",
+            dependencies: []
+        ),
+        .testTarget(
+            name: "BaggageTests",
+            dependencies: [
+                "Baggage",
+            ]
+        ),
+      
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Baggage + Logging
+
+        .target(
+            name: "BaggageLogging",
+            dependencies: [
+                "Baggage",
+                .product(name: "Logging", package: "swift-log"),
+            ]
+        ),
+        .testTarget(
+            name: "BaggageLoggingTests", 
+            dependencies: [
+                "BaggageLogging",
+            ]
+        ),
+      
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Instrumentation
+
+        .target(
+            name: "Instrumentation",
+            dependencies: [
+                "Baggage",
+            ]
+        ),
+        .testTarget(
+            name: "InstrumentationTests",
+            dependencies: [
+                "Instrumentation",
+            ]
+        ),
+
+        .target(
+            name: "NIOInstrumentation",
+            dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                "Instrumentation",
+            ]),
+        .testTarget(
+            name: "NIOInstrumentationTests",
+            dependencies: [
+                "NIOInstrumentation",
+            ]
+        ),
+
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Performance / Benchmarks
+
+        .target(
+            name: "Benchmarks",
+            dependencies: [
+                "Baggage",
+                "SwiftBenchmarkTools",
+            ]
+        ),
+        .target(
+            name: "SwiftBenchmarkTools",
+            dependencies: []
+        ),
     ]
 )
