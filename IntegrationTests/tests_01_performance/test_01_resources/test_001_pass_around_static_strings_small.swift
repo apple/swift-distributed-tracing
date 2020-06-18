@@ -28,6 +28,6 @@ func run(identifier: String) {
             precondition(res == 42)
             numberDone += 1
         }
-        return 1
+        return numberDone
     }
 }
