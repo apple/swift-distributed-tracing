@@ -24,7 +24,7 @@ public protocol InstrumentProtocol {
     func inject(from baggage: BaggageContext, into: inout InjectInto)
 }
 
-/// A box-type for an `InstrumentProtocol`, necessarry for creating homogenous collections of `InstrumentProtocol`s.
+/// A box-type for an `InstrumentProtocol`, necessary for creating homogeneous collections of `InstrumentProtocol`s.
 public struct Instrument<InjectInto, ExtractFrom>: InstrumentProtocol {
     private let inject: (BaggageContext, inout InjectInto) -> Void
     private let extract: (ExtractFrom, inout BaggageContext) -> Void
