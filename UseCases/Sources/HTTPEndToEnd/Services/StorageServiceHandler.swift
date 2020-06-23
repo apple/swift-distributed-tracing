@@ -28,15 +28,14 @@ final class StorageServiceHandler: ChannelInboundHandler {
 
         baggage.logger.info("📦 Looking for the product")
 
-        sleep(2)
-
-        baggage.logger.info("📦 Found the product")
-
-        let responseHead = HTTPResponseHead(version: requestHead.version, status: .ok)
-        context.eventLoop.execute {
-            context.channel.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
-            context.channel.write(self.wrapOutboundOut(.end(nil)), promise: nil)
-            context.channel.flush()
+        context.eventLoop.scheduleTask(in: .seconds(2)) {
+            baggage.logger.info("📦 Found the product")
+            let responseHead = HTTPResponseHead(version: requestHead.version, status: .ok)
+            context.eventLoop.execute {
+                context.channel.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
+                context.channel.write(self.wrapOutboundOut(.end(nil)), promise: nil)
+                context.channel.flush()
+            }
         }
     }
 }
