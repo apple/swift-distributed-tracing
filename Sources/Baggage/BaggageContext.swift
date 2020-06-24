@@ -63,6 +63,12 @@ public struct BaggageContext {
     }
 }
 
+extension BaggageContext: CustomStringConvertible {
+    public var description: String {
+        "\(Self.self)(keys: \(self._storage.map(\.key.name)))"
+    }
+}
+
 /// `BaggageContextKey`s are used as keys in a `BaggageContext`. Their associated type `Value` gurantees type-safety.
 /// To give your `BaggageContextKey` an explicit name you may override the `name` property.
 public protocol BaggageContextKey {

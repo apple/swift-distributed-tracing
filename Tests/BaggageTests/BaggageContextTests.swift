@@ -27,6 +27,30 @@ final class BaggageContextTests: XCTestCase {
         baggage[TestIDKey.self] = nil
         XCTAssertNil(baggage.testID)
     }
+
+    func testEmptyBaggageDescription() {
+        XCTAssertEqual(String(describing: BaggageContext()), "BaggageContext(keys: [])")
+    }
+
+    func testSingleKeyBaggageDescription() {
+        var baggage = BaggageContext()
+        baggage.testID = 42
+
+        XCTAssertEqual(String(describing: baggage), #"BaggageContext(keys: ["TestIDKey"])"#)
+    }
+
+    func testMultiKeysBaggageDescription() {
+        var baggage = BaggageContext()
+        baggage.testID = 42
+        baggage[SecondTestIDKey.self] = "test"
+
+        let description = String(describing: baggage)
+        XCTAssert(description.starts(with: "BaggageContext(keys: ["))
+        // use contains instead of `XCTAssertEqual` because the order is non-predictable (Dictionary)
+        XCTAssert(description.contains("TestIDKey"))
+        XCTAssert(description.contains("ExplicitKeyName"))
+        print(description.reversed().starts(with: "])"))
+    }
 }
 
 private enum TestIDKey: BaggageContextKey {
@@ -41,4 +65,10 @@ private extension BaggageContext {
             self[TestIDKey.self] = newValue
         }
     }
+}
+
+private enum SecondTestIDKey: BaggageContextKey {
+    typealias Value = String
+
+    static let name: String? = "ExplicitKeyName"
 }
