@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "gsoc-swift-baggage-context",
+        "repositoryURL": "https://github.com/slashmo/gsoc-swift-baggage-context",
+        "state": {
+          "branch": "main",
+          "revision": "4f086dff385ccefa5f1acf62a0b38b0f984db143",
+          "version": null
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
