@@ -4,37 +4,23 @@ import PackageDescription
 let package = Package(
     name: "gsoc-swift-tracing",
     products: [
-        .library(name: "Baggage", targets: ["Baggage"]),
         .library(name: "BaggageLogging", targets: ["BaggageLogging"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
     dependencies: [
+        .package(url: "https://github.com/slashmo/gsoc-swift-baggage-context", .branch("main")),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.2.0")
     ],
     targets: [
-        // ==== --------------------------------------------------------------------------------------------------------
-        // MARK: Baggage
-
-        .target(
-            name: "Baggage",
-            dependencies: []
-        ),
-        .testTarget(
-            name: "BaggageTests",
-            dependencies: [
-                "Baggage",
-            ]
-        ),
-      
         // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Baggage + Logging
 
         .target(
             name: "BaggageLogging",
             dependencies: [
-                "Baggage",
+                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),
@@ -51,7 +37,7 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                "Baggage",
+                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
             ]
         ),
         .testTarget(
@@ -81,7 +67,7 @@ let package = Package(
         .target(
             name: "Benchmarks",
             dependencies: [
-                "Baggage",
+                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
                 "SwiftBenchmarkTools",
             ]
         ),
