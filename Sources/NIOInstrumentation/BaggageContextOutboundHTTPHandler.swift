@@ -7,14 +7,14 @@ public final class BaggageContextOutboundHTTPHandler: ChannelOutboundHandler {
     public typealias OutboundIn = HTTPClientRequestPartWithBaggage
     public typealias OutboundOut = HTTPClientRequestPart
 
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
 
-    public init<I>(instrument: I)
+    public init<Instrument>(instrument: Instrument)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
+        self.instrument = AnyInstrument(instrument)
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {

@@ -1,15 +1,15 @@
 import Baggage
 
-/// A pseudo-`Instrument` that may be used to instrument using multiple other `Instrument`s
+/// A pseudo-`Instrument` that may be used to instrument using multiple other `AnyInstrument`s
 /// across a common `BaggageContext`.
 public struct MultiplexInstrument<InjectInto, ExtractFrom> {
-    private var instruments: [Instrument<InjectInto, ExtractFrom>]
+    private var instruments: [AnyInstrument<InjectInto, ExtractFrom>]
 
     /// Create a `MultiplexInstrument`.
     ///
     /// - Parameter instruments: An array of `Instrument`s, each of which will be used to `inject`/`extract`
     /// through the same `BaggageContext`.
-    public init(_ instruments: [Instrument<InjectInto, ExtractFrom>]) {
+    public init(_ instruments: [AnyInstrument<InjectInto, ExtractFrom>]) {
         self.instruments = instruments
     }
 }

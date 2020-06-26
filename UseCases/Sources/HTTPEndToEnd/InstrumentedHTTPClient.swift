@@ -7,15 +7,15 @@ import NIOHTTP1
 
 struct InstrumentedHTTPClient {
     private let client: HTTPClient
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
 
-    init<I>(instrument: I, eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider)
+    init<Instrument>(instrument: Instrument, eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
         self.client = HTTPClient(eventLoopGroupProvider: eventLoopGroupProvider)
-        self.instrument = Instrument(instrument)
+        self.instrument = AnyInstrument(instrument)
     }
 
     // TODO: deadline: NIODeadline? would move into baggage?

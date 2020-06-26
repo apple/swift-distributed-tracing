@@ -5,8 +5,8 @@ import XCTest
 final class InstrumentTests: XCTestCase {
     func testMultiplexInvokesAllInstruments() {
         let instrument = MultiplexInstrument([
-            Instrument(FirstFakeTracer()),
-            Instrument(SecondFakeTracer()),
+            AnyInstrument(FirstFakeTracer()),
+            AnyInstrument(SecondFakeTracer()),
         ])
 
         var baggage = BaggageContext()
