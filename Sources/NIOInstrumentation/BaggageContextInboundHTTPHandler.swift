@@ -7,15 +7,15 @@ public final class BaggageContextInboundHTTPHandler: ChannelInboundHandler {
     public typealias InboundIn = HTTPServerRequestPart
     public typealias InboundOut = HTTPServerRequestPart
 
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
     private var onBaggageExtracted: (BaggageContext) -> Void
 
-    public init<I>(instrument: I, onBaggage: @escaping (BaggageContext) -> Void)
+    public init<Instrument>(instrument: Instrument, onBaggage: @escaping (BaggageContext) -> Void)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
+        self.instrument = AnyInstrument(instrument)
         self.onBaggageExtracted = onBaggage
     }
 
