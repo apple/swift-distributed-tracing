@@ -11,15 +11,16 @@ final class OrderServiceHandler: ChannelInboundHandler {
     typealias OutboundOut = HTTPServerResponsePart
 
     private let httpClient: InstrumentedHTTPClient
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
     private let logger = Logger(label: "OrderService")
 
-    init<I>(httpClient: InstrumentedHTTPClient, instrument: I)
-        where I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
+    init<Instrument>(httpClient: InstrumentedHTTPClient, instrument: Instrument)
+        where
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
         self.httpClient = httpClient
-        self.instrument = Instrument(instrument)
+        self.instrument = AnyInstrument(instrument)
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {

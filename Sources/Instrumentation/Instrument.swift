@@ -25,17 +25,17 @@ public protocol InstrumentProtocol {
 }
 
 /// A box-type for an `InstrumentProtocol`, necessary for creating homogeneous collections of `InstrumentProtocol`s.
-public struct Instrument<InjectInto, ExtractFrom>: InstrumentProtocol {
+public struct AnyInstrument<InjectInto, ExtractFrom>: InstrumentProtocol {
     private let inject: (BaggageContext, inout InjectInto) -> Void
     private let extract: (ExtractFrom, inout BaggageContext) -> Void
 
     /// Wrap the given `InstrumentProtocol` inside an `Instrument`.
     /// - Parameter instrument: The `InstrumentProtocol` being wrapped.
-    public init<I>(_ instrument: I)
+    public init<Instrument>(_ instrument: Instrument)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == InjectInto,
-        I.ExtractFrom == ExtractFrom {
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == InjectInto,
+        Instrument.ExtractFrom == ExtractFrom {
         self.inject = instrument.inject
         self.extract = instrument.extract
     }
