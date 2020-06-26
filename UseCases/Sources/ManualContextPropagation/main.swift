@@ -4,7 +4,7 @@ import Instrumentation
 
 // MARK: - Demo
 
-let server = FakeHTTPServer(instrument: Instrument(FakeTracer())) { baggage, _, client in
+let server = FakeHTTPServer(instrument: AnyInstrument(FakeTracer())) { baggage, _, client in
     print("=== Perform subsequent request ===")
     let outgoingRequest = FakeHTTPRequest(path: "/other-service", headers: [("Content-Type", "application/json")])
     client.performRequest(baggage, request: outgoingRequest)
@@ -25,7 +25,7 @@ struct FakeHTTPRequest {
 
 struct FakeHTTPResponse {}
 
-typealias HTTPHeadersIntrument = Instrument<HTTPHeaders, HTTPHeaders>
+typealias HTTPHeadersIntrument = AnyInstrument<HTTPHeaders, HTTPHeaders>
 
 struct FakeHTTPServer {
     typealias Handler = (BaggageContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
@@ -39,7 +39,7 @@ struct FakeHTTPServer {
         I: InstrumentProtocol,
         I.InjectInto == HTTPHeaders,
         I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        self.instrument = AnyInstrument(instrument)
         self.catchAllHandler = catchAllHandler
         self.client = FakeHTTPClient(instrument: instrument)
     }
@@ -62,7 +62,7 @@ struct FakeHTTPClient {
         I: InstrumentProtocol,
         I.InjectInto == HTTPHeaders,
         I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        self.instrument = AnyInstrument(instrument)
     }
 
     func performRequest(_ baggage: BaggageContext, request: FakeHTTPRequest) {

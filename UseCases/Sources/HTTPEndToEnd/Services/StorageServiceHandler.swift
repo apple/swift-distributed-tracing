@@ -10,13 +10,14 @@ final class StorageServiceHandler: ChannelInboundHandler {
     typealias OutboundOut = HTTPServerResponsePart
 
     private let logger = Logger(label: "StorageService")
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
 
-    init<I>(instrument: I)
-        where I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+    init<Instrument>(instrument: Instrument)
+        where
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
+        self.instrument = AnyInstrument(instrument)
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {

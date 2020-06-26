@@ -23,14 +23,14 @@ server.receive(try! HTTPClient.Request(url: "https://swift.org"))
 
 struct InstrumentedHTTPClient {
     private let client = HTTPClient(eventLoopGroupProvider: .createNew)
-    private let instrument: Instrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
 
-    init<I>(instrument: I)
+    init<Instrument>(instrument: Instrument)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
+        self.instrument = AnyInstrument(instrument)
     }
 
     func execute(request: HTTPClient.Request, baggage: BaggageContext) {
@@ -44,7 +44,7 @@ struct InstrumentedHTTPClient {
 
 struct FakeHTTPResponse {}
 
-typealias HTTPHeadersIntrument = Instrument<HTTPHeaders, HTTPHeaders>
+typealias HTTPHeadersIntrument = AnyInstrument<HTTPHeaders, HTTPHeaders>
 
 struct FakeHTTPServer {
     typealias Handler = (BaggageContext, HTTPClient.Request, InstrumentedHTTPClient) -> FakeHTTPResponse
@@ -53,12 +53,12 @@ struct FakeHTTPServer {
     private let catchAllHandler: Handler
     private let client: InstrumentedHTTPClient
 
-    init<I>(instrument: I, catchAllHandler: @escaping Handler)
+    init<Instrument>(instrument: Instrument, catchAllHandler: @escaping Handler)
         where
-        I: InstrumentProtocol,
-        I.InjectInto == HTTPHeaders,
-        I.ExtractFrom == HTTPHeaders {
-        self.instrument = Instrument(instrument)
+        Instrument: InstrumentProtocol,
+        Instrument.InjectInto == HTTPHeaders,
+        Instrument.ExtractFrom == HTTPHeaders {
+        self.instrument = AnyInstrument(instrument)
         self.catchAllHandler = catchAllHandler
         self.client = InstrumentedHTTPClient(instrument: instrument)
     }
