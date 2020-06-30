@@ -21,7 +21,7 @@ private func tearDown() {
 // completely silly "benchmark" function
 func bench_example(_ count: Int) throws {
     var sum = 0
-    for i in 1 ... count {
+    for _ in 1 ... count {
         sum += 1
     }
 }
