@@ -3,6 +3,7 @@ import Baggage
 import Foundation
 import Instrumentation
 import NIOHTTP1
+import NIOInstrumentation
 
 let server = FakeHTTPServer(
     instrument: FakeTracer()
@@ -23,19 +24,15 @@ server.receive(try! HTTPClient.Request(url: "https://swift.org"))
 
 struct InstrumentedHTTPClient {
     private let client = HTTPClient(eventLoopGroupProvider: .createNew)
-    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: Instrument
 
-    init<Instrument>(instrument: Instrument)
-        where
-        Instrument: InstrumentProtocol,
-        Instrument.InjectInto == HTTPHeaders,
-        Instrument.ExtractFrom == HTTPHeaders {
-        self.instrument = AnyInstrument(instrument)
+    init(instrument: Instrument) {
+        self.instrument = instrument
     }
 
     func execute(request: HTTPClient.Request, baggage: BaggageContext) {
         var request = request
-        self.instrument.inject(from: baggage, into: &request.headers)
+        self.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
         print(request.headers)
     }
 }
@@ -44,21 +41,15 @@ struct InstrumentedHTTPClient {
 
 struct FakeHTTPResponse {}
 
-typealias HTTPHeadersIntrument = AnyInstrument<HTTPHeaders, HTTPHeaders>
-
 struct FakeHTTPServer {
     typealias Handler = (BaggageContext, HTTPClient.Request, InstrumentedHTTPClient) -> FakeHTTPResponse
 
-    private let instrument: HTTPHeadersIntrument
+    private let instrument: Instrument
     private let catchAllHandler: Handler
     private let client: InstrumentedHTTPClient
 
-    init<Instrument>(instrument: Instrument, catchAllHandler: @escaping Handler)
-        where
-        Instrument: InstrumentProtocol,
-        Instrument.InjectInto == HTTPHeaders,
-        Instrument.ExtractFrom == HTTPHeaders {
-        self.instrument = AnyInstrument(instrument)
+    init(instrument: Instrument, catchAllHandler: @escaping Handler) {
+        self.instrument = instrument
         self.catchAllHandler = catchAllHandler
         self.client = InstrumentedHTTPClient(instrument: instrument)
     }
@@ -66,28 +57,38 @@ struct FakeHTTPServer {
     func receive(_ request: HTTPClient.Request) {
         var baggage = BaggageContext()
         print("\(String(describing: Self.self)): Extracting context values from request headers into context")
-        self.instrument.extract(from: request.headers, into: &baggage)
+        self.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
         _ = self.catchAllHandler(baggage, request, self.client)
     }
 }
 
 // MARK: - Fake Tracer
 
-private struct FakeTracer: InstrumentProtocol {
-    enum TraceID: BaggageContextKey {
+private final class FakeTracer: Instrument {
+    enum TraceIDKey: BaggageContextKey {
         typealias Value = String
     }
 
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject(from baggage: BaggageContext, into headers: inout HTTPHeaders) {
-        guard let traceID = baggage[TraceID.self] else { return }
-        headers.replaceOrAdd(name: Self.headerName, value: traceID)
+    func inject<Carrier, Injector>(
+        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+    )
+        where
+        Injector: InjectorProtocol,
+        Carrier == Injector.Carrier {
+        guard let traceID = baggage[TraceIDKey.self] else { return }
+        injector.inject(traceID, forKey: Self.headerName, into: &carrier)
     }
 
-    func extract(from headers: HTTPHeaders, into baggage: inout BaggageContext) {
-        let traceID = headers.first(where: { $0.0 == Self.headerName })?.1 ?? Self.defaultTraceID
-        baggage[TraceID.self] = traceID
+    func extract<Carrier, Extractor>(
+        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+    )
+        where
+        Extractor: ExtractorProtocol,
+        Carrier == Extractor.Carrier {
+        let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
+        baggage[TraceIDKey.self] = traceID
     }
 }

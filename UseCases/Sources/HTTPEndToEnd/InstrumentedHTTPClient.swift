@@ -4,18 +4,15 @@ import BaggageLogging
 import Instrumentation
 import NIO
 import NIOHTTP1
+import NIOInstrumentation
 
 struct InstrumentedHTTPClient {
     private let client: HTTPClient
-    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: Instrument
 
-    init<Instrument>(instrument: Instrument, eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider)
-        where
-        Instrument: InstrumentProtocol,
-        Instrument.InjectInto == HTTPHeaders,
-        Instrument.ExtractFrom == HTTPHeaders {
+    init(instrument: Instrument, eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider) {
         self.client = HTTPClient(eventLoopGroupProvider: eventLoopGroupProvider)
-        self.instrument = AnyInstrument(instrument)
+        self.instrument = instrument
     }
 
     // TODO: deadline: NIODeadline? would move into baggage?
@@ -30,7 +27,7 @@ struct InstrumentedHTTPClient {
 
     func execute(request: HTTPClient.Request, baggage: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         var request = request
-        self.instrument.inject(from: baggage, into: &request.headers)
+        self.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
         baggage.logger.info("🌎 InstrumentedHTTPClient: Execute request")
         return self.client.execute(request: request)
     }

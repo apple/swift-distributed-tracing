@@ -10,7 +10,7 @@ final class BaggageContextOutboundHTTPHandlerTests: XCTestCase {
         let traceID = "abc"
 
         var baggage = BaggageContext()
-        baggage[FakeTracer.TraceID.self] = traceID
+        baggage[FakeTracer.TraceIDKey.self] = traceID
 
         let httpVersion = HTTPVersion(major: 1, minor: 1)
         let handler = BaggageContextOutboundHTTPHandler(instrument: FakeTracer())
