@@ -3,22 +3,31 @@ import Foundation
 import Instrumentation
 import NIOHTTP1
 
-struct FakeTracer: InstrumentProtocol {
-    enum TraceID: BaggageContextKey {
+final class FakeTracer: Instrument {
+    enum TraceIDKey: BaggageContextKey {
         typealias Value = String
     }
 
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject(from baggage: BaggageContext, into headers: inout HTTPHeaders) {
-        if let traceID = baggage[TraceID.self] {
-            headers.replaceOrAdd(name: Self.headerName, value: traceID)
-        }
+    func inject<Carrier, Injector>(
+        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+    )
+        where
+        Injector: InjectorProtocol,
+        Carrier == Injector.Carrier {
+        guard let traceID = baggage[TraceIDKey.self] else { return }
+        injector.inject(traceID, forKey: Self.headerName, into: &carrier)
     }
 
-    func extract(from headers: HTTPHeaders, into baggage: inout BaggageContext) {
-        let traceID = headers.first(name: Self.headerName) ?? Self.defaultTraceID
-        baggage[TraceID.self] = traceID
+    func extract<Carrier, Extractor>(
+        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+    )
+        where
+        Extractor: ExtractorProtocol,
+        Carrier == Extractor.Carrier {
+        let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
+        baggage[TraceIDKey.self] = traceID
     }
 }

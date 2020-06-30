@@ -25,6 +25,6 @@ final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
         waitForExpectations(timeout: 0.5)
 
         XCTAssertNotNil(extractedBaggage)
-        XCTAssertEqual(extractedBaggage![FakeTracer.TraceID.self], traceID)
+        XCTAssertEqual(extractedBaggage![FakeTracer.TraceIDKey.self], traceID)
     }
 }

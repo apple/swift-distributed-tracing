@@ -22,12 +22,14 @@ let package = Package(
         .target(name: "ManualAsyncHTTPClient", dependencies: [
             .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
             .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
+            .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
             .product(name: "AsyncHTTPClient", package: "async-http-client")
         ]),
         .target(name: "HTTPEndToEnd", dependencies: [
             .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
             .product(name: "BaggageLogging", package: "gsoc-swift-tracing"),
             .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
+            .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
             .product(name: "AsyncHTTPClient", package: "async-http-client"),
             .product(name: "NIO", package: "swift-nio")
         ])

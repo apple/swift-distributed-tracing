@@ -4,20 +4,17 @@ import Instrumentation
 import Logging
 import NIO
 import NIOHTTP1
+import NIOInstrumentation
 
 final class StorageServiceHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPServerRequestPart
     typealias OutboundOut = HTTPServerResponsePart
 
     private let logger = Logger(label: "StorageService")
-    private let instrument: AnyInstrument<HTTPHeaders, HTTPHeaders>
+    private let instrument: Instrument
 
-    init<Instrument>(instrument: Instrument)
-        where
-        Instrument: InstrumentProtocol,
-        Instrument.InjectInto == HTTPHeaders,
-        Instrument.ExtractFrom == HTTPHeaders {
-        self.instrument = AnyInstrument(instrument)
+    init(instrument: Instrument) {
+        self.instrument = instrument
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -25,7 +22,7 @@ final class StorageServiceHandler: ChannelInboundHandler {
 
         var baggage = BaggageContext()
         baggage[BaggageContext.BaseLoggerKey.self] = self.logger
-        self.instrument.extract(from: requestHead.headers, into: &baggage)
+        self.instrument.extract(requestHead.headers, into: &baggage, using: HTTPHeadersExtractor())
 
         baggage.logger.info("📦 Looking for the product")
 

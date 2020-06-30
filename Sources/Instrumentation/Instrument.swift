@@ -1,50 +1,55 @@
 import Baggage
 
-/// Conforming types are usually cross-cutting tools like tracers that extract values of one type (`ExtractFrom`) into a
-/// `BaggageContext` and inject values stored in a `BaggageContext` into another type (`InjectInto`).
-/// `ExtractFrom` and `InjectInto` may very well be of the same type, e.g. when a cross-cutting tool propagates
-/// baggage through HTTP headers.
-public protocol InstrumentProtocol {
-    associatedtype InjectInto
-    associatedtype ExtractFrom
+/// Conforming types are used to extract values from a specific `Carrier`.
+public protocol ExtractorProtocol {
+    /// The carrier to extract values from.
+    associatedtype Carrier
 
-    /// Extract values from an `ExtractFrom` and inject them into the given `BaggageContext`.
+    /// Extract the value for the given key from the `Carrier`.
     ///
     /// - Parameters:
-    ///   - from: The value from which relevant information will be extracted.
-    ///   - baggage: The `BaggageContext` in which this relevant information will be stored.
-    func extract(from: ExtractFrom, into baggage: inout BaggageContext)
+    ///   - key: The key to be extracted.
+    ///   - carrier: The `Carrier` to extract from.
+    func extract(key: String, from carrier: Carrier) -> String?
+}
 
-    /// Inject values into the given `InjectInto` which are stored in the given `BaggageContext`.
+/// Conforming types are used to inject values into a specific `Carrier`.
+public protocol InjectorProtocol {
+    /// The carrier to inject values into.
+    associatedtype Carrier
+
+    /// Inject the given value for the given key into the given `Carrier`.
+    ///
+    /// - Parameters:
+    ///   - value: The value to be injected.
+    ///   - key: The key for which to inject the value.
+    ///   - carrier: The `Carrier` to inject into.
+    func inject(_ value: String, forKey key: String, into carrier: inout Carrier)
+}
+
+/// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
+/// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
+public protocol Instrument {
+    /// Extract values from a `Carrier` by using the given extractor and inject them into the given `BaggageContext`.
+    /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
+    ///
+    /// - Parameters:
+    ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
+    ///   - baggage: The `BaggageContext` into which these values should be injected.
+    ///   - extractor: The `Extractor` that extracts values from the given `Carrier`.
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+        where
+        Extractor: ExtractorProtocol,
+        Extractor.Carrier == Carrier
+
+    /// Inject values from a `BaggageContext` and inject them into the given `Carrier` using the given `Injector`.
     ///
     /// - Parameters:
     ///   - baggage: The `BaggageContext` from which relevant information will be extracted.
-    ///   - into: The `InjectInto` into which this information will be injected. In general, you shouldn't remove values from this
-    ///   but only update/add, as other tools may be interested in the values you're about to remove.
-    func inject(from baggage: BaggageContext, into: inout InjectInto)
-}
-
-/// A box-type for an `InstrumentProtocol`, necessary for creating homogeneous collections of `InstrumentProtocol`s.
-public struct AnyInstrument<InjectInto, ExtractFrom>: InstrumentProtocol {
-    private let inject: (BaggageContext, inout InjectInto) -> Void
-    private let extract: (ExtractFrom, inout BaggageContext) -> Void
-
-    /// Wrap the given `InstrumentProtocol` inside an `Instrument`.
-    /// - Parameter instrument: The `InstrumentProtocol` being wrapped.
-    public init<Instrument>(_ instrument: Instrument)
+    ///   - carrier: The `Carrier` into which this information will be injected.
+    ///   - injector: The `Injector` used to inject extracted baggage into the given `Carrier`.
+    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
-        Instrument: InstrumentProtocol,
-        Instrument.InjectInto == InjectInto,
-        Instrument.ExtractFrom == ExtractFrom {
-        self.inject = instrument.inject
-        self.extract = instrument.extract
-    }
-
-    public func inject(from baggage: BaggageContext, into: inout InjectInto) {
-        self.inject(baggage, &into)
-    }
-
-    public func extract(from: ExtractFrom, into baggage: inout BaggageContext) {
-        self.extract(from, &baggage)
-    }
+        Injector: InjectorProtocol,
+        Injector.Carrier == Carrier
 }
