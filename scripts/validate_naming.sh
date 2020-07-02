@@ -16,7 +16,7 @@
 ##
 ## This source file is part of the SwiftNIO open source project
 ##
-## Copyright (c) 2017-2018 Apple Inc. and the SwiftNIO project authors
+## Copyright (c) 2017-2019 Apple Inc. and the SwiftNIO project authors
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -26,46 +26,17 @@
 ##
 ##===----------------------------------------------------------------------===##
 
-function plugin_echo_test_suite_begin() {
-    echo "Running test suite '$1'"
-}
-
-function plugin_echo_test_suite_end() {
-    true
-}
-
-# test_name
-function plugin_echo_test_begin() {
-    echo -n "Running test '$1'... "
-}
-
-function plugin_echo_test_skip() {
-    echo "Skipping test '$1'"
-}
-
-function plugin_echo_test_ok() {
-    echo "OK (${1}s)"
-}
-
-function plugin_echo_test_fail() {
-    echo "FAILURE ($1)"
-    echo "--- OUTPUT BEGIN ---"
-    cat "$2"
-    echo "--- OUTPUT  END  ---"
-}
-
-function plugin_echo_test_end() {
-    true
-}
-
-function plugin_echo_summary_ok() {
-    echo "OK (ran $1 tests successfully)"
-}
-
-function plugin_echo_summary_fail() {
-    echo "FAILURE (oks: $1, failures: $2)"
-}
-
-function plugin_echo_init() {
-    true
-}
+printf "=> Checking for unacceptable language... "
+# This greps for unacceptable terminology. The square bracket[s] are so that
+# "git grep" doesn't find the lines that greps :).
+unacceptable_terms=(
+  -e blacklis[t]
+  -e whitelis[t]
+  -e slav[e]
+)
+if git grep --color=never -i "${unacceptable_terms[@]}" > /dev/null; then
+  printf "\033[0;31mUnacceptable language found.\033[0m\n"
+  git grep -i "${unacceptable_terms[@]}"
+  exit 1
+fi
+printf "\033[0;32mokay.\033[0m\n"
