@@ -3,7 +3,7 @@
 [![Swift 5.2](https://img.shields.io/badge/Swift-5.2-ED523F.svg?style=flat)](https://swift.org/download/)
 [![CI](https://github.com/slashmo/gsoc-swift-tracing/workflows/CI/badge.svg)](https://github.com/slashmo/gsoc-swift-tracing/actions?query=workflow%3ACI)
 
-This is a WIP collection of Swift libraries enabling Tracing for your Swift (Server) systems. Check out the [GSoC project overview](https://summerofcode.withgoogle.com/projects/#6092707967008768) to learn more.
+This is a WIP collection of Swift libraries enabling Tracing for your Swift (Server) systems. Check out the [GSoC project overview](https://summerofcode.withgoogle.com/projects/#6092707967008768) to learn more. For a more detailed project plan please take a look [at this Google doc](https://docs.google.com/document/d/19j9x515dR0IAwF3Zoevxoj6jvMdGpP4UuyGhmEXO_B8).
 
 ## Dependencies
 
