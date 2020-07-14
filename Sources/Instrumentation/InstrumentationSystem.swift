@@ -19,7 +19,8 @@ import Baggage
 /// - Note: If you need to use more that one cross-cutting tool you can do so by using `MultiplexInstrument`.
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
-    private static var _instrument: Instrument = NOOPInstrument.instance
+    private static var _instrument: Instrument = NoOpInstrument()
+    private static var _tracer: TracingInstrument?
     private static var isInitialized = false
 
     /// Globally select the desired `Instrument` implementation.
@@ -34,8 +35,22 @@ public enum InstrumentationSystem {
                 you need to use multiple instruments.
                 """
             )
+            if let tracer = instrument as? TracingInstrument {
+                self._tracer = tracer
+            }
             self._instrument = instrument
+
             self.isInitialized = true
+        }
+    }
+
+    // for our testing we want to allow multiple bootstrapping
+    internal static func bootstrapInternal(_ instrument: Instrument) {
+        self.lock.withWriterLock {
+            if let tracer = instrument as? TracingInstrument {
+                self._tracer = tracer
+            }
+            self._instrument = instrument
         }
     }
 
@@ -43,18 +58,13 @@ public enum InstrumentationSystem {
     public static var instrument: Instrument {
         self.lock.withReaderLock { self._instrument }
     }
-}
 
-private final class NOOPInstrument: Instrument {
-    static let instance = NOOPInstrument()
-
-    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
-        where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {}
-
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
-        where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {}
+    // FIXME: smarter impl
+    public static var tracer: TracingInstrument {
+        self.lock.withReaderLock {
+            let tracer: TracingInstrument? = self._tracer
+            let res: TracingInstrument = tracer ?? NoOpTracingInstrument()
+            return res
+        }
+    }
 }
