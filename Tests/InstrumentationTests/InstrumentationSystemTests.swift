@@ -19,7 +19,7 @@ final class InstrumentationSystemTests: XCTestCase {
     func testItProvidesAccessToASingletonInstrument() {
         let tracer = FakeTracer()
 
-        InstrumentationSystem.bootstrap(tracer)
+        InstrumentationSystem.bootstrap(tracer) // FIXME, must use bootstrapInternal
         XCTAssertTrue(InstrumentationSystem.instrument as? FakeTracer === tracer)
     }
 }

@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "gsoc-swift-tracing",
+    platforms: [
+        .macOS(.v10_15)
+    ],
     products: [
         .library(name: "BaggageLogging", targets: ["BaggageLogging"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
@@ -44,6 +47,7 @@ let package = Package(
             name: "InstrumentationTests",
             dependencies: [
                 "Instrumentation",
+                "BaggageLogging"
             ]
         ),
 
