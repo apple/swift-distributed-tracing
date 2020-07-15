@@ -24,6 +24,7 @@ public protocol TracingInstrument: Instrument {
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `BaggageContext` within to start the new `Span`.
+    ///   - kind: The `SpanKind` of the new `Span`.
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
         named operationName: String,
