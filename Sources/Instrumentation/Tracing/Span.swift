@@ -24,6 +24,9 @@ public protocol Span {
     /// [OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
     var operationName: String { get }
 
+    /// The kind of this span.
+    var kind: SpanKind { get }
+
     /// The status of this span.
     var status: SpanStatus? { get set }
 
@@ -245,4 +248,25 @@ public struct SpanStatus {
         /// The request does not have valid authentication credentials for the operation.
         case unauthenticated
     }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Span Kind
+
+/// Describes the relationship between the Span, its parents, and its children in a Trace.
+public enum SpanKind {
+    /// Indicates that the span covers server-side handling of a synchronous RPC or other remote request.
+    /// This span is the child of a remote `.client` span that was expected to wait for a response.
+    case server
+    /// Indicates that the span describes a synchronous request to some remote service.
+    /// This span is the parent of a remote `.server` span and waits for its response.
+    case client
+    /// Indicates that the span describes the parent of an asynchronous request. This parent span is expected to end before the corresponding child
+    /// `.consumer` span, possibly even before the child span starts. In messaging scenarios with batching,
+    /// tracing individual messages requires a new `.producer` span per message to be created.
+    case producer
+    /// Indicates that the span describes the child of an asynchronous `.producer` request.
+    case consumer
+    /// Indicates that the span represents an internal operation within an application, as opposed to an operations with remote parents or children.
+    case `internal`
 }

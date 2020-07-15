@@ -24,8 +24,14 @@ public protocol TracingInstrument: Instrument {
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `BaggageContext` within to start the new `Span`.
+    ///   - kind: The `SpanKind` of the new `Span`.
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
-    func startSpan(named operationName: String, context: BaggageContext, at timestamp: DispatchTime?) -> Span
+    func startSpan(
+        named operationName: String,
+        context: BaggageContext,
+        ofKind kind: SpanKind,
+        at timestamp: DispatchTime?
+    ) -> Span
 }
 
 extension TracingInstrument {
@@ -34,7 +40,14 @@ extension TracingInstrument {
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `BaggageContext` within to start the new `Span`.
-    public func startSpan(named operationName: String, context: BaggageContext) -> Span {
-        self.startSpan(named: operationName, context: context, at: nil)
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Defaults to `nil`.
+    public func startSpan(
+        named operationName: String,
+        context: BaggageContext,
+        ofKind kind: SpanKind = .internal,
+        at timestamp: DispatchTime? = nil
+    ) -> Span {
+        self.startSpan(named: operationName, context: context, ofKind: .internal, at: nil)
     }
 }

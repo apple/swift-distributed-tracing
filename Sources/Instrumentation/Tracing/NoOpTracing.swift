@@ -18,7 +18,12 @@ import Dispatch
 public struct NoOpTracingInstrument: TracingInstrument {
     public var currentSpan: Span? = nil
 
-    public func startSpan(named operationName: String, context: BaggageContext, at timestamp: DispatchTime?) -> Span {
+    public func startSpan(
+        named operationName: String,
+        context: BaggageContext,
+        ofKind kind: SpanKind,
+        at timestamp: DispatchTime?
+    ) -> Span {
         NoOpSpan()
     }
 
@@ -35,6 +40,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
     public struct NoOpSpan: Span {
         public var operationName: String = ""
         public var status: SpanStatus?
+        public let kind: SpanKind = .internal
 
         public var startTimestamp: DispatchTime {
             .now()
