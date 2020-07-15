@@ -55,8 +55,18 @@ enum TaskIDKey: BaggageContextKey {
 private final class TracedLockPrintlnTracer: TracingInstrument {
     var currentSpan: Span? // FIXME: likely not like that
 
-    func startSpan(named operationName: String, context: BaggageContext, at timestamp: DispatchTime?) -> Span {
-        TracedLockPrintlnSpan(operationName: operationName, startTimestamp: timestamp ?? .now(), context: context)
+    func startSpan(
+        named operationName: String,
+        context: BaggageContext,
+        ofKind kind: SpanKind,
+        at timestamp: DispatchTime?
+    ) -> Span {
+        TracedLockPrintlnSpan(
+            operationName: operationName,
+            startTimestamp: timestamp ?? .now(),
+            kind: kind,
+            context: context
+        )
     }
 
     func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
@@ -71,6 +81,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
     struct TracedLockPrintlnSpan: Span {
         let operationName: String
+        let kind: SpanKind
 
         var status: SpanStatus? {
             didSet {
@@ -100,11 +111,13 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         init(
             operationName: String,
             startTimestamp: DispatchTime,
+            kind: SpanKind,
             context baggage: BaggageContext
         ) {
             self.operationName = operationName
             self.startTimestamp = startTimestamp
             self.baggage = baggage
+            self.kind = kind
 
             print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
         }
