@@ -34,8 +34,18 @@ final class TracingInstrumentTests: XCTestCase {
 final class JaegerTracer: TracingInstrument {
     private(set) var currentSpan: Span?
 
-    func startSpan(named operationName: String, context: BaggageContext, at timestamp: DispatchTime?) -> Span {
-        let span = OTSpan(operationName: operationName, startTimestamp: timestamp ?? .now(), context: context) { span in
+    func startSpan(
+        named operationName: String,
+        context: BaggageContext,
+        ofKind kind: SpanKind,
+        at timestamp: DispatchTime?
+    ) -> Span {
+        let span = OTSpan(
+            operationName: operationName,
+            startTimestamp: timestamp ?? .now(),
+            context: context,
+            kind: kind
+        ) { span in
             span.baggage.logger.info(#"Emitting span "\#(span.operationName)" to backend"#)
             span.baggage.logger.info("\(span.attributes)")
         }
@@ -86,6 +96,7 @@ extension JaegerTracer {
 
 struct OTSpan: Span {
     let operationName: String
+    let kind: SpanKind
 
     var status: SpanStatus? {
         didSet {
@@ -118,12 +129,14 @@ struct OTSpan: Span {
         operationName: String,
         startTimestamp: DispatchTime,
         context baggage: BaggageContext,
+        kind: SpanKind,
         onEnd: @escaping (Span) -> Void
     ) {
         self.operationName = operationName
         self.startTimestamp = startTimestamp
         self.baggage = baggage
         self.onEnd = onEnd
+        self.kind = kind
     }
 
     mutating func addEvent(_ event: SpanEvent) {

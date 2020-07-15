@@ -18,7 +18,13 @@ import XCTest
 final class SpanTests: XCTestCase {
     func testAddingEventCreatesCopy() {
         // TODO: We should probably replace OTSpan at some point with a NoOpSpan for testing things like this.
-        let span = OTSpan(operationName: "test", startTimestamp: .now(), context: BaggageContext(), onEnd: { _ in })
+        let span = OTSpan(
+            operationName: "test",
+            startTimestamp: .now(),
+            context: BaggageContext(),
+            kind: .internal,
+            onEnd: { _ in }
+        )
         XCTAssert(span.events.isEmpty)
 
         let copiedSpan = span.addingEvent("test-event")
