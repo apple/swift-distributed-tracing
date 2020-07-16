@@ -48,13 +48,18 @@ public protocol Span {
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
     mutating func addEvent(_ event: SpanEvent)
 
-    // TODO: Wrap in a struct to hide collection implementation details.
-
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes { get set }
 
     /// Returns true if this `Span` is recording information like events, attributes, status, etc.
     var isRecording: Bool { get }
+
+    /// The read-only collection of linked `Span`s.
+    var links: [SpanLink] { get }
+
+    /// Add a `SpanLink` in place.
+    /// - Parameter link: The `SpanLink` to add to this `Span`.
+    mutating func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
     /// - Parameter timestamp: The `DispatchTime` at which the span ended.
@@ -269,4 +274,27 @@ public enum SpanKind {
     case consumer
     /// Indicates that the span represents an internal operation within an application, as opposed to an operations with remote parents or children.
     case `internal`
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Span Link
+
+/// A link to another `Span`.
+/// The other `Span`s information is stored in `context` and `attributes` may be used to
+/// further describe the link.
+public struct SpanLink {
+    /// A `BaggageContext` containing identifying information about the link target `Span`.
+    public let context: BaggageContext
+
+    /// `SpanAttributes` further describing the connection between the `Span`s.
+    public let attributes: SpanAttributes
+
+    /// Create a new `SpanLink`.
+    /// - Parameters:
+    ///   - context: The `BaggageContext` identifying the targeted `Span`.
+    ///   - attributes: `SpanAttributes` that further describe the link. Defaults to no attributes.
+    public init(context: BaggageContext, attributes: SpanAttributes = [:]) {
+        self.context = context
+        self.attributes = attributes
+    }
 }
