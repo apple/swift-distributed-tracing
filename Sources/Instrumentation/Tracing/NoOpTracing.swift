@@ -41,6 +41,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
         public var operationName: String = ""
         public var status: SpanStatus?
         public let kind: SpanKind = .internal
+        public let links = [SpanLink]()
 
         public var startTimestamp: DispatchTime {
             .now()
@@ -55,6 +56,8 @@ public struct NoOpTracingInstrument: TracingInstrument {
         public var events: [SpanEvent] {
             []
         }
+
+        public mutating func addLink(_ link: SpanLink) {}
 
         public mutating func addEvent(_ event: SpanEvent) {}
 
