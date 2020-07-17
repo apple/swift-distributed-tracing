@@ -115,6 +115,8 @@ struct OTSpan: Span {
         }
     }
 
+    private(set) var links = [SpanLink]()
+
     var attributes: SpanAttributes = [:] {
         didSet {
             self.isRecording = !self.attributes.isEmpty
@@ -137,6 +139,10 @@ struct OTSpan: Span {
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
+    }
+
+    mutating func addLink(_ link: SpanLink) {
+        self.links.append(link)
     }
 
     mutating func addEvent(_ event: SpanEvent) {

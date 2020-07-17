@@ -94,6 +94,8 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
         let baggage: BaggageContext
 
+        private(set) var links = [SpanLink]()
+
         private(set) var events = [SpanEvent]() {
             didSet {
                 self.isRecording = !self.events.isEmpty
@@ -120,6 +122,10 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             self.kind = kind
 
             print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
+        }
+
+        mutating func addLink(_ link: SpanLink) {
+            self.links.append(link)
         }
 
         mutating func addEvent(_ event: SpanEvent) {
