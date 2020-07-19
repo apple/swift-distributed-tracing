@@ -17,9 +17,6 @@ import Dispatch
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
 public protocol TracingInstrument: Instrument {
-    /// The currently traces `Span`.
-    var currentSpan: Span? { get }
-
     /// Start a new `Span` within the given `BaggageContext` at a given timestamp.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
