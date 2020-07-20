@@ -53,8 +53,6 @@ enum TaskIDKey: BaggageContextKey {
 // MARK: PrintLn Tracer
 
 private final class TracedLockPrintlnTracer: TracingInstrument {
-    var currentSpan: Span? // FIXME: likely not like that
-
     func startSpan(
         named operationName: String,
         context: BaggageContext,
