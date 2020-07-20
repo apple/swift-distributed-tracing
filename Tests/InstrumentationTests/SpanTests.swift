@@ -48,6 +48,15 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(stringValue, "test")
     }
 
+    func testSpanAttributeIsExpressibleByStringInterpolation() {
+        let stringAttribute: SpanAttribute = "test \(true) \(42) \(3.14)"
+        guard case .string(let stringValue) = stringAttribute else {
+            XCTFail("Expected string attribute, got \(stringAttribute).")
+            return
+        }
+        XCTAssertEqual(stringValue, "test true 42 3.14")
+    }
+
     func testSpanAttributeIsExpressibleByIntegerLiteral() {
         let intAttribute: SpanAttribute = 42
         guard case .int(let intValue) = intAttribute else {
