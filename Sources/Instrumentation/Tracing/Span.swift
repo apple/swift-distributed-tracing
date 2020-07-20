@@ -165,6 +165,12 @@ extension SpanAttribute: ExpressibleByArrayLiteral {
 public struct SpanAttributes {
     private var _attributes = [String: SpanAttribute]()
 
+    /// Create a set of attributes by wrapping the given dictionary.
+    /// - Parameter attributes: The attributes dictionary to wrap.
+    public init(_ attributes: [String: SpanAttribute]) {
+        self._attributes = attributes
+    }
+
     /// Accesses the `SpanAttribute` with the given name for reading and writing.
     /// - Parameter name: The name of the attribute used to identify the attribute.
     /// - Returns: The `SpanAttribute` identified by the given name, or `nil` if it's not present.
