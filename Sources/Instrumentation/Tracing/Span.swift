@@ -137,6 +137,12 @@ extension SpanAttribute: ExpressibleByStringLiteral {
     }
 }
 
+extension SpanAttribute: ExpressibleByStringInterpolation {
+    public init(stringInterpolation value: Self.StringInterpolation) {
+        self = .string("\(value)")
+    }
+}
+
 extension SpanAttribute: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self = .int(value)
