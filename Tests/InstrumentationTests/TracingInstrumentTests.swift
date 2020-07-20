@@ -32,8 +32,6 @@ final class TracingInstrumentTests: XCTestCase {
 // MARK: - JaegerTracer
 
 final class JaegerTracer: TracingInstrument {
-    private(set) var currentSpan: Span?
-
     func startSpan(
         named operationName: String,
         context: BaggageContext,
@@ -49,7 +47,6 @@ final class JaegerTracer: TracingInstrument {
             span.baggage.logger.info(#"Emitting span "\#(span.operationName)" to backend"#)
             span.baggage.logger.info("\(span.attributes)")
         }
-        currentSpan = span
         return span
     }
 
