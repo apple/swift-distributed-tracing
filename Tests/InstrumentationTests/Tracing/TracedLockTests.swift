@@ -57,7 +57,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         named operationName: String,
         context: BaggageContext,
         ofKind kind: SpanKind,
-        at timestamp: DispatchTime?
+        at timestamp: Timestamp?
     ) -> Span {
         TracedLockPrintlnSpan(
             operationName: operationName,
@@ -87,8 +87,8 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             }
         }
 
-        let startTimestamp: DispatchTime
-        private(set) var endTimestamp: DispatchTime?
+        let startTimestamp: Timestamp
+        private(set) var endTimestamp: Timestamp?
 
         let baggage: BaggageContext
 
@@ -110,7 +110,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
         init(
             operationName: String,
-            startTimestamp: DispatchTime,
+            startTimestamp: Timestamp,
             kind: SpanKind,
             context baggage: BaggageContext
         ) {
@@ -130,9 +130,9 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             self.events.append(event)
         }
 
-        mutating func end(at timestamp: DispatchTime) {
+        mutating func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
-            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end (took \(timestamp.uptimeNanoseconds - self.startTimestamp.uptimeNanoseconds) nanos)")
+            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
         }
     }
 }

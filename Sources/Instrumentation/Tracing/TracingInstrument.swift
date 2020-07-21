@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import Dispatch
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
@@ -27,7 +26,7 @@ public protocol TracingInstrument: Instrument {
         named operationName: String,
         context: BaggageContext,
         ofKind kind: SpanKind,
-        at timestamp: DispatchTime?
+        at timestamp: Timestamp?
     ) -> Span
 }
 
@@ -42,7 +41,7 @@ extension TracingInstrument {
     public func startSpan(
         named operationName: String,
         context: BaggageContext,
-        at timestamp: DispatchTime? = nil
+        at timestamp: Timestamp? = nil
     ) -> Span {
         self.startSpan(named: operationName, context: context, ofKind: .internal, at: nil)
     }

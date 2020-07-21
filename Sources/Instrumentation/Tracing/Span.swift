@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import Dispatch
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
@@ -30,11 +29,11 @@ public protocol Span {
     /// The status of this span.
     var status: SpanStatus? { get set }
 
-    /// The precise `DispatchTime` of when the `Span` was started.
-    var startTimestamp: DispatchTime { get }
+    /// The `Timestamp` of when the `Span` was started.
+    var startTimestamp: Timestamp { get }
 
-    /// The precise `DispatchTime` of when the `Span` has ended.
-    var endTimestamp: DispatchTime? { get }
+    /// The `Timestamp` of when the `Span` has ended.
+    var endTimestamp: Timestamp? { get }
 
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
     var baggage: BaggageContext { get }
@@ -54,8 +53,8 @@ public protocol Span {
     mutating func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
-    /// - Parameter timestamp: The `DispatchTime` at which the span ended.
-    mutating func end(at timestamp: DispatchTime)
+    /// - Parameter timestamp: The `Timestamp` at which the span ended.
+    mutating func end(at timestamp: Timestamp)
 }
 
 extension Span {
@@ -77,7 +76,7 @@ extension Span {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Event
 
-/// An event that occured during a `Span`.
+/// An event that occurred during a `Span`.
 public struct SpanEvent {
     /// The human-readable name of this `SpanEvent`.
     public let name: String
@@ -85,15 +84,15 @@ public struct SpanEvent {
     /// One or more `SpanAttribute`s with the same restrictions as defined for `Span` attributes.
     public var attributes: SpanAttributes
 
-    /// The `DispatchTime` at which this event occured.
-    public let timestamp: DispatchTime
+    /// The `Timestamp` at which this event occurred.
+    public let timestamp: Timestamp
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
-    ///   - attributes: The `SpanAttributes` describing this event. Defaults to no attributes.
-    ///   - timestamp: The `DispatchTime` at which this event occured. Defaults to `.now()`.
-    public init(name: String, attributes: SpanAttributes = [:], at timestamp: DispatchTime = .now()) {
+    ///   - attributes: attributes describing this event. Defaults to no attributes.
+    ///   - timestamp: The `Timestamp` at which this event occurred. Defaults to `.now()`.
+    public init(name: String, attributes: SpanAttributes = [:], at timestamp: Timestamp = .now()) {
         self.name = name
         self.attributes = attributes
         self.timestamp = timestamp
@@ -116,7 +115,7 @@ public enum SpanAttribute {
     case double(Double)
     case bool(Bool)
 
-    // TODO: This could be misused to create a heterogenuous array of attributes, which is not allowed in OT:
+    // TODO: This could be misused to create a heterogeneous array of attributes, which is not allowed in OT:
     // https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-attributes
 
     case array([SpanAttribute])
@@ -203,15 +202,15 @@ extension SpanAttributes: ExpressibleByDictionaryLiteral {
 
 /// Represents the status of a finished Span. It's composed of a canonical code in conjunction with an optional descriptive message.
 public struct SpanStatus {
-    public let cannonicalCode: CannonicalCode
+    public let canonicalCode: CannonicalCode
     public let message: String?
 
     /// Create a new `SpanStatus`.
     /// - Parameters:
-    ///   - cannonicalCode: The cannonical code of this `SpanStatus`.
+    ///   - canonicalCode: The canonical code of this `SpanStatus`.
     ///   - message: The optional descriptive message of this `SpanStatus`. Defaults to nil.
-    public init(cannonicalCode: CannonicalCode, message: String? = nil) {
-        self.cannonicalCode = cannonicalCode
+    public init(canonicalCode: CannonicalCode, message: String? = nil) {
+        self.canonicalCode = canonicalCode
         self.message = message
     }
 
