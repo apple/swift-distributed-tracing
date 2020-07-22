@@ -51,10 +51,6 @@ public struct NoOpTracingInstrument: TracingInstrument {
             .init()
         }
 
-        public var events: [SpanEvent] {
-            []
-        }
-
         public mutating func addLink(_ link: SpanLink) {}
 
         public mutating func addEvent(_ event: SpanEvent) {}

@@ -39,11 +39,6 @@ public protocol Span {
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
     var baggage: BaggageContext { get }
 
-    /// The read-only collection of events which happened within this `Span`.
-    ///
-    /// `SpanEvent`s might be added via the `addEvent` or `addingEvent` `Span` methods.
-    var events: [SpanEvent] { get }
-
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
     mutating func addEvent(_ event: SpanEvent)
