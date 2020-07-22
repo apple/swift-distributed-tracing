@@ -9,7 +9,11 @@ let package = Package(
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
     dependencies: [
-        .package(url: "https://github.com/slashmo/gsoc-swift-baggage-context", .branch("main")),
+        .package(
+            name: "swift-baggage-context",
+            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
+            from: "0.1.0"
+        ),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.2.0")
     ],
@@ -20,24 +24,24 @@ let package = Package(
         .target(
             name: "BaggageLogging",
             dependencies: [
-                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
+                .product(name: "Baggage", package: "swift-baggage-context"),
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),
         .testTarget(
-            name: "BaggageLoggingTests", 
+            name: "BaggageLoggingTests",
             dependencies: [
                 "BaggageLogging",
             ]
         ),
-      
+
         // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Instrumentation
 
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
+                .product(name: "Baggage", package: "swift-baggage-context"),
             ]
         ),
         .testTarget(
@@ -68,7 +72,7 @@ let package = Package(
         .target(
             name: "Benchmarks",
             dependencies: [
-                .product(name: "Baggage", package: "gsoc-swift-baggage-context"),
+                .product(name: "Baggage", package: "swift-baggage-context"),
                 "SwiftBenchmarkTools",
             ]
         ),
