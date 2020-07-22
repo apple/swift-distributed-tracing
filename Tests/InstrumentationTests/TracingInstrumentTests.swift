@@ -112,7 +112,7 @@ struct OTSpan: Span {
         }
     }
 
-    private(set) var links = [SpanLink]()
+    private var links = [SpanLink]()
 
     var attributes: SpanAttributes = [:] {
         didSet {
