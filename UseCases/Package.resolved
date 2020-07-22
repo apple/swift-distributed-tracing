@@ -11,12 +11,12 @@
         }
       },
       {
-        "package": "gsoc-swift-baggage-context",
+        "package": "swift-baggage-context",
         "repositoryURL": "https://github.com/slashmo/gsoc-swift-baggage-context.git",
         "state": {
-          "branch": "main",
-          "revision": "4f086dff385ccefa5f1acf62a0b38b0f984db143",
-          "version": null
+          "branch": null,
+          "revision": "349804a0599573d09df6e433cb8266b80727e5b0",
+          "version": "0.1.0"
         }
       },
       {
