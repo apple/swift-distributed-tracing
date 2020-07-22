@@ -94,7 +94,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
         private(set) var links = [SpanLink]()
 
-        private(set) var events = [SpanEvent]() {
+        private var events = [SpanEvent]() {
             didSet {
                 self.isRecording = !self.events.isEmpty
             }
