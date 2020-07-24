@@ -39,7 +39,6 @@ public struct NoOpTracingInstrument: TracingInstrument {
         public var operationName: String = ""
         public var status: SpanStatus?
         public let kind: SpanKind = .internal
-        public let links = [SpanLink]()
 
         public var startTimestamp: DispatchTime {
             .now()

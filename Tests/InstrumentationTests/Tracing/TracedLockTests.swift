@@ -92,7 +92,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
         let baggage: BaggageContext
 
-        private(set) var links = [SpanLink]()
+        private var links = [SpanLink]()
 
         private var events = [SpanEvent]() {
             didSet {

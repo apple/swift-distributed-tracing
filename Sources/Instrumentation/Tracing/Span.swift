@@ -49,9 +49,6 @@ public protocol Span {
     /// Returns true if this `Span` is recording information like events, attributes, status, etc.
     var isRecording: Bool { get }
 
-    /// The read-only collection of linked `Span`s.
-    var links: [SpanLink] { get }
-
     /// Add a `SpanLink` in place.
     /// - Parameter link: The `SpanLink` to add to this `Span`.
     mutating func addLink(_ link: SpanLink)
