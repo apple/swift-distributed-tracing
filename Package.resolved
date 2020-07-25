@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "swift-baggage-context",
-        "repositoryURL": "https://github.com/slashmo/gsoc-swift-baggage-context.git",
+        "repositoryURL": "https://github.com/slashmo/gsoc-swift-baggage-context",
         "state": {
           "branch": null,
-          "revision": "349804a0599573d09df6e433cb8266b80727e5b0",
+          "revision": "10469603494f1cde67fbd0725cdde0e04d131b05",
           "version": "0.1.0"
         }
       },

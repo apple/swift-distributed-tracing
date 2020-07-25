@@ -11,7 +11,7 @@ let package = Package(
     dependencies: [
         .package(
             name: "swift-baggage-context",
-            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
+            url: "https://github.com/slashmo/gsoc-swift-baggage-context",
             from: "0.1.0"
         ),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
