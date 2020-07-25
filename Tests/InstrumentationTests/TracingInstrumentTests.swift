@@ -13,7 +13,6 @@
 
 import Baggage
 import BaggageLogging
-import Dispatch
 import Instrumentation
 import XCTest
 
@@ -36,7 +35,7 @@ final class JaegerTracer: TracingInstrument {
         named operationName: String,
         context: BaggageContext,
         ofKind kind: SpanKind,
-        at timestamp: DispatchTime?
+        at timestamp: Timestamp?
     ) -> Span {
         let span = OTSpan(
             operationName: operationName,
@@ -101,8 +100,8 @@ struct OTSpan: Span {
         }
     }
 
-    let startTimestamp: DispatchTime
-    private(set) var endTimestamp: DispatchTime?
+    let startTimestamp: Timestamp
+    private(set) var endTimestamp: Timestamp?
 
     let baggage: BaggageContext
 
@@ -126,7 +125,7 @@ struct OTSpan: Span {
 
     init(
         operationName: String,
-        startTimestamp: DispatchTime,
+        startTimestamp: Timestamp,
         context baggage: BaggageContext,
         kind: SpanKind,
         onEnd: @escaping (Span) -> Void
@@ -146,7 +145,7 @@ struct OTSpan: Span {
         self.events.append(event)
     }
 
-    mutating func end(at timestamp: DispatchTime) {
+    mutating func end(at timestamp: Timestamp) {
         self.endTimestamp = timestamp
         self.onEnd(self)
     }

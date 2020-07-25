@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import Dispatch
 
 /// No operation TracingInstrument, used when no tracing is required.
 public struct NoOpTracingInstrument: TracingInstrument {
@@ -20,7 +19,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
         named operationName: String,
         context: BaggageContext,
         ofKind kind: SpanKind,
-        at timestamp: DispatchTime?
+        at timestamp: Timestamp?
     ) -> Span {
         NoOpSpan()
     }
@@ -40,11 +39,11 @@ public struct NoOpTracingInstrument: TracingInstrument {
         public var status: SpanStatus?
         public let kind: SpanKind = .internal
 
-        public var startTimestamp: DispatchTime {
+        public var startTimestamp: Timestamp {
             .now()
         }
 
-        public var endTimestamp: DispatchTime? = nil
+        public var endTimestamp: Timestamp?
 
         public var baggage: BaggageContext {
             .init()
@@ -65,7 +64,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
 
         public let isRecording = false
 
-        public mutating func end(at timestamp: DispatchTime) {
+        public mutating func end(at timestamp: Timestamp) {
             // ignore
         }
     }
