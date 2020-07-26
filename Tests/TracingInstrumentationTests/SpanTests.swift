@@ -18,8 +18,8 @@ import XCTest
 
 final class SpanTests: XCTestCase {
     func testAddingEventCreatesCopy() {
-        // TODO: We should probably replace OTSpan at some point with a NoOpSpan for testing things like this.
-        let span = OTSpan(
+        // TODO: We should probably replace OTelSpan at some point with a NoOpSpan for testing things like this.
+        let span = OTelSpan(
             operationName: "test",
             startTimestamp: .now(),
             context: BaggageContext(),
@@ -160,7 +160,7 @@ final class SpanTests: XCTestCase {
         var parentContext = BaggageContext()
         parentContext[TestBaggageContextKey.self] = "test"
 
-        let parent = OTSpan(
+        let parent = OTelSpan(
             operationName: "client",
             startTimestamp: .now(),
             context: parentContext,
@@ -168,7 +168,7 @@ final class SpanTests: XCTestCase {
             onEnd: { _ in }
         )
         let childContext = BaggageContext()
-        var child = OTSpan(
+        var child = OTelSpan(
             operationName: "server",
             startTimestamp: .now(),
             context: childContext,
