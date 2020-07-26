@@ -60,7 +60,7 @@ final class JaegerTracer: TracingInstrument {
         ofKind kind: SpanKind,
         at timestamp: Timestamp?
     ) -> Span {
-        let span = OTSpan(
+        let span = OTelSpan(
             operationName: operationName,
             startTimestamp: timestamp ?? .now(),
             context: context,
@@ -111,9 +111,9 @@ extension JaegerTracer {
     }
 }
 
-// MARK: - OTSpan
+// MARK: - OTelSpan
 
-struct OTSpan: Span {
+struct OTelSpan: Span {
     let operationName: String
     let kind: SpanKind
 
