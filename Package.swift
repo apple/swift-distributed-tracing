@@ -56,7 +56,6 @@ let package = Package(
         .target(
             name: "TracingInstrumentation",
             dependencies: [
-                .product(name: "Baggage", package: "swift-baggage-context"),
                 "Instrumentation"
             ]
         ),
