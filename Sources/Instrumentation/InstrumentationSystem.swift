@@ -28,7 +28,10 @@ import Baggage
 /// ## What getter to use
 /// - Default to using `InstrumentationSystem.instrument`
 /// - Use `InstrumentationSystem.instrument(of: MyInstrument.self)` only if you need to use specific `MyInstrument` APIs
-/// - Protocols that "inherit" from `Instrument` may also wrap `.instrument(of: TheirInstrument.self)` in a convenience method
+///
+/// Specific instrumentation libraries may also provide their own accessors as extensions, e.g. GreatInstrumentation could provide an
+/// `InstrumentationSystem.great` convenience accessor, so prefer using them if available. These accessors should call
+/// `.instrument(of: GreatInstrument.self)` under the hood to ensure they work when being used through a `MultiplexInstrument`.
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
     private static var _instrument: Instrument = NoOpInstrument()
