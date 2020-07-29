@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Instrumentation
+import TracingInstrumentation
 import XCTest
 
 final class TimestampTests: XCTestCase {

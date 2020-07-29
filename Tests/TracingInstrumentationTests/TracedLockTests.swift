@@ -14,6 +14,7 @@
 import Baggage
 import BaggageLogging
 @testable import Instrumentation
+import TracingInstrumentation
 import XCTest
 
 final class TracedLockTests: XCTestCase {

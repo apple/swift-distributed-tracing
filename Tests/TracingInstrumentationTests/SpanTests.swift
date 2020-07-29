@@ -13,6 +13,7 @@
 
 import Baggage
 import Instrumentation
+import TracingInstrumentation
 import XCTest
 
 final class SpanTests: XCTestCase {

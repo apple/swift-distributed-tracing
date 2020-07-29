@@ -6,6 +6,7 @@ let package = Package(
     products: [
         .library(name: "BaggageLogging", targets: ["BaggageLogging"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
+        .library(name: "TracingInstrumentation", targets: ["TracingInstrumentation"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
     ],
     dependencies: [
@@ -48,6 +49,22 @@ let package = Package(
             name: "InstrumentationTests",
             dependencies: [
                 "Instrumentation",
+                "BaggageLogging"
+            ]
+        ),
+
+        .target(
+            name: "TracingInstrumentation",
+            dependencies: [
+                .product(name: "Baggage", package: "swift-baggage-context"),
+                "Instrumentation"
+            ]
+        ),
+        .testTarget(
+            name: "TracingInstrumentationTests",
+            dependencies: [
+                "Instrumentation",
+                "TracingInstrumentation",
                 "BaggageLogging"
             ]
         ),
