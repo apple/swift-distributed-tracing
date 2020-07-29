@@ -27,6 +27,12 @@ public struct MultiplexInstrument {
     }
 }
 
+extension MultiplexInstrument {
+    func firstInstance<I>(of instrument: I.Type) -> I? {
+        self.instruments.first(where: { $0 is I }) as? I
+    }
+}
+
 extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Injector>(
         _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector

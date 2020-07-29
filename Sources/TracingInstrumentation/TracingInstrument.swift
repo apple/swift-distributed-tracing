@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
+import Instrumentation
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
@@ -44,5 +45,15 @@ extension TracingInstrument {
         at timestamp: Timestamp? = nil
     ) -> Span {
         self.startSpan(named: operationName, context: context, ofKind: .internal, at: nil)
+    }
+}
+
+extension InstrumentationSystem {
+    /// Returns the `TracingInstrument` bootstrapped as part of the `InstrumentationSystem`.
+    ///
+    /// - Warning: Only call this after you bootstrapped the `InstrumentationSystem`. Calling it before is
+    /// considered a programmer error and leads to a crash.
+    public static var tracingInstrument: TracingInstrument {
+        instrument(of: TracingInstrument.self)!
     }
 }

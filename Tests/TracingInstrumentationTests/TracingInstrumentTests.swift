@@ -14,6 +14,7 @@
 import Baggage
 import BaggageLogging
 import Instrumentation
+import TracingInstrumentation
 import XCTest
 
 final class TracingInstrumentTests: XCTestCase {
