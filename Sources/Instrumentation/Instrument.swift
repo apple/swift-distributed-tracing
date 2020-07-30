@@ -67,14 +67,3 @@ public protocol Instrument {
         Injector.Carrier == Carrier
 }
 
-public struct NoOpInstrument: Instrument {
-    public func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
-        where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {}
-
-    public func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
-        where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {}
-}

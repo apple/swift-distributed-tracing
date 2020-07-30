@@ -61,24 +61,36 @@ public enum InstrumentationSystem {
         }
     }
 
-    /// Returns the globally configured `Instrument`. Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
+    /// Returns the globally configured `Instrument`.
+    ///
+    /// Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
     public static var instrument: Instrument {
         self.lock.withReaderLock { self._instrument }
     }
-}
 
-extension InstrumentationSystem {
     /// Get an `Instrument` instance of the given type.
     ///
     /// When using `MultiplexInstrument`, this returns the first instance of the given type stored in the `MultiplexInstrument`.
+    ///
     /// - Parameter instrumentType: The type of `Instrument` you want to retrieve an instance for.
     /// - Returns: An `Instrument` instance of the given type or `nil` if no `Instrument` of that type has been bootstrapped.
-    public static func instrument<I>(of instrumentType: I.Type) -> I? {
+    public static func instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
+        self._findInstrument(where: { $0 is I }) as? I
+    }
+
+}
+
+extension InstrumentationSystem {
+    /// :nodoc: INTERNAL API: Do Not Use
+    public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         self.lock.withReaderLock {
-            if let multiplexInstrument = self._instrument as? MultiplexInstrument {
-                return multiplexInstrument.firstInstance(of: I.self)
+            if let multiplex = self._instrument as? MultiplexInstrument {
+                return multiplex.firstInstrument(where: predicate)
+            } else if predicate(self._instrument) {
+                return self._instrument
+            } else {
+                return nil
             }
-            return self._instrument as? I
         }
     }
 }

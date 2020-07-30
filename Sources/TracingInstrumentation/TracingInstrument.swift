@@ -47,13 +47,3 @@ extension TracingInstrument {
         self.startSpan(named: operationName, context: context, ofKind: .internal, at: nil)
     }
 }
-
-extension InstrumentationSystem {
-    /// Returns the `TracingInstrument` bootstrapped as part of the `InstrumentationSystem`.
-    ///
-    /// - Warning: Only call this after you bootstrapped the `InstrumentationSystem`. Calling it before is
-    /// considered a programmer error and leads to a crash.
-    public static var tracingInstrument: TracingInstrument {
-        instrument(of: TracingInstrument.self)!
-    }
-}

@@ -28,8 +28,8 @@ public struct MultiplexInstrument {
 }
 
 extension MultiplexInstrument {
-    func firstInstance<I>(of instrument: I.Type) -> I? {
-        self.instruments.first(where: { $0 is I }) as? I
+    func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+        self.instruments.first(where: predicate)
     }
 }
 
