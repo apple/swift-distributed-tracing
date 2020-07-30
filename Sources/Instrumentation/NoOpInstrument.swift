@@ -15,7 +15,6 @@ import Baggage
 
 /// A "no op" implementation of an `Instrument`.
 public struct NoOpInstrument: Instrument {
-
     public init() {}
 
     public func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)

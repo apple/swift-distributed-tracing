@@ -48,8 +48,6 @@ final class TracingInstrumentTests: XCTestCase {
 
         XCTAssert(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracingInstrument is JaegerTracer)
-
-
     }
 }
 

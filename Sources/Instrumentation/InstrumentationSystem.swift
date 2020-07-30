@@ -77,7 +77,6 @@ public enum InstrumentationSystem {
     public static func instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
         self._findInstrument(where: { $0 is I }) as? I
     }
-
 }
 
 extension InstrumentationSystem {
