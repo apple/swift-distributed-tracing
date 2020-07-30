@@ -27,6 +27,12 @@ public struct MultiplexInstrument {
     }
 }
 
+extension MultiplexInstrument {
+    func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+        self.instruments.first(where: predicate)
+    }
+}
+
 extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Injector>(
         _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector

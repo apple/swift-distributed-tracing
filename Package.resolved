@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/slashmo/gsoc-swift-baggage-context",
         "state": {
           "branch": null,
-          "revision": "10469603494f1cde67fbd0725cdde0e04d131b05",
+          "revision": "349804a0599573d09df6e433cb8266b80727e5b0",
           "version": "0.1.0"
         }
       },
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "8a865bd15e69526cbdfcfd7c47698eb20b2ba951",
-          "version": "2.19.0"
+          "revision": "3cfb3f1d6efb05d1e93be342ea3d3e99aed00bb5",
+          "version": "2.20.0"
         }
       }
     ]

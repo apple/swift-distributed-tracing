@@ -13,7 +13,8 @@
 
 import Baggage
 import BaggageLogging
-import Instrumentation
+@testable import Instrumentation
+import TracingInstrumentation
 import XCTest
 
 final class TracingInstrumentTests: XCTestCase {
@@ -25,6 +26,30 @@ final class TracingInstrumentTests: XCTestCase {
         }
 
         httpServer.receive(FakeHTTPRequest(path: "/", headers: []))
+    }
+
+    func testItProvidesAccessToATracingInstrument() {
+        let tracer = JaegerTracer()
+
+        XCTAssertNil(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self))
+
+        InstrumentationSystem.bootstrapInternal(tracer)
+        XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
+        XCTAssert(InstrumentationSystem.instrument(of: JaegerTracer.self) === tracer)
+        XCTAssertNil(InstrumentationSystem.instrument(of: NoOpInstrument.self))
+
+        XCTAssert(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument is JaegerTracer)
+
+        let multiplexInstrument = MultiplexInstrument([tracer])
+        InstrumentationSystem.bootstrapInternal(multiplexInstrument)
+        XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
+        XCTAssert(InstrumentationSystem.instrument(of: JaegerTracer.self) === tracer)
+
+        XCTAssert(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument is JaegerTracer)
+
+
     }
 }
 
