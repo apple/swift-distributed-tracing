@@ -66,4 +66,3 @@ public protocol Instrument {
         Injector: InjectorProtocol,
         Injector.Carrier == Carrier
 }
-
