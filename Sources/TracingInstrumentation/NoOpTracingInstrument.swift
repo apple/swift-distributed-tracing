@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
+import Instrumentation
 
 /// No operation TracingInstrument, used when no tracing is required.
 public struct NoOpTracingInstrument: TracingInstrument {
