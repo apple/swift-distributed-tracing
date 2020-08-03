@@ -105,20 +105,57 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(stringValue, "test")
     }
 
-    func testSpanAttributesProvideSubscriptAccess() {
+//    func testSpanAttributesProvideSubscriptAccess() {
+//        var attributes: SpanAttributes = [:]
+//        XCTAssert(attributes.isEmpty)
+//
+//        attributes["0"] = false
+//        XCTAssertFalse(attributes.isEmpty)
+//
+//        guard case .bool(let flag) = attributes["0"], !flag else {
+//            XCTFail("Expected subscript getter to return the bool attribute.")
+//            return
+//        }
+//    }
+
+    func testSpanAttributesUX() {
         var attributes: SpanAttributes = [:]
-        XCTAssert(attributes.isEmpty)
 
-        attributes["0"] = false
-        XCTAssertFalse(attributes.isEmpty)
+        // normally we can use just the span attribute values, and it is not type safe or guided in any way:
+        attributes["thing.name"] = "hello"
+        attributes["meaning.of.life"] = 42
+        attributes["integers"] = [1, 2, 3, 4]
+        attributes["names"] = ["alpha", "beta"]
+        attributes["bools"] = [true, false, true]
+        attributes["alive"] = false
 
-        guard case .bool(let flag) = attributes["0"], !flag else {
-            XCTFail("Expected subscript getter to return the bool attribute.")
-            return
-        }
+        XCTAssertEqual(attributes["thing.name"], SpanAttribute.string("hello"))
+        XCTAssertEqual(attributes["meaning.of.life"], SpanAttribute.int(42))
+        XCTAssertEqual(attributes["alive"], SpanAttribute.bool(false))
+
+        // An import like: `import OpenTelemetryInstrumentationSupport` can enable type-safe well defined attributes,
+        // e.g. as defined in https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace/semantic_conventions
+        attributes.name = "kappa"
+        attributes.sampleHttp.statusCode = 200
+        attributes.sampleHttp.codesArray = [1, 2, 3]
+
+        XCTAssertEqual(attributes.name, SpanAttribute.string("kappa"))
+        XCTAssertEqual(attributes.name, "kappa")
+        XCTAssertEqual(attributes.sampleHttp.statusCode, 200)
     }
 
-    func testSpanAttributesAreIteratable() {
+    func testSpanAttributesCustomValue() {
+        var attributes: SpanAttributes = [:]
+
+        // normally we can use just the span attribute values, and it is not type safe or guided in any way:
+        attributes.sampleHttp.customType = CustomAttributeValue()
+
+        XCTAssertEqual(attributes["http.custom_value"], SpanAttribute.stringConvertible(CustomAttributeValue()))
+        XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
+        XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
+    }
+
+    func testSpanAttributesAreIterable() {
         let attributes: SpanAttributes = ["0": 0, "1": true, "2": "test"]
 
         var dictionary = [String: SpanAttribute]()
@@ -130,5 +167,59 @@ final class SpanTests: XCTestCase {
             XCTFail("Expected all attributes to be copied to the dictionary.")
             return
         }
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Example Span attributes
+
+extension SpanAttribute {
+    var name: SpanAttributeKey<String> {
+        "name"
+    }
+}
+
+extension SpanAttributes {
+    public var sampleHttp: HTTPAttributes {
+        get {
+            .init(attributes: self)
+        }
+        set {
+            self = newValue.attributes
+        }
+    }
+}
+
+@dynamicMemberLookup
+public struct HTTPAttributes: SpanAttributeNamespace {
+    public var attributes: SpanAttributes
+    public init(attributes: SpanAttributes) {
+        self.attributes = attributes
+    }
+
+    public struct NestedAttributes: NestedSpanAttributesProtocol {
+        public init() {}
+
+        public var statusCode: SpanAttributeKey<Int> {
+            "http.status_code"
+        }
+
+        public var codesArray: SpanAttributeKey<[Int]> {
+            "http.codes_array"
+        }
+
+        public var customType: SpanAttributeKey<CustomAttributeValue> {
+            "http.custom_value"
+        }
+    }
+}
+
+public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        .stringConvertible(self)
+    }
+
+    public var description: String {
+        "CustomAttributeValue()"
     }
 }
