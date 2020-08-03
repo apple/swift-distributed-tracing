@@ -7,7 +7,8 @@ let package = Package(
         .library(name: "BaggageLogging", targets: ["BaggageLogging"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "TracingInstrumentation", targets: ["TracingInstrumentation"]),
-        .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"])
+        .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"]),
+        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"])
     ],
     dependencies: [
         .package(
