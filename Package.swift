@@ -74,11 +74,25 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 "Instrumentation",
-            ]),
+            ]
+        ),
         .testTarget(
             name: "NIOInstrumentationTests",
             dependencies: [
                 "NIOInstrumentation",
+            ]
+        ),
+
+        .target(
+            name: "OpenTelemetryInstrumentationSupport",
+            dependencies: [
+                .target(name: "TracingInstrumentation")
+            ]
+        ),
+        .testTarget(
+            name: "OpenTelemetryInstrumentationSupportTests",
+            dependencies: [
+                "OpenTelemetryInstrumentationSupport"
             ]
         ),
 
