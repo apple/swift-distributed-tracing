@@ -10,27 +10,19 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "gsoc-swift-tracing", path: "../"),
-        .package(
-            name: "swift-baggage-context",
-            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.1.0"
-        ),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.1.1"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.18.0")
     ],
     targets: [
         .target(name: "ManualContextPropagation", dependencies: [
-            .product(name: "Baggage", package: "swift-baggage-context"),
             .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
         ]),
         .target(name: "ManualAsyncHTTPClient", dependencies: [
-            .product(name: "Baggage", package: "swift-baggage-context"),
             .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
             .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
             .product(name: "AsyncHTTPClient", package: "async-http-client")
         ]),
         .target(name: "HTTPEndToEnd", dependencies: [
-            .product(name: "Baggage", package: "swift-baggage-context"),
             .product(name: "BaggageLogging", package: "gsoc-swift-tracing"),
             .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
             .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),

@@ -29,19 +29,19 @@ struct InstrumentedHTTPClient {
     }
 
     // TODO: deadline: NIODeadline? would move into baggage?
-    public func get(url: String, baggage: BaggageContext = .init()) -> EventLoopFuture<HTTPClient.Response> {
+    public func get(url: String, context: BaggageContext = .init()) -> EventLoopFuture<HTTPClient.Response> {
         do {
             let request = try HTTPClient.Request(url: url, method: .GET)
-            return self.execute(request: request, baggage: baggage)
+            return self.execute(request: request, context: context)
         } catch {
             return self.client.eventLoopGroup.next().makeFailedFuture(error)
         }
     }
 
-    func execute(request: HTTPClient.Request, baggage: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
+    func execute(request: HTTPClient.Request, context: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         var request = request
-        self.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
-        baggage.logger.info("🌎 InstrumentedHTTPClient: Execute request")
+        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        context.logger.info("🌎 InstrumentedHTTPClient: Execute request")
         return self.client.execute(request: request)
     }
 
