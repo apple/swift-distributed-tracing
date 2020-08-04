@@ -70,6 +70,13 @@ extension Span {
     public mutating func end() {
         self.end(at: .now())
     }
+
+    /// Adds a `SpanLink` to the given parent `Span`.
+    /// - Parameter parent: The parent `Span`.
+    /// - Parameter attributes: The `SpanAttributes` describing this link. Defaults to no attributes.
+    public mutating func addLink(_ parent: Span, attributes: SpanAttributes = [:]) {
+        self.addLink(SpanLink(context: parent.context, attributes: attributes))
+    }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
