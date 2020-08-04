@@ -35,7 +35,7 @@ public protocol Span {
     var endTimestamp: Timestamp? { get }
 
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
-    var baggage: BaggageContext { get }
+    var context: BaggageContext { get }
 
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.

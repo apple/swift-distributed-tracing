@@ -37,24 +37,24 @@ final class InstrumentationSystemTests: XCTestCase {
 }
 
 private final class FakeTracer: Instrument {
-    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {}
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
 }
 
 private final class FakeInstrument: Instrument {
-    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {}
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}

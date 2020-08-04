@@ -19,9 +19,9 @@ import XCTest
 
 final class TracingInstrumentTests: XCTestCase {
     func testPlayground() {
-        let httpServer = FakeHTTPServer(instrument: JaegerTracer()) { baggage, _, client -> FakeHTTPResponse in
-            baggage.logger.info("Make subsequent HTTP request")
-            client.performRequest(baggage, request: FakeHTTPRequest(path: "/test", headers: []))
+        let httpServer = FakeHTTPServer(instrument: JaegerTracer()) { context, _, client -> FakeHTTPResponse in
+            context.logger.info("Make subsequent HTTP request")
+            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
         }
 
@@ -66,14 +66,14 @@ final class JaegerTracer: TracingInstrument {
             context: context,
             kind: kind
         ) { span in
-            span.baggage.logger.info(#"Emitting span "\#(span.operationName)" to backend"#)
-            span.baggage.logger.info("\(span.attributes)")
+            span.context.logger.info(#"Emitting span "\#(span.operationName)" to backend"#)
+            span.context.logger.info("\(span.attributes)")
         }
         return span
     }
 
     func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
     )
         where
         Extractor: ExtractorProtocol,
@@ -85,16 +85,16 @@ final class JaegerTracer: TracingInstrument {
         precondition(traceParentComponents.count == 4, "Invalid traceparent format")
         let traceID = String(traceParentComponents[1])
         let parentID = String(traceParentComponents[2])
-        baggage[TraceParentKey.self] = TraceParent(traceID: traceID, parentID: parentID)
+        context[TraceParentKey.self] = TraceParent(traceID: traceID, parentID: parentID)
     }
 
     func inject<Carrier, Injector>(
-        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
     )
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {
-        guard let traceParent = baggage[TraceParentKey.self] else { return }
+        guard let traceParent = context[TraceParentKey.self] else { return }
         let traceParentHeader = "00-\(traceParent.traceID)-\(traceParent.parentID)-00"
         injector.inject(traceParentHeader, forKey: "traceparent", into: &carrier)
     }
@@ -126,7 +126,7 @@ struct OTSpan: Span {
     let startTimestamp: Timestamp
     private(set) var endTimestamp: Timestamp?
 
-    let baggage: BaggageContext
+    let context: BaggageContext
 
     private(set) var events = [SpanEvent]() {
         didSet {
@@ -149,13 +149,13 @@ struct OTSpan: Span {
     init(
         operationName: String,
         startTimestamp: Timestamp,
-        context baggage: BaggageContext,
+        context: BaggageContext,
         kind: SpanKind,
         onEnd: @escaping (Span) -> Void
     ) {
         self.operationName = operationName
         self.startTimestamp = startTimestamp
-        self.baggage = baggage
+        self.context = context
         self.onEnd = onEnd
         self.kind = kind
     }
@@ -221,8 +221,8 @@ struct FakeHTTPServer {
 
         var span = tracer.startSpan(named: "GET \(request.path)", context: context)
 
-        let response = self.catchAllHandler(span.baggage, request, self.client)
-        span.baggage.logger.info("Handled HTTP request with status: \(response.status)")
+        let response = self.catchAllHandler(span.context, request, self.client)
+        span.context.logger.info("Handled HTTP request with status: \(response.status)")
         span.attributes["http.status"] = .int(response.status)
 
         span.end()
@@ -238,9 +238,9 @@ struct FakeHTTPClient {
         self.instrument = instrument
     }
 
-    func performRequest(_ baggage: BaggageContext, request: FakeHTTPRequest) {
+    func performRequest(_ context: BaggageContext, request: FakeHTTPRequest) {
         var request = request
-        self.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
-        baggage.logger.info("Performing outgoing HTTP request")
+        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        context.logger.info("Performing outgoing HTTP request")
     }
 }

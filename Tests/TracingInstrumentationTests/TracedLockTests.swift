@@ -68,12 +68,12 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         )
     }
 
-    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {}
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
@@ -91,7 +91,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         let startTimestamp: Timestamp
         private(set) var endTimestamp: Timestamp?
 
-        let baggage: BaggageContext
+        let context: BaggageContext
 
         private var links = [SpanLink]()
 
@@ -113,14 +113,14 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             operationName: String,
             startTimestamp: Timestamp,
             kind: SpanKind,
-            context baggage: BaggageContext
+            context: BaggageContext
         ) {
             self.operationName = operationName
             self.startTimestamp = startTimestamp
-            self.baggage = baggage
+            self.context = context
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
+            print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
         }
 
         mutating func addLink(_ link: SpanLink) {
@@ -133,7 +133,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
 
         mutating func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
-            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
+            print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
         }
     }
 }
