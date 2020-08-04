@@ -29,7 +29,7 @@ public final class BaggageContextOutboundHTTPHandler: ChannelOutboundHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let requestPartWithBaggage = unwrapOutboundIn(data)
         guard case .head(var head) = requestPartWithBaggage.requestPart else { return }
-        self.instrument.inject(requestPartWithBaggage.baggage, into: &head.headers, using: HTTPHeadersInjector())
+        self.instrument.inject(requestPartWithBaggage.context, into: &head.headers, using: HTTPHeadersInjector())
         // TODO: context.baggage = baggage
         // consider how we'll offer this capability in NIO
         context.write(self.wrapOutboundOut(.head(head)), promise: promise)
@@ -38,10 +38,10 @@ public final class BaggageContextOutboundHTTPHandler: ChannelOutboundHandler {
 
 public struct HTTPClientRequestPartWithBaggage {
     public let requestPart: HTTPClientRequestPart
-    public let baggage: BaggageContext
+    public let context: BaggageContext
 
-    public init(requestPart: HTTPClientRequestPart, baggage: BaggageContext) {
+    public init(requestPart: HTTPClientRequestPart, context: BaggageContext) {
         self.requestPart = requestPart
-        self.baggage = baggage
+        self.context = context
     }
 }
