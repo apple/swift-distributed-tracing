@@ -26,7 +26,7 @@ let server = FakeHTTPServer(
         url: "https://swift.org",
         headers: ["Accept": "application/json"]
     )
-    client.execute(request: outgoingRequest, baggage: context)
+    client.execute(request: outgoingRequest, context: context)
     return FakeHTTPResponse()
 }
 
@@ -43,9 +43,9 @@ struct InstrumentedHTTPClient {
         self.instrument = instrument
     }
 
-    func execute(request: HTTPClient.Request, baggage: BaggageContext) {
+    func execute(request: HTTPClient.Request, context: BaggageContext) {
         var request = request
-        self.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
+        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
         print(request.headers)
     }
 }
@@ -68,10 +68,10 @@ struct FakeHTTPServer {
     }
 
     func receive(_ request: HTTPClient.Request) {
-        var baggage = BaggageContext()
+        var context = BaggageContext()
         print("\(String(describing: Self.self)): Extracting context values from request headers into context")
-        self.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
-        _ = self.catchAllHandler(baggage, request, self.client)
+        self.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
+        _ = self.catchAllHandler(context, request, self.client)
     }
 }
 
@@ -86,22 +86,22 @@ private final class FakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Injector>(
-        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
     )
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {
-        guard let traceID = baggage[TraceIDKey.self] else { return }
+        guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: Self.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
     )
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {
         let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
-        baggage[TraceIDKey.self] = traceID
+        context[TraceIDKey.self] = traceID
     }
 }
