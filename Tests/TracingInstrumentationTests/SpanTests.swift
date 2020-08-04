@@ -105,19 +105,6 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(stringValue, "test")
     }
 
-//    func testSpanAttributesProvideSubscriptAccess() {
-//        var attributes: SpanAttributes = [:]
-//        XCTAssert(attributes.isEmpty)
-//
-//        attributes["0"] = false
-//        XCTAssertFalse(attributes.isEmpty)
-//
-//        guard case .bool(let flag) = attributes["0"], !flag else {
-//            XCTFail("Expected subscript getter to return the bool attribute.")
-//            return
-//        }
-//    }
-
     func testSpanAttributesUX() {
         var attributes: SpanAttributes = [:]
 
@@ -167,6 +154,35 @@ final class SpanTests: XCTestCase {
             XCTFail("Expected all attributes to be copied to the dictionary.")
             return
         }
+    }
+
+    func testSpanParentConvenience() {
+        var parentContext = BaggageContext()
+        parentContext[TestBaggageContextKey.self] = "test"
+
+        let parent = OTSpan(
+            operationName: "client",
+            startTimestamp: .now(),
+            context: parentContext,
+            kind: .client,
+            onEnd: { _ in }
+        )
+        let childContext = BaggageContext()
+        var child = OTSpan(
+            operationName: "server",
+            startTimestamp: .now(),
+            context: childContext,
+            kind: .server,
+            onEnd: { _ in }
+        )
+
+        var attributes = SpanAttributes()
+        attributes.sampleHttp.statusCode = 418
+        child.addLink(parent, attributes: attributes)
+
+        XCTAssertEqual(child.links.count, 1)
+        XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
+        XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
     }
 }
 
@@ -222,4 +238,8 @@ public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttr
     public var description: String {
         "CustomAttributeValue()"
     }
+}
+
+private struct TestBaggageContextKey: BaggageContextKey {
+    typealias Value = String
 }
