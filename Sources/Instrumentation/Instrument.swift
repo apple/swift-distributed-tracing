@@ -48,9 +48,9 @@ public protocol Instrument {
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
-    ///   - baggage: The `BaggageContext` into which these values should be injected.
+    ///   - context: The `BaggageContext` into which these values should be injected.
     ///   - extractor: The `Extractor` that extracts values from the given `Carrier`.
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Extractor.Carrier == Carrier
@@ -58,10 +58,10 @@ public protocol Instrument {
     /// Inject values from a `BaggageContext` and inject them into the given `Carrier` using the given `Injector`.
     ///
     /// - Parameters:
-    ///   - baggage: The `BaggageContext` from which relevant information will be extracted.
+    ///   - context: The `BaggageContext` from which relevant information will be extracted.
     ///   - carrier: The `Carrier` into which this information will be injected.
-    ///   - injector: The `Injector` used to inject extracted baggage into the given `Carrier`.
-    func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    ///   - injector: The `Injector` used to inject extracted `BaggageContext` into the given `Carrier`.
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Injector.Carrier == Carrier

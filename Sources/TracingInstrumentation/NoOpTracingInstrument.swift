@@ -30,7 +30,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {}
 
-    public func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor)
+    public func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
@@ -46,7 +46,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
 
         public var endTimestamp: Timestamp?
 
-        public var baggage: BaggageContext {
+        public var context: BaggageContext {
             .init()
         }
 
