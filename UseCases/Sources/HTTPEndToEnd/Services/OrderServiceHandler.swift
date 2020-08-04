@@ -47,7 +47,7 @@ final class OrderServiceHandler: ChannelInboundHandler {
             baggage.logger.info("🧾 Asking StorageService if your product exists")
 
             let request = try! HTTPClient.Request(url: "http://localhost:8081")
-            self.httpClient.execute(request: request, baggage: baggage).whenComplete { _ in
+            self.httpClient.execute(request: request, context: baggage).whenComplete { _ in
                 let responseHead = HTTPResponseHead(version: requestHead.version, status: .created)
                 context.eventLoop.execute {
                     context.channel.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
