@@ -1,0 +1,166 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B9FC5FF924CD3AB1007CB118 /* SpansExampleInstrument.instrpkg in Sources */ = {isa = PBXBuildFile; fileRef = B9FC5FF824CD3AB1007CB118 /* SpansExampleInstrument.instrpkg */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B9FC5FF524CD3AB1007CB118 /* SpansExampleInstrument.instrdst */ = {isa = PBXFileReference; explicitFileType = com.apple.instruments.instrdst; includeInIndex = 0; path = SpansExampleInstrument.instrdst; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9FC5FF824CD3AB1007CB118 /* SpansExampleInstrument.instrpkg */ = {isa = PBXFileReference; lastKnownFileType = "com.apple.instruments.package-definition"; path = SpansExampleInstrument.instrpkg; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		B9FC5FEE24CD3AB1007CB118 = {
+			isa = PBXGroup;
+			children = (
+				B9FC5FF724CD3AB1007CB118 /* SpansExampleInstrument */,
+				B9FC5FF624CD3AB1007CB118 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B9FC5FF624CD3AB1007CB118 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9FC5FF524CD3AB1007CB118 /* SpansExampleInstrument.instrdst */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B9FC5FF724CD3AB1007CB118 /* SpansExampleInstrument */ = {
+			isa = PBXGroup;
+			children = (
+				B9FC5FF824CD3AB1007CB118 /* SpansExampleInstrument.instrpkg */,
+			);
+			path = SpansExampleInstrument;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B9FC5FF424CD3AB1007CB118 /* SpansExampleInstrument */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B9FC5FFA24CD3AB1007CB118 /* Build configuration list for PBXNativeTarget "SpansExampleInstrument" */;
+			buildPhases = (
+				B9FC5FF324CD3AB1007CB118 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SpansExampleInstrument;
+			productName = SpansExampleInstrument;
+			productReference = B9FC5FF524CD3AB1007CB118 /* SpansExampleInstrument.instrdst */;
+			productType = "com.apple.product-type.instruments-package";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B9FC5FEF24CD3AB1007CB118 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1200;
+				TargetAttributes = {
+					B9FC5FF424CD3AB1007CB118 = {
+						CreatedOnToolsVersion = 12.0;
+					};
+				};
+			};
+			buildConfigurationList = B9FC5FF224CD3AB1007CB118 /* Build configuration list for PBXProject "SpansExampleInstrument" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B9FC5FEE24CD3AB1007CB118;
+			productRefGroup = B9FC5FF624CD3AB1007CB118 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B9FC5FF424CD3AB1007CB118 /* SpansExampleInstrument */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B9FC5FF324CD3AB1007CB118 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9FC5FF924CD3AB1007CB118 /* SpansExampleInstrument.instrpkg in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B9FC5FF024CD3AB1007CB118 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		B9FC5FF124CD3AB1007CB118 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+		B9FC5FFB24CD3AB1007CB118 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BALXGG2H6J;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Instruments/Packages";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Debug;
+		};
+		B9FC5FFC24CD3AB1007CB118 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = BALXGG2H6J;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Instruments/Packages";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B9FC5FF224CD3AB1007CB118 /* Build configuration list for PBXProject "SpansExampleInstrument" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9FC5FF024CD3AB1007CB118 /* Debug */,
+				B9FC5FF124CD3AB1007CB118 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B9FC5FFA24CD3AB1007CB118 /* Build configuration list for PBXNativeTarget "SpansExampleInstrument" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9FC5FFB24CD3AB1007CB118 /* Debug */,
+				B9FC5FFC24CD3AB1007CB118 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B9FC5FEF24CD3AB1007CB118 /* Project object */;
+}
