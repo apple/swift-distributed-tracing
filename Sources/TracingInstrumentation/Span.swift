@@ -41,6 +41,12 @@ public protocol Span {
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
     mutating func addEvent(_ event: SpanEvent)
 
+    /// Record an error of the given type described by the the given message.
+    ///
+    /// - Parameters:
+    ///   - error: The error to be recorded.
+    mutating func recordError(_ error: Error)
+
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes { get set }
 
@@ -83,7 +89,7 @@ extension Span {
 // MARK: Span Event
 
 /// An event that occurred during a `Span`.
-public struct SpanEvent {
+public struct SpanEvent: Equatable {
     /// The human-readable name of this `SpanEvent`.
     public let name: String
 
@@ -299,7 +305,7 @@ extension SpanAttribute: ExpressibleByArrayLiteral {
 
 /// A collection of `SpanAttribute`s.
 @dynamicMemberLookup
-public struct SpanAttributes {
+public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
 
     /// Create a set of attributes by wrapping the given dictionary.

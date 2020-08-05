@@ -54,6 +54,8 @@ public struct NoOpTracingInstrument: TracingInstrument {
 
         public mutating func addEvent(_ event: SpanEvent) {}
 
+        public func recordError(_ error: Error) {}
+
         public var attributes: SpanAttributes {
             get {
                 [:]
