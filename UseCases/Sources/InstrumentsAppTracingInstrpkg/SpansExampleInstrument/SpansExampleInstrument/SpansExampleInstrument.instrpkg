@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<package>
+	<id>org.swift.server.tracing.example.SpansExampleInstrument</id>
+	<title>SpansExampleInstrument</title>
+	<owner>
+		<name>Konrad `ktoso` Malawski</name>
+	</owner>
+
+    <!-- Instruments Developer Help: https://help.apple.com/instruments/developer/mac/current/ -->
+
+    
+    <!-- MARK: Schema Definitions -->
+    <os-signpost-interval-schema>
+        <id>tracing-spans</id>
+        <title>Example: OSSignpost tracing swift-tracing Spans</title>
+        
+        <subsystem>"org.swift.server.tracing.example"</subsystem>
+        <category>"Example"</category>
+        <name>"TracingSpans"</name>
+        
+        <start-pattern>
+            <message>"b;id:" ?id ";parent-ids:" ?parent-ids ";op-name:" ?op-name</message>
+        </start-pattern>
+        <end-pattern>
+            <message>"e;"</message>
+        </end-pattern>
+        
+        <column>
+            <mnemonic>span-id</mnemonic>
+            <title>ID</title>
+            <!-- <type>uint64</type> -->
+            <type>uint64</type>
+            <expression>?id</expression>
+        </column>
+        <column>
+            <mnemonic>parent-ids</mnemonic>
+            <title>Parent IDs</title>
+            <type>string</type>
+            <expression>?parent-ids</expression>
+        </column>
+        
+        <column>
+            <mnemonic>op-name</mnemonic>
+            <title>Operation Name</title>
+            <type>string</type>
+            <expression>?op-name</expression>
+        </column>
+    
+<!--    TODO: how to use the automatically captured thread IDs here? -->
+<!--        <column>-->
+<!--            <mnemonic>thread-start</mnemonic>-->
+<!--            <title>Thread (start)</title>-->
+<!--            <type>thread</type>-->
+<!--            <expression>?</expression>-->
+<!--        </column>-->
+<!--        <column>-->
+<!--            <mnemonic>thread-end</mnemonic>-->
+<!--            <title>Thread (end)</title>-->
+<!--            <type>thred</type>-->
+<!--            <expression>?thread</expression>-->
+<!--        </column>-->
+    </os-signpost-interval-schema>
+
+    <!-- MARK: Instrument Definitions -->
+    <instrument>
+        <id>org.apple.swift.server.tracing.example.span-intervals</id>
+        <title>Swift-Tracing: Spans</title>
+        <category>Behavior</category>
+        <purpose>Visualizes Span intervals, captured via os_signposts as emitted via the swift-tracing OSSignpost backend.</purpose>
+        <icon>Activity Monitor</icon>
+        
+        <create-table>
+            <id>tracing-spans-table</id>
+            <schema-ref>tracing-spans</schema-ref>
+        </create-table>
+        
+        <graph>
+            <title>Spans</title>
+
+            <lane>
+                <title>Span Intervals</title>
+                <table-ref>tracing-spans-table</table-ref>
+                <plot-template>
+                    <instance-by>op-name</instance-by>
+                    <label-format>%s</label-format>
+                    <value-from>duration</value-from>
+                    <label-from>op-name</label-from>
+                </plot-template>
+            </lane>
+        </graph>
+        <list>
+            <title>List: Spans</title>
+            <table-ref>tracing-spans-table</table-ref>
+            <column>start</column>
+            <column>op-name</column>
+            <column>duration</column>
+            <column>span-id</column>
+            <column>parent-ids</column>
+        </list>
+    </instrument>
+
+    <!-- MARK: Embed Templates -->
+    <!-- TODO: make a template -->
+    
+</package>

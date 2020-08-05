@@ -6,7 +6,8 @@ let package = Package(
     products: [
         .executable(name: "ManualContextPropagation", targets: ["ManualContextPropagation"]),
         .executable(name: "ManualAsyncHTTPClient", targets: ["ManualAsyncHTTPClient"]),
-        .executable(name: "HTTPEndToEnd", targets: ["HTTPEndToEnd"])
+        .executable(name: "HTTPEndToEnd", targets: ["HTTPEndToEnd"]),
+        .executable(name: "InstrumentsAppTracing", targets: ["InstrumentsAppTracing"]),
     ],
     dependencies: [
         .package(name: "gsoc-swift-tracing", path: "../"),
@@ -29,6 +30,9 @@ let package = Package(
             .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
             .product(name: "AsyncHTTPClient", package: "async-http-client"),
             .product(name: "NIO", package: "swift-nio"),
-        ])
+        ]),
+        .target(name: "InstrumentsAppTracing", dependencies: [
+            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
+        ]),
     ]
 )
