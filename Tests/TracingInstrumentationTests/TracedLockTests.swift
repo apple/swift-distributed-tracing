@@ -131,6 +131,8 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             self.events.append(event)
         }
 
+        func recordError(_ error: Error) {}
+
         mutating func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
             print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
