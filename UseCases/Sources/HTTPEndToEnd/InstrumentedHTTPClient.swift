@@ -41,7 +41,7 @@ struct InstrumentedHTTPClient {
     func execute(request: HTTPClient.Request, context: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         var request = request
         self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
-        context.logger.info("🌎 InstrumentedHTTPClient: Execute request")
+//        context.logger.info("🌎 InstrumentedHTTPClient: Execute request")
         return self.client.execute(request: request)
     }
 

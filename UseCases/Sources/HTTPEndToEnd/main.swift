@@ -76,9 +76,7 @@ private final class FakeTracer: Instrument {
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(
-        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
-    )
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {
@@ -86,9 +84,7 @@ private final class FakeTracer: Instrument {
         injector.inject(traceID, forKey: Self.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
-    )
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {

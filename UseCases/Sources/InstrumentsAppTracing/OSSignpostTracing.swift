@@ -14,6 +14,7 @@
 import Baggage
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
+import TracingInstrumentation
 
 #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
 import os.log
@@ -38,11 +39,15 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
     // ==== ------------------------------------------------------------------------------------------------------------
     // MARK: Instrument API
 
-    public func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor) {
+    public func extract<Carrier, Extractor>(
+        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+    ) {
         // noop; we could handle extracting our keys here
     }
 
-    public func inject<Carrier, Injector>(_ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector) {
+    public func inject<Carrier, Injector>(
+        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+    ) {
         // noop; we could handle injecting our keys here
     }
 
@@ -51,7 +56,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
 
     public func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        context: BaggageContextCarrier,
         ofKind kind: SpanKind,
         at timestamp: Timestamp?
     ) -> Span {
@@ -59,7 +64,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
             log: self.log,
             named: operationName,
             signpostName: self.signpostName,
-            context: context
+            context: context.baggage
             // , kind ignored
             // , timestamp ignored, we capture it automatically
         )
@@ -244,7 +249,7 @@ enum OSSignpostTracingKeys {
 @available(iOS 10.0, *)
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
-extension BaggageContext {
+extension BaggageContextProtocol {
     var signpostTraceParentIDs: OSSignpostTracingKeys.TraceParentIDs.Value {
         get {
             self[OSSignpostTracingKeys.TraceParentIDs.self] ?? []
