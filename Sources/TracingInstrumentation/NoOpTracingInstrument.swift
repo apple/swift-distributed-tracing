@@ -18,19 +18,27 @@ import Instrumentation
 public struct NoOpTracingInstrument: TracingInstrument {
     public func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        context: BaggageContextCarrier,
         ofKind kind: SpanKind,
         at timestamp: Timestamp?
     ) -> Span {
         NoOpSpan()
     }
 
-    public func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    public func inject<Carrier, Injector>(
+        _ context: BaggageContext,
+        into carrier: inout Carrier,
+        using injector: Injector
+    )
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {}
 
-    public func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
+    public func extract<Carrier, Extractor>(
+        _ carrier: Carrier,
+        into context: inout BaggageContext,
+        using extractor: Extractor
+    )
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}

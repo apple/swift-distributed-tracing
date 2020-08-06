@@ -469,10 +469,10 @@ public struct SpanLink {
 
     /// Create a new `SpanLink`.
     /// - Parameters:
-    ///   - context: The `BaggageContext` identifying the targeted `Span`.
+    ///   - context: The carrier of a `BaggageContext` identifying the targeted `Span`.
     ///   - attributes: `SpanAttributes` that further describe the link. Defaults to no attributes.
-    public init(context: BaggageContext, attributes: SpanAttributes = [:]) {
-        self.context = context
+    public init(context: BaggageContextCarrier, attributes: SpanAttributes = [:]) {
+        self.context = context.baggage
         self.attributes = attributes
     }
 }
