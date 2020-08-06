@@ -12,8 +12,8 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import Instrumentation
 import Foundation // string conversion for os_log seems to live here
+import Instrumentation
 
 #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
 import os.log
@@ -91,7 +91,7 @@ final class OSSignpostSpan: Span {
     public let startTimestamp: Timestamp
     public var endTimestamp: Timestamp?
 
-    public var status: SpanStatus? = nil
+    public var status: SpanStatus?
     public let kind: SpanKind = .internal
 
     public var baggage: BaggageContext {
@@ -147,7 +147,7 @@ final class OSSignpostSpan: Span {
                 signpostID: self.signpostID,
                 Self.beginFormat,
                 self.signpostID.rawValue,
-                "\(context.signpostTraceParentIDs.map({ "\($0.rawValue)" }).joined(separator: ","))",
+                "\(context.signpostTraceParentIDs.map { "\($0.rawValue)" }.joined(separator: ","))",
                 operationName
             )
         }
@@ -160,15 +160,14 @@ final class OSSignpostSpan: Span {
         defer { self.lock.lock() }
         if self.endTimestamp == nil {
             print("""
-                  warning: 
-                  Span \(self.signpostID) (\(self.operationName)) \
-                  [todo:source location] \
-                  was dropped without end() being called!
-                  """)
+            warning: 
+            Span \(self.signpostID) (\(self.operationName)) \
+            [todo:source location] \
+            was dropped without end() being called!
+            """)
         }
     }
     #endif
-
 
     public func addLink(_ link: SpanLink) {
         guard self.isRecording else { return }
@@ -203,7 +202,6 @@ final class OSSignpostSpan: Span {
         }
     }
 
-
     public func end(at timestamp: Timestamp) {
         guard self.isRecording else { return }
         self.lock.lock()
@@ -236,6 +234,7 @@ enum OSSignpostTracingKeys {
     enum TraceParentIDs: BaggageContextKey {
         typealias Value = [OSSignpostID]
     }
+
     enum SignpostID: BaggageContextKey {
         typealias Value = OSSignpostID
     }
@@ -254,6 +253,7 @@ extension BaggageContext {
             self[OSSignpostTracingKeys.TraceParentIDs.self] = newValue
         }
     }
+
     var signpostID: OSSignpostTracingKeys.SignpostID.Value? {
         get {
             self[OSSignpostTracingKeys.SignpostID.self]

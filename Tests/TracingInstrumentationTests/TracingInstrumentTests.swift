@@ -19,7 +19,7 @@ import XCTest
 
 final class TracingInstrumentTests: XCTestCase {
     func testPlayground() {
-        let httpServer = FakeHTTPServer(instrument: JaegerTracer()) { context, _, client -> FakeHTTPResponse in
+        let httpServer = FakeHTTPServer(instrument: TestTracer()) { context, _, client -> FakeHTTPResponse in
             context.logger.info("Make subsequent HTTP request")
             client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
@@ -29,38 +29,38 @@ final class TracingInstrumentTests: XCTestCase {
     }
 
     func testItProvidesAccessToATracingInstrument() {
-        let tracer = JaegerTracer()
+        let tracer = TestTracer()
 
-        XCTAssertNil(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self))
+        XCTAssertNil(InstrumentationSystem.tracingInstrument(of: TestTracer.self))
 
         InstrumentationSystem.bootstrapInternal(tracer)
         XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: JaegerTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
         XCTAssertNil(InstrumentationSystem.instrument(of: NoOpInstrument.self))
 
-        XCTAssert(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracingInstrument is JaegerTracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument(of: TestTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument is TestTracer)
 
         let multiplexInstrument = MultiplexInstrument([tracer])
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
         XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: JaegerTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
 
-        XCTAssert(InstrumentationSystem.tracingInstrument(of: JaegerTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracingInstrument is JaegerTracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument(of: TestTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem.tracingInstrument is TestTracer)
     }
 }
 
-// MARK: - JaegerTracer
+// MARK: - TestTracer
 
-final class JaegerTracer: TracingInstrument {
+final class TestTracer: TracingInstrument {
     func startSpan(
         named operationName: String,
         context: BaggageContext,
         ofKind kind: SpanKind,
         at timestamp: Timestamp?
     ) -> Span {
-        let span = OTelSpan(
+        let span = TestSpan(
             operationName: operationName,
             startTimestamp: timestamp ?? .now(),
             context: context,
@@ -100,7 +100,7 @@ final class JaegerTracer: TracingInstrument {
     }
 }
 
-extension JaegerTracer {
+extension TestTracer {
     struct TraceParent {
         let traceID: String
         let parentID: String
@@ -111,9 +111,9 @@ extension JaegerTracer {
     }
 }
 
-// MARK: - OTelSpan
+// MARK: - TestSpan
 
-struct OTelSpan: Span {
+struct TestSpan: Span {
     let operationName: String
     let kind: SpanKind
 
