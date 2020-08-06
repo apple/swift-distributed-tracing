@@ -11,9 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Instrumentation
 import Baggage
 import Dispatch
+import Instrumentation
 
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Setup
@@ -36,7 +36,7 @@ if #available(macOS 10.14, iOS 10.0, *) {
 let tracer = InstrumentationSystem.tracer
 let context = BaggageContext()
 
-for i in 1...5 {
+for i in 1 ... 5 {
     print("Starting operation: op-\(i)")
     var parentSpan = tracer.startSpan(named: "op-\(i)", context: context)
     defer { parentSpan.end() }
@@ -60,4 +60,3 @@ print("done.")
 print("Demo only available on macOS / Apple platforms.")
 
 #endif
-
