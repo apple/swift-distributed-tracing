@@ -168,6 +168,8 @@ struct TestSpan: Span {
         self.events.append(event)
     }
 
+    func recordError(_ error: Error) {}
+
     mutating func end(at timestamp: Timestamp) {
         self.endTimestamp = timestamp
         self.onEnd(self)
