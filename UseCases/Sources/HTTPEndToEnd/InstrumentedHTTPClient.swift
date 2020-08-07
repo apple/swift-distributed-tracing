@@ -15,6 +15,7 @@ import AsyncHTTPClient
 import Baggage
 import BaggageLogging
 import Instrumentation
+import Logging
 import NIO
 import NIOHTTP1
 import NIOInstrumentation
@@ -22,6 +23,7 @@ import NIOInstrumentation
 struct InstrumentedHTTPClient {
     private let client: HTTPClient
     private let instrument: Instrument
+    private let logger = Logger(label: "InstrumentedHTTPClient")
 
     init(instrument: Instrument, eventLoopGroupProvider: HTTPClient.EventLoopGroupProvider) {
         self.client = HTTPClient(eventLoopGroupProvider: eventLoopGroupProvider)
@@ -41,7 +43,7 @@ struct InstrumentedHTTPClient {
     func execute(request: HTTPClient.Request, context: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         var request = request
         self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
-        context.logger.info("🌎 InstrumentedHTTPClient: Execute request")
+        self.logger.with(context: context).info("🌎 InstrumentedHTTPClient: Execute request")
         return self.client.execute(request: request)
     }
 

@@ -20,7 +20,6 @@ import XCTest
 final class TracingInstrumentTests: XCTestCase {
     func testPlayground() {
         let httpServer = FakeHTTPServer(instrument: TestTracer()) { context, _, client -> FakeHTTPResponse in
-            context.logger.info("Make subsequent HTTP request")
             client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
         }
@@ -56,25 +55,20 @@ final class TracingInstrumentTests: XCTestCase {
 final class TestTracer: TracingInstrument {
     func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        context: BaggageContextCarrier,
         ofKind kind: SpanKind,
         at timestamp: Timestamp?
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
             startTimestamp: timestamp ?? .now(),
-            context: context,
+            context: context.baggage,
             kind: kind
-        ) { span in
-            span.context.logger.info(#"Emitting span "\#(span.operationName)" to backend"#)
-            span.context.logger.info("\(span.attributes)")
-        }
+        ) { _ in }
         return span
     }
 
-    func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
-    )
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {
@@ -88,9 +82,7 @@ final class TestTracer: TracingInstrument {
         context[TraceParentKey.self] = TraceParent(traceID: traceID, parentID: parentID)
     }
 
-    func inject<Carrier, Injector>(
-        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
-    )
+    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {
@@ -224,7 +216,6 @@ struct FakeHTTPServer {
         var span = tracer.startSpan(named: "GET \(request.path)", context: context)
 
         let response = self.catchAllHandler(span.context, request, self.client)
-        span.context.logger.info("Handled HTTP request with status: \(response.status)")
         span.attributes["http.status"] = .int(response.status)
 
         span.end()
@@ -243,6 +234,5 @@ struct FakeHTTPClient {
     func performRequest(_ context: BaggageContext, request: FakeHTTPRequest) {
         var request = request
         self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
-        context.logger.info("Performing outgoing HTTP request")
     }
 }
