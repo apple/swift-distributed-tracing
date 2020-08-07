@@ -13,6 +13,7 @@
 
 import AsyncHTTPClient
 import Baggage
+import BaggageLogging
 import Instrumentation
 import Logging
 import NIO
@@ -39,12 +40,10 @@ final class OrderServiceHandler: ChannelInboundHandler {
 
         self.instrument.extract(requestHead.headers, into: &baggage, using: HTTPHeadersExtractor())
 
-//        baggage.logger.info("🧾 Received order request")
-        self.logger.info("🧾 Received order request")
+        self.logger.with(context: baggage).info("🧾 Received order request")
 
         context.eventLoop.scheduleTask(in: .seconds(1)) {
-//            baggage.logger.info("🧾 Asking StorageService if your product exists")
-            self.logger.info("🧾 Asking StorageService if your product exists")
+            self.logger.with(context: baggage).info("🧾 Asking StorageService if your product exists")
 
             let request = try! HTTPClient.Request(url: "http://localhost:8081")
             self.httpClient.execute(request: request, context: baggage).whenComplete { _ in
