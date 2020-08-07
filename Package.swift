@@ -45,6 +45,7 @@ let package = Package(
             dependencies: [
                 "Instrumentation",
                 "TracingInstrumentation",
+                .product(name: "BaggageLogging", package: "swift-baggage-context"),
             ]
         ),
 
