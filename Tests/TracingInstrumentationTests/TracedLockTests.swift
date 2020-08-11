@@ -68,6 +68,8 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         )
     }
 
+    public func forceFlush() {}
+
     func inject<Carrier, Injector>(
         _ context: BaggageContext,
         into carrier: inout Carrier,
