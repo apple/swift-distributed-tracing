@@ -57,11 +57,11 @@ final class TestTracer: TracingInstrument {
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
-            startTimestamp: timestamp ?? .now(),
+            startTimestamp: timestamp,
             context: context.baggage,
             kind: kind
         ) { _ in }
