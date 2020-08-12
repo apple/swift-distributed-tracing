@@ -58,7 +58,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
         OSSignpostSpan(
             log: self.log,

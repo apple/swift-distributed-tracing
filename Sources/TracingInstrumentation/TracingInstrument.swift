@@ -22,12 +22,12 @@ public protocol TracingInstrument: Instrument {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The carrier of a `BaggageContext` within to start the new `Span`.
     ///   - kind: The `SpanKind` of the new `Span`.
-    ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Passing `nil` leaves the timestamp capture to the underlying tracing instrument.
+    ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span
 
     /// Export all ended spans to the configured backend that have not yet been exported.
@@ -46,12 +46,12 @@ extension TracingInstrument {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The carrier of a `BaggageContext` within to start the new `Span`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
-    ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Defaults to `nil`, meaning the timestamp capture is left up to the underlying tracing instrument.
+    ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Defaults to `.now()`.
     public func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,
         at timestamp: Timestamp? = nil
     ) -> Span {
-        self.startSpan(named: operationName, context: context, ofKind: .internal, at: nil)
+        self.startSpan(named: operationName, context: context, ofKind: .internal, at: .now())
     }
 }
