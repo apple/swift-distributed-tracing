@@ -20,7 +20,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
         NoOpSpan()
     }

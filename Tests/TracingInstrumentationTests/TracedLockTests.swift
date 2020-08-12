@@ -58,11 +58,11 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
         TracedLockPrintlnSpan(
             operationName: operationName,
-            startTimestamp: timestamp ?? .now(),
+            startTimestamp: timestamp,
             kind: kind,
             context: context.baggage
         )
