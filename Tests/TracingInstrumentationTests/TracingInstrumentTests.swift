@@ -68,6 +68,8 @@ final class TestTracer: TracingInstrument {
         return span
     }
 
+    public func forceFlush() {}
+
     func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
