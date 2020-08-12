@@ -69,6 +69,8 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
             // , timestamp ignored, we capture it automatically
         )
     }
+
+    public func forceFlush() {}
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
@@ -197,6 +199,8 @@ final class OSSignpostSpan: Span {
 
         // perhaps emit it as os_signpost(.event, ...)
     }
+
+    func recordError(_ error: Error) {}
 
     public var attributes: SpanAttributes {
         get {
