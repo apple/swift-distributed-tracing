@@ -50,8 +50,9 @@ extension TracingInstrument {
     public func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,
-        at timestamp: Timestamp? = nil
+        ofKind kind: SpanKind = .internal,
+        at timestamp: Timestamp = .now()
     ) -> Span {
-        self.startSpan(named: operationName, context: context, ofKind: .internal, at: .now())
+        self.startSpan(named: operationName, context: context, ofKind: kind, at: timestamp)
     }
 }
