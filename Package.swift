@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
@@ -10,11 +10,13 @@ let package = Package(
         .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"])
     ],
     dependencies: [
-        .package(
-            name: "swift-baggage-context",
-            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.2.0"
-        ),
+//        .package(
+//            name: "swift-baggage-context",
+//            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
+//            from: "0.2.0"
+//        ),
+        // .package(url: "https://github.com/slashmo/gsoc-swift-baggage-context.git", from: "0.2.0"),
+        .package(url: "file:///users/ktoso/code/gsoc-swift-baggage-context", .branch("main")),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0")
     ],
     targets: [
@@ -24,7 +26,7 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "Baggage", package: "swift-baggage-context"),
+                "Baggage",
             ]
         ),
         .testTarget(
@@ -45,15 +47,15 @@ let package = Package(
             dependencies: [
                 "Instrumentation",
                 "TracingInstrumentation",
-                .product(name: "BaggageLogging", package: "swift-baggage-context"),
+                "BaggageLogging",
             ]
         ),
 
         .target(
             name: "NIOInstrumentation",
             dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
+                "NIO",
+                "NIOHTTP1",
                 "Instrumentation",
             ]
         ),
@@ -83,7 +85,7 @@ let package = Package(
         .target(
             name: "Benchmarks",
             dependencies: [
-                .product(name: "Baggage", package: "swift-baggage-context"),
+                "Baggage",
                 "SwiftBenchmarkTools",
             ]
         ),
