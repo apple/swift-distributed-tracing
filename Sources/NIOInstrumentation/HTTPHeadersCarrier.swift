@@ -18,7 +18,7 @@ public struct HTTPHeadersExtractor: ExtractorProtocol {
     public init() {}
 
     public func extract(key: String, from headers: HTTPHeaders) -> String? {
-        headers.first(name: key)
+        return headers.first(name: key)
     }
 }
 

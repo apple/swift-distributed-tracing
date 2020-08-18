@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
@@ -11,9 +11,8 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            name: "swift-baggage-context",
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.2.0"
+            from: "0.3.0"
         ),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0")
     ],
@@ -24,7 +23,7 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "Baggage", package: "swift-baggage-context"),
+                "Baggage",
             ]
         ),
         .testTarget(
@@ -37,7 +36,7 @@ let package = Package(
         .target(
             name: "TracingInstrumentation",
             dependencies: [
-                "Instrumentation"
+                "Instrumentation",
             ]
         ),
         .testTarget(
@@ -45,15 +44,15 @@ let package = Package(
             dependencies: [
                 "Instrumentation",
                 "TracingInstrumentation",
-                .product(name: "BaggageLogging", package: "swift-baggage-context"),
+                "BaggageLogging",
             ]
         ),
 
         .target(
             name: "NIOInstrumentation",
             dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOHTTP1", package: "swift-nio"),
+                "NIO",
+                "NIOHTTP1",
                 "Instrumentation",
             ]
         ),
@@ -73,7 +72,7 @@ let package = Package(
         .testTarget(
             name: "OpenTelemetryInstrumentationSupportTests",
             dependencies: [
-                "OpenTelemetryInstrumentationSupport"
+                "OpenTelemetryInstrumentationSupport",
             ]
         ),
 
@@ -81,14 +80,14 @@ let package = Package(
         // MARK: Performance / Benchmarks
 
         .target(
-            name: "Benchmarks",
+            name: "TracingBenchmarks",
             dependencies: [
-                .product(name: "Baggage", package: "swift-baggage-context"),
-                "SwiftBenchmarkTools",
+                "Baggage",
+                "TracingBenchmarkTools",
             ]
         ),
         .target(
-            name: "SwiftBenchmarkTools",
+            name: "TracingBenchmarkTools",
             dependencies: []
         ),
     ]

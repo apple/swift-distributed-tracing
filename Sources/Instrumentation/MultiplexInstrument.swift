@@ -29,7 +29,7 @@ public struct MultiplexInstrument {
 
 extension MultiplexInstrument {
     func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        self.instruments.first(where: predicate)
+        return self.instruments.first(where: predicate)
     }
 }
 

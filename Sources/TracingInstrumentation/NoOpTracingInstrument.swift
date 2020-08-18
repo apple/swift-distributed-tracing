@@ -22,7 +22,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
-        NoOpSpan()
+        return NoOpSpan()
     }
 
     public func forceFlush() {}
@@ -51,13 +51,13 @@ public struct NoOpTracingInstrument: TracingInstrument {
         public let kind: SpanKind = .internal
 
         public var startTimestamp: Timestamp {
-            .now()
+            return .now()
         }
 
         public var endTimestamp: Timestamp?
 
         public var context: BaggageContext {
-            .init()
+            return .init()
         }
 
         public mutating func addLink(_ link: SpanLink) {}
@@ -68,7 +68,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
 
         public var attributes: SpanAttributes {
             get {
-                [:]
+                return [:]
             }
             set {
                 // ignore

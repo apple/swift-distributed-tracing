@@ -11,6 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if swift(>=5.2)
 import TracingInstrumentation
 
 extension SpanAttributes {
@@ -41,3 +42,4 @@ public struct PeerAttributes: SpanAttributeNamespace {
         public var service: SpanAttributeKey<String> { "peer.service" }
     }
 }
+#endif

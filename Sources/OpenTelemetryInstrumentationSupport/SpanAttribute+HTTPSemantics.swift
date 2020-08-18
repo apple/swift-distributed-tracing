@@ -11,6 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if swift(>=5.2)
 import TracingInstrumentation
 
 extension SpanAttributes {
@@ -98,3 +99,4 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         public var serverClientIP: SpanAttributeKey<String> { "http.client_ip" }
     }
 }
+#endif

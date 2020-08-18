@@ -60,7 +60,7 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
-        TracedLockPrintlnSpan(
+        return TracedLockPrintlnSpan(
             operationName: operationName,
             startTimestamp: timestamp,
             kind: kind,

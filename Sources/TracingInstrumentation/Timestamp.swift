@@ -25,17 +25,17 @@ public struct Timestamp: Comparable, CustomStringConvertible {
 
     /// Microseconds since Epoch
     public var microsSinceEpoch: Int64 {
-        Int64(bitPattern: self.time.rawValue) / -1000
+        return Int64(bitPattern: self.time.rawValue) / -1000
     }
 
     /// Milliseconds since Epoch
     public var millisSinceEpoch: Int64 {
-        Int64(bitPattern: self.time.rawValue) / -1_000_000
+        return Int64(bitPattern: self.time.rawValue) / -1_000_000
     }
 
     /// Returns the current time.
     public static func now() -> Timestamp {
-        self.init(time: .now())
+        return self.init(time: .now())
     }
 
     /// A time in the distant future.
@@ -53,14 +53,14 @@ public struct Timestamp: Comparable, CustomStringConvertible {
     }
 
     public var description: String {
-        "Timestamp(\(self.time.rawValue))"
+        return "Timestamp(\(self.time.rawValue))"
     }
 
     public static func < (lhs: Timestamp, rhs: Timestamp) -> Bool {
-        lhs.time < rhs.time
+        return lhs.time < rhs.time
     }
 
     public static func == (lhs: Timestamp, rhs: Timestamp) -> Bool {
-        lhs.time == rhs.time
+        return lhs.time == rhs.time
     }
 }
