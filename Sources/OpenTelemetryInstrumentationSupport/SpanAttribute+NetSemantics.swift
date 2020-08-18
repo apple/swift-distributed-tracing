@@ -11,6 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if swift(>=5.2)
 import TracingInstrumentation
 
 extension SpanAttributes {
@@ -59,3 +60,4 @@ public struct NetAttributes: SpanAttributeNamespace {
         public var hostName: SpanAttributeKey<String> { "net.host.name" }
     }
 }
+#endif

@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import SwiftBenchmarkTools
+import TracingBenchmarkTools
 
 public let ExampleBenchmarks: [BenchmarkInfo] = [
     BenchmarkInfo(

@@ -53,6 +53,6 @@ extension TracingInstrument {
         ofKind kind: SpanKind = .internal,
         at timestamp: Timestamp = .now()
     ) -> Span {
-        self.startSpan(named: operationName, context: context, ofKind: kind, at: timestamp)
+        return self.startSpan(named: operationName, context: context, ofKind: kind, at: timestamp)
     }
 }

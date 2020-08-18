@@ -31,7 +31,7 @@ final class FakeTracer: Instrument {
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier {
         guard let traceID = context[TraceIDKey.self] else { return }
-        injector.inject(traceID, forKey: Self.headerName, into: &carrier)
+        injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extractor>(
@@ -40,7 +40,7 @@ final class FakeTracer: Instrument {
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {
-        let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
+        let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
 }

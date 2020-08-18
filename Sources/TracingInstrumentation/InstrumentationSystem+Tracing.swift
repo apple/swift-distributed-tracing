@@ -25,7 +25,7 @@ extension InstrumentationSystem {
     /// - Parameter instrumentType: The type of `Instrument` you want to retrieve an instance for.
     /// - Returns: An `Instrument` instance of the given type or `nil` if no `Instrument` of that type has been bootstrapped.
     public static func tracingInstrument<T>(of instrumentType: T.Type) -> T? where T: TracingInstrument {
-        self._findInstrument(where: { $0 is T }) as? T
+        return self._findInstrument(where: { $0 is T }) as? T
     }
 
     /// Returns the `TracingInstrument` bootstrapped as part of the `InstrumentationSystem`.
@@ -35,6 +35,6 @@ extension InstrumentationSystem {
     ///
     /// - Returns: A `TracingInstrument` if the system was bootstrapped with one, and `NoOpTracingInstrument` otherwise.
     public static var tracingInstrument: TracingInstrument {
-        (self._findInstrument(where: { $0 is TracingInstrument }) as? TracingInstrument) ?? NoOpTracingInstrument()
+        return (self._findInstrument(where: { $0 is TracingInstrument }) as? TracingInstrument) ?? NoOpTracingInstrument()
     }
 }
