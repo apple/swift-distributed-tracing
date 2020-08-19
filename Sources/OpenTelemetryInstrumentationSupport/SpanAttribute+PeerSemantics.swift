@@ -11,9 +11,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.2)
 import TracingInstrumentation
 
+extension SpanAttributeName {
+    public static let peerService = "peer.service"
+}
+
+#if swift(>=5.2)
 extension SpanAttributes {
     /// General semantic attributes.
     public var peer: PeerAttributes {
@@ -39,7 +43,7 @@ public struct PeerAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// The service.name of the remote service. SHOULD be equal to the actual service.name resource attribute of the remote service if any.
-        public var service: SpanAttributeKey<String> { "peer.service" }
+        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.peerService) }
     }
 }
 #endif
