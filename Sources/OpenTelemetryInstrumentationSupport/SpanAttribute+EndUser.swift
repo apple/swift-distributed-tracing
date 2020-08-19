@@ -14,8 +14,11 @@
 import TracingInstrumentation
 
 extension SpanAttributeName {
+    /// - See: EndUserAttributes
     public static let endUserID = "enduser.id"
+    /// - See: EndUserAttributes
     public static let endUserRole = "enduser.role"
+    /// - See: EndUserAttributes
     public static let endUserScope = "enduser.scope"
 }
 

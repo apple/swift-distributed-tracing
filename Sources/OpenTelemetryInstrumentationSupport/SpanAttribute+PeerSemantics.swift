@@ -14,6 +14,7 @@
 import TracingInstrumentation
 
 extension SpanAttributeName {
+    /// - See: PeerAttributes
     public static let peerService = "peer.service"
 }
 
