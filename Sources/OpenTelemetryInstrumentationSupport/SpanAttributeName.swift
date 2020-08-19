@@ -13,5 +13,5 @@
 
 import TracingInstrumentation
 
-/// A set of `String` constants describing semantic names for `SpanAttributes`.
+/// Namespace for attribute key constants used with `SpanAttributes`.
 public enum SpanAttributeName {}
