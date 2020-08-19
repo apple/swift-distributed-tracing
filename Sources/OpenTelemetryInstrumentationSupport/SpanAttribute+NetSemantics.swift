@@ -37,6 +37,8 @@ extension SpanAttributes {
 }
 
 /// Network-related semantic conventions as defined in the OpenTelemetry spec.
+///
+/// - SeeAlso: [OpenTelemetry: General semantic attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/span-general.md) (as of August 2020)
 @dynamicMemberLookup
 public struct NetAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
