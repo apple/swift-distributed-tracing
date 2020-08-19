@@ -31,6 +31,8 @@ extension SpanAttributes {
 }
 
 /// Peer-related semantic conventions as defined in the OpenTelemetry spec.
+///
+/// - SeeAlso: [OpenTelemetry: General remote service attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/span-general.md#general-remote-service-attributes) (as of August 2020)
 @dynamicMemberLookup
 public struct PeerAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes

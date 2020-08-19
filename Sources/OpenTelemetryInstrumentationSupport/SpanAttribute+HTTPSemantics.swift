@@ -46,6 +46,8 @@ extension SpanAttributes {
 }
 
 /// Semantic conventions for HTTP spans as defined in the OpenTelemetry spec.
+///
+/// - SeeAlso: [OpenTelemetry: Semantic conventions for HTTP spans](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/http.md) (as of August 2020)
 @dynamicMemberLookup
 public struct HTTPAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
