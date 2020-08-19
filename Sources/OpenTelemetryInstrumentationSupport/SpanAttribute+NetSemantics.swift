@@ -11,9 +11,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.2)
 import TracingInstrumentation
 
+extension SpanAttributeName {
+    /// - See: NetAttributes
+    public static let netTransport = "net.transport"
+    /// - See: NetAttributes
+    public static let netPeerIP = "net.peer.ip"
+    /// - See: NetAttributes
+    public static let netPeerPort = "net.peer.port"
+    /// - See: NetAttributes
+    public static let netPeerName = "net.peer.name"
+    /// - See: NetAttributes
+    public static let netHostIP = "net.host.ip"
+    /// - See: NetAttributes
+    public static let netHostPort = "net.host.port"
+    /// - See: NetAttributes
+    public static let netHostName = "net.host.name"
+}
+
+#if swift(>=5.2)
 extension SpanAttributes {
     /// Semantic network attributes.
     public var net: NetAttributes {
@@ -27,6 +44,8 @@ extension SpanAttributes {
 }
 
 /// Network-related semantic conventions as defined in the OpenTelemetry spec.
+///
+/// - SeeAlso: [OpenTelemetry: General semantic attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/span-general.md) (as of August 2020)
 @dynamicMemberLookup
 public struct NetAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
@@ -39,25 +58,25 @@ public struct NetAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// Transport protocol used.
-        public var transport: SpanAttributeKey<String> { "net.transport" }
+        public var transport: SpanAttributeKey<String> { .init(name: SpanAttributeName.netTransport) }
 
         /// Remote address of the peer (dotted decimal for IPv4 or RFC5952 for IPv6).
-        public var peerIP: SpanAttributeKey<String> { "net.peer.ip" }
+        public var peerIP: SpanAttributeKey<String> { .init(name: SpanAttributeName.netPeerIP) }
 
         /// Remote port number as an integer. E.g., 80.
-        public var peerPort: SpanAttributeKey<Int> { "net.peer.port" }
+        public var peerPort: SpanAttributeKey<Int> { .init(name: SpanAttributeName.netPeerPort) }
 
         /// Remote hostname or similar.
-        public var peerName: SpanAttributeKey<String> { "net.peer.name" }
+        public var peerName: SpanAttributeKey<String> { .init(name: SpanAttributeName.netPeerName) }
 
         /// Like `peerIP` but for the host IP. Useful in case of a multi-IP host.
-        public var hostIP: SpanAttributeKey<String> { "net.host.ip" }
+        public var hostIP: SpanAttributeKey<String> { .init(name: SpanAttributeName.netHostIP) }
 
         /// Like `peerPort` but for the host port.
-        public var hostPort: SpanAttributeKey<Int> { "net.host.port" }
+        public var hostPort: SpanAttributeKey<Int> { .init(name: SpanAttributeName.netHostPort) }
 
         /// Local hostname or similar.
-        public var hostName: SpanAttributeKey<String> { "net.host.name" }
+        public var hostName: SpanAttributeKey<String> { .init(name: SpanAttributeName.netHostName) }
     }
 }
 #endif
