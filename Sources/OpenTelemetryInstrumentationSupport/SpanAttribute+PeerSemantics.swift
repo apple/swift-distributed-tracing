@@ -11,9 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.2)
 import TracingInstrumentation
 
+extension SpanAttributeName {
+    /// - See: PeerAttributes
+    public static let peerService = "peer.service"
+}
+
+#if swift(>=5.2)
 extension SpanAttributes {
     /// General semantic attributes.
     public var peer: PeerAttributes {
@@ -27,6 +32,8 @@ extension SpanAttributes {
 }
 
 /// Peer-related semantic conventions as defined in the OpenTelemetry spec.
+///
+/// - SeeAlso: [OpenTelemetry: General remote service attributes](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/span-general.md#general-remote-service-attributes) (as of August 2020)
 @dynamicMemberLookup
 public struct PeerAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
@@ -39,7 +46,7 @@ public struct PeerAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// The service.name of the remote service. SHOULD be equal to the actual service.name resource attribute of the remote service if any.
-        public var service: SpanAttributeKey<String> { "peer.service" }
+        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.peerService) }
     }
 }
 #endif
