@@ -14,12 +14,19 @@
 import TracingInstrumentation
 
 extension SpanAttributeName {
+    /// - See: NetAttributes
     public static let netTransport = "net.transport"
+    /// - See: NetAttributes
     public static let netPeerIP = "net.peer.ip"
+    /// - See: NetAttributes
     public static let netPeerPort = "net.peer.port"
+    /// - See: NetAttributes
     public static let netPeerName = "net.peer.name"
+    /// - See: NetAttributes
     public static let netHostIP = "net.host.ip"
+    /// - See: NetAttributes
     public static let netHostPort = "net.host.port"
+    /// - See: NetAttributes
     public static let netHostName = "net.host.name"
 }
 

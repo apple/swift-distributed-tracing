@@ -14,21 +14,37 @@
 import TracingInstrumentation
 
 extension SpanAttributeName {
+    /// - See: HTTPAttributes
     public static let httpMethod = "http.method"
+    /// - See: HTTPAttributes
     public static let httpURL = "http.url"
+    /// - See: HTTPAttributes
     public static let httpTarget = "http.target"
+    /// - See: HTTPAttributes
     public static let httpHost = "http.host"
+    /// - See: HTTPAttributes
     public static let httpScheme = "http.scheme"
+    /// - See: HTTPAttributes
     public static let httpStatusCode = "http.status_code"
+    /// - See: HTTPAttributes
     public static let httpStatusText = "http.status_text"
+    /// - See: HTTPAttributes
     public static let httpFlavor = "http.flavor"
+    /// - See: HTTPAttributes
     public static let httpUserAgent = "http.user_agent"
+    /// - See: HTTPAttributes
     public static let httpRequestContentLength = "http.request_content_length"
+    /// - See: HTTPAttributes
     public static let httpRequestContentLengthUncompressed = "http.request_content_length_uncompressed"
+    /// - See: HTTPAttributes
     public static let httpResponseContentLength = "http.response_content_length"
+    /// - See: HTTPAttributes
     public static let httpResponseContentLengthUncompressed = "http.response_content_length_uncompressed"
+    /// - See: HTTPAttributes
     public static let httpServerName = "http.server_name"
+    /// - See: HTTPAttributes
     public static let httpServerRoute = "http.route"
+    /// - See: HTTPAttributes
     public static let httpServerClientIP = "http.client_ip"
 }
 
