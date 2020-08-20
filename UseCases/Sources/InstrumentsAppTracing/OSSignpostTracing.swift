@@ -81,7 +81,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
 final class OSSignpostSpan: Span {
-    let operationName: String
+    private let operationName: String
     var context: BaggageContext
 
     private let log: OSLog
@@ -95,11 +95,8 @@ final class OSSignpostSpan: Span {
 
     public let isRecording: Bool
 
-    public let startTimestamp: Timestamp
-    public var endTimestamp: Timestamp?
-
-    public var status: SpanStatus?
-    public let kind: SpanKind = .internal
+    private let startTimestamp: Timestamp
+    private var endTimestamp: Timestamp?
 
     public var baggage: BaggageContext {
         self.context
@@ -194,6 +191,8 @@ final class OSSignpostSpan: Span {
         self.context.signpostTraceParentIDs += [id]
     }
 
+    func setStatus(_ status: SpanStatus) {}
+    
     public func addEvent(_ event: SpanEvent) {
         guard self.isRecording else { return }
 

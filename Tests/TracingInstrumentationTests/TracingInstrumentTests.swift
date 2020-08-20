@@ -108,16 +108,12 @@ extension TestTracer {
 // MARK: - TestSpan
 
 struct TestSpan: Span {
-    let operationName: String
-    let kind: SpanKind
+    private let operationName: String
+    private let kind: SpanKind
 
-    var status: SpanStatus? {
-        didSet {
-            self.isRecording = self.status != nil
-        }
-    }
+    private var status: SpanStatus?
 
-    let startTimestamp: Timestamp
+    private let startTimestamp: Timestamp
     private(set) var endTimestamp: Timestamp?
 
     let context: BaggageContext
@@ -152,6 +148,11 @@ struct TestSpan: Span {
         self.context = context
         self.onEnd = onEnd
         self.kind = kind
+    }
+
+    mutating func setStatus(_ status: SpanStatus) {
+        self.status = status
+        self.isRecording = true
     }
 
     mutating func addLink(_ link: SpanLink) {
