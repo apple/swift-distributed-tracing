@@ -15,11 +15,14 @@ import TracingInstrumentation
 
 extension SpanAttributeName {
     /// - See: RPCAttributes
-    public static let rpcSystem = "rpc.system"
-    /// - See: RPCAttributes
-    public static let rpcService = "rpc.service"
-    /// - See: RPCAttributes
-    public static let rpcMethod = "rpc.method"
+    public enum RPC {
+        /// - See: RPCAttributes
+        public static let system = "rpc.system"
+        /// - See: RPCAttributes
+        public static let service = "rpc.service"
+        /// - See: RPCAttributes
+        public static let method = "rpc.method"
+    }
 }
 
 #if swift(>=5.2)
@@ -50,13 +53,13 @@ public struct RPCAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// A string identifying the remoting system, e.g., "grpc", "java_rmi" or "wcf".
-        public var system: SpanAttributeKey<String> { .init(name: SpanAttributeName.rpcSystem) }
+        public var system: SpanAttributeKey<String> { .init(name: SpanAttributeName.RPC.system) }
 
         /// The full name of the service being called, including its package name, if applicable.
-        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.rpcService) }
+        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.RPC.service) }
 
         /// The name of the method being called, must be equal to the $method part in the span name.
-        public var method: SpanAttributeKey<String> { .init(name: SpanAttributeName.rpcMethod) }
+        public var method: SpanAttributeKey<String> { .init(name: SpanAttributeName.RPC.method) }
     }
 }
 #endif
