@@ -19,24 +19,13 @@ import Baggage
 ///
 /// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
 public protocol Span {
-    /// The operation name is a human-readable string which concisely identifies the work represented by the `Span`.
-    var operationName: String { get }
-
-    /// The kind of this span.
-    var kind: SpanKind { get }
-
-    /// The status of this span.
-    var status: SpanStatus? { get set }
-
-    /// The `Timestamp` of when the `Span` was started.
-    var startTimestamp: Timestamp { get }
-
-    /// The `Timestamp` of when the `Span` has ended.
-    var endTimestamp: Timestamp? { get }
-
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
     var context: BaggageContext { get }
 
+    /// Set the status.
+    /// - Parameter status: The status of this `Span`.
+    mutating func setStatus(_ status: SpanStatus)
+    
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
     mutating func addEvent(_ event: SpanEvent)

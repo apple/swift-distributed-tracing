@@ -46,19 +46,11 @@ public struct NoOpTracingInstrument: TracingInstrument {
         Carrier == Extractor.Carrier {}
 
     public struct NoOpSpan: Span {
-        public var operationName: String = ""
-        public var status: SpanStatus?
-        public let kind: SpanKind = .internal
-
-        public var startTimestamp: Timestamp {
-            return .now()
-        }
-
-        public var endTimestamp: Timestamp?
-
         public var context: BaggageContext {
             return .init()
         }
+
+        public mutating func setStatus(_ status: SpanStatus) {}
 
         public mutating func addLink(_ link: SpanLink) {}
 

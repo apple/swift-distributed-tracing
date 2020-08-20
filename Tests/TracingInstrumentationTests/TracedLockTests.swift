@@ -89,16 +89,12 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         Carrier == Extractor.Carrier {}
 
     struct TracedLockPrintlnSpan: Span {
-        let operationName: String
-        let kind: SpanKind
+        private let operationName: String
+        private let kind: SpanKind
 
-        var status: SpanStatus? {
-            didSet {
-                self.isRecording = self.status != nil
-            }
-        }
+        private var status: SpanStatus?
 
-        let startTimestamp: Timestamp
+        private let startTimestamp: Timestamp
         private(set) var endTimestamp: Timestamp?
 
         let context: BaggageContext
@@ -131,6 +127,11 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             self.kind = kind
 
             print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
+        }
+
+        mutating func setStatus(_ status: SpanStatus) {
+            self.status = status
+            self.isRecording = true
         }
 
         mutating func addLink(_ link: SpanLink) {
