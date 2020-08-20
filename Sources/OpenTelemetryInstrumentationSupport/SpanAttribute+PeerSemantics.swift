@@ -15,7 +15,10 @@ import TracingInstrumentation
 
 extension SpanAttributeName {
     /// - See: PeerAttributes
-    public static let peerService = "peer.service"
+    public enum Peer {
+        /// - See: PeerAttributes
+        public static let service = "peer.service"
+    }
 }
 
 #if swift(>=5.2)
@@ -46,7 +49,7 @@ public struct PeerAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// The service.name of the remote service. SHOULD be equal to the actual service.name resource attribute of the remote service if any.
-        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.peerService) }
+        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.Peer.service) }
     }
 }
 #endif
