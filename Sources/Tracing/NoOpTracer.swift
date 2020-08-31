@@ -14,16 +14,18 @@
 import Baggage
 import Instrumentation
 
-/// No operation TracingInstrument, used when no tracing is required.
-public struct NoOpTracingInstrument: TracingInstrument {
+/// No operation Tracer, used when no tracing is required.
+public struct NoOpTracer: Tracer {
     public func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
-        NoOpSpan()
+        return NoOpSpan()
     }
+
+    public func forceFlush() {}
 
     public func inject<Carrier, Injector>(
         _ context: BaggageContext,
@@ -43,30 +45,22 @@ public struct NoOpTracingInstrument: TracingInstrument {
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
 
-    public struct NoOpSpan: Span {
-        public var operationName: String = ""
-        public var status: SpanStatus?
-        public let kind: SpanKind = .internal
-
-        public var startTimestamp: Timestamp {
-            .now()
-        }
-
-        public var endTimestamp: Timestamp?
-
+    public final class NoOpSpan: Span {
         public var context: BaggageContext {
-            .init()
+            return .init()
         }
 
-        public mutating func addLink(_ link: SpanLink) {}
+        public func setStatus(_ status: SpanStatus) {}
 
-        public mutating func addEvent(_ event: SpanEvent) {}
+        public func addLink(_ link: SpanLink) {}
+
+        public func addEvent(_ event: SpanEvent) {}
 
         public func recordError(_ error: Error) {}
 
         public var attributes: SpanAttributes {
             get {
-                [:]
+                return [:]
             }
             set {
                 // ignore
@@ -75,7 +69,7 @@ public struct NoOpTracingInstrument: TracingInstrument {
 
         public let isRecording = false
 
-        public mutating func end(at timestamp: Timestamp) {
+        public func end(at timestamp: Timestamp) {
             // ignore
         }
     }

@@ -14,7 +14,7 @@
 import Baggage
 import BaggageLogging
 @testable import Instrumentation
-import TracingInstrumentation
+import Tracing
 import XCTest
 
 final class TracedLockTests: XCTestCase {
@@ -53,20 +53,22 @@ enum TaskIDKey: BaggageContextKey {
 // ==== ------------------------------------------------------------------------
 // MARK: PrintLn Tracer
 
-private final class TracedLockPrintlnTracer: TracingInstrument {
+private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
-        TracedLockPrintlnSpan(
+        return TracedLockPrintlnSpan(
             operationName: operationName,
-            startTimestamp: timestamp ?? .now(),
+            startTimestamp: timestamp,
             kind: kind,
             context: context.baggage
         )
     }
+
+    public func forceFlush() {}
 
     func inject<Carrier, Injector>(
         _ context: BaggageContext,
@@ -86,17 +88,13 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
 
-    struct TracedLockPrintlnSpan: Span {
-        let operationName: String
-        let kind: SpanKind
+    final class TracedLockPrintlnSpan: Span {
+        private let operationName: String
+        private let kind: SpanKind
 
-        var status: SpanStatus? {
-            didSet {
-                self.isRecording = self.status != nil
-            }
-        }
+        private var status: SpanStatus?
 
-        let startTimestamp: Timestamp
+        private let startTimestamp: Timestamp
         private(set) var endTimestamp: Timestamp?
 
         let context: BaggageContext
@@ -131,17 +129,22 @@ private final class TracedLockPrintlnTracer: TracingInstrument {
             print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
         }
 
-        mutating func addLink(_ link: SpanLink) {
+        func setStatus(_ status: SpanStatus) {
+            self.status = status
+            self.isRecording = true
+        }
+
+        func addLink(_ link: SpanLink) {
             self.links.append(link)
         }
 
-        mutating func addEvent(_ event: SpanEvent) {
+        func addEvent(_ event: SpanEvent) {
             self.events.append(event)
         }
 
         func recordError(_ error: Error) {}
 
-        mutating func end(at timestamp: Timestamp) {
+        func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
             print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
         }

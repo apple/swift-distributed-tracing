@@ -4,22 +4,29 @@ on: [push, pull_request]
 
 jobs:
   unit-test:
+    strategy:
+      matrix:
+        # GitHub Actions replaces 5.0 with 5 so we have to be specific here
+        swift: [5.0.3, 5.1, 5.2]
     runs-on: ubuntu-latest
-    container: swift:5.2
+    container: swift:${{ matrix.swift }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Resolve Swift dependencies
         run: swift package resolve
       - name: Build & Test
-        run: swift test -c release --enable-test-discovery
+        run: swift test
   compile-usecases:
+    strategy:
+      matrix:
+        # GitHub Actions replaces 5.0 with 5 so we have to be specific here
+        swift: [5.0.3, 5.1, 5.2]
     runs-on: ubuntu-latest
-    container: swift:5.2
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Resolve Swift dependencies
-        run: cd UseCases && swift package resolve
+      - name: Build Docker Image
+        run: docker build -t swift-tracing:${{ matrix.swift }} -f dev/Dockerfile-${{ matrix.swift }} .
       - name: Compile UseCases
-        run: cd UseCases && swift build
+        run: docker run -v $(pwd):/app --rm -w /app/UseCases --name baggage-context swift-tracing:${{ matrix.swift }} swift build

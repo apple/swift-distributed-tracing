@@ -12,20 +12,13 @@
 //===----------------------------------------------------------------------===//
 
 import Instrumentation
-import NIOHTTP1
+import Tracing
+import XCTest
 
-public struct HTTPHeadersExtractor: ExtractorProtocol {
-    public init() {}
-
-    public func extract(key: String, from headers: HTTPHeaders) -> String? {
-        return headers.first(name: key)
-    }
-}
-
-public struct HTTPHeadersInjector: InjectorProtocol {
-    public init() {}
-
-    public func inject(_ value: String, forKey key: String, into headers: inout HTTPHeaders) {
-        headers.replaceOrAdd(name: key, value: value)
+final class TimestampTests: XCTestCase {
+    func test_timestamp_now() {
+        let timestamp = Timestamp.now()
+        XCTAssertGreaterThan(timestamp.microsSinceEpoch, 1_595_592_205_693_986)
+        XCTAssertGreaterThan(timestamp.millisSinceEpoch, 1_595_592_205_693)
     }
 }

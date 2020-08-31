@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
@@ -10,38 +10,37 @@ let package = Package(
         .executable(name: "InstrumentsAppTracing", targets: ["InstrumentsAppTracing"]),
     ],
     dependencies: [
-        .package(name: "gsoc-swift-tracing", path: "../"),
+        .package(path: "../"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.1.1"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.9.0"),
         .package(
-            name: "swift-baggage-context",
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.2.0"
+            from: "0.3.0"
         ),
     ],
     targets: [
         .target(name: "ManualContextPropagation", dependencies: [
-            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "Baggage", package: "swift-baggage-context"),
+            "Instrumentation",
+            "Baggage",
         ]),
         .target(name: "ManualAsyncHTTPClient", dependencies: [
-            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "AsyncHTTPClient", package: "async-http-client"),
-            .product(name: "NIO", package: "swift-nio"),
-            .product(name: "Baggage", package: "swift-baggage-context"),
+            "Instrumentation",
+            "NIOInstrumentation",
+            "AsyncHTTPClient",
+            "NIO",
+            "Baggage",
         ]),
         .target(name: "HTTPEndToEnd", dependencies: [
-            .product(name: "TracingInstrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "NIOInstrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "AsyncHTTPClient", package: "async-http-client"),
-            .product(name: "NIO", package: "swift-nio"),
-            .product(name: "Baggage", package: "swift-baggage-context"),
-            .product(name: "BaggageLogging", package: "swift-baggage-context"),
+            "Tracing",
+            "NIOInstrumentation",
+            "AsyncHTTPClient",
+            "NIO",
+            "Baggage",
+            "BaggageLogging",
         ]),
         .target(name: "InstrumentsAppTracing", dependencies: [
-            .product(name: "Instrumentation", package: "gsoc-swift-tracing"),
-            .product(name: "TracingInstrumentation", package: "gsoc-swift-tracing"),
+            "Instrumentation",
+            "Tracing",
         ]),
     ]
 )
