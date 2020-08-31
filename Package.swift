@@ -7,14 +7,14 @@ let package = Package(
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"]),
-        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"])
+        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"]),
     ],
     dependencies: [
         .package(
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
             from: "0.3.0"
         ),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0")
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------

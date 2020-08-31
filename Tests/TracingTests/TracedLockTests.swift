@@ -88,7 +88,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
 
-    struct TracedLockPrintlnSpan: Span {
+    final class TracedLockPrintlnSpan: Span {
         private let operationName: String
         private let kind: SpanKind
 
@@ -129,22 +129,22 @@ private final class TracedLockPrintlnTracer: Tracer {
             print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
         }
 
-        mutating func setStatus(_ status: SpanStatus) {
+        func setStatus(_ status: SpanStatus) {
             self.status = status
             self.isRecording = true
         }
 
-        mutating func addLink(_ link: SpanLink) {
+        func addLink(_ link: SpanLink) {
             self.links.append(link)
         }
 
-        mutating func addEvent(_ event: SpanEvent) {
+        func addEvent(_ event: SpanEvent) {
             self.events.append(event)
         }
 
         func recordError(_ error: Error) {}
 
-        mutating func end(at timestamp: Timestamp) {
+        func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
             print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
         }

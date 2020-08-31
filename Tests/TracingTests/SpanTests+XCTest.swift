@@ -25,7 +25,6 @@ extension SpanTests {
    @available(*, deprecated, message: "not actually deprecated. Just deprecated to allow deprecated tests (which test deprecated functionality) without warnings")
    static var allTests : [(String, (SpanTests) -> () throws -> Void)] {
       return [
-                ("testAddingEventCreatesCopy", testAddingEventCreatesCopy),
                 ("testSpanEventIsExpressibleByStringLiteral", testSpanEventIsExpressibleByStringLiteral),
                 ("testSpanAttributeIsExpressibleByStringLiteral", testSpanAttributeIsExpressibleByStringLiteral),
                 ("testSpanAttributeIsExpressibleByStringInterpolation", testSpanAttributeIsExpressibleByStringInterpolation),
