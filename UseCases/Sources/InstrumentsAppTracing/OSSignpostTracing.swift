@@ -14,7 +14,7 @@
 import Baggage
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
 import os.log

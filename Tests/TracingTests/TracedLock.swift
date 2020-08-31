@@ -14,7 +14,7 @@
 import Baggage
 import Foundation
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 final class TracedLock {
     let name: String
