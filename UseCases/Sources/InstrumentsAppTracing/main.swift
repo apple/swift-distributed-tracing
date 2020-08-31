@@ -14,7 +14,7 @@
 import Baggage
 import Dispatch
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Setup

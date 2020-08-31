@@ -5,7 +5,7 @@ let package = Package(
     name: "gsoc-swift-tracing",
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
-        .library(name: "TracingInstrumentation", targets: ["TracingInstrumentation"]),
+        .library(name: "Tracing", targets: ["Tracing"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"]),
         .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"])
     ],
@@ -34,16 +34,16 @@ let package = Package(
         ),
 
         .target(
-            name: "TracingInstrumentation",
+            name: "Tracing",
             dependencies: [
                 "Instrumentation",
             ]
         ),
         .testTarget(
-            name: "TracingInstrumentationTests",
+            name: "TracingTests",
             dependencies: [
                 "Instrumentation",
-                "TracingInstrumentation",
+                "Tracing",
                 "BaggageLogging",
             ]
         ),
@@ -66,7 +66,7 @@ let package = Package(
         .target(
             name: "OpenTelemetryInstrumentationSupport",
             dependencies: [
-                .target(name: "TracingInstrumentation")
+                .target(name: "Tracing")
             ]
         ),
         .testTarget(
