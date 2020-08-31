@@ -89,7 +89,8 @@ private final class FakeTracer: Instrument {
     func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
@@ -97,7 +98,8 @@ private final class FakeTracer: Instrument {
     func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Carrier == Extractor.Carrier
+    {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }

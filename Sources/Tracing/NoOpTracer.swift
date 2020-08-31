@@ -14,8 +14,8 @@
 import Baggage
 import Instrumentation
 
-/// No operation TracingInstrument, used when no tracing is required.
-public struct NoOpTracingInstrument: TracingInstrument {
+/// No operation Tracer, used when no tracing is required.
+public struct NoOpTracer: Tracer {
     public func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,

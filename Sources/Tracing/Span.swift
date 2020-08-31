@@ -15,7 +15,7 @@ import Baggage
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
-/// where `tracer` conforms to `TracingInstrument`.
+/// where `tracer` conforms to `Tracer`.
 ///
 /// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
 public protocol Span {
@@ -25,7 +25,7 @@ public protocol Span {
     /// Set the status.
     /// - Parameter status: The status of this `Span`.
     mutating func setStatus(_ status: SpanStatus)
-    
+
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
     mutating func addEvent(_ event: SpanEvent)
@@ -162,7 +162,8 @@ extension SpanAttributeNamespace {
     }
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
 }
@@ -364,7 +365,8 @@ extension SpanAttributes {
     ///
     // TODO: document the pattern maybe on SpanAttributes?
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
 }
