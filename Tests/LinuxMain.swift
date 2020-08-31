@@ -24,7 +24,7 @@ import XCTest
    @testable import InstrumentationTests
    @testable import NIOInstrumentationTests
    @testable import OpenTelemetryInstrumentationSupportTests
-   @testable import TracingInstrumentationTests
+   @testable import TracingTests
 
 // This protocol is necessary to we can call the 'run' method (on an existential of this protocol)
 // without the compiler noticing that we're calling a deprecated function.
@@ -43,7 +43,7 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
              testCase(SpanTests.allTests),
              testCase(TimestampTests.allTests),
              testCase(TracedLockTests.allTests),
-             testCase(TracingInstrumentTests.allTests),
+             testCase(TracerTests.allTests),
         ])
     }
 }

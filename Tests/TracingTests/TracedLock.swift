@@ -14,7 +14,7 @@
 import Baggage
 import Foundation
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 final class TracedLock {
     let name: String
@@ -30,7 +30,7 @@ final class TracedLock {
     func lock(context: BaggageContext) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.tracingInstrument.startSpan(named: self.name, context: context)
+        self.activeSpan = InstrumentationSystem.tracer.startSpan(named: self.name, context: context)
     }
 
     func unlock(context: BaggageContext) {

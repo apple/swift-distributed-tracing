@@ -14,7 +14,7 @@
 import Baggage
 import Instrumentation
 import OpenTelemetryInstrumentationSupport
-import TracingInstrumentation
+import Tracing
 import XCTest
 
 final class SpanAttributeSemanticsTests: XCTestCase {

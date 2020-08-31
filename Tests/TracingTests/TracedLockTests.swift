@@ -14,7 +14,7 @@
 import Baggage
 import BaggageLogging
 @testable import Instrumentation
-import TracingInstrumentation
+import Tracing
 import XCTest
 
 final class TracedLockTests: XCTestCase {
@@ -53,7 +53,7 @@ enum TaskIDKey: BaggageContextKey {
 // ==== ------------------------------------------------------------------------
 // MARK: PrintLn Tracer
 
-private final class TracedLockPrintlnTracer: TracingInstrument {
+private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
         named operationName: String,
         context: BaggageContextCarrier,

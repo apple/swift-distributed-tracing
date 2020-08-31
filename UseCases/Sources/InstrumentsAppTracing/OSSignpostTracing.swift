@@ -14,7 +14,7 @@
 import Baggage
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
 import os.log
@@ -27,7 +27,7 @@ import os.signpost
 @available(iOS 10.0, *)
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
-public struct OSSignpostTracingInstrument: TracingInstrument {
+public struct OSSignpostTracingInstrument: Tracer {
     let log: OSLog
     let signpostName: StaticString
 
@@ -192,7 +192,7 @@ final class OSSignpostSpan: Span {
     }
 
     func setStatus(_ status: SpanStatus) {}
-    
+
     public func addEvent(_ event: SpanEvent) {
         guard self.isRecording else { return }
 

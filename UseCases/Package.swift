@@ -31,7 +31,7 @@ let package = Package(
             "Baggage",
         ]),
         .target(name: "HTTPEndToEnd", dependencies: [
-            "TracingInstrumentation",
+            "Tracing",
             "NIOInstrumentation",
             "AsyncHTTPClient",
             "NIO",
@@ -40,7 +40,7 @@ let package = Package(
         ]),
         .target(name: "InstrumentsAppTracing", dependencies: [
             "Instrumentation",
-            "TracingInstrumentation",
+            "Tracing",
         ]),
     ]
 )
