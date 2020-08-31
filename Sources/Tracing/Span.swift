@@ -15,37 +15,26 @@ import Baggage
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
-/// where `tracer` conforms to `TracingInstrument`.
+/// where `tracer` conforms to `Tracer`.
 ///
 /// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
-public protocol Span {
-    /// The operation name is a human-readable string which concisely identifies the work represented by the `Span`.
-    var operationName: String { get }
-
-    /// The kind of this span.
-    var kind: SpanKind { get }
-
-    /// The status of this span.
-    var status: SpanStatus? { get set }
-
-    /// The `Timestamp` of when the `Span` was started.
-    var startTimestamp: Timestamp { get }
-
-    /// The `Timestamp` of when the `Span` has ended.
-    var endTimestamp: Timestamp? { get }
-
+public protocol Span: AnyObject {
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
     var context: BaggageContext { get }
 
+    /// Set the status.
+    /// - Parameter status: The status of this `Span`.
+    func setStatus(_ status: SpanStatus)
+
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
-    mutating func addEvent(_ event: SpanEvent)
+    func addEvent(_ event: SpanEvent)
 
     /// Record an error of the given type described by the the given message.
     ///
     /// - Parameters:
     ///   - error: The error to be recorded.
-    mutating func recordError(_ error: Error)
+    func recordError(_ error: Error)
 
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes { get set }
@@ -55,33 +44,24 @@ public protocol Span {
 
     /// Add a `SpanLink` in place.
     /// - Parameter link: The `SpanLink` to add to this `Span`.
-    mutating func addLink(_ link: SpanLink)
+    func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
     /// - Parameter timestamp: The `Timestamp` at which the span ended.
-    mutating func end(at timestamp: Timestamp)
+    func end(at timestamp: Timestamp)
 }
 
 extension Span {
-    /// Create a copy of this `Span` with the given event added to the existing set of events.
-    /// - Parameter event: The new `SpanEvent` to be added to the returned copy.
-    /// - Returns: A copy of this `Span` with the given event added to the existing set of events.
-    public func addingEvent(_ event: SpanEvent) -> Self {
-        var copy = self
-        copy.addEvent(event)
-        return copy
-    }
-
     /// End this `Span` at the current timestamp.
-    public mutating func end() {
+    public func end() {
         self.end(at: .now())
     }
 
-    /// Adds a `SpanLink` to the given parent `Span`.
-    /// - Parameter parent: The parent `Span`.
+    /// Adds a `SpanLink` between this `Span` and the given `Span`.
+    /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The `SpanAttributes` describing this link. Defaults to no attributes.
-    public mutating func addLink(_ parent: Span, attributes: SpanAttributes = [:]) {
-        self.addLink(SpanLink(context: parent.context, attributes: attributes))
+    public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
+        self.addLink(SpanLink(context: other.context, attributes: attributes))
     }
 }
 
@@ -132,6 +112,7 @@ public struct SpanAttributeKey<T>: Hashable, ExpressibleByStringLiteral where T:
     }
 }
 
+#if swift(>=5.2)
 @dynamicMemberLookup
 public protocol SpanAttributeNamespace {
     /// Type that contains the nested attributes, e.g. HTTPAttributes which would contain `statusCode` and similar vars.
@@ -172,10 +153,12 @@ extension SpanAttributeNamespace {
     }
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
 }
+#endif
 
 /// The value of an attribute used to describe a `Span` or `SpanEvent`.
 public enum SpanAttribute: Equatable {
@@ -226,8 +209,9 @@ public enum SpanAttribute: Equatable {
              (.double, _),
              (.bool, _),
              (.array, _),
-             (.stringConvertible, _),
-             (.__namespace, _):
+             (.stringConvertible, _):
+            return false
+        case (.__namespace, _):
             return false
         }
     }
@@ -239,31 +223,31 @@ public protocol SpanAttributeConvertible {
 
 extension String: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .string(self)
+        return .string(self)
     }
 }
 
 extension Int: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .int(self)
+        return .int(self)
     }
 }
 
 extension Double: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .double(self)
+        return .double(self)
     }
 }
 
 extension Bool: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .bool(self)
+        return .bool(self)
     }
 }
 
 extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .array(self.map { $0.toSpanAttribute() })
+        return .array(self.map { $0.toSpanAttribute() })
     }
 }
 
@@ -274,7 +258,7 @@ extension SpanAttribute: ExpressibleByStringLiteral {
 }
 
 extension SpanAttribute: ExpressibleByStringInterpolation {
-    public init(stringInterpolation value: Self.StringInterpolation) {
+    public init(stringInterpolation value: SpanAttribute.StringInterpolation) {
         self = .string("\(value)")
     }
 }
@@ -303,11 +287,19 @@ extension SpanAttribute: ExpressibleByArrayLiteral {
     }
 }
 
+#if swift(>=5.2)
 /// A collection of `SpanAttribute`s.
 @dynamicMemberLookup
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
+}
+#else
+public struct SpanAttributes: Equatable {
+    private var _attributes = [String: SpanAttribute]()
+}
+#endif
 
+extension SpanAttributes {
     /// Create a set of attributes by wrapping the given dictionary.
     /// - Parameter attributes: The attributes dictionary to wrap.
     public init(_ attributes: [String: SpanAttribute]) {
@@ -320,11 +312,11 @@ public struct SpanAttributes: Equatable {
     /// - Returns: The `SpanAttribute` identified by the given name, or `nil` if it's not present.
     public subscript(_ name: String) -> SpanAttribute? {
         get {
-            self._attributes[name]
+            return self._attributes[name]
         }
         set {
             switch newValue {
-            case .__namespace:
+            case .some(.__namespace):
                 fatalError("__namespace magic value MUST NOT be stored as an attribute. Attempted to store under [\(name)] key.")
             default:
                 self._attributes[name] = newValue
@@ -332,6 +324,20 @@ public struct SpanAttributes: Equatable {
         }
     }
 
+    /// Calls the given callback for each attribute stored in this collection.
+    /// - Parameter callback: The function to call for each attribute.
+    public func forEach(_ callback: (String, SpanAttribute) -> Void) {
+        self._attributes.forEach { callback($0.key, $0.1) }
+    }
+
+    /// Returns true if the collection contains no attributes.
+    public var isEmpty: Bool {
+        return self._attributes.isEmpty
+    }
+}
+
+#if swift(>=5.2)
+extension SpanAttributes {
     /// Enables for type-safe fluent accessors for attributes.
     ///
     // TODO: document the pattern maybe on SpanAttributes?
@@ -350,21 +356,12 @@ public struct SpanAttributes: Equatable {
     ///
     // TODO: document the pattern maybe on SpanAttributes?
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
-
-    /// Calls the given callback for each attribute stored in this collection.
-    /// - Parameter callback: The function to call for each attribute.
-    public func forEach(_ callback: (String, SpanAttribute) -> Void) {
-        self._attributes.forEach { callback($0.key, $0.1) }
-    }
-
-    /// Returns true if the collection contains no attributes.
-    public var isEmpty: Bool {
-        self._attributes.isEmpty
-    }
 }
+#endif
 
 extension SpanAttributes: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (String, SpanAttribute)...) {

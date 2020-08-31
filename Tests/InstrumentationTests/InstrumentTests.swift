@@ -47,7 +47,7 @@ private struct DictionaryInjector: InjectorProtocol {
 
 private struct DictionaryExtractor: ExtractorProtocol {
     func extract(key: String, from dictionary: [String: String]) -> String? {
-        dictionary[key]
+        return dictionary[key]
     }
 }
 
@@ -66,9 +66,10 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         guard let traceID = context[TraceIDKey.self] else { return }
-        injector.inject(traceID, forKey: Self.headerName, into: &carrier)
+        injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extractor>(
@@ -76,8 +77,9 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
-        let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
+        Carrier == Extractor.Carrier
+    {
+        let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
 }
@@ -97,9 +99,10 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         guard let traceID = context[TraceIDKey.self] else { return }
-        injector.inject(traceID, forKey: Self.headerName, into: &carrier)
+        injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extractor>(
@@ -107,8 +110,9 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
-        let traceID = extractor.extract(key: Self.headerName, from: carrier) ?? Self.defaultTraceID
+        Carrier == Extractor.Carrier
+    {
+        let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
 }

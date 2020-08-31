@@ -14,11 +14,12 @@
 import Baggage
 import Instrumentation
 import OpenTelemetryInstrumentationSupport
-import TracingInstrumentation
+import Tracing
 import XCTest
 
 final class SpanAttributeSemanticsTests: XCTestCase {
     func testDynamicMemberLookup() {
+        #if swift(>=5.2)
         var attributes: SpanAttributes = [:]
 
         attributes.http.method = "GET"
@@ -32,5 +33,6 @@ final class SpanAttributeSemanticsTests: XCTestCase {
 
         attributes.endUser.id = "steve"
         XCTAssertEqual(attributes.endUser.id, "steve")
+        #endif
     }
 }

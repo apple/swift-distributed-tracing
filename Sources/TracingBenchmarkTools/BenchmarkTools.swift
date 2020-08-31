@@ -25,13 +25,13 @@ import Darwin
 
 extension BenchmarkCategory: CustomStringConvertible {
     public var description: String {
-        self.rawValue
+        return self.rawValue
     }
 }
 
 extension BenchmarkCategory: Comparable {
     public static func < (lhs: BenchmarkCategory, rhs: BenchmarkCategory) -> Bool {
-        lhs.rawValue < rhs.rawValue
+        return lhs.rawValue < rhs.rawValue
     }
 }
 
@@ -54,7 +54,7 @@ public struct BenchmarkPlatformSet: OptionSet {
     }
 
     public static var allPlatforms: BenchmarkPlatformSet {
-        [.darwin, .linux]
+        return [.darwin, .linux]
     }
 }
 
@@ -124,17 +124,17 @@ public struct BenchmarkInfo {
 
     /// Returns true if this benchmark should be run on the current platform.
     var shouldRun: Bool {
-        !self.unsupportedPlatforms.contains(.currentPlatform)
+        return !self.unsupportedPlatforms.contains(.currentPlatform)
     }
 }
 
 extension BenchmarkInfo: Comparable {
     public static func < (lhs: BenchmarkInfo, rhs: BenchmarkInfo) -> Bool {
-        lhs.name < rhs.name
+        return lhs.name < rhs.name
     }
 
     public static func == (lhs: BenchmarkInfo, rhs: BenchmarkInfo) -> Bool {
-        lhs.name == rhs.name
+        return lhs.name == rhs.name
     }
 }
 
@@ -175,7 +175,7 @@ public func SRand() {
 }
 
 public func Random() -> Int64 {
-    lfsrRandomGenerator.randInt()
+    return lfsrRandomGenerator.randInt()
 }
 
 @inlinable // FIXME(inline-always)
@@ -192,16 +192,16 @@ public func CheckResults(
     }
 }
 
-public func False() -> Bool { false }
+public func False() -> Bool { return false }
 
 /// This is a dummy protocol to test the speed of our protocol dispatch.
 public protocol SomeProtocol { func getValue() -> Int }
 struct MyStruct: SomeProtocol {
     init() {}
-    func getValue() -> Int { 1 }
+    func getValue() -> Int { return 1 }
 }
 
-public func someProtocolFactory() -> SomeProtocol { MyStruct() }
+public func someProtocolFactory() -> SomeProtocol { return MyStruct() }
 
 // Just consume the argument.
 // It's important that this function is in another module than the tests
@@ -212,19 +212,19 @@ public func blackHole<T>(_: T) {}
 // Return the passed argument without letting the optimizer know that.
 @inline(never)
 public func identity<T>(_ x: T) -> T {
-    x
+    return x
 }
 
 // Return the passed argument without letting the optimizer know that.
 // It's important that this function is in another module than the tests
 // which are using it.
 @inline(never)
-public func getInt(_ x: Int) -> Int { x }
+public func getInt(_ x: Int) -> Int { return x }
 
 // The same for String.
 @inline(never)
-public func getString(_ s: String) -> String { s }
+public func getString(_ s: String) -> String { return s }
 
 // The same for Substring.
 @inline(never)
-public func getSubstring(_ s: Substring) -> Substring { s }
+public func getSubstring(_ s: Substring) -> Substring { return s }

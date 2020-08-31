@@ -11,14 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Instrumentation
-import TracingInstrumentation
-import XCTest
+import Tracing
 
-final class TimestampTests: XCTestCase {
-    func test_timestamp_now() {
-        let timestamp = Timestamp.now()
-        XCTAssertGreaterThan(timestamp.microsSinceEpoch, 1_595_592_205_693_986)
-        XCTAssertGreaterThan(timestamp.millisSinceEpoch, 1_595_592_205_693)
-    }
-}
+/// Namespace for attribute key constants used with `SpanAttributes`.
+public enum SpanAttributeName {}

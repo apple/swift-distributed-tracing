@@ -1,8 +1,10 @@
 # file options
 
---swiftversion 5.2
+--swiftversion 5.0
 --exclude .build
 --exclude UseCases/.build
+--exclude Tests/LinuxMain.swift
+--exclude **/*Tests+XCTest.swift
 
 # format options
 

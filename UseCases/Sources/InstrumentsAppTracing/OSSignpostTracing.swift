@@ -14,7 +14,7 @@
 import Baggage
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 #if os(macOS) || os(tvOS) || os(iOS) || os(watchOS)
 import os.log
@@ -27,7 +27,7 @@ import os.signpost
 @available(iOS 10.0, *)
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
-public struct OSSignpostTracingInstrument: TracingInstrument {
+public struct OSSignpostTracingInstrument: Tracer {
     let log: OSLog
     let signpostName: StaticString
 
@@ -58,7 +58,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
         named operationName: String,
         context: BaggageContextCarrier,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp?
+        at timestamp: Timestamp
     ) -> Span {
         OSSignpostSpan(
             log: self.log,
@@ -69,6 +69,8 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
             // , timestamp ignored, we capture it automatically
         )
     }
+
+    public func forceFlush() {}
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
@@ -79,7 +81,7 @@ public struct OSSignpostTracingInstrument: TracingInstrument {
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
 final class OSSignpostSpan: Span {
-    let operationName: String
+    private let operationName: String
     var context: BaggageContext
 
     private let log: OSLog
@@ -93,11 +95,8 @@ final class OSSignpostSpan: Span {
 
     public let isRecording: Bool
 
-    public let startTimestamp: Timestamp
-    public var endTimestamp: Timestamp?
-
-    public var status: SpanStatus?
-    public let kind: SpanKind = .internal
+    private let startTimestamp: Timestamp
+    private var endTimestamp: Timestamp?
 
     public var baggage: BaggageContext {
         self.context
@@ -192,11 +191,15 @@ final class OSSignpostSpan: Span {
         self.context.signpostTraceParentIDs += [id]
     }
 
+    func setStatus(_ status: SpanStatus) {}
+
     public func addEvent(_ event: SpanEvent) {
         guard self.isRecording else { return }
 
         // perhaps emit it as os_signpost(.event, ...)
     }
+
+    func recordError(_ error: Error) {}
 
     public var attributes: SpanAttributes {
         get {

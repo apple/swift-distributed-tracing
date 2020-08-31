@@ -5,19 +5,16 @@ let package = Package(
     name: "gsoc-swift-tracing",
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
-        .library(name: "TracingInstrumentation", targets: ["TracingInstrumentation"]),
+        .library(name: "Tracing", targets: ["Tracing"]),
         .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"]),
-        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"])
+        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"]),
     ],
     dependencies: [
-//        .package(
-//            name: "swift-baggage-context",
-//            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-//            from: "0.2.0"
-//        ),
-        // .package(url: "https://github.com/slashmo/gsoc-swift-baggage-context.git", from: "0.2.0"),
-        .package(url: "file:///users/ktoso/code/gsoc-swift-baggage-context", .branch("main")),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0")
+        .package(
+            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
+            from: "0.3.0"
+        ),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -37,16 +34,16 @@ let package = Package(
         ),
 
         .target(
-            name: "TracingInstrumentation",
+            name: "Tracing",
             dependencies: [
-                "Instrumentation"
+                "Instrumentation",
             ]
         ),
         .testTarget(
-            name: "TracingInstrumentationTests",
+            name: "TracingTests",
             dependencies: [
                 "Instrumentation",
-                "TracingInstrumentation",
+                "Tracing",
                 "BaggageLogging",
             ]
         ),
@@ -69,13 +66,13 @@ let package = Package(
         .target(
             name: "OpenTelemetryInstrumentationSupport",
             dependencies: [
-                .target(name: "TracingInstrumentation")
+                .target(name: "Tracing")
             ]
         ),
         .testTarget(
             name: "OpenTelemetryInstrumentationSupportTests",
             dependencies: [
-                "OpenTelemetryInstrumentationSupport"
+                "OpenTelemetryInstrumentationSupport",
             ]
         ),
 
@@ -83,14 +80,14 @@ let package = Package(
         // MARK: Performance / Benchmarks
 
         .target(
-            name: "Benchmarks",
+            name: "TracingBenchmarks",
             dependencies: [
                 "Baggage",
-                "SwiftBenchmarkTools",
+                "TracingBenchmarkTools",
             ]
         ),
         .target(
-            name: "SwiftBenchmarkTools",
+            name: "TracingBenchmarkTools",
             dependencies: []
         ),
     ]

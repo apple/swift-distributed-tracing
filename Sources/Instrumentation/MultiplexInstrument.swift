@@ -29,7 +29,7 @@ public struct MultiplexInstrument {
 
 extension MultiplexInstrument {
     func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        self.instruments.first(where: predicate)
+        return self.instruments.first(where: predicate)
     }
 }
 
@@ -39,7 +39,8 @@ extension MultiplexInstrument: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         self.instruments.forEach { $0.inject(context, into: &carrier, using: injector) }
     }
 
@@ -48,7 +49,8 @@ extension MultiplexInstrument: Instrument {
     )
         where
         Carrier == Extractor.Carrier,
-        Extractor: ExtractorProtocol {
+        Extractor: ExtractorProtocol
+    {
         self.instruments.forEach { $0.extract(carrier, into: &context, using: extractor) }
     }
 }
