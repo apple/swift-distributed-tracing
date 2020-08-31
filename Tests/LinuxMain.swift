@@ -43,7 +43,7 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
              testCase(SpanTests.allTests),
              testCase(TimestampTests.allTests),
              testCase(TracedLockTests.allTests),
-             testCase(TracingInstrumentTests.allTests),
+             testCase(TracerTests.allTests),
         ])
     }
 }

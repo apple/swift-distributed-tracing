@@ -66,7 +66,8 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
@@ -76,7 +77,8 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Carrier == Extractor.Carrier
+    {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
@@ -97,7 +99,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Carrier == Injector.Carrier
+    {
         guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
@@ -107,7 +110,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Carrier == Extractor.Carrier
+    {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }

@@ -16,7 +16,7 @@ import Instrumentation
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
-public protocol TracingInstrument: Instrument {
+public protocol Tracer: Instrument {
     /// Start a new `Span` within the given `BaggageContext` at a given timestamp.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
@@ -39,7 +39,7 @@ public protocol TracingInstrument: Instrument {
     func forceFlush()
 }
 
-extension TracingInstrument {
+extension Tracer {
     /// Start a new `Span` within the given `BaggageContext`. This passes `nil` as the timestamp to the tracer, which
     /// usually means it should default to the current timestamp.
     /// - Parameters:
