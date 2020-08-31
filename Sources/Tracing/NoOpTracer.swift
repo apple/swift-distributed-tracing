@@ -45,16 +45,16 @@ public struct NoOpTracer: Tracer {
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier {}
 
-    public struct NoOpSpan: Span {
+    public final class NoOpSpan: Span {
         public var context: BaggageContext {
             return .init()
         }
 
-        public mutating func setStatus(_ status: SpanStatus) {}
+        public func setStatus(_ status: SpanStatus) {}
 
-        public mutating func addLink(_ link: SpanLink) {}
+        public func addLink(_ link: SpanLink) {}
 
-        public mutating func addEvent(_ event: SpanEvent) {}
+        public func addEvent(_ event: SpanEvent) {}
 
         public func recordError(_ error: Error) {}
 
@@ -69,7 +69,7 @@ public struct NoOpTracer: Tracer {
 
         public let isRecording = false
 
-        public mutating func end(at timestamp: Timestamp) {
+        public func end(at timestamp: Timestamp) {
             // ignore
         }
     }
