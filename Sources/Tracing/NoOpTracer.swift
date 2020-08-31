@@ -22,7 +22,7 @@ public struct NoOpTracer: Tracer {
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
-        return NoOpSpan()
+        return NoOpSpan(context: context.baggage)
     }
 
     public func forceFlush() {}
@@ -46,8 +46,11 @@ public struct NoOpTracer: Tracer {
         Carrier == Extractor.Carrier {}
 
     public final class NoOpSpan: Span {
-        public var context: BaggageContext {
-            return .init()
+        public let context: BaggageContext
+        public let isRecording = false
+
+        public init(context: BaggageContext) {
+            self.context = context
         }
 
         public func setStatus(_ status: SpanStatus) {}
@@ -66,8 +69,6 @@ public struct NoOpTracer: Tracer {
                 // ignore
             }
         }
-
-        public let isRecording = false
 
         public func end(at timestamp: Timestamp) {
             // ignore

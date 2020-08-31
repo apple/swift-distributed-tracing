@@ -55,9 +55,9 @@ public enum InstrumentationSystem {
     }
 
     // for our testing we want to allow multiple bootstrapping
-    internal static func bootstrapInternal(_ instrument: Instrument) {
+    internal static func bootstrapInternal(_ instrument: Instrument?) {
         self.lock.withWriterLock {
-            self._instrument = instrument
+            self._instrument = instrument ?? NoOpInstrument()
         }
     }
 
