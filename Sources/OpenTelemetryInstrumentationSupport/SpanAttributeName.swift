@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import TracingInstrumentation
+import Tracing
 
 /// Namespace for attribute key constants used with `SpanAttributes`.
 public enum SpanAttributeName {}

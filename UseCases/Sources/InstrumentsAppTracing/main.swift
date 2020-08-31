@@ -14,7 +14,7 @@
 import Baggage
 import Dispatch
 import Instrumentation
-import TracingInstrumentation
+import Tracing
 
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Setup
@@ -34,7 +34,7 @@ if #available(macOS 10.14, iOS 10.0, *) {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Manual usage
 
-let tracer = InstrumentationSystem.tracingInstrument
+let tracer = InstrumentationSystem.tracer
 let context = BaggageContext()
 
 for i in 1 ... 5 {

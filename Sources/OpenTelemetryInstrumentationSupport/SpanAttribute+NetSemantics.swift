@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import TracingInstrumentation
+import Tracing
 
 extension SpanAttributeName {
     /// - See: NetAttributes
