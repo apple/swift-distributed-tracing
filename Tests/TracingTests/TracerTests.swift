@@ -109,7 +109,7 @@ extension TestTracer {
 
 // MARK: - TestSpan
 
-struct TestSpan: Span {
+final class TestSpan: Span {
     private let operationName: String
     private let kind: SpanKind
 
@@ -152,22 +152,22 @@ struct TestSpan: Span {
         self.kind = kind
     }
 
-    mutating func setStatus(_ status: SpanStatus) {
+    func setStatus(_ status: SpanStatus) {
         self.status = status
         self.isRecording = true
     }
 
-    mutating func addLink(_ link: SpanLink) {
+    func addLink(_ link: SpanLink) {
         self.links.append(link)
     }
 
-    mutating func addEvent(_ event: SpanEvent) {
+    func addEvent(_ event: SpanEvent) {
         self.events.append(event)
     }
 
     func recordError(_ error: Error) {}
 
-    mutating func end(at timestamp: Timestamp) {
+    func end(at timestamp: Timestamp) {
         self.endTimestamp = timestamp
         self.onEnd(self)
     }
@@ -218,7 +218,7 @@ struct FakeHTTPServer {
         var context = BaggageContext()
         self.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
 
-        var span = tracer.startSpan(named: "GET \(request.path)", context: context)
+        let span = tracer.startSpan(named: "GET \(request.path)", context: context)
 
         let response = self.catchAllHandler(span.context, request, self.client)
         span.attributes["http.status"] = .int(response.status)
