@@ -18,6 +18,11 @@ import Tracing
 import XCTest
 
 final class TracedLockTests: XCTestCase {
+    override class func tearDown() {
+        super.tearDown()
+        InstrumentationSystem.bootstrapInternal(nil)
+    }
+
     func test_tracesLockedTime() {
         let tracer = TracedLockPrintlnTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
