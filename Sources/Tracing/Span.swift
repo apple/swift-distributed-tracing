@@ -18,23 +18,23 @@ import Baggage
 /// where `tracer` conforms to `Tracer`.
 ///
 /// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
-public protocol Span {
+public protocol Span: AnyObject {
     /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
     var context: BaggageContext { get }
 
     /// Set the status.
     /// - Parameter status: The status of this `Span`.
-    mutating func setStatus(_ status: SpanStatus)
+    func setStatus(_ status: SpanStatus)
 
     /// Add a `SpanEvent` in place.
     /// - Parameter event: The `SpanEvent` to add to this `Span`.
-    mutating func addEvent(_ event: SpanEvent)
+    func addEvent(_ event: SpanEvent)
 
     /// Record an error of the given type described by the the given message.
     ///
     /// - Parameters:
     ///   - error: The error to be recorded.
-    mutating func recordError(_ error: Error)
+    func recordError(_ error: Error)
 
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes { get set }
@@ -44,32 +44,23 @@ public protocol Span {
 
     /// Add a `SpanLink` in place.
     /// - Parameter link: The `SpanLink` to add to this `Span`.
-    mutating func addLink(_ link: SpanLink)
+    func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
     /// - Parameter timestamp: The `Timestamp` at which the span ended.
-    mutating func end(at timestamp: Timestamp)
+    func end(at timestamp: Timestamp)
 }
 
 extension Span {
-    /// Create a copy of this `Span` with the given event added to the existing set of events.
-    /// - Parameter event: The new `SpanEvent` to be added to the returned copy.
-    /// - Returns: A copy of this `Span` with the given event added to the existing set of events.
-    public func addingEvent(_ event: SpanEvent) -> Self {
-        var copy = self
-        copy.addEvent(event)
-        return copy
-    }
-
     /// End this `Span` at the current timestamp.
-    public mutating func end() {
+    public func end() {
         self.end(at: .now())
     }
 
     /// Adds a `SpanLink` between this `Span` and the given `Span`.
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The `SpanAttributes` describing this link. Defaults to no attributes.
-    public mutating func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
+    public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(context: other.context, attributes: attributes))
     }
 }

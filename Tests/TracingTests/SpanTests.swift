@@ -17,22 +17,6 @@ import Tracing
 import XCTest
 
 final class SpanTests: XCTestCase {
-    func testAddingEventCreatesCopy() {
-        let span = TestSpan(
-            operationName: "test",
-            startTimestamp: .now(),
-            context: BaggageContext(),
-            kind: .internal,
-            onEnd: { _ in }
-        )
-        XCTAssert(span.events.isEmpty)
-
-        let copiedSpan = span.addingEvent("test-event")
-        XCTAssertEqual(copiedSpan.events[0].name, "test-event")
-
-        XCTAssert(span.events.isEmpty)
-    }
-
     func testSpanEventIsExpressibleByStringLiteral() {
         let event: SpanEvent = "test"
 
@@ -172,7 +156,7 @@ final class SpanTests: XCTestCase {
             onEnd: { _ in }
         )
         let childContext = BaggageContext()
-        var child = TestSpan(
+        let child = TestSpan(
             operationName: "server",
             startTimestamp: .now(),
             context: childContext,
