@@ -44,6 +44,7 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
              testCase(TimestampTests.allTests),
              testCase(TracedLockTests.allTests),
              testCase(TracerTests.allTests),
+             testCase(TracingInstrumentationSystemTests.allTests),
         ])
     }
 }

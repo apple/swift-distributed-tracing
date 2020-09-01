@@ -16,6 +16,11 @@ import Baggage
 import XCTest
 
 final class InstrumentationSystemTests: XCTestCase {
+    override class func tearDown() {
+        super.tearDown()
+        InstrumentationSystem.bootstrapInternal(nil)
+    }
+
     func testItProvidesAccessToASingletonInstrument() {
         let tracer = FakeTracer()
         let instrument = FakeInstrument()
