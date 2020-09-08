@@ -37,6 +37,7 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
        XCTMain([
              testCase(BaggageContextInboundHTTPHandlerTests.allTests),
              testCase(BaggageContextOutboundHTTPHandlerTests.allTests),
+             testCase(HTTPHeadersCarrierTests.allTests),
              testCase(InstrumentTests.allTests),
              testCase(InstrumentationSystemTests.allTests),
              testCase(SpanAttributeSemanticsTests.allTests),
