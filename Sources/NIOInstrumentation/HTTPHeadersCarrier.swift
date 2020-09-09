@@ -14,6 +14,11 @@
 import Instrumentation
 import NIOHTTP1
 
+/// Extracts header values from `NIOHTTP1.HTTPHeaders`.
+///
+/// If multiple entries exist for a given key, their values will be joined according to
+/// [HTTP RFC 7230: Field Order](https://httpwg.org/specs/rfc7230.html#rfc.section.3.2.2), returning a comma-separated list
+/// of the values.
 public struct HTTPHeadersExtractor: ExtractorProtocol {
     public init() {}
 
@@ -26,6 +31,7 @@ public struct HTTPHeadersExtractor: ExtractorProtocol {
     }
 }
 
+/// Injects values into `NIOHTTP1.HTTPHeaders`.
 public struct HTTPHeadersInjector: InjectorProtocol {
     public init() {}
 
