@@ -26,6 +26,7 @@ extension HTTPHeadersCarrierTests {
    static var allTests : [(String, (HTTPHeadersCarrierTests) -> () throws -> Void)] {
       return [
                 ("testExtractSingleHeader", testExtractSingleHeader),
+                ("testExtractNoHeader", testExtractNoHeader),
                 ("testExtractMultipleHeadersOfSameName", testExtractMultipleHeadersOfSameName),
            ]
    }
