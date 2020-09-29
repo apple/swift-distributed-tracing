@@ -35,6 +35,18 @@ final class HTTPHeadersCarrierTests: XCTestCase {
         )
     }
 
+    func testExtractNoHeader() {
+        let extractor = HTTPHeadersExtractor()
+
+        XCTAssertNil(extractor.extract(key: "test", from: .init()))
+    }
+
+    func testExtractEmptyHeader() {
+        let extractor = HTTPHeadersExtractor()
+
+        XCTAssertEqual(extractor.extract(key: "test", from: ["test": ""]), "")
+    }
+
     func testExtractMultipleHeadersOfSameName() {
         let headers: HTTPHeaders = [
             "tracestate": "vendorname1=opaqueValue1",
