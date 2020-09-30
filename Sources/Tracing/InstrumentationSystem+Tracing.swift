@@ -11,7 +11,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
 import Instrumentation
 
 extension InstrumentationSystem {

@@ -21,16 +21,16 @@ public final class BaggageContextInboundHTTPHandler: ChannelInboundHandler {
     public typealias InboundOut = HTTPServerRequestPart
 
     private let instrument: Instrument
-    private var onBaggageExtracted: (BaggageContext) -> Void
+    private var onBaggageExtracted: (Baggage) -> Void
 
-    public init(instrument: Instrument, onBaggage: @escaping (BaggageContext) -> Void) {
+    public init(instrument: Instrument, onBaggage: @escaping (Baggage) -> Void) {
         self.instrument = instrument
         self.onBaggageExtracted = onBaggage
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         guard case .head(let head) = unwrapInboundIn(data) else { return }
-        var baggage = BaggageContext()
+        var baggage = Baggage.topLevel
         self.instrument.extract(head.headers, into: &baggage, using: HTTPHeadersExtractor())
         self.onBaggageExtracted(baggage)
     }

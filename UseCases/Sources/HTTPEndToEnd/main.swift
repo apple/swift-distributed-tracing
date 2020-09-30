@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import AsyncHTTPClient
-import Baggage
+import BaggageContext
 import Foundation
 import Instrumentation
 import Logging
@@ -38,29 +38,29 @@ func serviceBootstrap(handler: ChannelHandler) -> ServerBootstrap {
 // MARK: - Fake Tracer
 
 private final class FakeTracer: Instrument {
-    enum TraceIDKey: BaggageContextKey {
+    enum TraceIDKey: Baggage.Key {
         typealias Value = String
     }
 
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier
     {
-        guard let traceID = context[TraceIDKey.self] else { return }
+        guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier
     {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
-        context[TraceIDKey.self] = traceID
+        baggage[TraceIDKey.self] = traceID
     }
 }
 
@@ -86,7 +86,7 @@ let storageServiceChannel = try storageServiceBootstrap.bind(host: "localhost", 
 logger.info("📦 Storage service listening on ::1:8081")
 
 logger.info("💻 Placing order")
-httpClient.get(url: "http://localhost:8080").whenComplete { _ in
+httpClient.get(url: "http://localhost:8080", context: DefaultContext(baggage: .topLevel, logger: logger)).whenComplete { _ in
     logger.info("💻 Order completed")
 }
 
