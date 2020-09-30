@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
@@ -19,8 +19,8 @@ import Baggage
 ///
 /// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
 public protocol Span: AnyObject {
-    /// The read-only `BaggageContext` of this `Span`, set when starting this `Span`.
-    var context: BaggageContext { get }
+    /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
+    var baggage: Baggage { get }
 
     /// Set the status.
     /// - Parameter status: The status of this `Span`.
@@ -61,7 +61,7 @@ extension Span {
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The `SpanAttributes` describing this link. Defaults to no attributes.
     public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
-        self.addLink(SpanLink(context: other.context, attributes: attributes))
+        self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
     }
 }
 
@@ -458,18 +458,18 @@ public enum SpanKind {
 /// The other `Span`s information is stored in `context` and `attributes` may be used to
 /// further describe the link.
 public struct SpanLink {
-    /// A `BaggageContext` containing identifying information about the link target `Span`.
-    public let context: BaggageContext
+    /// A `Baggage` containing identifying information about the link target `Span`.
+    public let baggage: Baggage
 
     /// `SpanAttributes` further describing the connection between the `Span`s.
     public let attributes: SpanAttributes
 
     /// Create a new `SpanLink`.
     /// - Parameters:
-    ///   - context: The carrier of a `BaggageContext` identifying the targeted `Span`.
+    ///   - context: The `Baggage` identifying the targeted `Span`.
     ///   - attributes: `SpanAttributes` that further describe the link. Defaults to no attributes.
-    public init(context: BaggageContextCarrier, attributes: SpanAttributes = [:]) {
-        self.context = context.baggage
+    public init(baggage: Baggage, attributes: SpanAttributes = [:]) {
+        self.baggage = baggage
         self.attributes = attributes
     }
 }

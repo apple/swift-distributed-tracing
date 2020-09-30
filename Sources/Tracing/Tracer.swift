@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Instrumentation
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
@@ -25,7 +25,7 @@ public protocol Tracer: Instrument {
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        context: BaggageContext,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span
@@ -49,7 +49,7 @@ extension Tracer {
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Defaults to `.now()`.
     public func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        context: BaggageContext,
         ofKind kind: SpanKind = .internal,
         at timestamp: Timestamp = .now()
     ) -> Span {

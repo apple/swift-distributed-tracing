@@ -35,22 +35,22 @@ extension MultiplexInstrument {
 
 extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Injector>(
-        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
     )
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier
     {
-        self.instruments.forEach { $0.inject(context, into: &carrier, using: injector) }
+        self.instruments.forEach { $0.inject(baggage, into: &carrier, using: injector) }
     }
 
     public func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
     )
         where
         Carrier == Extractor.Carrier,
         Extractor: ExtractorProtocol
     {
-        self.instruments.forEach { $0.extract(carrier, into: &context, using: extractor) }
+        self.instruments.forEach { $0.extract(carrier, into: &baggage, using: extractor) }
     }
 }

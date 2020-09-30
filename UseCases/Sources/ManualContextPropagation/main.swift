@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Foundation
 import Instrumentation
 
@@ -52,9 +52,9 @@ struct FakeHTTPServer {
     }
 
     func receive(_ request: FakeHTTPRequest) {
-        var context = BaggageContext()
-        print("\(String(describing: FakeHTTPRequest.self)): Extracting context values from request headers into context")
-        self.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
+        var context = DefaultContext(baggage: .topLevel, logger: .init(label: "test"))
+        context.logger.info("\(String(describing: FakeHTTPRequest.self)): Extracting context values from request headers into context")
+        self.instrument.extract(request.headers, into: &context.baggage, using: HTTPHeadersExtractor())
         _ = self.catchAllHandler(context, request, self.client)
     }
 }
@@ -70,8 +70,8 @@ struct FakeHTTPClient {
 
     func performRequest(_ context: BaggageContext, request: FakeHTTPRequest) {
         var request = request
-        print("\(String(describing: FakeHTTPClient.self)): Injecting context values into request headers")
-        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        context.logger.info("\(String(describing: FakeHTTPClient.self)): Injecting context values into request headers")
+        self.instrument.inject(context.baggage, into: &request.headers, using: HTTPHeadersInjector())
         print(request)
     }
 }
@@ -79,36 +79,36 @@ struct FakeHTTPClient {
 // MARK: - Fake Tracer
 
 private final class FakeTracer: Instrument {
-    enum TraceIDKey: BaggageContextKey {
+    enum TraceIDKey: Baggage.Key {
         typealias Value = String
     }
 
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier
     {
-        guard let traceID = context[TraceIDKey.self] else { return }
+        guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier
     {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
-        context[TraceIDKey.self] = traceID
+        baggage[TraceIDKey.self] = traceID
     }
 }
 
 // MARK: - Demo
 
 let server = FakeHTTPServer(instrument: FakeTracer()) { context, _, client in
-    print("=== Perform subsequent request ===")
+    context.logger.info("Perform subsequent request")
     let outgoingRequest = FakeHTTPRequest(path: "/other-service", headers: [("Content-Type", "application/json")])
     client.performRequest(context, request: outgoingRequest)
     return FakeHTTPResponse()
