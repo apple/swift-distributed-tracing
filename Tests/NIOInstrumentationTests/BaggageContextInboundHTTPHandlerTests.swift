@@ -23,9 +23,9 @@ final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
         let traceID = "abc"
         let callbackExpectation = expectation(description: "Expected onBaggageExtracted to be called")
 
-        var extractedContext: BaggageContext?
-        let handler = BaggageContextInboundHTTPHandler(instrument: FakeTracer()) { context in
-            extractedContext = context
+        var extractedBaggage: Baggage?
+        let handler = BaggageContextInboundHTTPHandler(instrument: FakeTracer()) { baggage in
+            extractedBaggage = baggage
             callbackExpectation.fulfill()
         }
         let loop = EmbeddedEventLoop()
@@ -37,7 +37,7 @@ final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
 
         waitForExpectations(timeout: 0.5)
 
-        XCTAssertNotNil(extractedContext)
-        XCTAssertEqual(extractedContext![FakeTracer.TraceIDKey.self], traceID)
+        XCTAssertNotNil(extractedBaggage)
+        XCTAssertEqual(extractedBaggage![FakeTracer.TraceIDKey.self], traceID)
     }
 }

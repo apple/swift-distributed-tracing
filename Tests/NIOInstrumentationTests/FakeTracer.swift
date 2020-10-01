@@ -17,7 +17,7 @@ import Instrumentation
 import NIOHTTP1
 
 final class FakeTracer: Instrument {
-    enum TraceIDKey: BaggageContextKey {
+    enum TraceIDKey: Baggage.Key {
         typealias Value = String
     }
 
@@ -25,24 +25,24 @@ final class FakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Injector>(
-        _ context: BaggageContext, into carrier: inout Carrier, using injector: Injector
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
     )
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier
     {
-        guard let traceID = context[TraceIDKey.self] else { return }
+        guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
     )
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier
     {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
-        context[TraceIDKey.self] = traceID
+        baggage[TraceIDKey.self] = traceID
     }
 }
