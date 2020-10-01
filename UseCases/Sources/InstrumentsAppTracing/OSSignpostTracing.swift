@@ -56,7 +56,7 @@ public struct OSSignpostTracingInstrument: Tracer {
 
     public func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
@@ -64,7 +64,7 @@ public struct OSSignpostTracingInstrument: Tracer {
             log: self.log,
             named: operationName,
             signpostName: self.signpostName,
-            baggage: context.baggage
+            baggage: baggage
             // , kind ignored
             // , timestamp ignored, we capture it automatically
         )
