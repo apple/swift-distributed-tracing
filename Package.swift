@@ -14,7 +14,7 @@ let package = Package(
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
             from: "0.5.0"
         ),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
+        .package(url: "https://github.com/slashmo/swift-nio.git", .branch("feature/baggage-context")),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
