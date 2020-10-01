@@ -4,5 +4,4 @@
 /*.xcodeproj
 xcuserdata/
 .swiftpm
-
-UseCases/Sources/InstrumentsAppTracingInstrpkg/SpansExampleInstrument/SpansExampleInstrument.xcodeproj/project.xcworkspace/
+/Package.resolved
