@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 @testable import Instrumentation
 import Tracing
 import XCTest
@@ -60,7 +60,7 @@ enum TaskIDKey: Baggage.Key {
 private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
@@ -68,7 +68,7 @@ private final class TracedLockPrintlnTracer: Tracer {
             operationName: operationName,
             startTimestamp: timestamp,
             kind: kind,
-            baggage: context.baggage
+            baggage: baggage
         )
     }
 

@@ -11,18 +11,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 import Instrumentation
 
 /// No operation Tracer, used when no tracing is required.
 public struct NoOpTracer: Tracer {
     public func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
-        return NoOpSpan(baggage: context.baggage)
+        return NoOpSpan(baggage: baggage)
     }
 
     public func forceFlush() {}
