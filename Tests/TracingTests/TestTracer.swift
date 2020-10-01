@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 import Foundation
 import Instrumentation
 import Tracing
@@ -21,14 +21,14 @@ final class TestTracer: Tracer {
 
     func startSpan(
         named operationName: String,
-        context: BaggageContext,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
             startTimestamp: timestamp,
-            baggage: context.baggage,
+            baggage: baggage,
             kind: kind
         ) { _ in }
         self.spans.append(span)

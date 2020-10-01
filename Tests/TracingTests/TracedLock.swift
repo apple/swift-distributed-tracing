@@ -30,10 +30,7 @@ final class TracedLock {
     func lock(baggage: Baggage) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.tracer.startSpan(
-            named: self.name,
-            context: DefaultContext(baggage: baggage, logger: .init(label: "test"))
-        )
+        self.activeSpan = InstrumentationSystem.tracer.startSpan(named: self.name, baggage: baggage)
     }
 
     func unlock(baggage: Baggage) {
