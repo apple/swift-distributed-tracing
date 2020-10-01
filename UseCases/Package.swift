@@ -12,7 +12,7 @@ let package = Package(
     dependencies: [
         .package(path: "../"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.1.1"),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.9.0"),
+        .package(url: "https://github.com/slashmo/swift-nio.git", .branch("feature/baggage-context")),
         .package(
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
             from: "0.5.0"
