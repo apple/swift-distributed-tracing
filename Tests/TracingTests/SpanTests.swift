@@ -145,21 +145,21 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanParentConvenience() {
-        var parentContext = BaggageContext()
-        parentContext[TestBaggageContextKey.self] = "test"
+        var parentBaggage = Baggage.topLevel
+        parentBaggage[TestBaggageContextKey.self] = "test"
 
         let parent = TestSpan(
             operationName: "client",
             startTimestamp: .now(),
-            context: parentContext,
+            baggage: parentBaggage,
             kind: .client,
             onEnd: { _ in }
         )
-        let childContext = BaggageContext()
+        let childBaggage = Baggage.topLevel
         let child = TestSpan(
             operationName: "server",
             startTimestamp: .now(),
-            context: childContext,
+            baggage: childBaggage,
             kind: .server,
             onEnd: { _ in }
         )
@@ -173,7 +173,7 @@ final class SpanTests: XCTestCase {
         child.addLink(parent, attributes: attributes)
 
         XCTAssertEqual(child.links.count, 1)
-        XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
+        XCTAssertEqual(child.links[0].baggage[TestBaggageContextKey.self], "test")
         #if swift(>=5.2)
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
         #else
@@ -242,6 +242,6 @@ public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttr
 }
 #endif
 
-private struct TestBaggageContextKey: BaggageContextKey {
+private struct TestBaggageContextKey: Baggage.Key {
     typealias Value = String
 }

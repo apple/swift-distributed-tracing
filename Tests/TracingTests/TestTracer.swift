@@ -21,14 +21,14 @@ final class TestTracer: Tracer {
 
     func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
             startTimestamp: timestamp,
-            context: context.baggage,
+            baggage: baggage,
             kind: kind
         ) { _ in }
         self.spans.append(span)
@@ -37,32 +37,32 @@ final class TestTracer: Tracer {
 
     public func forceFlush() {}
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
+    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
         Carrier == Extractor.Carrier
     {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
-        context.traceID = traceID
+        baggage.traceID = traceID
     }
 
-    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
         Carrier == Injector.Carrier
     {
-        guard let traceID = context.traceID else { return }
+        guard let traceID = baggage.traceID else { return }
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
     }
 }
 
 extension TestTracer {
-    enum TraceIDKey: BaggageContextKey {
+    enum TraceIDKey: Baggage.Key {
         typealias Value = String
     }
 }
 
-extension BaggageContext {
+extension Baggage {
     var traceID: String? {
         get {
             return self[TestTracer.TraceIDKey.self]
@@ -82,7 +82,7 @@ final class TestSpan: Span {
     private let startTimestamp: Timestamp
     private(set) var endTimestamp: Timestamp?
 
-    let context: BaggageContext
+    let baggage: Baggage
 
     private(set) var events = [SpanEvent]() {
         didSet {
@@ -105,13 +105,13 @@ final class TestSpan: Span {
     init(
         operationName: String,
         startTimestamp: Timestamp,
-        context: BaggageContext,
+        baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (Span) -> Void
     ) {
         self.operationName = operationName
         self.startTimestamp = startTimestamp
-        self.context = context
+        self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
     }

@@ -27,6 +27,7 @@ extension HTTPHeadersCarrierTests {
       return [
                 ("testExtractSingleHeader", testExtractSingleHeader),
                 ("testExtractNoHeader", testExtractNoHeader),
+                ("testExtractEmptyHeader", testExtractEmptyHeader),
                 ("testExtractMultipleHeadersOfSameName", testExtractMultipleHeadersOfSameName),
            ]
    }

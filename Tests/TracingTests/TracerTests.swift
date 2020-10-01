@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 @testable import Instrumentation
 import Tracing
 import XCTest
@@ -35,22 +35,22 @@ final class TracerTests: XCTestCase {
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.context.traceID, "test")
+            XCTAssertEqual(span.baggage.traceID, "test")
         }
     }
 
     func testContextPropagationWithNoOpSpan() {
-        let httpServer = FakeHTTPServer { context, _, client -> FakeHTTPResponse in
-            var context = BaggageContext()
-            context.traceID = "test"
-            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
+        let httpServer = FakeHTTPServer { _, _, client -> FakeHTTPResponse in
+            var baggage = Baggage.topLevel
+            baggage.traceID = "test"
+            client.performRequest(baggage, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
         }
 
         httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
 
-        XCTAssertEqual(httpServer.client.contexts.count, 1)
-        XCTAssertEqual(httpServer.client.contexts.first?.traceID, "test")
+        XCTAssertEqual(httpServer.client.baggages.count, 1)
+        XCTAssertEqual(httpServer.client.baggages.first?.traceID, "test")
     }
 }
 
@@ -80,7 +80,7 @@ struct FakeHTTPResponse {
 }
 
 struct FakeHTTPServer {
-    typealias Handler = (BaggageContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (Baggage, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
 
     private let catchAllHandler: Handler
     let client: FakeHTTPClient
@@ -93,12 +93,12 @@ struct FakeHTTPServer {
     func receive(_ request: FakeHTTPRequest) {
         let tracer = InstrumentationSystem.tracer
 
-        var context = BaggageContext()
-        InstrumentationSystem.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
+        var baggage = Baggage.topLevel
+        InstrumentationSystem.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
 
-        let span = tracer.startSpan(named: "GET \(request.path)", context: context)
+        let span = tracer.startSpan(named: "GET \(request.path)", baggage: baggage)
 
-        let response = self.catchAllHandler(span.context, request, self.client)
+        let response = self.catchAllHandler(span.baggage, request, self.client)
         span.attributes["http.status"] = .int(response.status)
 
         span.end()
@@ -108,14 +108,13 @@ struct FakeHTTPServer {
 // MARK: - Fake HTTP Client
 
 final class FakeHTTPClient {
-    private(set) var contexts = [BaggageContext]()
+    private(set) var baggages = [Baggage]()
 
-    func performRequest(_ context: BaggageContext, request: FakeHTTPRequest) {
+    func performRequest(_ baggage: Baggage, request: FakeHTTPRequest) {
         var request = request
-        let span = InstrumentationSystem.tracer
-            .startSpan(named: "GET \(request.path)", context: context, ofKind: .client)
-        self.contexts.append(span.context)
-        InstrumentationSystem.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        let span = InstrumentationSystem.tracer.startSpan(named: "GET \(request.path)", baggage: baggage)
+        self.baggages.append(span.baggage)
+        InstrumentationSystem.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
         span.end()
     }
 }

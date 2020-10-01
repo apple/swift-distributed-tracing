@@ -17,15 +17,16 @@ import Instrumentation
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
 public protocol Tracer: Instrument {
-    /// Start a new `Span` within the given `BaggageContext` at a given timestamp.
+    /// Start a new `Span` with the given `Baggage` at a given timestamp.
+    ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - context: The carrier of a `BaggageContext` within to start the new `Span`.
+    ///   - baggage: The `Baggage` providing information on where to start the new `Span`.
     ///   - kind: The `SpanKind` of the new `Span`.
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span
@@ -40,19 +41,17 @@ public protocol Tracer: Instrument {
 }
 
 extension Tracer {
-    /// Start a new `Span` within the given `BaggageContext`. This passes `nil` as the timestamp to the tracer, which
-    /// usually means it should default to the current timestamp.
+    /// Start a new `Span` with the given `Baggage` starting at `Timestamp.now()`.
+    ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The carrier of a `BaggageContext` within to start the new `Span`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
-    ///   - timestamp: The `DispatchTime` at which to start the new `Span`. Defaults to `.now()`.
     public func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
-        ofKind kind: SpanKind = .internal,
-        at timestamp: Timestamp = .now()
+        baggage: Baggage,
+        ofKind kind: SpanKind = .internal
     ) -> Span {
-        return self.startSpan(named: operationName, context: context, ofKind: kind, at: timestamp)
+        return self.startSpan(named: operationName, baggage: baggage, ofKind: kind, at: .now())
     }
 }

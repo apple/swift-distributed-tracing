@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Instrumentation
 import Logging
 import NIO
@@ -32,13 +32,13 @@ final class StorageServiceHandler: ChannelInboundHandler {
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         guard case .head(let requestHead) = self.unwrapInboundIn(data) else { return }
 
-        var baggage = BaggageContext()
-        self.instrument.extract(requestHead.headers, into: &baggage, using: HTTPHeadersExtractor())
+        var ctx = DefaultContext(baggage: .topLevel, logger: logger)
+        self.instrument.extract(requestHead.headers, into: &ctx.baggage, using: HTTPHeadersExtractor())
 
-        self.logger.with(context: baggage).info("📦 Looking for the product")
+        ctx.logger.info("📦 Looking for the product")
 
         context.eventLoop.scheduleTask(in: .seconds(2)) {
-            self.logger.with(context: baggage).info("📦 Found the product")
+            ctx.logger.info("📦 Found the product")
             let responseHead = HTTPResponseHead(version: requestHead.version, status: .ok)
             context.eventLoop.execute {
                 context.channel.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
