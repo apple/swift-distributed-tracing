@@ -18,7 +18,7 @@ import NIOHTTP1
 import NIOInstrumentation
 import XCTest
 
-final class HTTPHeadersExtractingHandlerTests: XCTestCase {
+final class HeaderExtractingHTTPServerHandlerTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
@@ -28,7 +28,7 @@ final class HTTPHeadersExtractingHandlerTests: XCTestCase {
         InstrumentationSystem.bootstrapInternal(FakeTracer())
 
         let traceID = "abc"
-        let handler = HTTPHeadersExtractingHandler()
+        let handler = HeaderExtractingHTTPServerHandler()
         let loop = EmbeddedEventLoop()
         let channel = EmbeddedChannel(handler: handler, loop: loop)
 
@@ -40,5 +40,22 @@ final class HTTPHeadersExtractingHandlerTests: XCTestCase {
         try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
 
         XCTAssertEqual(channel._channelCore.baggage[FakeTracer.TraceIDKey.self], traceID)
+    }
+
+    func test_forwards_all_read_events() throws {
+        InstrumentationSystem.bootstrapInternal(FakeTracer())
+
+        let channel = EmbeddedChannel(loop: EmbeddedEventLoop())
+        try channel.pipeline.addHandlers(HeaderExtractingHTTPServerHandler()).wait()
+
+        let requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
+        try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
+        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
+
+        try channel.writeInbound(HTTPServerRequestPart.body(channel.allocator.buffer(string: "Test")))
+        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
+
+        try channel.writeInbound(HTTPServerRequestPart.end(nil))
+        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
     }
 }
