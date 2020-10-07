@@ -39,11 +39,11 @@ let context = DefaultContext(baggage: .topLevel, logger: .init(label: "test"))
 
 for i in 1 ... 5 {
     print("Starting operation: op-\(i)")
-    let parentSpan = tracer.startSpan(named: "op-\(i)", context: context)
+    let parentSpan = tracer.startSpan(named: "op-\(i)", baggage: context.baggage)
     defer { parentSpan.end() }
 
     DispatchQueue.global().async {
-        let span = tracer.startSpan(named: "op-\(i)-inner", context: context)
+        let span = tracer.startSpan(named: "op-\(i)-inner", baggage: context.baggage)
         span.addLink(parentSpan)
         print("    Starting sub-operation: op-\(i)-inner")
         defer { span.end() }
