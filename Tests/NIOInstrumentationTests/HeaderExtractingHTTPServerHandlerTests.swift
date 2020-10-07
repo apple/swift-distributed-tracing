@@ -29,8 +29,7 @@ final class HeaderExtractingHTTPServerHandlerTests: XCTestCase {
 
         let traceID = "abc"
         let handler = HeaderExtractingHTTPServerHandler()
-        let loop = EmbeddedEventLoop()
-        let channel = EmbeddedChannel(handler: handler, loop: loop)
+        let channel = EmbeddedChannel(handler: handler, loop: EmbeddedEventLoop())
 
         var requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
         requestHead.headers = [FakeTracer.headerName: traceID]
@@ -40,6 +39,25 @@ final class HeaderExtractingHTTPServerHandlerTests: XCTestCase {
         try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
 
         XCTAssertEqual(channel._channelCore.baggage[FakeTracer.TraceIDKey.self], traceID)
+    }
+
+    func test_respects_previous_baggage_values() throws {
+        InstrumentationSystem.bootstrapInternal(FakeTracer())
+
+        let traceID = "abc"
+        let handler = HeaderExtractingHTTPServerHandler()
+        let channel = EmbeddedChannel(handler: handler, loop: EmbeddedEventLoop())
+        channel._channelCore.baggage[TestKey.self] = "test"
+
+        var requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
+        requestHead.headers = [FakeTracer.headerName: traceID]
+
+        XCTAssertNil(channel._channelCore.baggage[FakeTracer.TraceIDKey.self])
+
+        try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
+
+        XCTAssertEqual(channel._channelCore.baggage[FakeTracer.TraceIDKey.self], traceID)
+        XCTAssertEqual(channel._channelCore.baggage[TestKey.self], "test")
     }
 
     func test_forwards_all_read_events() throws {
@@ -58,4 +76,8 @@ final class HeaderExtractingHTTPServerHandlerTests: XCTestCase {
         try channel.writeInbound(HTTPServerRequestPart.end(nil))
         XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
     }
+}
+
+private enum TestKey: Baggage.Key {
+    typealias Value = String
 }

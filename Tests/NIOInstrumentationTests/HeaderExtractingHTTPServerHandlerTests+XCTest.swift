@@ -26,6 +26,7 @@ extension HeaderExtractingHTTPServerHandlerTests {
    static var allTests : [(String, (HeaderExtractingHTTPServerHandlerTests) -> () throws -> Void)] {
       return [
                 ("test_extracts_http_request_headers_into_baggage", test_extracts_http_request_headers_into_baggage),
+                ("test_respects_previous_baggage_values", test_respects_previous_baggage_values),
                 ("test_forwards_all_read_events", test_forwards_all_read_events),
            ]
    }

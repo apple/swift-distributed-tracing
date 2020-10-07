@@ -29,9 +29,11 @@ public final class HeaderExtractingHTTPServerHandler: ChannelInboundHandler {
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         if case .head(let head) = self.unwrapInboundIn(data) {
-            var baggage = Baggage.topLevel
-            InstrumentationSystem.instrument.extract(head.headers, into: &baggage, using: HTTPHeadersExtractor())
-            context.baggage = baggage
+            InstrumentationSystem.instrument.extract(
+                head.headers,
+                into: &context.baggage,
+                using: HTTPHeadersExtractor()
+            )
         }
 
         context.fireChannelRead(data)
