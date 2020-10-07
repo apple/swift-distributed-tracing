@@ -12,32 +12,33 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import Instrumentation
+@testable import Instrumentation
 import NIO
 import NIOHTTP1
 import NIOInstrumentation
 import XCTest
 
-final class BaggageContextInboundHTTPHandlerTests: XCTestCase {
-    func testForwardsHTTPHeadersToInstrumentationMiddleware() throws {
-        let traceID = "abc"
-        let callbackExpectation = expectation(description: "Expected onBaggageExtracted to be called")
+final class HTTPHeadersExtractingHandlerTests: XCTestCase {
+    override class func tearDown() {
+        super.tearDown()
+        InstrumentationSystem.bootstrapInternal(nil)
+    }
 
-        var extractedBaggage: Baggage?
-        let handler = BaggageContextInboundHTTPHandler(instrument: FakeTracer()) { baggage in
-            extractedBaggage = baggage
-            callbackExpectation.fulfill()
-        }
+    func test_extracts_http_request_headers_into_baggage() throws {
+        InstrumentationSystem.bootstrapInternal(FakeTracer())
+
+        let traceID = "abc"
+        let handler = HTTPHeadersExtractingHandler()
         let loop = EmbeddedEventLoop()
         let channel = EmbeddedChannel(handler: handler, loop: loop)
+
         var requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
         requestHead.headers = [FakeTracer.headerName: traceID]
 
+        XCTAssertNil(channel._channelCore.baggage[FakeTracer.TraceIDKey.self])
+
         try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
 
-        waitForExpectations(timeout: 0.5)
-
-        XCTAssertNotNil(extractedBaggage)
-        XCTAssertEqual(extractedBaggage![FakeTracer.TraceIDKey.self], traceID)
+        XCTAssertEqual(channel._channelCore.baggage[FakeTracer.TraceIDKey.self], traceID)
     }
 }
