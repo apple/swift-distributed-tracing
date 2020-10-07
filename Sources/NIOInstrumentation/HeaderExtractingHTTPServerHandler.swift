@@ -16,17 +16,24 @@ import Instrumentation
 import NIO
 import NIOHTTP1
 
-public final class HTTPHeadersExtractingHandler: ChannelInboundHandler {
+import Baggage
+import Instrumentation
+import NIO
+import NIOHTTP1
+
+public final class HeaderExtractingHTTPServerHandler: ChannelInboundHandler {
     public typealias InboundIn = HTTPServerRequestPart
     public typealias InboundOut = HTTPServerRequestPart
 
     public init() {}
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        guard case .head(let head) = unwrapInboundIn(data) else { return }
-        var baggage = Baggage.topLevel
-        InstrumentationSystem.instrument.extract(head.headers, into: &baggage, using: HTTPHeadersExtractor())
-        context.baggage = baggage
+        if case .head(let head) = self.unwrapInboundIn(data) {
+            var baggage = Baggage.topLevel
+            InstrumentationSystem.instrument.extract(head.headers, into: &baggage, using: HTTPHeadersExtractor())
+            context.baggage = baggage
+        }
+
         context.fireChannelRead(data)
     }
 }
