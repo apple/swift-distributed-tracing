@@ -61,20 +61,23 @@ final class HeaderExtractingHTTPServerHandlerTests: XCTestCase {
     }
 
     func test_forwards_all_read_events() throws {
-        InstrumentationSystem.bootstrapInternal(FakeTracer())
-
-        let channel = EmbeddedChannel(loop: EmbeddedEventLoop())
-        try channel.pipeline.addHandlers(HeaderExtractingHTTPServerHandler()).wait()
+        let channel = EmbeddedChannel(
+            handler: HeaderExtractingHTTPServerHandler(),
+            loop: EmbeddedEventLoop()
+        )
 
         let requestHead = HTTPRequestHead(version: .init(major: 1, minor: 1), method: .GET, uri: "/")
-        try channel.writeInbound(HTTPServerRequestPart.head(requestHead))
-        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
+        let head = HTTPServerRequestPart.head(requestHead)
+        try channel.writeInbound(head)
+        XCTAssertEqual(try channel.readInbound(), head)
 
-        try channel.writeInbound(HTTPServerRequestPart.body(channel.allocator.buffer(string: "Test")))
-        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
+        let body = HTTPServerRequestPart.body(channel.allocator.buffer(string: "Test"))
+        try channel.writeInbound(body)
+        XCTAssertEqual(try channel.readInbound(), body)
 
-        try channel.writeInbound(HTTPServerRequestPart.end(nil))
-        XCTAssertNotNil(try channel.readInbound(as: HTTPServerRequestPart.self))
+        let end = HTTPServerRequestPart.end(nil)
+        try channel.writeInbound(end)
+        XCTAssertEqual(try channel.readInbound(as: HTTPServerRequestPart.self), end)
     }
 }
 
