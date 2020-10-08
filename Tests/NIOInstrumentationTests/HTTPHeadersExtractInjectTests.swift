@@ -26,9 +26,9 @@ final class HTTPHeadersExtractInjectTests: XCTestCase {
     func test_extracted_baggage_into_subsequent_request_headers() throws {
         InstrumentationSystem.bootstrapInternal(FakeTracer())
 
-        let outboundHandler = HTTPHeadersInjectingHandler()
+        let outboundHandler = HeaderInjectingHTTPClientHandler()
         let requestHandler = MockRequestHandler()
-        let inboundHandler = HTTPHeadersExtractingHandler()
+        let inboundHandler = HeaderExtractingHTTPServerHandler()
 
         let channel = EmbeddedChannel(loop: EmbeddedEventLoop())
         XCTAssertNoThrow(try channel.pipeline.addHandlers([outboundHandler, requestHandler, inboundHandler]).wait())

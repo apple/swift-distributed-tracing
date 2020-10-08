@@ -18,7 +18,9 @@ import NIOHTTP1
 import NIOInstrumentation
 import XCTest
 
-final class HTTPHeadersInjectingHandlerTests: XCTestCase {
+final class HeaderInjectingHTTPClientHandlerTests: XCTestCase {
+    private let httpVersion = HTTPVersion(major: 1, minor: 1)
+
     override class func tearDown() {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
@@ -32,19 +34,37 @@ final class HTTPHeadersInjectingHandlerTests: XCTestCase {
         var baggage = Baggage.topLevel
         baggage[FakeTracer.TraceIDKey.self] = traceID
 
-        let httpVersion = HTTPVersion(major: 1, minor: 1)
-        let handler = HTTPHeadersInjectingHandler()
+        let handler = HeaderInjectingHTTPClientHandler()
         let loop = EmbeddedEventLoop()
         let channel = EmbeddedChannel(handler: handler, loop: loop)
         channel._channelCore.baggage = baggage
         let requestHead = HTTPRequestHead(version: httpVersion, method: .GET, uri: "/")
 
         try channel.writeOutbound(HTTPClientRequestPart.head(requestHead))
-        let modifiedRequestPart = try channel.readOutbound(as: HTTPClientRequestPart.self)
 
         XCTAssertEqual(
-            modifiedRequestPart,
-            .head(.init(version: httpVersion, method: .GET, uri: "/", headers: [FakeTracer.headerName: traceID]))
+            try channel.readOutbound(as: HTTPClientRequestPart.self),
+            .head(.init(version: self.httpVersion, method: .GET, uri: "/", headers: [FakeTracer.headerName: traceID]))
         )
+    }
+
+    func test_forwards_all_write_events() throws {
+        let channel = EmbeddedChannel(
+            handler: HeaderInjectingHTTPClientHandler(),
+            loop: EmbeddedEventLoop()
+        )
+
+        let requestHead = HTTPRequestHead(version: httpVersion, method: .GET, uri: "/")
+        let head = HTTPClientRequestPart.head(requestHead)
+        try channel.writeOutbound(head)
+        XCTAssertEqual(try channel.readOutbound(), head)
+
+        let body = HTTPClientRequestPart.body(.byteBuffer(channel.allocator.buffer(string: "test")))
+        try channel.writeOutbound(body)
+        XCTAssertEqual(try channel.readOutbound(), body)
+
+        let end = HTTPClientRequestPart.end(nil)
+        try channel.writeOutbound(end)
+        XCTAssertEqual(try channel.readOutbound(), end)
     }
 }
