@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
 import Tracing
@@ -40,13 +40,13 @@ public struct OSSignpostTracingInstrument: Tracer {
     // MARK: Instrument API
 
     public func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout BaggageContext, using extractor: Extractor
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
     ) {
         // noop; we could handle extracting our keys here
     }
 
     public func inject<Carrier, Injector>(
-        _ baggage: BaggageContext, into carrier: inout Carrier, using injector: Injector
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
     ) {
         // noop; we could handle injecting our keys here
     }
@@ -56,7 +56,7 @@ public struct OSSignpostTracingInstrument: Tracer {
 
     public func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
@@ -64,7 +64,7 @@ public struct OSSignpostTracingInstrument: Tracer {
             log: self.log,
             named: operationName,
             signpostName: self.signpostName,
-            context: context.baggage
+            baggage: baggage
             // , kind ignored
             // , timestamp ignored, we capture it automatically
         )
@@ -82,12 +82,12 @@ public struct OSSignpostTracingInstrument: Tracer {
 @available(watchOS 3.0, *)
 final class OSSignpostSpan: Span {
     private let operationName: String
-    var context: BaggageContext
+    public private(set) var baggage: Baggage
 
     private let log: OSLog
     private let signpostName: StaticString
     private var signpostID: OSSignpostID {
-        self.context.signpostID! // guaranteed that we have "our" ID
+        self.baggage.signpostID! // guaranteed that we have "our" ID
     }
 
     // TODO: use os_unfair_lock
@@ -97,10 +97,6 @@ final class OSSignpostSpan: Span {
 
     private let startTimestamp: Timestamp
     private var endTimestamp: Timestamp?
-
-    public var baggage: BaggageContext {
-        self.context
-    }
 
     static let beginFormat: StaticString =
         """
@@ -118,12 +114,12 @@ final class OSSignpostSpan: Span {
         log: OSLog,
         named operationName: String,
         signpostName: StaticString,
-        context: BaggageContext
+        baggage: Baggage
     ) {
         self.log = log
         self.operationName = operationName
         self.signpostName = signpostName
-        self.context = context
+        self.baggage = baggage
 
         self.startTimestamp = .now() // meh
         self.isRecording = log.signpostsEnabled
@@ -141,7 +137,7 @@ final class OSSignpostSpan: Span {
             log: log,
             object: self
         )
-        self.context.signpostID = signpostID
+        self.baggage.signpostID = signpostID
 
         if self.isRecording {
             os_signpost(
@@ -151,7 +147,7 @@ final class OSSignpostSpan: Span {
                 signpostID: self.signpostID,
                 Self.beginFormat,
                 self.signpostID.rawValue,
-                "\(context.signpostTraceParentIDs.map { "\($0.rawValue)" }.joined(separator: ","))",
+                "\(baggage.signpostTraceParentIDs.map { "\($0.rawValue)" }.joined(separator: ","))",
                 operationName
             )
         }
@@ -178,7 +174,7 @@ final class OSSignpostSpan: Span {
         self.lock.lock()
         defer { self.lock.unlock() }
 
-        guard let id = link.context.signpostID else {
+        guard let id = link.baggage.signpostID else {
             print(
                 """
                 Attempted to addLink(\(link)) to \(self.signpostID) (\(self.operationName))\
@@ -188,7 +184,7 @@ final class OSSignpostSpan: Span {
             return
         }
 
-        self.context.signpostTraceParentIDs += [id]
+        self.baggage.signpostTraceParentIDs += [id]
     }
 
     func setStatus(_ status: SpanStatus) {}
@@ -239,11 +235,11 @@ final class OSSignpostSpan: Span {
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
 enum OSSignpostTracingKeys {
-    enum TraceParentIDs: BaggageContextKey {
+    enum TraceParentIDs: Baggage.Key {
         typealias Value = [OSSignpostID]
     }
 
-    enum SignpostID: BaggageContextKey {
+    enum SignpostID: Baggage.Key {
         typealias Value = OSSignpostID
     }
 }
@@ -252,7 +248,7 @@ enum OSSignpostTracingKeys {
 @available(iOS 10.0, *)
 @available(tvOS 10.0, *)
 @available(watchOS 3.0, *)
-extension BaggageContextProtocol {
+extension Baggage {
     var signpostTraceParentIDs: OSSignpostTracingKeys.TraceParentIDs.Value {
         get {
             self[OSSignpostTracingKeys.TraceParentIDs.self] ?? []

@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Foundation
 import Instrumentation
 import Tracing
@@ -27,21 +27,21 @@ final class TracedLock {
         self.underlyingLock = NSLock()
     }
 
-    func lock(context: BaggageContext) {
+    func lock(baggage: Baggage) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.tracer.startSpan(named: self.name, context: context)
+        self.activeSpan = InstrumentationSystem.tracer.startSpan(named: self.name, baggage: baggage)
     }
 
-    func unlock(context: BaggageContext) {
+    func unlock(baggage: Baggage) {
         self.activeSpan?.end()
         self.activeSpan = nil
         self.underlyingLock.unlock()
     }
 
-    func withLock(context: BaggageContext, _ closure: () -> Void) {
-        self.lock(context: context)
-        defer { self.unlock(context: context) }
+    func withLock(baggage: Baggage, _ closure: () -> Void) {
+        self.lock(baggage: baggage)
+        defer { self.unlock(baggage: baggage) }
         closure()
     }
 }

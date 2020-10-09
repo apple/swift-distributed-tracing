@@ -12,12 +12,16 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import BaggageLogging
 @testable import Instrumentation
 import Tracing
 import XCTest
 
 final class TracedLockTests: XCTestCase {
+    override class func tearDown() {
+        super.tearDown()
+        InstrumentationSystem.bootstrapInternal(nil)
+    }
+
     func test_tracesLockedTime() {
         let tracer = TracedLockPrintlnTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -26,11 +30,11 @@ final class TracedLockTests: XCTestCase {
 
         func launchTask(_ name: String) {
             DispatchQueue.global().async {
-                var context = BaggageContext()
-                context[TaskIDKey.self] = name
+                var baggage = Baggage.topLevel
+                baggage[TaskIDKey.self] = name
 
-                lock.lock(context: context)
-                lock.unlock(context: context)
+                lock.lock(baggage: baggage)
+                lock.unlock(baggage: baggage)
             }
         }
         launchTask("one")
@@ -45,7 +49,7 @@ final class TracedLockTests: XCTestCase {
 // ==== ------------------------------------------------------------------------
 // MARK: test keys
 
-enum TaskIDKey: BaggageContextKey {
+enum TaskIDKey: Baggage.Key {
     typealias Value = String
     static let name: String? = "LockedOperationNameKey"
 }
@@ -56,7 +60,7 @@ enum TaskIDKey: BaggageContextKey {
 private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
@@ -64,14 +68,14 @@ private final class TracedLockPrintlnTracer: Tracer {
             operationName: operationName,
             startTimestamp: timestamp,
             kind: kind,
-            context: context.baggage
+            baggage: baggage
         )
     }
 
     public func forceFlush() {}
 
     func inject<Carrier, Injector>(
-        _ context: BaggageContext,
+        _ baggage: Baggage,
         into carrier: inout Carrier,
         using injector: Injector
     )
@@ -81,7 +85,7 @@ private final class TracedLockPrintlnTracer: Tracer {
 
     func extract<Carrier, Extractor>(
         _ carrier: Carrier,
-        into context: inout BaggageContext,
+        into baggage: inout Baggage,
         using extractor: Extractor
     )
         where
@@ -97,7 +101,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         private let startTimestamp: Timestamp
         private(set) var endTimestamp: Timestamp?
 
-        let context: BaggageContext
+        let baggage: Baggage
 
         private var links = [SpanLink]()
 
@@ -119,14 +123,14 @@ private final class TracedLockPrintlnTracer: Tracer {
             operationName: String,
             startTimestamp: Timestamp,
             kind: SpanKind,
-            context: BaggageContext
+            baggage: Baggage
         ) {
             self.operationName = operationName
             self.startTimestamp = startTimestamp
-            self.context = context
+            self.baggage = baggage
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
+            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -146,7 +150,7 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         func end(at timestamp: Timestamp) {
             self.endTimestamp = timestamp
-            print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
+            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
         }
     }
 }
