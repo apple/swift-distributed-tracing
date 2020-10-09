@@ -2,19 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "gsoc-swift-tracing",
+    name: "swift-distributed-tracing",
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
-        .library(name: "NIOInstrumentation", targets: ["NIOInstrumentation"]),
         .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"]),
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.5.0"
-        ),
-        .package(url: "https://github.com/slashmo/swift-nio.git", .branch("feature/baggage-context")),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.0.1"),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage-core.git", from: "0.0.1"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -24,52 +20,38 @@ let package = Package(
             name: "Instrumentation",
             dependencies: [
                 "Baggage",
-                "BaggageContext",
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
-                "BaggageContext",
                 "Instrumentation",
             ]
         ),
 
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Tracing
+
         .target(
             name: "Tracing",
             dependencies: [
-                "BaggageContext",
                 "Instrumentation",
             ]
         ),
         .testTarget(
             name: "TracingTests",
             dependencies: [
-                "Instrumentation",
                 "Tracing",
-                "BaggageContext",
             ]
         ),
 
-        .target(
-            name: "NIOInstrumentation",
-            dependencies: [
-                "NIO",
-                "NIOHTTP1",
-                "Instrumentation",
-            ]
-        ),
-        .testTarget(
-            name: "NIOInstrumentationTests",
-            dependencies: [
-                "NIOInstrumentation",
-            ]
-        ),
+        // ==== ----------------------------------------------------------------------------------------------------------------
+        // MARK: Support libraries
 
         .target(
             name: "OpenTelemetryInstrumentationSupport",
             dependencies: [
-                .target(name: "Tracing")
+                "Tracing"
             ]
         ),
         .testTarget(

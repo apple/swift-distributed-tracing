@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -22,7 +22,6 @@ import XCTest
 
 #if os(Linux) || os(FreeBSD)
    @testable import InstrumentationTests
-   @testable import NIOInstrumentationTests
    @testable import OpenTelemetryInstrumentationSupportTests
    @testable import TracingTests
 
@@ -35,10 +34,6 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
    @available(*, deprecated, message: "not actually deprecated. Just deprecated to allow deprecated tests (which test deprecated functionality) without warnings")
    func run() {
        XCTMain([
-             testCase(HTTPHeadersCarrierTests.allTests),
-             testCase(HTTPHeadersExtractInjectTests.allTests),
-             testCase(HeaderExtractingHTTPServerHandlerTests.allTests),
-             testCase(HeaderInjectingHTTPClientHandlerTests.allTests),
              testCase(InstrumentTests.allTests),
              testCase(InstrumentationSystemTests.allTests),
              testCase(SpanAttributeSemanticsTests.allTests),

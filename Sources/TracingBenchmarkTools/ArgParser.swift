@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -219,7 +219,7 @@ class ArgumentParser<U> {
     ) {
         self.arguments.append(
             Argument(name: name, help: help)
-                { try self.parseArgument(name, property, defaultValue, parser) }
+            { try self.parseArgument(name, property, defaultValue, parser) }
         )
     }
 

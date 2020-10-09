@@ -1,9 +1,9 @@
 #!/bin/bash
 ##===----------------------------------------------------------------------===##
 ##
-## This source file is part of the Swift Tracing open source project
+## This source file is part of the Swift Distributed Tracing open source project
 ##
-## Copyright (c) 2020 Moritz Lang and the Swift Tracing project authors
+## Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -50,9 +50,9 @@ for language in swift-or-c bash dtrace; do
         cat > "$tmp" <<"EOF"
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the Swift Tracing open source project
+// This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
+// Copyright (c) YEARS Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -68,9 +68,9 @@ EOF
 #!/bin/bash
 ##===----------------------------------------------------------------------===##
 ##
-## This source file is part of the Swift Tracing open source project
+## This source file is part of the Swift Distributed Tracing open source project
 ##
-## Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
+## Copyright (c) YEARS Apple Inc. and the Swift Distributed Tracing project authors
 ## Licensed under Apache License v2.0
 ##
 ## See LICENSE.txt for license information
@@ -86,9 +86,9 @@ EOF
 #!/usr/sbin/dtrace -q -s
 /*===----------------------------------------------------------------------===*
  *
- *  This source file is part of the Swift Tracing open source project
+ *  This source file is part of the Swift Distributed Tracing open source project
  *
- *  Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
+ *  Copyright (c) YEARS Apple Inc. and the Swift Distributed Tracing project authors
  *  Licensed under Apache License v2.0
  *
  *  See LICENSE.txt for license information

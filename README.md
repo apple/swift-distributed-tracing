@@ -1,20 +1,46 @@
-# Swift (Server) Tracing
-
-[![Swift 5.2](https://img.shields.io/badge/Swift-5.2-ED523F.svg?style=flat)](https://swift.org/download/)
-[![Swift 5.1](https://img.shields.io/badge/Swift-5.1-ED523F.svg?style=flat)](https://swift.org/download/)
-[![Swift 5.0](https://img.shields.io/badge/Swift-5.0-ED523F.svg?style=flat)](https://swift.org/download/)
-[![CI](https://github.com/slashmo/gsoc-swift-tracing/workflows/CI/badge.svg)](https://github.com/slashmo/gsoc-swift-tracing/actions?query=workflow%3ACI)
+# Swift Distributed Tracing
 
 This is a collection of Swift libraries enabling the instrumentation of your server side applications using tools such
 as tracers. Our goal is to provide a common foundation that allows you too freely choose how to instrument your system
 with minimal changes to your actual code.
 
-While Swift Tracing allows building all kinds of _instruments_ which can co-exist in applications transparently,
+While Swift Distributed Tracing allows building all kinds of _instruments_ which can co-exist in applications transparently,
 it's primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
-> The tracing API is compatible with the [Open Telemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md).
+---
+
+### Important note on Adoption
+
+> ⚠️  ⚠️  ⚠️
+>
+> We anticipate the upcoming **Swift 6** and its concurrency features to have _significant (positive) impact_ on the
+> shape of context propagation APIs (such as `LoggingContext` and `Baggage`). 
+>
+> As such, libraries should carefully consider _when_ and _how_ they should adopt context propagation in their APIs.
+>
+> In many cases it may be preferable to wait until Swift 6 is released along with its concurrency features, 
+> because it may have a significant impact on how context propagation can be achieved, and be potentially less disruptive to APIs.
+>
+> ⚠️  ⚠️  ⚠️
 
 ---
+
+## Compatibility
+
+The Swift Distributed Tracing project is designed in a very open and extensible manner, such that various instrumentation
+and tracing systems can be built on top of it.
+
+> The tracing API is compatible with the [Open Telemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md),
+> and provides convenience APIs in the `OpenTelemetrySupport` module that fit the style of the otel specification.
+ 
+Compatible `Tracer` implementations:
+
+- Swift **Jaeger** Client (@slashmo)
+  - also able to emit **Zipkin** formatted data
+- xRay (@pokrywka)
+- xRay (@fabian)
+
+TODO: Links
 
 ## Instrumentation
 
@@ -68,9 +94,9 @@ For each party involved we offer different libraries that all make use of `Bagga
 
 ---
 
-## Adoption
+## Adoption Tracker
 
-The following libraries already support swift tracing or baggage context in their APIs:
+The following libraries already support Swift Distributed Tracing  or baggage context in their APIs:
 
 | Library | Integrates | Status |
 | --- | --- | --- |
@@ -243,11 +269,13 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([FancyInstrument(), OtherFan
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
+## F.A.Q.
+
+ ⚠️ ⚠️ ⚠️ TODO: need to write up some common questions here️ ⚠️ ⚠️ ⚠️ 
+
 ## Discussions
 
-Discussions about this topic are **more than welcome**. During this project we'll use a mixture of
-[GitHub issues](https://github.com/slashmo/gsoc-swift-tracing/issues)
-and [Swift forum posts](https://forums.swift.org/c/server/serverdev/14).
+TODO: make a forums category?
 
 ## Contributing
 
@@ -258,3 +286,4 @@ You can make ensure it always is run and passes before you push by installing a 
 ```
 echo './scripts/sanity.sh' > .git/hooks/pre-push
 ```
+
