@@ -1,7 +1,7 @@
 #!/bin/bash
 ##===----------------------------------------------------------------------===##
 ##
-## This source file is part of the Swift Distributed Tracing open source project
+## This source file is part of the Swift Tracing open source project
 ##
 ## Copyright (c) 2020 Moritz Lang and the Swift Tracing project authors
 ## Licensed under Apache License v2.0
@@ -50,7 +50,7 @@ for language in swift-or-c bash dtrace; do
         cat > "$tmp" <<"EOF"
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the Swift Distributed Tracing open source project
+// This source file is part of the Swift Tracing open source project
 //
 // Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
 // Licensed under Apache License v2.0
@@ -68,7 +68,7 @@ EOF
 #!/bin/bash
 ##===----------------------------------------------------------------------===##
 ##
-## This source file is part of the Swift Distributed Tracing open source project
+## This source file is part of the Swift Tracing open source project
 ##
 ## Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
 ## Licensed under Apache License v2.0
@@ -86,7 +86,7 @@ EOF
 #!/usr/sbin/dtrace -q -s
 /*===----------------------------------------------------------------------===*
  *
- *  This source file is part of the Swift Distributed Tracing open source project
+ *  This source file is part of the Swift Tracing open source project
  *
  *  Copyright (c) YEARS Moritz Lang and the Swift Tracing project authors
  *  Licensed under Apache License v2.0

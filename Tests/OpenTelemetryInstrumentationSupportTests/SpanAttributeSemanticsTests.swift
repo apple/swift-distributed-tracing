@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Moritz Lang and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
