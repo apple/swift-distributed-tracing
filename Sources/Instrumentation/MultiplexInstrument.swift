@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -39,8 +39,7 @@ extension MultiplexInstrument: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier
-    {
+        Carrier == Injector.Carrier {
         self.instruments.forEach { $0.inject(baggage, into: &carrier, using: injector) }
     }
 
@@ -49,8 +48,7 @@ extension MultiplexInstrument: Instrument {
     )
         where
         Carrier == Extractor.Carrier,
-        Extractor: ExtractorProtocol
-    {
+        Extractor: ExtractorProtocol {
         self.instruments.forEach { $0.extract(carrier, into: &baggage, using: extractor) }
     }
 }

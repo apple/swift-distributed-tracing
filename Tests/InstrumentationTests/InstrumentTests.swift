@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -66,8 +66,7 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier
-    {
+        Carrier == Injector.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
@@ -77,8 +76,7 @@ private final class FirstFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier
-    {
+        Carrier == Extractor.Carrier {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
@@ -99,8 +97,7 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier
-    {
+        Carrier == Injector.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
@@ -110,8 +107,7 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier
-    {
+        Carrier == Extractor.Carrier {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }

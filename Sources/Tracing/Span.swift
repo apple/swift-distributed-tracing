@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -153,8 +153,7 @@ extension SpanAttributeNamespace {
     }
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace
-    {
+        where Namespace: SpanAttributeNamespace {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
 }
@@ -293,6 +292,7 @@ extension SpanAttribute: ExpressibleByArrayLiteral {
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
 }
+
 #else
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
@@ -356,8 +356,7 @@ extension SpanAttributes {
     ///
     // TODO: document the pattern maybe on SpanAttributes?
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace
-    {
+        where Namespace: SpanAttributeNamespace {
         SpanAttribute.__namespace[keyPath: dynamicMember]
     }
 }

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import CoreBaggage
 
 /// A "no op" implementation of an `Instrument`.
 public struct NoOpInstrument: Instrument {

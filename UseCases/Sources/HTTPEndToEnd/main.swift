@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Tracing project authors
+// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -48,8 +48,7 @@ private final class FakeTracer: Instrument {
     func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
         where
         Injector: InjectorProtocol,
-        Carrier == Injector.Carrier
-    {
+        Carrier == Injector.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
@@ -57,8 +56,7 @@ private final class FakeTracer: Instrument {
     func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
         where
         Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier
-    {
+        Carrier == Extractor.Carrier {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
