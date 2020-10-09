@@ -18,17 +18,17 @@ import Instrumentation
 public struct NoOpTracer: Tracer {
     public func startSpan(
         named operationName: String,
-        context: BaggageContextCarrier,
+        baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
     ) -> Span {
-        return NoOpSpan()
+        return NoOpSpan(baggage: baggage)
     }
 
     public func forceFlush() {}
 
     public func inject<Carrier, Injector>(
-        _ context: BaggageContext,
+        _ baggage: Baggage,
         into carrier: inout Carrier,
         using injector: Injector
     )
@@ -38,7 +38,7 @@ public struct NoOpTracer: Tracer {
 
     public func extract<Carrier, Extractor>(
         _ carrier: Carrier,
-        into context: inout BaggageContext,
+        into baggage: inout Baggage,
         using extractor: Extractor
     )
         where
@@ -46,8 +46,11 @@ public struct NoOpTracer: Tracer {
         Carrier == Extractor.Carrier {}
 
     public final class NoOpSpan: Span {
-        public var context: BaggageContext {
-            return .init()
+        public let baggage: Baggage
+        public let isRecording = false
+
+        public init(baggage: Baggage) {
+            self.baggage = baggage
         }
 
         public func setStatus(_ status: SpanStatus) {}
@@ -66,8 +69,6 @@ public struct NoOpTracer: Tracer {
                 // ignore
             }
         }
-
-        public let isRecording = false
 
         public func end(at timestamp: Timestamp) {
             // ignore

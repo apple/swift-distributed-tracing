@@ -12,8 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import AsyncHTTPClient
-import Baggage
-import BaggageLogging
+import BaggageContext
 import Instrumentation
 import Logging
 import NIO
@@ -36,17 +35,17 @@ final class OrderServiceHandler: ChannelInboundHandler {
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         guard case .head(let requestHead) = self.unwrapInboundIn(data) else { return }
 
-        var baggage = BaggageContext()
+        var ctx = DefaultContext(baggage: .topLevel, logger: self.logger)
 
-        self.instrument.extract(requestHead.headers, into: &baggage, using: HTTPHeadersExtractor())
+        self.instrument.extract(requestHead.headers, into: &ctx.baggage, using: HTTPHeadersExtractor())
 
-        self.logger.with(context: baggage).info("🧾 Received order request")
+        ctx.logger.info("🧾 Received order request")
 
         context.eventLoop.scheduleTask(in: .seconds(1)) {
-            self.logger.with(context: baggage).info("🧾 Asking StorageService if your product exists")
+            ctx.logger.info("🧾 Asking StorageService if your product exists")
 
             let request = try! HTTPClient.Request(url: "http://localhost:8081")
-            self.httpClient.execute(request: request, context: baggage).whenComplete { _ in
+            self.httpClient.execute(request: request, context: ctx).whenComplete { _ in
                 let responseHead = HTTPResponseHead(version: requestHead.version, status: .created)
                 context.eventLoop.execute {
                     context.channel.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)

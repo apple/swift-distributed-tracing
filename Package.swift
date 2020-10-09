@@ -12,9 +12,9 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/slashmo/gsoc-swift-baggage-context.git",
-            from: "0.3.0"
+            from: "0.5.0"
         ),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.17.0"),
+        .package(url: "https://github.com/slashmo/swift-nio.git", .branch("feature/baggage-context")),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -24,11 +24,13 @@ let package = Package(
             name: "Instrumentation",
             dependencies: [
                 "Baggage",
+                "BaggageContext",
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
+                "BaggageContext",
                 "Instrumentation",
             ]
         ),
@@ -36,6 +38,7 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
+                "BaggageContext",
                 "Instrumentation",
             ]
         ),
@@ -44,7 +47,7 @@ let package = Package(
             dependencies: [
                 "Instrumentation",
                 "Tracing",
-                "BaggageLogging",
+                "BaggageContext",
             ]
         ),
 

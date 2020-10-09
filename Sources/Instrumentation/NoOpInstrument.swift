@@ -18,7 +18,7 @@ public struct NoOpInstrument: Instrument {
     public init() {}
 
     public func inject<Carrier, Injector>(
-        _ context: BaggageContext,
+        _ baggage: Baggage,
         into carrier: inout Carrier,
         using injector: Injector
     )
@@ -28,7 +28,7 @@ public struct NoOpInstrument: Instrument {
 
     public func extract<Carrier, Extractor>(
         _ carrier: Carrier,
-        into context: inout BaggageContext,
+        into baggage: inout Baggage,
         using extractor: Extractor
     )
         where

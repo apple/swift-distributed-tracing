@@ -14,14 +14,24 @@
 import Instrumentation
 import NIOHTTP1
 
+/// Extracts header values from `NIOHTTP1.HTTPHeaders`.
+///
+/// If multiple entries exist for a given key, their values will be joined according to
+/// [HTTP RFC 7230: Field Order](https://httpwg.org/specs/rfc7230.html#rfc.section.3.2.2), returning a comma-separated list
+/// of the values.
 public struct HTTPHeadersExtractor: ExtractorProtocol {
     public init() {}
 
     public func extract(key: String, from headers: HTTPHeaders) -> String? {
-        return headers.first(name: key)
+        let headers = headers
+            .lazy
+            .filter { $0.name == key }
+            .map { $0.value }
+        return headers.isEmpty ? nil : headers.joined(separator: ",")
     }
 }
 
+/// Injects values into `NIOHTTP1.HTTPHeaders`.
 public struct HTTPHeadersInjector: InjectorProtocol {
     public init() {}
 

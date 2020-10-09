@@ -11,165 +11,46 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
-import BaggageLogging
+import BaggageContext
 @testable import Instrumentation
 import Tracing
 import XCTest
 
 final class TracerTests: XCTestCase {
-    func testPlayground() {
-        let httpServer = FakeHTTPServer(instrument: TestTracer()) { context, _, client -> FakeHTTPResponse in
+    override class func tearDown() {
+        super.tearDown()
+        InstrumentationSystem.bootstrapInternal(nil)
+    }
+
+    func testContextPropagation() {
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrap(tracer)
+
+        let httpServer = FakeHTTPServer { context, _, client -> FakeHTTPResponse in
             client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
         }
 
-        httpServer.receive(FakeHTTPRequest(path: "/", headers: []))
-    }
+        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
 
-    func testItProvidesAccessToATracer() {
-        let tracer = TestTracer()
-
-        XCTAssertNil(InstrumentationSystem.tracer(of: TestTracer.self))
-
-        InstrumentationSystem.bootstrapInternal(tracer)
-        XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
-        XCTAssertNil(InstrumentationSystem.instrument(of: NoOpInstrument.self))
-
-        XCTAssert(InstrumentationSystem.tracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracer is TestTracer)
-
-        let multiplexInstrument = MultiplexInstrument([tracer])
-        InstrumentationSystem.bootstrapInternal(multiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
-
-        XCTAssert(InstrumentationSystem.tracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracer is TestTracer)
-    }
-}
-
-// MARK: - TestTracer
-
-final class TestTracer: Tracer {
-    func startSpan(
-        named operationName: String,
-        context: BaggageContextCarrier,
-        ofKind kind: SpanKind,
-        at timestamp: Timestamp
-    ) -> Span {
-        let span = TestSpan(
-            operationName: operationName,
-            startTimestamp: timestamp,
-            context: context.baggage,
-            kind: kind
-        ) { _ in }
-        return span
-    }
-
-    public func forceFlush() {}
-
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into context: inout BaggageContext, using extractor: Extractor)
-        where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier
-    {
-        let traceParent = extractor.extract(key: "traceparent", from: carrier)
-            ?? "00-0af7651916cd43dd8448eb211c80319c-b9c7c989f97918e1-01"
-
-        let traceParentComponents = traceParent.split(separator: "-")
-        precondition(traceParentComponents.count == 4, "Invalid traceparent format")
-        let traceID = String(traceParentComponents[1])
-        let parentID = String(traceParentComponents[2])
-        context[TraceParentKey.self] = TraceParent(traceID: traceID, parentID: parentID)
-    }
-
-    func inject<Carrier, Injector>(_ context: BaggageContext, into carrier: inout Carrier, using injector: Injector)
-        where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier
-    {
-        guard let traceParent = context[TraceParentKey.self] else { return }
-        let traceParentHeader = "00-\(traceParent.traceID)-\(traceParent.parentID)-00"
-        injector.inject(traceParentHeader, forKey: "traceparent", into: &carrier)
-    }
-}
-
-extension TestTracer {
-    struct TraceParent {
-        let traceID: String
-        let parentID: String
-    }
-
-    enum TraceParentKey: BaggageContextKey {
-        typealias Value = TraceParent
-    }
-}
-
-// MARK: - TestSpan
-
-final class TestSpan: Span {
-    private let operationName: String
-    private let kind: SpanKind
-
-    private var status: SpanStatus?
-
-    private let startTimestamp: Timestamp
-    private(set) var endTimestamp: Timestamp?
-
-    let context: BaggageContext
-
-    private(set) var events = [SpanEvent]() {
-        didSet {
-            self.isRecording = !self.events.isEmpty
+        XCTAssertEqual(tracer.spans.count, 2)
+        for span in tracer.spans {
+            XCTAssertEqual(span.baggage.traceID, "test")
         }
     }
 
-    private(set) var links = [SpanLink]()
-
-    var attributes: SpanAttributes = [:] {
-        didSet {
-            self.isRecording = !self.attributes.isEmpty
+    func testContextPropagationWithNoOpSpan() {
+        let httpServer = FakeHTTPServer { _, _, client -> FakeHTTPResponse in
+            var baggage = Baggage.topLevel
+            baggage.traceID = "test"
+            client.performRequest(baggage, request: FakeHTTPRequest(path: "/test", headers: []))
+            return FakeHTTPResponse(status: 418)
         }
-    }
 
-    private(set) var isRecording = false
+        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
 
-    let onEnd: (Span) -> Void
-
-    init(
-        operationName: String,
-        startTimestamp: Timestamp,
-        context: BaggageContext,
-        kind: SpanKind,
-        onEnd: @escaping (Span) -> Void
-    ) {
-        self.operationName = operationName
-        self.startTimestamp = startTimestamp
-        self.context = context
-        self.onEnd = onEnd
-        self.kind = kind
-    }
-
-    func setStatus(_ status: SpanStatus) {
-        self.status = status
-        self.isRecording = true
-    }
-
-    func addLink(_ link: SpanLink) {
-        self.links.append(link)
-    }
-
-    func addEvent(_ event: SpanEvent) {
-        self.events.append(event)
-    }
-
-    func recordError(_ error: Error) {}
-
-    func end(at timestamp: Timestamp) {
-        self.endTimestamp = timestamp
-        self.onEnd(self)
+        XCTAssertEqual(httpServer.client.baggages.count, 1)
+        XCTAssertEqual(httpServer.client.baggages.first?.traceID, "test")
     }
 }
 
@@ -199,28 +80,25 @@ struct FakeHTTPResponse {
 }
 
 struct FakeHTTPServer {
-    typealias Handler = (BaggageContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (Baggage, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
 
-    private let instrument: Instrument
     private let catchAllHandler: Handler
-    private let client: FakeHTTPClient
+    let client: FakeHTTPClient
 
-    init(instrument: Instrument, catchAllHandler: @escaping Handler) {
-        self.instrument = instrument
+    init(catchAllHandler: @escaping Handler) {
         self.catchAllHandler = catchAllHandler
-        self.client = FakeHTTPClient(instrument: instrument)
+        self.client = FakeHTTPClient()
     }
 
     func receive(_ request: FakeHTTPRequest) {
-        // TODO: - Consider a nicer way to access a certain instrument
-        let tracer = self.instrument as! Tracer
+        let tracer = InstrumentationSystem.tracer
 
-        var context = BaggageContext()
-        self.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
+        var baggage = Baggage.topLevel
+        InstrumentationSystem.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
 
-        let span = tracer.startSpan(named: "GET \(request.path)", context: context)
+        let span = tracer.startSpan(named: "GET \(request.path)", baggage: baggage)
 
-        let response = self.catchAllHandler(span.context, request, self.client)
+        let response = self.catchAllHandler(span.baggage, request, self.client)
         span.attributes["http.status"] = .int(response.status)
 
         span.end()
@@ -229,15 +107,14 @@ struct FakeHTTPServer {
 
 // MARK: - Fake HTTP Client
 
-struct FakeHTTPClient {
-    private let instrument: Instrument
+final class FakeHTTPClient {
+    private(set) var baggages = [Baggage]()
 
-    init(instrument: Instrument) {
-        self.instrument = instrument
-    }
-
-    func performRequest(_ context: BaggageContext, request: FakeHTTPRequest) {
+    func performRequest(_ baggage: Baggage, request: FakeHTTPRequest) {
         var request = request
-        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        let span = InstrumentationSystem.tracer.startSpan(named: "GET \(request.path)", baggage: baggage)
+        self.baggages.append(span.baggage)
+        InstrumentationSystem.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
+        span.end()
     }
 }

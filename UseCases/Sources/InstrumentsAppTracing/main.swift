@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import BaggageContext
 import Dispatch
 import Instrumentation
 import Tracing
@@ -35,16 +35,16 @@ if #available(macOS 10.14, iOS 10.0, *) {
 // MARK: Manual usage
 
 let tracer = InstrumentationSystem.tracer
-let context = BaggageContext()
+let context = DefaultContext(baggage: .topLevel, logger: .init(label: "test"))
 
 for i in 1 ... 5 {
     print("Starting operation: op-\(i)")
-    var parentSpan = tracer.startSpan(named: "op-\(i)", context: context)
+    let parentSpan = tracer.startSpan(named: "op-\(i)", baggage: context.baggage)
     defer { parentSpan.end() }
 
     DispatchQueue.global().async {
-        var span = tracer.startSpan(named: "op-\(i)-inner", context: BaggageContext()) // empty context
-        span.addLink(SpanLink(context: parentSpan.context)) // TODO: span.addLink(parentSpan)
+        let span = tracer.startSpan(named: "op-\(i)-inner", baggage: context.baggage)
+        span.addLink(parentSpan)
         print("    Starting sub-operation: op-\(i)-inner")
         defer { span.end() }
 

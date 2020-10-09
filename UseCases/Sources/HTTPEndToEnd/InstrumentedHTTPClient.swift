@@ -12,8 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import AsyncHTTPClient
-import Baggage
-import BaggageLogging
+import BaggageContext
 import Instrumentation
 import Logging
 import NIO
@@ -31,7 +30,7 @@ struct InstrumentedHTTPClient {
     }
 
     // TODO: deadline: NIODeadline? would move into baggage?
-    public func get(url: String, context: BaggageContext = .init()) -> EventLoopFuture<HTTPClient.Response> {
+    public func get(url: String, context: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         do {
             let request = try HTTPClient.Request(url: url, method: .GET)
             return self.execute(request: request, context: context)
@@ -42,8 +41,8 @@ struct InstrumentedHTTPClient {
 
     func execute(request: HTTPClient.Request, context: BaggageContext) -> EventLoopFuture<HTTPClient.Response> {
         var request = request
-        self.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
-        self.logger.with(context: context).info("🌎 InstrumentedHTTPClient: Execute request")
+        self.instrument.inject(context.baggage, into: &request.headers, using: HTTPHeadersInjector())
+        context.logger.info("🌎 InstrumentedHTTPClient: Execute request")
         return self.client.execute(request: request)
     }
 
