@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 import Instrumentation
 import Logging
 import NIO

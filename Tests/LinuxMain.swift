@@ -22,7 +22,7 @@ import XCTest
 
 #if os(Linux) || os(FreeBSD)
    @testable import InstrumentationTests
-   @testable import OpenTelemetryInstrumentationSupportTests
+   @testable import TracingOpenTelemetrySupportTests
    @testable import TracingTests
 
 // This protocol is necessary to we can call the 'run' method (on an existential of this protocol)

@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
-import BaggageContext
 @testable import Instrumentation
 import XCTest
 

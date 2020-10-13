@@ -6,11 +6,10 @@ let package = Package(
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
-        .library(name: "OpenTelemetryInstrumentationSupport", targets: ["OpenTelemetryInstrumentationSupport"]),
+        .library(name: "TracingOpenTelemetrySupport", targets: ["TracingOpenTelemetrySupport"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.0.1"),
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage-core.git", from: "0.0.1"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -49,15 +48,15 @@ let package = Package(
         // MARK: Support libraries
 
         .target(
-            name: "OpenTelemetryInstrumentationSupport",
+            name: "TracingOpenTelemetrySupport",
             dependencies: [
                 "Tracing"
             ]
         ),
         .testTarget(
-            name: "OpenTelemetryInstrumentationSupportTests",
+            name: "TracingOpenTelemetrySupportTests",
             dependencies: [
-                "OpenTelemetryInstrumentationSupport",
+                "TracingOpenTelemetrySupport",
             ]
         ),
 
@@ -65,14 +64,16 @@ let package = Package(
         // MARK: Performance / Benchmarks
 
         .target(
-            name: "TracingBenchmarks",
+            name: "_TracingBenchmarks",
             dependencies: [
                 "Baggage",
-                "TracingBenchmarkTools",
+                "Tracing",
+                "TracingOpenTelemetrySupport",
+                "_TracingBenchmarkTools",
             ]
         ),
         .target(
-            name: "TracingBenchmarkTools",
+            name: "_TracingBenchmarkTools",
             dependencies: []
         ),
     ]

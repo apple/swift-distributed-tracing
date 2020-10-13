@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 import Dispatch
 import Instrumentation
 import Tracing

@@ -218,7 +218,7 @@ func get(url: String, context: BaggageContextCarrier) {
 > Make sure that error cases also set the error attribute and end the span.
 
 > In the above example we used the semantic `http.method` attribute that gets exposed via the
-`OpenTelemetryInstrumentationSupport` library.
+`TracingOpenTelemetrySupport` library.
 
 ## Instrument developers: Creating an instrument
 

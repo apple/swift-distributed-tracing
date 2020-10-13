@@ -20,7 +20,7 @@ final class TestTracer: Tracer {
     private(set) var spans = [TestSpan]()
 
     func startSpan(
-        named operationName: String,
+        _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
