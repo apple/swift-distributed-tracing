@@ -9,7 +9,8 @@ let package = Package(
         .library(name: "TracingOpenTelemetrySupport", targets: ["TracingOpenTelemetrySupport"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.0.1"),
+        // FIXME: changes to https when public
+        .package(url: "git@github.com:apple/swift-distributed-tracing-baggage.git", from: "0.0.1"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
