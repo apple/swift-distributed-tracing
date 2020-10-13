@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
-import Instrumentation
+@_exported import Baggage
+@_exported import Instrumentation
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
@@ -25,7 +25,7 @@ public protocol Tracer: Instrument {
     ///   - kind: The `SpanKind` of the new `Span`.
     ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
-        named operationName: String,
+        _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp
@@ -45,13 +45,30 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - context: The carrier of a `BaggageContext` within to start the new `Span`.
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent `Span`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
     public func startSpan(
-        named operationName: String,
+        _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind = .internal
     ) -> Span {
-        return self.startSpan(named: operationName, baggage: baggage, ofKind: kind, at: .now())
+        return self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now())
+    }
+
+    // ==== --------------------------------------------------------------------
+    // MARK: LoggingContext accepting
+
+    /// Start a new `Span` with the given `Baggage` starting at `Timestamp.now()`.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - context: Logging context containing a `Baggage` whichi may contain trace identifiers of a parent `Span`.
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    public func startSpan(
+        _ operationName: String,
+        context: LoggingContext,
+        ofKind kind: SpanKind = .internal
+    ) -> Span {
+        return self.startSpan(operationName, baggage: context.baggage, ofKind: kind, at: .now())
     }
 }

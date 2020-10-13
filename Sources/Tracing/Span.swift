@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+@_exported import Baggage
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
@@ -154,7 +154,7 @@ extension SpanAttributeNamespace {
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
         where Namespace: SpanAttributeNamespace {
-        SpanAttribute.__namespace[keyPath: dynamicMember]
+        SpanAttribute.int(0)[keyPath: dynamicMember]
     }
 }
 #endif

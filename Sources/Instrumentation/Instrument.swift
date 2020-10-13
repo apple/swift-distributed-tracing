@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import CoreBaggage
 
 /// Conforming types are used to extract values from a specific `Carrier`.
 public protocol ExtractorProtocol {

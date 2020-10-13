@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Instrumentation
+@_exported import Instrumentation
 
 extension InstrumentationSystem {
     /// Get a `Tracer` instance of the given type.

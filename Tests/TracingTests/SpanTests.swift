@@ -105,7 +105,7 @@ final class SpanTests: XCTestCase {
 
         // using swift 5.2, we can improve upon that by using type-safe, keypath-based subscripts:
         #if swift(>=5.2)
-        // An import like: `import OpenTelemetryInstrumentationSupport` can enable type-safe well defined attributes,
+        // An import like: `import TracingOpenTelemetrySupport` can enable type-safe well defined attributes,
         // e.g. as defined in https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace/semantic_conventions
         attributes.name = "kappa"
         attributes.sampleHttp.statusCode = 200

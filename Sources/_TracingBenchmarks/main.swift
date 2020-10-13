@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import TracingBenchmarkTools
+import _TracingBenchmarkTools
 
 assert({
     print("===========================================================================")
@@ -36,6 +36,6 @@ private func registerBenchmark(_ name: String, _ function: @escaping (Int) -> Vo
     registerBenchmark(BenchmarkInfo(name: name, runFunction: function, tags: tags))
 }
 
-registerBenchmark(ExampleBenchmarks)
+registerBenchmark(SpanAttributesDSLBenchmarks)
 
 main()

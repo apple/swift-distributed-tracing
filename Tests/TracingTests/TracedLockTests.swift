@@ -59,7 +59,7 @@ enum TaskIDKey: Baggage.Key {
 
 private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
-        named operationName: String,
+        _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
         at timestamp: Timestamp

@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import AsyncHTTPClient
-import BaggageContext
+import Baggage
 import Foundation
 import Instrumentation
 import Logging

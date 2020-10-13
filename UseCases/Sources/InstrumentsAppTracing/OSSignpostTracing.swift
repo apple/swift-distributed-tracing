@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import BaggageContext
+import Baggage
 import Foundation // string conversion for os_log seems to live here
 import Instrumentation
 import Tracing
