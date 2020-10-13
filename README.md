@@ -35,12 +35,11 @@ and tracing systems can be built on top of it.
  
 Compatible `Tracer` implementations:
 
-- Swift **Jaeger** Client (@slashmo)
+- @slashmo / [Swift **Jaeger** Client](https://github.com/slashmo/jaeger-client-swift)
   - also able to emit **Zipkin** formatted data
-- xRay (@pokrywka)
-- xRay (@fabian)
-
-TODO: Links
+- @pokrywka / [AWS xRay SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift)
+- @fabian / xRay WIP
+- your implementation?
 
 ## Instrumentation
 
