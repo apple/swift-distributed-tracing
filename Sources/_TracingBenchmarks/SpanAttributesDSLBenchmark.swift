@@ -11,6 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if swift(>=5.2)
+
 import _TracingBenchmarkTools
 import Tracing
 import TracingOpenTelemetrySupport
@@ -130,3 +132,5 @@ func bench_set_Int_dsl(times: Int) throws {
         span.attributes.http.statusCode = 200
     }
 }
+
+#endif
