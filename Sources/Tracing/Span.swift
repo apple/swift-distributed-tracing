@@ -47,6 +47,8 @@ public protocol Span: AnyObject {
     func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
+    ///
+    /// Ending a `Span` MUST be idempotent.
     /// - Parameter timestamp: The `Timestamp` at which the span ended.
     func end(at timestamp: Timestamp)
 }
@@ -160,35 +162,59 @@ extension SpanAttributeNamespace {
 #endif
 
 /// The value of an attribute used to describe a `Span` or `SpanEvent`.
+///
+/// Arrays are allowed but are enforced to be homogenous.
+///
+/// Attributes cannot be "nested" their structure is a flat key/value representation.
 public enum SpanAttribute: Equatable {
-    case string(String)
     case int(Int64)
+    case intArray([Int64])
+
     case double(Double)
+    case doubleArray([Double])
+
     case bool(Bool)
+    case boolArray([Bool])
 
-    // TODO: This could be misused to create a heterogeneous array of attributes, which is not allowed in OT:
-    // https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-attributes
+    case string(String)
+    case stringArray([String])
 
-    case array([SpanAttribute])
     case stringConvertible(CustomStringConvertible)
+    case stringConvertibleArray([CustomStringConvertible])
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
     /// This value will never be stored or returned, and any attempt of doing so would WILL crash your application.
     case __namespace
 
+    public static func int(_ value: Int) -> SpanAttribute {
+        .int(Int64(value))
+    }
+
+    public static func int(_ value: Int32) -> SpanAttribute {
+        .int(Int64(value))
+    }
+
     internal var anyValue: Any {
         switch self {
-        case .string(let value):
-            return value
         case .int(let value):
+            return value
+        case .intArray(let value):
             return value
         case .double(let value):
             return value
+        case .doubleArray(let value):
+            return value
         case .bool(let value):
             return value
-        case .array(let value):
+        case .boolArray(let value):
+            return value
+        case .string(let value):
+            return value
+        case .stringArray(let value):
             return value
         case .stringConvertible(let value):
+            return value
+        case .stringConvertibleArray(let value):
             return value
         case .__namespace:
             fatalError("__namespace MUST NOT be stored not can be extracted from using anyValue")
@@ -197,56 +223,71 @@ public enum SpanAttribute: Equatable {
 
     public static func == (lhs: SpanAttribute, rhs: SpanAttribute) -> Bool {
         switch (lhs, rhs) {
-        case (.string(let l), .string(let r)): return l == r
         case (.int(let l), .int(let r)): return l == r
+        case (.intArray(let l), .intArray(let r)): return l == r
         case (.double(let l), .double(let r)): return l == r
+        case (.doubleArray(let l), .doubleArray(let r)): return l == r
         case (.bool(let l), .bool(let r)): return l == r
-        case (.array(let l), .array(let r)): return l == r
+        case (.boolArray(let l), .boolArray(let r)): return l == r
+        case (.string(let l), .string(let r)): return l == r
+        case (.stringArray(let l), .stringArray(let r)): return l == r
         case (.stringConvertible(let l), .stringConvertible(let r)): return "\(l)" == "\(r)"
-        case (.string, _),
-             (.int, _),
+        case (.stringConvertibleArray(let l), .stringConvertibleArray(let r)): return "\(l)" == "\(r)"
+        case (.int, _),
+             (.intArray, _),
              (.double, _),
+             (.doubleArray, _),
              (.bool, _),
-             (.array, _),
-             (.stringConvertible, _):
-            return false
-        case (.__namespace, _):
+             (.boolArray, _),
+             (.string, _),
+             (.stringArray, _),
+             (.stringConvertible, _),
+             (.stringConvertibleArray, _),
+             (.__namespace, _):
             return false
         }
     }
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values
+
 public protocol SpanAttributeConvertible {
     func toSpanAttribute() -> SpanAttribute
 }
 
+extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        switch self {
+        case let value as [Int]:
+        }
+
+        if let value = self as? [Int] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int32] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int64] {
+            return .intArray(value)
+        } else if let value = self as? [Double] {
+            return .doubleArray(value)
+        } else if let value = self as? [Bool] {
+            return .boolArray(value)
+        } else if let value = self as? [String] {
+            return .stringArray(value)
+        } else if let value = self as? [CustomStringConvertible] {
+            return .stringConvertibleArray(value)
+        } else {
+            fatalError("Not supported SpanAttribute array type: \(type(of: self))")
+        }
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: String
+
 extension String: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
         return .string(self)
-    }
-}
-
-extension Int: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .int(self)
-    }
-}
-
-extension Double: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .double(self)
-    }
-}
-
-extension Bool: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .bool(self)
-    }
-}
-
-extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .array(self.map { $0.toSpanAttribute() })
     }
 }
 
@@ -262,9 +303,45 @@ extension SpanAttribute: ExpressibleByStringInterpolation {
     }
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Int
+
 extension SpanAttribute: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
-        self = .int(value)
+        self = .int(Int64(value))
+    }
+}
+
+extension Int: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int32: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int64: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(self)
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Float/Double
+
+extension Float: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .double(Double(self))
+    }
+}
+
+extension Double: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .double(self)
     }
 }
 
@@ -274,17 +351,23 @@ extension SpanAttribute: ExpressibleByFloatLiteral {
     }
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Bool
+
+extension Bool: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .bool(self)
+    }
+}
+
 extension SpanAttribute: ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = .bool(value)
     }
 }
 
-extension SpanAttribute: ExpressibleByArrayLiteral {
-    public init(arrayLiteral attributes: SpanAttribute...) {
-        self = .array(attributes)
-    }
-}
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: SpanAttributes: Namespaces
 
 #if swift(>=5.2)
 /// A collection of `SpanAttribute`s.

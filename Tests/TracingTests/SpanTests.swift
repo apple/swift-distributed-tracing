@@ -69,23 +69,10 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let attributes: SpanAttribute = [true, "test"]
-        guard case .array(let arrayValue) = attributes else {
-            XCTFail("Expected array attribute, got \(attributes).")
-            return
-        }
-
-        guard case .bool(let boolValue) = arrayValue[0] else {
-            XCTFail("Expected bool attribute, got \(arrayValue[0])")
-            return
-        }
-        XCTAssert(boolValue)
-
-        guard case .string(let stringValue) = arrayValue[1] else {
-            XCTFail("Expected string attribute, got \(arrayValue[1])")
-            return
-        }
-        XCTAssertEqual(stringValue, "test")
+        let _: SpanAttribute = [42, 21]
+        let _: SpanAttribute = [42.10, 21.0]
+        let _: SpanAttribute = [true, false]
+        let _: SpanAttribute = ["one", "two"]
     }
 
     func testSpanAttributesUX() {
