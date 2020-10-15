@@ -162,7 +162,7 @@ extension SpanAttributeNamespace {
 /// The value of an attribute used to describe a `Span` or `SpanEvent`.
 public enum SpanAttribute: Equatable {
     case string(String)
-    case int(Int)
+    case int(Int64)
     case double(Double)
     case bool(Bool)
 
