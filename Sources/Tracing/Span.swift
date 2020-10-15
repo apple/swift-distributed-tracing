@@ -257,28 +257,24 @@ public protocol SpanAttributeConvertible {
 }
 
 extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        switch self {
-        case let value as [Int]:
-        }
+    
+}
 
-        if let value = self as? [Int] {
-            return .intArray(value.map(Int64.init))
-        } else if let value = self as? [Int32] {
-            return .intArray(value.map(Int64.init))
-        } else if let value = self as? [Int64] {
-            return .intArray(value)
-        } else if let value = self as? [Double] {
-            return .doubleArray(value)
-        } else if let value = self as? [Bool] {
-            return .boolArray(value)
-        } else if let value = self as? [String] {
-            return .stringArray(value)
-        } else if let value = self as? [CustomStringConvertible] {
-            return .stringConvertibleArray(value)
-        } else {
-            fatalError("Not supported SpanAttribute array type: \(type(of: self))")
-        }
+extension Array where Element: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        fatalError()
+    }
+}
+
+extension Array where Element == Int {
+    public func toSpanAttribute() -> SpanAttribute {
+            return .intArray(self.map(Int64.init))
+    }
+}
+
+extension Array where Element == Double {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .doubleArray(self)
     }
 }
 

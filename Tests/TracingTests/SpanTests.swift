@@ -69,10 +69,13 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let _: SpanAttribute = [42, 21]
+        let _: SpanAttributeConvertible = [42, 21]
         let _: SpanAttribute = [42.10, 21.0]
         let _: SpanAttribute = [true, false]
         let _: SpanAttribute = ["one", "two"]
+        
+        var s: Span? = nil
+        s!.attributes["hi"] = [1,2,34]
     }
 
     func testSpanAttributesUX() {
