@@ -122,8 +122,8 @@ final class SpanTests: XCTestCase {
     func testSpanAttributesAreIterable() {
         let attributes: SpanAttributes = [
             "0": 0,
-            "1": true, 
-            "2": "test"
+            "1": true,
+            "2": "test",
         ]
 
         var dictionary = [String: SpanAttribute]()
@@ -183,7 +183,7 @@ final class SpanTests: XCTestCase {
 // MARK: Example Span attributes
 
 extension SpanAttribute {
-    var name: SpanAttributeKey<String> {
+    var name: Key<String> {
         return "name"
     }
 }
@@ -210,15 +210,15 @@ public struct HTTPAttributes: SpanAttributeNamespace {
     public struct NestedAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
-        public var statusCode: SpanAttributeKey<Int> {
+        public var statusCode: SpanAttribute.Key<Int> {
             "http.status_code"
         }
 
-        public var codesArray: SpanAttributeKey<[Int]> {
+        public var codesArray: SpanAttribute.Key<[Int]> {
             "http.codes_array"
         }
 
-        public var customType: SpanAttributeKey<CustomAttributeValue> {
+        public var customType: SpanAttribute.Key<CustomAttributeValue> {
             "http.custom_value"
         }
     }

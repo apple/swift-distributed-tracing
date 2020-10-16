@@ -26,7 +26,6 @@ final class SpanAttributeSemanticsTests: XCTestCase {
         XCTAssertEqual(attributes.http.method, "GET")
 
         attributes.net.hostPort = 8080
-        print("attributes.net = \(attributes["net.host.port"])")
         XCTAssertEqual(attributes.net.hostPort, 8080)
 
         attributes.peer.service = "hotrod"
