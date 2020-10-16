@@ -169,13 +169,12 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(child.links[0].baggage[TestBaggageContextKey.self], "test")
         #if swift(>=5.2)
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
-        #else
-        guard case .some(.int(let statusCode)) = child.links[0].attributes["http.status_code"] else {
+        #endif
+        guard case .some(.int(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
             XCTFail("Expected int value for http.status_code")
             return
         }
         XCTAssertEqual(statusCode, 418)
-        #endif
     }
 }
 

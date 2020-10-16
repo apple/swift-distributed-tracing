@@ -204,6 +204,8 @@ public enum SpanAttribute: Equatable {
     case stringConvertible(CustomStringConvertible)
     case stringConvertibleArray([CustomStringConvertible])
 
+    #if swift(>=5.2)
+    // older swifts get confused and can't resolve if we mean the `case int(Int64)` or any of those overloads
     public static func int(_ value: Int) -> SpanAttribute {
         .int(Int64(value))
     }
@@ -219,11 +221,12 @@ public enum SpanAttribute: Equatable {
     public static func int(_ value: Int32) -> SpanAttribute {
         .int(Int64(value))
     }
+    #endif
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
     /// This value will never be stored or returned, and any attempt of doing so would WILL crash your application.
     internal static var _namespace: SpanAttribute {
-        .int(0)
+        return .int(0)
     }
 
     internal var anyValue: Any {
@@ -504,7 +507,7 @@ extension SpanAttributes {
 
     /// - Returns: Number of attributes stored.
     public var count: Int {
-        self._attributes.count
+        return self._attributes.count
     }
 
     /// Returns true if the collection contains no attributes.
