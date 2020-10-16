@@ -49,7 +49,7 @@ public struct EndUserAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// Username or client_id extracted from the access token or Authorization header in the inbound request from outside the system.

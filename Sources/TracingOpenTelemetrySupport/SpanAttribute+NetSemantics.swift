@@ -57,7 +57,7 @@ public struct NetAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// Transport protocol used.

@@ -51,7 +51,7 @@ public struct GRPCAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// The type of message, e.g. "SENT" or "RECEIVED".

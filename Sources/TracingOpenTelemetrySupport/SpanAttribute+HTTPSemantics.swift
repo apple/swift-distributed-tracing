@@ -75,7 +75,7 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// HTTP request method. E.g. "GET".

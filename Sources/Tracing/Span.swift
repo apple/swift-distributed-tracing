@@ -118,11 +118,11 @@ public struct SpanAttributeKey<T>: Hashable, ExpressibleByStringLiteral where T:
 @dynamicMemberLookup
 public protocol SpanAttributeNamespace {
     /// Type that contains the nested attributes, e.g. HTTPAttributes which would contain `statusCode` and similar vars.
-    associatedtype NestedAttributes: NestedSpanAttributesProtocol
+    associatedtype NestedSpanAttributes: NestedSpanAttributesProtocol
 
     var attributes: SpanAttributes { get set }
 
-    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible { get set }
+    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible { get set }
 
     subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
         where Namespace: SpanAttributeNamespace { get }
@@ -145,10 +145,10 @@ extension NestedSpanAttributesProtocol {
 }
 
 extension SpanAttributeNamespace {
-    public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedAttributes, SpanAttributeKey<T>>) -> T?
+    public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
         where T: SpanAttributeConvertible {
         get {
-            let key = NestedAttributes.__namespace[keyPath: dynamicMember]
+            let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
             let spanAttribute = self.attributes[key.name]?.toSpanAttribute()
             switch spanAttribute {
             case .int(let int):
@@ -169,7 +169,7 @@ extension SpanAttributeNamespace {
             }
         }
         set {
-            let key = NestedAttributes.__namespace[keyPath: dynamicMember]
+            let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
             self.attributes[key.name] = newValue?.toSpanAttribute()
         }
     }

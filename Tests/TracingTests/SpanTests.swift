@@ -207,7 +207,7 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         public var statusCode: SpanAttribute.Key<Int> {

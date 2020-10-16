@@ -49,7 +49,7 @@ public struct RPCAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// A string identifying the remoting system, e.g., "grpc", "java_rmi" or "wcf".
