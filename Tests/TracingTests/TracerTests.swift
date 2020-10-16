@@ -99,7 +99,7 @@ struct FakeHTTPServer {
         let span = tracer.startSpan("GET \(request.path)", baggage: baggage)
 
         let response = self.catchAllHandler(span.baggage, request, self.client)
-        span.attributes["http.status"] = .int(response.status)
+        span.attributes["http.status"] = response.status
 
         span.end()
     }

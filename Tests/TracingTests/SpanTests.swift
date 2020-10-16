@@ -69,13 +69,12 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let _: SpanAttributeConvertible = [42, 21]
-        let _: SpanAttribute = [42.10, 21.0]
-        let _: SpanAttribute = [true, false]
-        let _: SpanAttribute = ["one", "two"]
-        
-        var s: Span? = nil
-        s!.attributes["hi"] = [1,2,34]
+        let s = InstrumentationSystem.tracer.startSpan("", baggage: .topLevel)
+        s.attributes["hi"] = [42, 21]
+        s.attributes["hi"] = [42.10, 21.0]
+        s.attributes["hi"] = [true, false]
+        s.attributes["hi"] = ["one", "two"]
+        s.attributes["hi"] = [1, 2, 34]
     }
 
     func testSpanAttributesUX() {
@@ -89,9 +88,9 @@ final class SpanTests: XCTestCase {
         attributes["bools"] = [true, false, true]
         attributes["alive"] = false
 
-        XCTAssertEqual(attributes["thing.name"], SpanAttribute.string("hello"))
-        XCTAssertEqual(attributes["meaning.of.life"], SpanAttribute.int(42))
-        XCTAssertEqual(attributes["alive"], SpanAttribute.bool(false))
+        XCTAssertEqual(attributes["thing.name"]?.toSpanAttribute(), SpanAttribute.string("hello"))
+        XCTAssertEqual(attributes["meaning.of.life"]?.toSpanAttribute(), SpanAttribute.int(42))
+        XCTAssertEqual(attributes["alive"]?.toSpanAttribute(), SpanAttribute.bool(false))
 
         // using swift 5.2, we can improve upon that by using type-safe, keypath-based subscripts:
         #if swift(>=5.2)
@@ -114,14 +113,18 @@ final class SpanTests: XCTestCase {
         // normally we can use just the span attribute values, and it is not type safe or guided in any way:
         attributes.sampleHttp.customType = CustomAttributeValue()
 
-        XCTAssertEqual(attributes["http.custom_value"], SpanAttribute.stringConvertible(CustomAttributeValue()))
+        XCTAssertEqual(attributes["http.custom_value"]?.toSpanAttribute(), SpanAttribute.stringConvertible(CustomAttributeValue()))
         XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
         XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
         #endif
     }
 
     func testSpanAttributesAreIterable() {
-        let attributes: SpanAttributes = ["0": 0, "1": true, "2": "test"]
+        let attributes: SpanAttributes = [
+            "0": 0,
+            "1": true, 
+            "2": "test"
+        ]
 
         var dictionary = [String: SpanAttribute]()
         attributes.forEach { name, attribute in
