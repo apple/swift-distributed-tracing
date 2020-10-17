@@ -69,23 +69,12 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let attributes: SpanAttribute = [true, "test"]
-        guard case .array(let arrayValue) = attributes else {
-            XCTFail("Expected array attribute, got \(attributes).")
-            return
-        }
-
-        guard case .bool(let boolValue) = arrayValue[0] else {
-            XCTFail("Expected bool attribute, got \(arrayValue[0])")
-            return
-        }
-        XCTAssert(boolValue)
-
-        guard case .string(let stringValue) = arrayValue[1] else {
-            XCTFail("Expected string attribute, got \(arrayValue[1])")
-            return
-        }
-        XCTAssertEqual(stringValue, "test")
+        let s = InstrumentationSystem.tracer.startSpan("", baggage: .topLevel)
+        s.attributes["hi"] = [42, 21]
+        s.attributes["hi"] = [42.10, 21.0]
+        s.attributes["hi"] = [true, false]
+        s.attributes["hi"] = ["one", "two"]
+        s.attributes["hi"] = [1, 2, 34]
     }
 
     func testSpanAttributesUX() {
@@ -99,9 +88,9 @@ final class SpanTests: XCTestCase {
         attributes["bools"] = [true, false, true]
         attributes["alive"] = false
 
-        XCTAssertEqual(attributes["thing.name"], SpanAttribute.string("hello"))
-        XCTAssertEqual(attributes["meaning.of.life"], SpanAttribute.int(42))
-        XCTAssertEqual(attributes["alive"], SpanAttribute.bool(false))
+        XCTAssertEqual(attributes["thing.name"]?.toSpanAttribute(), SpanAttribute.string("hello"))
+        XCTAssertEqual(attributes["meaning.of.life"]?.toSpanAttribute(), SpanAttribute.int(42))
+        XCTAssertEqual(attributes["alive"]?.toSpanAttribute(), SpanAttribute.bool(false))
 
         // using swift 5.2, we can improve upon that by using type-safe, keypath-based subscripts:
         #if swift(>=5.2)
@@ -124,14 +113,18 @@ final class SpanTests: XCTestCase {
         // normally we can use just the span attribute values, and it is not type safe or guided in any way:
         attributes.sampleHttp.customType = CustomAttributeValue()
 
-        XCTAssertEqual(attributes["http.custom_value"], SpanAttribute.stringConvertible(CustomAttributeValue()))
+        XCTAssertEqual(attributes["http.custom_value"]?.toSpanAttribute(), SpanAttribute.stringConvertible(CustomAttributeValue()))
         XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
         XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
         #endif
     }
 
     func testSpanAttributesAreIterable() {
-        let attributes: SpanAttributes = ["0": 0, "1": true, "2": "test"]
+        let attributes: SpanAttributes = [
+            "0": 0,
+            "1": true,
+            "2": "test",
+        ]
 
         var dictionary = [String: SpanAttribute]()
         attributes.forEach { name, attribute in
@@ -176,13 +169,12 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(child.links[0].baggage[TestBaggageContextKey.self], "test")
         #if swift(>=5.2)
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
-        #else
-        guard case .some(.int(let statusCode)) = child.links[0].attributes["http.status_code"] else {
+        #endif
+        guard case .some(.int(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
             XCTFail("Expected int value for http.status_code")
             return
         }
         XCTAssertEqual(statusCode, 418)
-        #endif
     }
 }
 
@@ -190,7 +182,7 @@ final class SpanTests: XCTestCase {
 // MARK: Example Span attributes
 
 extension SpanAttribute {
-    var name: SpanAttributeKey<String> {
+    var name: Key<String> {
         return "name"
     }
 }
@@ -214,18 +206,18 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
-        public var statusCode: SpanAttributeKey<Int> {
+        public var statusCode: SpanAttribute.Key<Int> {
             "http.status_code"
         }
 
-        public var codesArray: SpanAttributeKey<[Int]> {
+        public var codesArray: SpanAttribute.Key<[Int]> {
             "http.codes_array"
         }
 
-        public var customType: SpanAttributeKey<CustomAttributeValue> {
+        public var customType: SpanAttribute.Key<CustomAttributeValue> {
             "http.custom_value"
         }
     }

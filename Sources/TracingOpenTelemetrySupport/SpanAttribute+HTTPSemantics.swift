@@ -75,72 +75,72 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// HTTP request method. E.g. "GET".
-        public var method: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.method) }
+        public var method: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.method) }
 
         /// Full HTTP request URL in the form scheme://host[:port]/path?query[#fragment].
         /// Usually the fragment is not transmitted over HTTP, but if it is known, it should be included nevertheless.
-        public var url: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.url) }
+        public var url: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.url) }
 
         /// The full request target as passed in a HTTP request line or equivalent, e.g. "/path/12314/?q=ddds#123".
-        public var target: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.target) }
+        public var target: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.target) }
 
         /// The value of the HTTP host header. When the header is empty or not present, this attribute should be the same.
-        public var host: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.host) }
+        public var host: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.host) }
 
         /// The URI scheme identifying the used protocol: "http" or "https"
-        public var scheme: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.scheme) }
+        public var scheme: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.scheme) }
 
         /// HTTP response status code. E.g. 200.
-        public var statusCode: SpanAttributeKey<Int> { .init(name: SpanAttributeName.HTTP.statusCode) }
+        public var statusCode: SpanAttribute.Key<Int> { .init(name: SpanAttributeName.HTTP.statusCode) }
 
         /// HTTP reason phrase. E.g. "OK".
-        public var statusText: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.statusText) }
+        public var statusText: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.statusText) }
 
         /// Kind of HTTP protocol used: "1.0", "1.1", "2", "SPDY" or "QUIC".
-        public var flavor: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.flavor) }
+        public var flavor: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.flavor) }
 
         /// Value of the HTTP User-Agent header sent by the client.
-        public var userAgent: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.userAgent) }
+        public var userAgent: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.userAgent) }
 
         /// The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often,
         /// but not always, present as the Content-Length header. For requests using transport encoding, this should be the
         /// compressed size.
-        public var requestContentLength: SpanAttributeKey<Int> {
+        public var requestContentLength: SpanAttribute.Key<Int> {
             .init(name: SpanAttributeName.HTTP.requestContentLength)
         }
 
         /// The size of the uncompressed request payload body after transport decoding. Not set if transport encoding not used.
-        public var requestContentLengthUncompressed: SpanAttributeKey<Int> {
+        public var requestContentLengthUncompressed: SpanAttribute.Key<Int> {
             .init(name: SpanAttributeName.HTTP.requestContentLengthUncompressed)
         }
 
         /// The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and
         /// is often, but not always, present as the Content-Length header. For requests using transport encoding, this
         /// should be the compressed size.
-        public var responseContentLength: SpanAttributeKey<Int> {
+        public var responseContentLength: SpanAttribute.Key<Int> {
             .init(name: SpanAttributeName.HTTP.responseContentLength)
         }
 
         /// The size of the uncompressed response payload body after transport decoding. Not set if transport encoding not used.
-        public var responseContentLengthUncompressed: SpanAttributeKey<Int> {
+        public var responseContentLengthUncompressed: SpanAttribute.Key<Int> {
             .init(name: SpanAttributeName.HTTP.responseContentLengthUncompressed)
         }
 
         /// The primary server name of the matched virtual host. This should be obtained via configuration.
         /// If no such configuration can be obtained, this attribute MUST NOT be set (`net.hostName` should be used instead).
-        public var serverName: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.serverName) }
+        public var serverName: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.serverName) }
 
         /// The matched route (path template). E.g. "/users/:userID?".
-        public var serverRoute: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.serverRoute) }
+        public var serverRoute: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.serverRoute) }
 
         /// The IP address of the original client behind all proxies, if known (e.g. from X-Forwarded-For).
         /// Note that this is not necessarily the same as `net.peerIP`, which would identify the network-level peer,
         /// which may be a proxy.
-        public var serverClientIP: SpanAttributeKey<String> { .init(name: SpanAttributeName.HTTP.serverClientIP) }
+        public var serverClientIP: SpanAttribute.Key<String> { .init(name: SpanAttributeName.HTTP.serverClientIP) }
     }
 }
 #endif

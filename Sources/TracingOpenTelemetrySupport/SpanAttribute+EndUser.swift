@@ -49,18 +49,18 @@ public struct EndUserAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// Username or client_id extracted from the access token or Authorization header in the inbound request from outside the system.
-        public var id: SpanAttributeKey<String> { .init(name: SpanAttributeName.EndUser.id) }
+        public var id: SpanAttribute.Key<String> { .init(name: SpanAttributeName.EndUser.id) }
 
         /// Actual/assumed role the client is making the request under extracted from token or application security context.
-        public var role: SpanAttributeKey<String> { .init(name: SpanAttributeName.EndUser.role) }
+        public var role: SpanAttribute.Key<String> { .init(name: SpanAttributeName.EndUser.role) }
 
         /// Scopes or granted authorities the client currently possesses extracted from token or application security context.
         /// The value would come from the scope associated with an OAuth 2.0 Access Token or an attribute value in a SAML 2.0 Assertion.
-        public var scope: SpanAttributeKey<String> { .init(name: SpanAttributeName.EndUser.scope) }
+        public var scope: SpanAttribute.Key<String> { .init(name: SpanAttributeName.EndUser.scope) }
     }
 }
 #endif
