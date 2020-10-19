@@ -37,18 +37,18 @@ final class TestTracer: Tracer {
 
     public func forceFlush() {}
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Extract: Extractor,
+        Carrier == Extract.Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         baggage.traceID = traceID
     }
 
-    func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Inject: Injector,
+        Carrier == Inject.Carrier {
         guard let traceID = baggage.traceID else { return }
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
     }

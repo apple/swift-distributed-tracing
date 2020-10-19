@@ -19,13 +19,13 @@ import Instrumentation
 
 typealias HTTPHeaders = [(String, String)]
 
-struct HTTPHeadersExtractor: ExtractorProtocol {
+struct HTTPHeadersExtractor: Extractor {
     func extract(key: String, from headers: HTTPHeaders) -> String? {
         return headers.first(where: { $0.0 == key })?.1
     }
 }
 
-struct HTTPHeadersInjector: InjectorProtocol {
+struct HTTPHeadersInject: Injector {
     func inject(_ value: String, forKey key: String, into headers: inout HTTPHeaders) {
         headers.append((key, value))
     }
@@ -86,18 +86,18 @@ private final class FakeTracer: Instrument {
     static let headerName = "fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Injector)
+    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Inject: Injector,
+        Carrier == Inject.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Extract: Extractor,
+        Carrier == Extract.Carrier {
         let traceID = extractor.extract(key: FakeTracer.headerName, from: carrier) ?? FakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }

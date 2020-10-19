@@ -39,14 +39,14 @@ public struct OSSignpostTracingInstrument: Tracer {
     // ==== ------------------------------------------------------------------------------------------------------------
     // MARK: Instrument API
 
-    public func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
+    public func extract<Carrier, Extract>(
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract
     ) {
         // noop; we could handle extracting our keys here
     }
 
-    public func inject<Carrier, Injector>(
-        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
+    public func inject<Carrier, Inject>(
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Inject
     ) {
         // noop; we could handle injecting our keys here
     }

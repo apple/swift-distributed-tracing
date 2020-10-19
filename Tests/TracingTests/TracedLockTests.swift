@@ -74,23 +74,23 @@ private final class TracedLockPrintlnTracer: Tracer {
 
     public func forceFlush() {}
 
-    func inject<Carrier, Injector>(
+    func inject<Carrier, Inject>(
         _ baggage: Baggage,
         into carrier: inout Carrier,
-        using injector: Injector
+        using injector: Inject
     )
         where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {}
+        Inject: Injector,
+        Carrier == Inject.Carrier {}
 
-    func extract<Carrier, Extractor>(
+    func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into baggage: inout Baggage,
-        using extractor: Extractor
+        using extractor: Extract
     )
         where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {}
+        Extract: Extractor,
+        Carrier == Extract.Carrier {}
 
     final class TracedLockPrintlnSpan: Span {
         private let operationName: String
