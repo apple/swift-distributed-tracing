@@ -45,11 +45,11 @@ public struct PeerAttributes: SpanAttributeNamespace {
         self.attributes = attributes
     }
 
-    public struct NestedAttributes: NestedSpanAttributesProtocol {
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
         /// The service.name of the remote service. SHOULD be equal to the actual service.name resource attribute of the remote service if any.
-        public var service: SpanAttributeKey<String> { .init(name: SpanAttributeName.Peer.service) }
+        public var service: SpanAttribute.Key<String> { .init(name: SpanAttributeName.Peer.service) }
     }
 }
 #endif

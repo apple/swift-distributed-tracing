@@ -47,6 +47,8 @@ public protocol Span: AnyObject {
     func addLink(_ link: SpanLink)
 
     /// End this `Span` at the given timestamp.
+    ///
+    /// Ending a `Span` MUST be idempotent.
     /// - Parameter timestamp: The `Timestamp` at which the span ended.
     func end(at timestamp: Timestamp)
 }
@@ -116,11 +118,11 @@ public struct SpanAttributeKey<T>: Hashable, ExpressibleByStringLiteral where T:
 @dynamicMemberLookup
 public protocol SpanAttributeNamespace {
     /// Type that contains the nested attributes, e.g. HTTPAttributes which would contain `statusCode` and similar vars.
-    associatedtype NestedAttributes: NestedSpanAttributesProtocol
+    associatedtype NestedSpanAttributes: NestedSpanAttributesProtocol
 
     var attributes: SpanAttributes { get set }
 
-    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible { get set }
+    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible { get set }
 
     subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
         where Namespace: SpanAttributeNamespace { get }
@@ -128,26 +130,46 @@ public protocol SpanAttributeNamespace {
 
 public protocol NestedSpanAttributesProtocol {
     init()
+
+    /// :nodoc: INTERNAL API
+    /// Magic value allowing the dynamicMember lookup inside SpanAttributeNamespaces to work.
+    ///
+    /// There is no need of ever implementing this function explicitly, the default implementation is good enough.
     static var __namespace: Self { get }
 }
 
 extension NestedSpanAttributesProtocol {
-    public static var __namespace: Self { .init() }
+    public static var __namespace: Self {
+        .init()
+    }
 }
 
 extension SpanAttributeNamespace {
-    public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible {
+    public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
+        where T: SpanAttributeConvertible {
         get {
-            let key = NestedAttributes.__namespace[keyPath: dynamicMember]
-            let spanAttribute: SpanAttribute? = self.attributes[key.name]
-            if let value = spanAttribute?.anyValue {
-                return value as? T
-            } else {
-                return nil
+            let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
+            let spanAttribute = self.attributes[key.name]?.toSpanAttribute()
+            switch spanAttribute {
+            case .int(let int):
+                switch T.self {
+                case is Int.Type: return (Int(exactly: int) as! T)
+                case is Int8.Type: return (Int8(exactly: int) as! T)
+                case is Int16.Type: return (Int16(exactly: int) as! T)
+                case is Int32.Type: return (Int32(exactly: int) as! T)
+                case is Int64.Type: return (int as! T)
+                default: return nil
+                }
+            default:
+                if let value = spanAttribute?.anyValue {
+                    return value as? T
+                } else {
+                    return nil
+                }
             }
         }
         set {
-            let key = NestedAttributes.__namespace[keyPath: dynamicMember]
+            let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
             self.attributes[key.name] = newValue?.toSpanAttribute()
         }
     }
@@ -160,93 +182,190 @@ extension SpanAttributeNamespace {
 #endif
 
 /// The value of an attribute used to describe a `Span` or `SpanEvent`.
+///
+/// Arrays are allowed but are enforced to be homogenous.
+///
+/// Attributes cannot be "nested" their structure is a flat key/value representation.
 public enum SpanAttribute: Equatable {
-    case string(String)
+    public typealias Key = SpanAttributeKey
+
     case int(Int64)
+    case intArray([Int64])
+
     case double(Double)
+    case doubleArray([Double])
+
     case bool(Bool)
+    case boolArray([Bool])
 
-    // TODO: This could be misused to create a heterogeneous array of attributes, which is not allowed in OT:
-    // https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-attributes
+    case string(String)
+    case stringArray([String])
 
-    case array([SpanAttribute])
     case stringConvertible(CustomStringConvertible)
+    case stringConvertibleArray([CustomStringConvertible])
+
+    #if swift(>=5.2)
+    // older swifts get confused and can't resolve if we mean the `case int(Int64)` or any of those overloads
+    public static func int(_ value: Int) -> SpanAttribute {
+        .int(Int64(value))
+    }
+
+    public static func int(_ value: Int8) -> SpanAttribute {
+        .int(Int64(value))
+    }
+
+    public static func int(_ value: Int16) -> SpanAttribute {
+        .int(Int64(value))
+    }
+
+    public static func int(_ value: Int32) -> SpanAttribute {
+        .int(Int64(value))
+    }
+    #endif
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
     /// This value will never be stored or returned, and any attempt of doing so would WILL crash your application.
-    case __namespace
+    internal static var _namespace: SpanAttribute {
+        return .int(0)
+    }
 
     internal var anyValue: Any {
         switch self {
-        case .string(let value):
-            return value
         case .int(let value):
+            return value
+        case .intArray(let value):
             return value
         case .double(let value):
             return value
+        case .doubleArray(let value):
+            return value
         case .bool(let value):
             return value
-        case .array(let value):
+        case .boolArray(let value):
+            return value
+        case .string(let value):
+            return value
+        case .stringArray(let value):
             return value
         case .stringConvertible(let value):
             return value
-        case .__namespace:
-            fatalError("__namespace MUST NOT be stored not can be extracted from using anyValue")
+        case .stringConvertibleArray(let value):
+            return value
         }
     }
 
     public static func == (lhs: SpanAttribute, rhs: SpanAttribute) -> Bool {
         switch (lhs, rhs) {
-        case (.string(let l), .string(let r)): return l == r
         case (.int(let l), .int(let r)): return l == r
+        case (.intArray(let l), .intArray(let r)): return l == r
         case (.double(let l), .double(let r)): return l == r
+        case (.doubleArray(let l), .doubleArray(let r)): return l == r
         case (.bool(let l), .bool(let r)): return l == r
-        case (.array(let l), .array(let r)): return l == r
+        case (.boolArray(let l), .boolArray(let r)): return l == r
+        case (.string(let l), .string(let r)): return l == r
+        case (.stringArray(let l), .stringArray(let r)): return l == r
         case (.stringConvertible(let l), .stringConvertible(let r)): return "\(l)" == "\(r)"
-        case (.string, _),
-             (.int, _),
+        case (.stringConvertibleArray(let l), .stringConvertibleArray(let r)): return "\(l)" == "\(r)"
+        case (.int, _),
+             (.intArray, _),
              (.double, _),
+             (.doubleArray, _),
              (.bool, _),
-             (.array, _),
-             (.stringConvertible, _):
-            return false
-        case (.__namespace, _):
+             (.boolArray, _),
+             (.string, _),
+             (.stringArray, _),
+             (.stringConvertible, _),
+             (.stringConvertibleArray, _):
             return false
         }
     }
 }
 
+extension SpanAttribute: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return self
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values
+
 public protocol SpanAttributeConvertible {
     func toSpanAttribute() -> SpanAttribute
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Arrays
+
+extension Array where Element == Int {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .intArray(self.map(Int64.init))
+    }
+}
+
+extension Array where Element == Int8 {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .intArray(self.map(Int64.init))
+    }
+}
+
+extension Array where Element == Int16 {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .intArray(self.map(Int64.init))
+    }
+}
+
+extension Array where Element == Int32 {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .intArray(self.map(Int64.init))
+    }
+}
+
+extension Array where Element == Int64 {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .intArray(self)
+    }
+}
+
+extension Array where Element == Double {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .doubleArray(self)
+    }
+}
+
+// fallback implementation
+extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        if let value = self as? [Int] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int8] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int16] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int32] {
+            return .intArray(value.map(Int64.init))
+        } else if let value = self as? [Int64] {
+            return .intArray(value)
+        } else if let value = self as? [Double] {
+            return .doubleArray(value)
+        } else if let value = self as? [Bool] {
+            return .boolArray(value)
+        } else if let value = self as? [String] {
+            return .stringArray(value)
+        } else if let value = self as? [CustomStringConvertible] {
+            return .stringConvertibleArray(value)
+        } else {
+            fatalError("Not supported SpanAttribute array type: \(type(of: self))")
+        }
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: String
+
 extension String: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
         return .string(self)
-    }
-}
-
-extension Int: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .int(self)
-    }
-}
-
-extension Double: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .double(self)
-    }
-}
-
-extension Bool: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .bool(self)
-    }
-}
-
-extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        return .array(self.map { $0.toSpanAttribute() })
     }
 }
 
@@ -262,9 +381,57 @@ extension SpanAttribute: ExpressibleByStringInterpolation {
     }
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Int
+
 extension SpanAttribute: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
-        self = .int(value)
+        self = .int(Int64(value))
+    }
+}
+
+extension Int: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int8: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int16: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int32: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(Int64(self))
+    }
+}
+
+extension Int64: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .int(self)
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Float/Double
+
+extension Float: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .double(Double(self))
+    }
+}
+
+extension Double: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .double(self)
     }
 }
 
@@ -274,20 +441,26 @@ extension SpanAttribute: ExpressibleByFloatLiteral {
     }
 }
 
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Attribute Values: Bool
+
+extension Bool: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        return .bool(self)
+    }
+}
+
 extension SpanAttribute: ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = .bool(value)
     }
 }
 
-extension SpanAttribute: ExpressibleByArrayLiteral {
-    public init(arrayLiteral attributes: SpanAttribute...) {
-        self = .array(attributes)
-    }
-}
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: SpanAttributes: Namespaces
 
 #if swift(>=5.2)
-/// A collection of `SpanAttribute`s.
+/// A container of `SpanAttribute`s.
 @dynamicMemberLookup
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
@@ -308,26 +481,33 @@ extension SpanAttributes {
 
     /// Accesses the `SpanAttribute` with the given name for reading and writing.
     ///
+    /// Please be cautious to not abuse this APIs power to read attributes to "smuggle" values between calls.
+    /// Only `Baggage` is intended to carry information in a readable fashion between functions / processes / nodes.
+    /// The API does allow reading in order to support the subscript-based dynamic member lookup implementation of
+    /// attributes which allows accessing them as `span.attributes.http.statusCode`, forcing us to expose a get operation on the attributes,
+    /// due to the lack of set-only subscripts.
+    ///
     /// - Parameter name: The name of the attribute used to identify the attribute.
     /// - Returns: The `SpanAttribute` identified by the given name, or `nil` if it's not present.
-    public subscript(_ name: String) -> SpanAttribute? {
+    public subscript(_ name: String) -> SpanAttributeConvertible? {
         get {
             return self._attributes[name]
         }
         set {
-            switch newValue {
-            case .some(.__namespace):
-                fatalError("__namespace magic value MUST NOT be stored as an attribute. Attempted to store under [\(name)] key.")
-            default:
-                self._attributes[name] = newValue
-            }
+            self._attributes[name] = newValue?.toSpanAttribute()
         }
     }
 
-    /// Calls the given callback for each attribute stored in this collection.
     /// - Parameter callback: The function to call for each attribute.
     public func forEach(_ callback: (String, SpanAttribute) -> Void) {
-        self._attributes.forEach { callback($0.key, $0.1) }
+        self._attributes.forEach {
+            callback($0.key, $0.1)
+        }
+    }
+
+    /// - Returns: Number of attributes stored.
+    public var count: Int {
+        return self._attributes.count
     }
 
     /// Returns true if the collection contains no attributes.
@@ -339,25 +519,21 @@ extension SpanAttributes {
 #if swift(>=5.2)
 extension SpanAttributes {
     /// Enables for type-safe fluent accessors for attributes.
-    ///
-    // TODO: document the pattern maybe on SpanAttributes?
     public subscript<T>(dynamicMember dynamicMember: KeyPath<SpanAttribute, SpanAttributeKey<T>>) -> SpanAttribute? {
         get {
-            let key = SpanAttribute.__namespace[keyPath: dynamicMember]
+            let key = SpanAttribute._namespace[keyPath: dynamicMember]
             return self._attributes[key.name]
         }
         set {
-            let key = SpanAttribute.__namespace[keyPath: dynamicMember]
+            let key = SpanAttribute._namespace[keyPath: dynamicMember]
             self._attributes[key.name] = newValue
         }
     }
 
     /// Enables for type-safe nested namespaces for attribute accessors.
-    ///
-    // TODO: document the pattern maybe on SpanAttributes?
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
         where Namespace: SpanAttributeNamespace {
-        SpanAttribute.__namespace[keyPath: dynamicMember]
+        SpanAttribute._namespace[keyPath: dynamicMember]
     }
 }
 #endif
