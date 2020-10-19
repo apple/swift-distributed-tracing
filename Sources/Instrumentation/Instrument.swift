@@ -14,7 +14,7 @@
 import CoreBaggage
 
 /// Conforming types are used to extract values from a specific `Carrier`.
-public protocol ExtractorProtocol {
+public protocol Extractor {
     /// The carrier to extract values from.
     associatedtype Carrier
 
@@ -27,7 +27,7 @@ public protocol ExtractorProtocol {
 }
 
 /// Conforming types are used to inject values into a specific `Carrier`.
-public protocol InjectorProtocol {
+public protocol Injector {
     /// The carrier to inject values into.
     associatedtype Carrier
 
@@ -50,14 +50,8 @@ public protocol Instrument {
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
     ///   - baggage: The `Baggage` into which these values should be injected.
     ///   - extractor: The `Extractor` that extracts values from the given `Carrier`.
-    func extract<Carrier, Extractor>(
-        _ carrier: Carrier,
-        into baggage: inout Baggage,
-        using extractor: Extractor
-    )
-        where
-        Extractor: ExtractorProtocol,
-        Extractor.Carrier == Carrier
+    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+        where Extract: Extractor, Extract.Carrier == Carrier
 
     /// Inject values from a `BaggageContext` and inject them into the given `Carrier` using the given `Injector`.
     ///
@@ -65,12 +59,6 @@ public protocol Instrument {
     ///   - baggage: The `Baggage` from which relevant information will be extracted.
     ///   - carrier: The `Carrier` into which this information will be injected.
     ///   - injector: The `Injector` used to inject extracted `BaggageContext` into the given `Carrier`.
-    func inject<Carrier, Injector>(
-        _ baggage: Baggage,
-        into carrier: inout Carrier,
-        using injector: Injector
-    )
-        where
-        Injector: InjectorProtocol,
-        Injector.Carrier == Carrier
+    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+        where Inject: Injector, Inject.Carrier == Carrier
 }

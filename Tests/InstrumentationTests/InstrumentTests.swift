@@ -39,13 +39,13 @@ final class InstrumentTests: XCTestCase {
     }
 }
 
-private struct DictionaryInjector: InjectorProtocol {
+private struct DictionaryInjector: Injector {
     func inject(_ value: String, forKey key: String, into dictionary: inout [String: String]) {
         dictionary[key] = value
     }
 }
 
-private struct DictionaryExtractor: ExtractorProtocol {
+private struct DictionaryExtractor: Extractor {
     func extract(key: String, from dictionary: [String: String]) -> String? {
         return dictionary[key]
     }
@@ -61,22 +61,14 @@ private final class FirstFakeTracer: Instrument {
     static let headerName = "first-fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(
-        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
-    )
-        where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+        where Inject: Injector, Carrier == Inject.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
-    )
-        where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+        where Extract: Extractor, Carrier == Extract.Carrier {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
@@ -92,22 +84,22 @@ private final class SecondFakeTracer: Instrument {
     static let headerName = "second-fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Injector>(
-        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
+    func inject<Carrier, Inject>(
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Inject
     )
         where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {
+        Inject: Injector,
+        Carrier == Inject.Carrier {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
+    func extract<Carrier, Extract>(
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract
     )
         where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {
+        Extract: Extractor,
+        Carrier == Extract.Carrier {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
