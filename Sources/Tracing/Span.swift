@@ -48,13 +48,35 @@ public protocol Span: AnyObject {
 
     /// End this `Span` at the given timestamp.
     ///
-    /// Ending a `Span` MUST be idempotent.
+    /// ### Rules about ending Spans
+    /// A Span must be ended only ONCE. Ending a span multiple times or never at all is considered a programming error.
+    ///
+    /// A tracer implementation MAY decide to crash the application if e.g. running in debug mode and noticing such misuse.
+    ///
+    /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
+    /// programming mistake to rely on this behavior.
+    ///
     /// - Parameter timestamp: The `Timestamp` at which the span ended.
+    ///
+    /// - SeeAlso: `Span.end()` which automatically uses the "current" time as timestamp.
     func end(at timestamp: Timestamp)
 }
 
 extension Span {
     /// End this `Span` at the current timestamp.
+    ///
+    /// ### Rules about ending Spans
+    /// A Span must be ended only ONCE. Ending a span multiple times or never at all is considered a programming error.
+    ///
+    /// A tracer implementation MAY decide to crash the application if e.g. running in debug mode and noticing such misuse.
+    ///
+    /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
+    /// programming mistake to rely on this behavior.
+    ///
+    /// - Parameter timestamp: The `Timestamp` at which the span ended.
+    ///
+    /// - SeeAlso: `Span.end(at:)` which allows passing in a specific timestamp, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    ///   Generally though prefer using the `end()` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
         self.end(at: .now())
     }
