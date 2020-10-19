@@ -246,15 +246,12 @@ public enum SpanAttribute: Equatable {
     #endif
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
-    /// This value will never be stored or returned, and any attempt of doing so would WILL crash your application.
     internal static var _namespace: SpanAttribute {
         return .int(0)
     }
 
     internal var anyValue: Any {
         switch self {
-        case .string(let value):
-            return value
         case .int(let value):
             return value
         case .intArray(let value):
