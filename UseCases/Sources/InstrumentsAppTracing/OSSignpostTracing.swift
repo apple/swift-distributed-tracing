@@ -39,14 +39,14 @@ public struct OSSignpostTracingInstrument: Tracer {
     // ==== ------------------------------------------------------------------------------------------------------------
     // MARK: Instrument API
 
-    public func extract<Carrier, Extractor>(
-        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extractor
+    public func extract<Carrier, Extract>(
+        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract
     ) {
         // noop; we could handle extracting our keys here
     }
 
-    public func inject<Carrier, Injector>(
-        _ baggage: Baggage, into carrier: inout Carrier, using injector: Injector
+    public func inject<Carrier, Inject>(
+        _ baggage: Baggage, into carrier: inout Carrier, using injector: Inject
     ) {
         // noop; we could handle injecting our keys here
     }
@@ -58,7 +58,7 @@ public struct OSSignpostTracingInstrument: Tracer {
         named operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span {
         OSSignpostSpan(
             log: self.log,
@@ -66,7 +66,7 @@ public struct OSSignpostTracingInstrument: Tracer {
             signpostName: self.signpostName,
             baggage: baggage
             // , kind ignored
-            // , timestamp ignored, we capture it automatically
+            // , time ignored, we capture it automatically
         )
     }
 
@@ -95,8 +95,8 @@ final class OSSignpostSpan: Span {
 
     public let isRecording: Bool
 
-    private let startTimestamp: Timestamp
-    private var endTimestamp: Timestamp?
+    private let startTime: DispatchWallTime
+    private var endTime: DispatchWallTime?
 
     static let beginFormat: StaticString =
         """
@@ -121,7 +121,7 @@ final class OSSignpostSpan: Span {
         self.signpostName = signpostName
         self.baggage = baggage
 
-        self.startTimestamp = .now() // meh
+        self.startTime = .now() // meh
         self.isRecording = log.signpostsEnabled
 
         self.lock = NSLock()
@@ -156,9 +156,9 @@ final class OSSignpostSpan: Span {
     #if DEBUG
     deinit {
         // sanity checking if we don't accidentally drop spans on the floor without ending them
-        self.lock.lock() // TODO: somewhat bad idea, we should rather implement endTimestamp as an atomic that's lockless to read (!)
+        self.lock.lock() // TODO: somewhat bad idea, we should rather implement endTime as an atomic that's lockless to read (!)
         defer { self.lock.lock() }
-        if self.endTimestamp == nil {
+        if self.endTime == nil {
             print("""
             warning: 
             Span \(self.signpostID) (\(self.operationName)) \
@@ -206,16 +206,16 @@ final class OSSignpostSpan: Span {
         }
     }
 
-    public func end(at timestamp: Timestamp) {
+    public func end(at time: DispatchWallTime) {
         guard self.isRecording else { return }
         self.lock.lock()
         defer { self.lock.unlock() }
 
-        guard self.endTimestamp == nil else {
+        guard self.endTime == nil else {
             print("warning: attempted to end() more-than-once the span: \(self.signpostID) (\(self.operationName))!")
             return
         }
-        self.endTimestamp = timestamp
+        self.endTime = time
 
         os_signpost(
             .end,

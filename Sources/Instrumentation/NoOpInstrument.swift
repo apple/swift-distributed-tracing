@@ -17,21 +17,13 @@ import CoreBaggage
 public struct NoOpInstrument: Instrument {
     public init() {}
 
-    public func inject<Carrier, Injector>(
-        _ baggage: Baggage,
-        into carrier: inout Carrier,
-        using injector: Injector
-    )
-        where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {}
+    public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+        where Inject: Injector, Carrier == Inject.Carrier {
+        // no-op
+    }
 
-    public func extract<Carrier, Extractor>(
-        _ carrier: Carrier,
-        into baggage: inout Baggage,
-        using extractor: Extractor
-    )
-        where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {}
+    public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+        where Extract: Extractor, Carrier == Extract.Carrier {
+        // no-op
+    }
 }

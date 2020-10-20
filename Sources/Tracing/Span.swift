@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Baggage
+import Dispatch
 
 /// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
 /// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
@@ -46,7 +47,7 @@ public protocol Span: AnyObject {
     /// - Parameter link: The `SpanLink` to add to this `Span`.
     func addLink(_ link: SpanLink)
 
-    /// End this `Span` at the given timestamp.
+    /// End this `Span` at the given time.
     ///
     /// ### Rules about ending Spans
     /// A Span must be ended only ONCE. Ending a Span multiple times or never at all is considered a programming error.
@@ -56,14 +57,14 @@ public protocol Span: AnyObject {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter timestamp: The `Timestamp` at which the span ended.
+    /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
-    /// - SeeAlso: `Span.end()` which automatically uses the "current" time as timestamp.
-    func end(at timestamp: Timestamp)
+    /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
+    func end(at time: DispatchWallTime)
 }
 
 extension Span {
-    /// End this `Span` at the current timestamp.
+    /// End this `Span` at the current time.
     ///
     /// ### Rules about ending Spans
     /// A Span must be ended only ONCE. Ending a Span multiple times or never at all is considered a programming error.
@@ -73,9 +74,9 @@ extension Span {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter timestamp: The `Timestamp` at which the span ended.
+    /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
-    /// - SeeAlso: `Span.end(at:)` which allows passing in a specific timestamp, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    /// - SeeAlso: `Span.end(at:)` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the `end()` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
         self.end(at: .now())
@@ -100,18 +101,18 @@ public struct SpanEvent: Equatable {
     /// One or more `SpanAttribute`s with the same restrictions as defined for `Span` attributes.
     public var attributes: SpanAttributes
 
-    /// The `Timestamp` at which this event occurred.
-    public let timestamp: Timestamp
+    /// The `DispatchWallTime` at which this event occurred.
+    public let time: DispatchWallTime
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
-    ///   - timestamp: The `Timestamp` at which this event occurred. Defaults to `.now()`.
-    public init(name: String, attributes: SpanAttributes = [:], at timestamp: Timestamp = .now()) {
+    ///   - time: The `DispatchWallTime` at which this event occurred. Defaults to `.now()`.
+    public init(name: String, attributes: SpanAttributes = [:], at time: DispatchWallTime = .now()) {
         self.name = name
         self.attributes = attributes
-        self.timestamp = timestamp
+        self.time = time
     }
 }
 
@@ -246,7 +247,6 @@ public enum SpanAttribute: Equatable {
     #endif
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
-    /// This value will never be stored or returned, and any attempt of doing so would WILL crash your application.
     internal static var _namespace: SpanAttribute {
         return .int(0)
     }

@@ -95,13 +95,13 @@ struct ExampleSpanError: Error, Equatable {}
 
 typealias HTTPHeaders = [(String, String)]
 
-struct HTTPHeadersExtractor: ExtractorProtocol {
+struct HTTPHeadersExtractor: Extractor {
     func extract(key: String, from headers: HTTPHeaders) -> String? {
         return headers.first(where: { $0.0 == key })?.1
     }
 }
 
-struct HTTPHeadersInjector: InjectorProtocol {
+struct HTTPHeadersInjector: Injector {
     func inject(_ value: String, forKey key: String, into headers: inout HTTPHeaders) {
         headers.append((key, value))
     }

@@ -12,23 +12,24 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Baggage
+import Dispatch
 @_exported import Instrumentation
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
 public protocol Tracer: Instrument {
-    /// Start a new `Span` with the given `Baggage` at a given timestamp.
+    /// Start a new `Span` with the given `Baggage` at a given time.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new `Span`.
     ///   - kind: The `SpanKind` of the new `Span`.
-    ///   - timestamp: The `DispatchTime` at which to start the new `Span`.
+    ///   - time: The `DispatchTime` at which to start the new `Span`.
     func startSpan(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span
 
     /// Export all ended spans to the configured backend that have not yet been exported.

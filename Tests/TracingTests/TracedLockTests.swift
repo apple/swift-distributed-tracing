@@ -62,11 +62,11 @@ private final class TracedLockPrintlnTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span {
         return TracedLockPrintlnSpan(
             operationName: operationName,
-            startTimestamp: timestamp,
+            startTime: time,
             kind: kind,
             baggage: baggage
         )
@@ -74,23 +74,23 @@ private final class TracedLockPrintlnTracer: Tracer {
 
     public func forceFlush() {}
 
-    func inject<Carrier, Injector>(
+    func inject<Carrier, Inject>(
         _ baggage: Baggage,
         into carrier: inout Carrier,
-        using injector: Injector
+        using injector: Inject
     )
         where
-        Injector: InjectorProtocol,
-        Carrier == Injector.Carrier {}
+        Inject: Injector,
+        Carrier == Inject.Carrier {}
 
-    func extract<Carrier, Extractor>(
+    func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into baggage: inout Baggage,
-        using extractor: Extractor
+        using extractor: Extract
     )
         where
-        Extractor: ExtractorProtocol,
-        Carrier == Extractor.Carrier {}
+        Extract: Extractor,
+        Carrier == Extract.Carrier {}
 
     final class TracedLockPrintlnSpan: Span {
         private let operationName: String
@@ -98,8 +98,8 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         private var status: SpanStatus?
 
-        private let startTimestamp: Timestamp
-        private(set) var endTimestamp: Timestamp?
+        private let startTime: DispatchWallTime
+        private(set) var endTime: DispatchWallTime?
 
         let baggage: Baggage
 
@@ -121,16 +121,16 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         init(
             operationName: String,
-            startTimestamp: Timestamp,
+            startTime: DispatchWallTime,
             kind: SpanKind,
             baggage: Baggage
         ) {
             self.operationName = operationName
-            self.startTimestamp = startTimestamp
+            self.startTime = startTime
             self.baggage = baggage
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimestamp): start")
+            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTime): start")
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -148,9 +148,9 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         func recordError(_ error: Error) {}
 
-        func end(at timestamp: Timestamp) {
-            self.endTimestamp = timestamp
-            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(timestamp): end")
+        func end(at time: DispatchWallTime) {
+            self.endTime = time
+            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
     }
 }
