@@ -17,6 +17,8 @@ import Dispatch
 
 /// No operation Tracer, used when no tracing is required.
 public struct NoOpTracer: Tracer {
+    public init() {}
+
     public func startSpan(
         _ operationName: String,
         baggage: Baggage,
