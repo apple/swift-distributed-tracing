@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import Baggage
+import Dispatch
 import Foundation
 import Instrumentation
 import Tracing
@@ -23,11 +24,11 @@ final class TestTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
-            startTimestamp: timestamp,
+            startTime: time,
             baggage: baggage,
             kind: kind
         ) { _ in }
@@ -77,8 +78,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    private let startTimestamp: Timestamp
-    private(set) var endTimestamp: Timestamp?
+    private let startTime: DispatchWallTime
+    private(set) var endTime: DispatchWallTime?
 
     let baggage: Baggage
 
@@ -102,13 +103,13 @@ final class TestSpan: Span {
 
     init(
         operationName: String,
-        startTimestamp: Timestamp,
+        startTime: DispatchWallTime,
         baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (Span) -> Void
     ) {
         self.operationName = operationName
-        self.startTimestamp = startTimestamp
+        self.startTime = startTime
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -129,8 +130,8 @@ final class TestSpan: Span {
 
     func recordError(_ error: Error) {}
 
-    func end(at timestamp: Timestamp) {
-        self.endTimestamp = timestamp
+    func end(at time: DispatchWallTime) {
+        self.endTime = time
         self.onEnd(self)
     }
 }

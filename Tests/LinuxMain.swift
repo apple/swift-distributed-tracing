@@ -38,7 +38,6 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
              testCase(InstrumentationSystemTests.allTests),
              testCase(SpanAttributeSemanticsTests.allTests),
              testCase(SpanTests.allTests),
-             testCase(TimestampTests.allTests),
              testCase(TracedLockTests.allTests),
              testCase(TracerTests.allTests),
              testCase(TracingInstrumentationSystemTests.allTests),

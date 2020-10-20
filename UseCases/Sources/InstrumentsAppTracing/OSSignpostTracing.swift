@@ -58,7 +58,7 @@ public struct OSSignpostTracingInstrument: Tracer {
         named operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span {
         OSSignpostSpan(
             log: self.log,
@@ -66,7 +66,7 @@ public struct OSSignpostTracingInstrument: Tracer {
             signpostName: self.signpostName,
             baggage: baggage
             // , kind ignored
-            // , timestamp ignored, we capture it automatically
+            // , time ignored, we capture it automatically
         )
     }
 
@@ -95,8 +95,8 @@ final class OSSignpostSpan: Span {
 
     public let isRecording: Bool
 
-    private let startTimestamp: Timestamp
-    private var endTimestamp: Timestamp?
+    private let startTime: DispatchWallTime
+    private var endTime: DispatchWallTime?
 
     static let beginFormat: StaticString =
         """
@@ -121,7 +121,7 @@ final class OSSignpostSpan: Span {
         self.signpostName = signpostName
         self.baggage = baggage
 
-        self.startTimestamp = .now() // meh
+        self.startTime = .now() // meh
         self.isRecording = log.signpostsEnabled
 
         self.lock = NSLock()
@@ -206,7 +206,7 @@ final class OSSignpostSpan: Span {
         }
     }
 
-    public func end(at timestamp: Timestamp) {
+    public func end(at time: DispatchWallTime) {
         guard self.isRecording else { return }
         self.lock.lock()
         defer { self.lock.unlock() }
