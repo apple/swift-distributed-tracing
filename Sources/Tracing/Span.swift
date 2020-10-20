@@ -66,7 +66,7 @@ extension Span {
     /// End this `Span` at the current timestamp.
     ///
     /// ### Rules about ending Spans
-    /// A Span must be ended only ONCE. Ending a span multiple times or never at all is considered a programming error.
+    /// A Span must be ended only ONCE. Ending a Span multiple times or never at all is considered a programming error.
     ///
     /// A tracer implementation MAY decide to crash the application if e.g. running in debug mode and noticing such misuse.
     ///
