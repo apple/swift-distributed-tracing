@@ -14,11 +14,13 @@
 @_exported import Baggage
 import Dispatch
 
-/// A `Span` type that follows the OpenTracing/OpenTelemetry spec. The span itself should not be
-/// initializable via its public interface. `Span` creation should instead go through `tracer.startSpan`
-/// where `tracer` conforms to `Tracer`.
+/// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
+/// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
+/// in which case this span should be considered as "child" of the previous span.
 ///
-/// - SeeAlso: [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span).
+/// Creating a `Span` is delegated to a `Tracer` and end users should never create them directly.
+///
+/// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: AnyObject {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
