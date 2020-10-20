@@ -41,7 +41,7 @@ public protocol Tracer: Instrument {
 }
 
 extension Tracer {
-    /// Start a new `Span` with the given `Baggage` starting at `Timestamp.now()`.
+    /// Start a new `Span` with the given `Baggage` starting at `DispatchWallTime.now()`.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
@@ -54,15 +54,17 @@ extension Tracer {
     ) -> Span {
         return self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now())
     }
+}
 
-    // ==== --------------------------------------------------------------------
-    // MARK: LoggingContext accepting
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Span creation: with `LoggingContext`
 
-    /// Start a new `Span` with the given `Baggage` starting at `Timestamp.now()`.
+extension Tracer {
+    /// Start a new `Span` with the given `Baggage` starting at `DispatchWallTime.now()`.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - context: Logging context containing a `Baggage` whichi may contain trace identifiers of a parent `Span`.
+    ///   - context: Logging context containing a `Baggage` which may contain trace identifiers of a parent `Span`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
     public func startSpan(
         _ operationName: String,
@@ -70,5 +72,64 @@ extension Tracer {
         ofKind kind: SpanKind = .internal
     ) -> Span {
         return self.startSpan(operationName, baggage: context.baggage, ofKind: kind, at: .now())
+    }
+}
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Starting spans: `withSpan`
+
+extension Tracer {
+    /// Execute a specific task within a newly created `Span`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `function` returns.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - context: Logging context containing a `Baggage` which may contain trace identifiers of a parent `Span`.
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - function: function to wrap in a span start/end and execute immediately
+    /// - Returns: the value returned by `function`
+    /// - Throws: the error the `function` has thrown (if any)
+    public func withSpan<T>(
+        _ operationName: String,
+        context: LoggingContext,
+        ofKind kind: SpanKind = .internal,
+        _ function: (Span) throws -> T
+    ) rethrows -> T {
+        let span = self.startSpan(operationName, context: context, ofKind: kind)
+        do {
+            return try function(span)
+        } catch {
+            span.recordError(error)
+            span.end()
+            throw error // rethrow
+        }
+    }
+
+    /// Execute a specific task within a newly created `Span`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `function` returns.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent `Span`.
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - function: function to wrap in a span start/end and execute immediately
+    /// - Returns: the value returned by `function`
+    /// - Throws: the error the `function` has thrown (if any)
+    public func withSpan<T>(
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind = .internal,
+        _ function: (Span) throws -> T
+    ) rethrows -> T {
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        do {
+            return try function(span)
+        } catch {
+            span.recordError(error)
+            span.end()
+            throw error // rethrow
+        }
     }
 }

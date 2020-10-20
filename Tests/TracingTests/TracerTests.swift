@@ -24,7 +24,10 @@ final class TracerTests: XCTestCase {
 
     func testContextPropagation() {
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrap(tracer)
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
 
         let httpServer = FakeHTTPServer { context, _, client -> FakeHTTPResponse in
             client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
@@ -52,7 +55,41 @@ final class TracerTests: XCTestCase {
         XCTAssertEqual(httpServer.client.baggages.count, 1)
         XCTAssertEqual(httpServer.client.baggages.first?.traceID, "test")
     }
+
+    func testWithSpan_success() {
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
+
+        let value = tracer.withSpan("hello", baggage: .topLevel) { _ in
+            "yes"
+        }
+
+        XCTAssertEqual(value, "yes")
+    }
+
+    func testWithSpan_throws() {
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
+
+        do {
+            _ = try tracer.withSpan("hello", baggage: .topLevel) { _ in
+                throw ExampleSpanError()
+            }
+        } catch {
+            XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+            return
+        }
+        XCTFail("Should have throw")
+    }
 }
+
+struct ExampleSpanError: Error, Equatable {}
 
 // MARK: - Fake HTTP Server
 
