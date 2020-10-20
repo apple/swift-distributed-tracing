@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Baggage
+import Dispatch
 @_exported import Instrumentation
 
 /// No operation Tracer, used when no tracing is required.
@@ -20,7 +21,7 @@ public struct NoOpTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at timestamp: Timestamp
+        at time: DispatchWallTime
     ) -> Span {
         return NoOpSpan(baggage: baggage)
     }
@@ -62,7 +63,7 @@ public struct NoOpTracer: Tracer {
             }
         }
 
-        public func end(at timestamp: Timestamp) {
+        public func end(at time: DispatchWallTime) {
             // ignore
         }
     }
