@@ -43,7 +43,9 @@ public enum InstrumentationSystem {
         }
     }
 
-    // for our testing we want to allow multiple bootstrapping
+    // For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by `bootstrap()`.
+    ///
+    /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the `NoOpInstrument` is bootstrapped.
     internal static func bootstrapInternal(_ instrument: Instrument?) {
         self.lock.withWriterLock {
             self._instrument = instrument ?? NoOpInstrument()
