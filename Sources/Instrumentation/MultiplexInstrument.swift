@@ -16,7 +16,7 @@ import Baggage
 /// A pseudo-`Instrument` that may be used to instrument using multiple other `Instrument`s across a
 /// common `BaggageContext`.
 public struct MultiplexInstrument {
-    private var instruments: [Instrument]
+    internal var instruments: [Instrument]
 
     /// Create a `MultiplexInstrument`.
     ///

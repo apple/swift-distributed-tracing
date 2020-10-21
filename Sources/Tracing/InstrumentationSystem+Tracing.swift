@@ -14,19 +14,6 @@
 @_exported import Instrumentation
 
 extension InstrumentationSystem {
-    /// Get a `Tracer` instance of the given type.
-    ///
-    /// When using `MultiplexInstrument`, this returns the first instance of the given type stored in the `MultiplexInstrument`.
-    ///
-    /// Usually tracing libraries will provide their own convenience getter, e.g. CoolTracing could provide `InstrumentationSystem.coolTracer`;
-    /// if available, prefer using those APIs rather than relying on this general function.
-    ///
-    /// - Parameter tracerType: The type of `Tracer` you want to retrieve an instance for.
-    /// - Returns: A `Tracer` instance of the given type or `nil` if no `Tracer` of that type has been bootstrapped.
-    public static func tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
-        return self._findInstrument(where: { $0 is T }) as? T
-    }
-
     /// Returns the `Tracer` bootstrapped as part of the `InstrumentationSystem`.
     ///
     /// If the system was bootstrapped with a `MultiplexInstrument` this function attempts to locate the _first_
