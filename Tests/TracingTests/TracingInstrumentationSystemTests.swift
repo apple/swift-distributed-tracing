@@ -15,6 +15,16 @@
 import Tracing
 import XCTest
 
+extension InstrumentationSystem {
+    public static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
+        return self._findInstrument(where: { $0 is T }) as? T
+    }
+
+    public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
+        return self._findInstrument(where: { $0 is I }) as? I
+    }
+}
+
 final class TracingInstrumentationSystemTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()
@@ -24,22 +34,22 @@ final class TracingInstrumentationSystemTests: XCTestCase {
     func testItProvidesAccessToATracer() {
         let tracer = TestTracer()
 
-        XCTAssertNil(InstrumentationSystem.tracer(of: TestTracer.self))
+        XCTAssertNil(InstrumentationSystem._tracer(of: TestTracer.self))
 
         InstrumentationSystem.bootstrapInternal(tracer)
         XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
-        XCTAssertNil(InstrumentationSystem.instrument(of: NoOpInstrument.self))
+        XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
+        XCTAssertNil(InstrumentationSystem._instrument(of: NoOpInstrument.self))
 
-        XCTAssert(InstrumentationSystem.tracer(of: TestTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracer is TestTracer)
 
         let multiplexInstrument = MultiplexInstrument([tracer])
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
         XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: TestTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
 
-        XCTAssert(InstrumentationSystem.tracer(of: TestTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracer is TestTracer)
     }
 }

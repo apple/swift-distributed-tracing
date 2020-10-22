@@ -15,6 +15,12 @@ import Baggage
 @testable import Instrumentation
 import XCTest
 
+extension InstrumentationSystem {
+    public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
+        return self._findInstrument(where: { $0 is I }) as? I
+    }
+}
+
 final class InstrumentationSystemTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()
@@ -26,18 +32,18 @@ final class InstrumentationSystemTests: XCTestCase {
         let instrument = FakeInstrument()
         let multiplexInstrument = MultiplexInstrument([tracer, instrument])
 
-        XCTAssertNil(InstrumentationSystem.instrument(of: FakeTracer.self))
-        XCTAssertNil(InstrumentationSystem.instrument(of: FakeInstrument.self))
+        XCTAssertNil(InstrumentationSystem._instrument(of: FakeTracer.self))
+        XCTAssertNil(InstrumentationSystem._instrument(of: FakeInstrument.self))
 
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
         XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: FakeTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.instrument(of: FakeInstrument.self) === instrument)
+        XCTAssert(InstrumentationSystem._instrument(of: FakeTracer.self) === tracer)
+        XCTAssert(InstrumentationSystem._instrument(of: FakeInstrument.self) === instrument)
 
         InstrumentationSystem.bootstrapInternal(tracer)
         XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument(of: FakeTracer.self) === tracer)
-        XCTAssertNil(InstrumentationSystem.instrument(of: FakeInstrument.self))
+        XCTAssert(InstrumentationSystem._instrument(of: FakeTracer.self) === tracer)
+        XCTAssertNil(InstrumentationSystem._instrument(of: FakeInstrument.self))
     }
 }
 

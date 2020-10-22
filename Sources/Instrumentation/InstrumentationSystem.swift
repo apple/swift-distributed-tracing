@@ -20,18 +20,7 @@ import Baggage
 /// If you need to use more that one cross-cutting tool you can do so by using `MultiplexInstrument`.
 ///
 /// # Access the Instrument
-/// There are two ways of getting the bootstrapped instrument.
-/// 1. `InstrumentationSystem.instrument`: Returns whatever you passed to `.bootstrap` as an `Instrument`.
-/// 2. `InstrumentationSystem.instrument(of: MyInstrument.self)`: Returns the bootstrapped `Instrument` if it's
-/// an instance of the given type or the first instance of `MyInstrument` if it's part of a `MultiplexInstrument`.
-///
-/// ## What getter to use
-/// - Default to using `InstrumentationSystem.instrument`
-/// - Use `InstrumentationSystem.instrument(of: MyInstrument.self)` only if you need to use specific `MyInstrument` APIs
-///
-/// Specific instrumentation libraries may also provide their own accessors as extensions, e.g. GreatInstrumentation could provide an
-/// `InstrumentationSystem.great` convenience accessor, so prefer using them if available. These accessors should call
-/// `.instrument(of: GreatInstrument.self)` under the hood to ensure they work when being used through a `MultiplexInstrument`.
+/// `InstrumentationSystem.instrument`: Returns whatever you passed to `.bootstrap` as an `Instrument`.
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
     private static var _instrument: Instrument = NoOpInstrument()
@@ -54,7 +43,9 @@ public enum InstrumentationSystem {
         }
     }
 
-    // for our testing we want to allow multiple bootstrapping
+    /// For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by `bootstrap()`.
+    ///
+    /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the `NoOpInstrument` is bootstrapped.
     internal static func bootstrapInternal(_ instrument: Instrument?) {
         self.lock.withWriterLock {
             self._instrument = instrument ?? NoOpInstrument()
@@ -66,16 +57,6 @@ public enum InstrumentationSystem {
     /// Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
     public static var instrument: Instrument {
         return self.lock.withReaderLock { self._instrument }
-    }
-
-    /// Get an `Instrument` instance of the given type.
-    ///
-    /// When using `MultiplexInstrument`, this returns the first instance of the given type stored in the `MultiplexInstrument`.
-    ///
-    /// - Parameter instrumentType: The type of `Instrument` you want to retrieve an instance for.
-    /// - Returns: An `Instrument` instance of the given type or `nil` if no `Instrument` of that type has been bootstrapped.
-    public static func instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
-        return self._findInstrument(where: { $0 is I }) as? I
     }
 }
 
