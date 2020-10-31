@@ -529,6 +529,14 @@ extension SpanAttributes {
         }
     }
 
+    /// Merges the given `SpanAttributes` into these `SpanAttributes` by overwriting values of duplicate keys with those of the
+    /// passed `SpanAttributes`.
+    ///
+    /// - Parameter other: `SpanAttributes` to merge.
+    public mutating func merge(_ other: SpanAttributes) {
+        self._attributes.merge(other._attributes, uniquingKeysWith: { _, rhs in rhs })
+    }
+
     /// - Returns: Number of attributes stored.
     public var count: Int {
         return self._attributes.count

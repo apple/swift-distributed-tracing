@@ -137,6 +137,26 @@ final class SpanTests: XCTestCase {
         }
     }
 
+    func testSpanAttributesMerge() {
+        var attributes: SpanAttributes = [
+            "0": 0,
+            "1": true,
+            "2": "test",
+        ]
+        let other: SpanAttributes = [
+            "0": 1,
+            "1": false,
+            "3": "new",
+        ]
+
+        attributes.merge(other)
+
+        XCTAssertEqual(attributes["0"]?.toSpanAttribute(), 1)
+        XCTAssertEqual(attributes["1"]?.toSpanAttribute(), false)
+        XCTAssertEqual(attributes["2"]?.toSpanAttribute(), "test")
+        XCTAssertEqual(attributes["3"]?.toSpanAttribute(), "new")
+    }
+
     func testSpanParentConvenience() {
         var parentBaggage = Baggage.topLevel
         parentBaggage[TestBaggageContextKey.self] = "test"
