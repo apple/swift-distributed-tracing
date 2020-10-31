@@ -280,9 +280,14 @@ TODO: make a forums category?
 
 Please make sure to run the `./scripts/sanity.sh` script when contributing, it checks formatting and similar things.
 
-You can make ensure it always is run and passes before you push by installing a pre-push hook with git:
+You can ensure it always is run and passes before you push by installing a pre-push hook with git:
 
-```
+``` sh
 echo './scripts/sanity.sh' > .git/hooks/pre-push
 ```
 
+### Formatting 
+
+We use a specific version of [`nicklockwood/swiftformat`](https://github.com/nicklockwood/swiftformat).
+Please take a look at our [`Dockerfile`](docker/Dockerfile) to see which version is currently being used and install it
+on your machine before running the script.
