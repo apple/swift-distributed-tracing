@@ -35,6 +35,7 @@ extension SpanTests {
                 ("testSpanAttributesUX", testSpanAttributesUX),
                 ("testSpanAttributesCustomValue", testSpanAttributesCustomValue),
                 ("testSpanAttributesAreIterable", testSpanAttributesAreIterable),
+                ("testSpanAttributesMerge", testSpanAttributesMerge),
                 ("testSpanParentConvenience", testSpanParentConvenience),
            ]
    }
