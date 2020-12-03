@@ -93,7 +93,7 @@ In this short getting started example, we'll go through bootstrapping, immediate
 
 **TODO: Provide a trivial example here**
 
-Adding a span of a synchronous functions can be achieved like this:
+Adding a span to synchronous functions can be achieved like this:
 
 ```swift
 func handleRequest(_ op: String, context: LoggingContext) -> String { 
@@ -152,9 +152,13 @@ func handleRequest(_ op: String, context: LoggingContext) -> EventLoopFuture<Str
 }
 ```
 
-While this is verbose, this is only the low-level building blocks that this library provides. Eventually convenience wrappers will be provided, automatically wrapping future types etc. We welcome such contributions, but likely they should live in `swift-distributed-tracing-extras`.
+While this is verbose, this is only the low-level building blocks that this library provides, higher level helper utilities can be  
 
-**TODO: Show examples / images**
+> Eventually convenience wrappers will be provided, automatically wrapping future types etc. We welcome such contributions, but likely they should live in `swift-distributed-tracing-extras`.
+
+Once a system, or multiple systems have been instrumented, a Tracer been selected and your application runs and emits some trace information, you will be able to inspect how your application is behaving by looking at one of the various trace UIs, such as e.g. Zipkin:
+
+![Simple example trace in Zipkin Web UI](images/zipkin_trace.png)
 
 **TODO: Show how this relates to async/await**
 
