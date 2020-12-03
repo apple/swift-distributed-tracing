@@ -1,6 +1,6 @@
 # Swift Distributed Tracing
 
-A Tracing API for Swift.
+A Distributed Tracing API for Swift.
 
 This is a collection of Swift libraries enabling the instrumentation of your server side applications using tools such as tracers. Our goal is to provide a common foundation that allows you to freely choose how to instrument your system with minimal changes to your actual code.
 
@@ -12,9 +12,9 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 
 > ⚠️  ⚠️  ⚠️
 >
-> We anticipate the upcoming [Swift Concurrency](https://forums.swift.org/t/swift-concurrency-roadmap/41611) features to have an significant impact on the usage of these APIs, if task-local values **(proposal coming soon)** are accepted into the language.
+> We anticipate the upcoming [Swift Concurrency](https://forums.swift.org/t/swift-concurrency-roadmap/41611) features to have significant impact on the usage of these APIs, if task-local values **(proposal coming soon)** are accepted into the language.
 > 
-> As such, we advice to adopt these APIs carefully, and offer them _optionally_, i.e. provide defaulted values for context paramters such that users do not necessarily have to use them – because the upcoming Swift Concurrency story should enable APIs to gain automatic context propagation using task locals (if the proposal were to be accepted).
+> As such, we advice to adopt these APIs carefully, and offer them _optionally_, i.e. provide defaulted values for context parameters such that users do not necessarily have to use them – because the upcoming Swift Concurrency story should enable APIs to gain automatic context propagation using task locals (if the proposal were to be accepted).
 > 
 > At this point in time we would like to focus on Tracer implementations, final API polish and adoption in "glue" libraries between services, such as AsyncHTTPClient, gRPC and similar APIs.
 >
@@ -71,10 +71,10 @@ The following libraries already support Swift Distributed Tracing or Baggage in 
 
 | Library | Integrates | Status |
 | ------- | ---------- | ------ |
-| AsyncHTTPClient | Tracing | Old* [PoC PR](https://github.com/swift-server/async-http-client/pull/289) |
-| Swift gRPC | Tracing | Old* [PoC PR](https://github.com/grpc/grpc-swift/pull/941) |
-| Swift AWS Lambda Runtime | Tracing | Old* [PoC PR](https://github.com/swift-server/swift-aws-lambda-runtime/pull/167) |
-| Swift NIO | Baggage | Old* [PoC PR](https://github.com/apple/swift-nio/pull/1574) |
+| AsyncHTTPClient | Tracing | Old* [Proof of Concept PR](https://github.com/swift-server/async-http-client/pull/289) |
+| Swift gRPC | Tracing | Old* [Proof of Concept PR](https://github.com/grpc/grpc-swift/pull/941) |
+| Swift AWS Lambda Runtime | Tracing | Old* [Proof of Concept PR](https://github.com/swift-server/swift-aws-lambda-runtime/pull/167) |
+| Swift NIO | Baggage | Old* [Proof of Concept PR](https://github.com/apple/swift-nio/pull/1574) |
 | RediStack (Redis) | Tracing | Signalled intent to adopt tracing. |
 | Soto AWS Client | Tracing | Signalled intent to adopt tracing. |
 | _Your library?_ | ... | [Get in touch!](https://forums.swift.org/c/server/43) | 
@@ -89,9 +89,9 @@ If you know of any other library please send in a [pull request](https://github.
 
 ## Getting Started
 
-In this short getting started example, we'll go through bootstrapping, immediately benefiting from tracing, and instrumenting our own synchronous and asynchronous APIs. The following sections will explain all the pieces of the API in more depth. When in doubt, you may want to refer to the OpenTelemetry, Zipkin, or Jaeger documentations because all the concepts for different tracers are quite similar. 
+In this short getting started example, we'll go through bootstrapping, immediately benefiting from tracing, and instrumenting our own synchronous and asynchronous APIs. The following sections will explain all the pieces of the API in more depth. When in doubt, you may want to refer to the [OpenTelemetry](https://opentelemetry.io), [Zipkin](https://zipkin.io), or [Jaeger](https://www.jaegertracing.io) documentations because all the concepts for different tracers are quite similar. 
 
-**TODO: Provide a trivial example here**
+Initially 
 
 Adding a span to synchronous functions can be achieved like this:
 
@@ -351,6 +351,18 @@ If using a framework which itself has a "`...Context`" object you may want to in
 ### Starting and ending spans
 
 The primary purpose of this API is to start and end so-called `Span` types.
+
+Spans form hierarchies with their parent spans, and end up being visualized using various tools, usually in a format similar to gant charts. So for example, if we had multiple operations that compose making dinner, they would be modelled as child spans of a main `makeDinner` span. Any sub tasks are again modelled as child spans of any given operation, and so on, resulting in a trace view similar to:
+
+```
+>-o-o-o----- makeDinner ----------------o---------------x    [15s]
+  \-|-|- chopVegetables--------x        |                    [2s]
+    | |  \- chop -x |                   |                    [1s]
+    | |             \--- chop -x        |                    [1s]
+    \-|- marinateMeat -----------x      |                    [3s]
+      \- preheatOven -----------------x |                    [10s]
+                                        \--cook---------x    [5s]
+```
 
 
 ## Library/Framework developers: Instrumenting your software
