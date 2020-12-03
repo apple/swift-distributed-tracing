@@ -2,7 +2,7 @@
 
 A Tracing API for Swift.
 
-This is a collection of Swift libraries enabling the instrumentation of your server side applications using tools such as tracers. Our goal is to provide a common foundation that allows you to freely choose how to instrument your system with minimal changes to your actual code.
+This is a collection of Swift libraries enabling the instrumentation of server side applications using tools such as tracers. Our goal is to provide a common foundation that allows to freely choose how to instrument systems with minimal changes to your actual code.
 
 While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, it's primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
