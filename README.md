@@ -2,9 +2,9 @@
 
 A Tracing API for Swift.
 
-This is a collection of Swift libraries enabling the instrumentation of your server side applications using tools such as tracers. Our goal is to provide a common foundation that allows you too freely choose how to instrument your system with minimal changes to your actual code.
+This is a collection of Swift libraries enabling the instrumentation of your server side applications using tools such as tracers. Our goal is to provide a common foundation that allows you to freely choose how to instrument your system with minimal changes to your actual code.
 
-While Swift Distributed Tracing allows building all kinds of _instruments_ which can co-exist in applications transparently, it's primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
+While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, it's primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
 ---
 
@@ -12,7 +12,7 @@ While Swift Distributed Tracing allows building all kinds of _instruments_ which
 
 > ⚠️  ⚠️  ⚠️
 >
-> We anticipate the upcoming [Swift Concurrency](https://forums.swift.org/t/swift-concurrency-roadmap/41611) features to have an significant impact on the usage of these APIs, if task-local values **(proposal coming soon)** would be accepted into the language.
+> We anticipate the upcoming [Swift Concurrency](https://forums.swift.org/t/swift-concurrency-roadmap/41611) features to have an significant impact on the usage of these APIs, if task-local values **(proposal coming soon)** are accepted into the language.
 > 
 > As such, we advice to adopt these APIs carefully, and offer them _optionally_, i.e. provide defaulted values for context paramters such that users do not necessarily have to use them – because the upcoming Swift Concurrency story should enable APIs to gain automatic context propagation using task locals (if the proposal were to be accepted).
 > 
@@ -89,7 +89,7 @@ If you know of any other library please send in a [pull request](https://github.
 
 ## Getting Started
 
-In this short getting started example, we'll go through bootstrapping, immediately benefiting from tracing, and instrumenting our own synchronous and asynchronous APIs. The following sections will explain all the pieces of the API in more depth. When in doubt, you may want to refer to the open telemetry, zipkin, or jaeger documentations because all the concepts for different tracers are quite similar. 
+In this short getting started example, we'll go through bootstrapping, immediately benefiting from tracing, and instrumenting our own synchronous and asynchronous APIs. The following sections will explain all the pieces of the API in more depth. When in doubt, you may want to refer to the OpenTelemetry, Zipkin, or Jaeger documentations because all the concepts for different tracers are quite similar. 
 
 **TODO: Provide a trivial example here**
 
@@ -104,7 +104,7 @@ func handleRequest(_ op: String, context: LoggingContext) -> String {
 }
 ```
 
-Throwing can be handled using by either recording errors manually into a span by calling `span.recordError(error:)` or by wrapping a potentially throwing operation using the `withSpan(operation:context:body:)` function, which automatically records any thrown error and ends the span at the end of the body closure scope:
+Throwing can be handled by either recording errors manually into a span by calling `span.recordError(error:)`, or by wrapping a potentially throwing operation using the `withSpan(operation:context:body:)` function, which automatically records any thrown error and ends the span at the end of the body closure scope:
 
 ```swift
 func handleRequest(_ op: String, context: LoggingContext) -> String {
@@ -227,10 +227,10 @@ Swift offers developers a suite of observability libraries: logging, metrics and
 
 Specifically, it is recommended to bootstrap systems in the following order:
 
-1. Bootstrap [Swift Log](https://github.com/apple/swift-log#default-logger-behavior)'s `LoggingSystem`, 
-2. then bootstrap Swift Metrics' `MetricsSystem`, 
-3. then Swift Tracing's `InstrumentationSystem` (Tracing),
-4. ... followed by bootstrapping any other parts of your application.
+1. [Swift Log](https://github.com/apple/swift-log#default-logger-behavior)'s `LoggingSystem`
+2. Swift Metrics' `MetricsSystem`
+3. Swift Tracing's `InstrumentationSystem`
+4. Finally, any other parts of your application
 
 Bootstrapping   tracing systems may attempt to emit metrics about their status etc.
 
@@ -278,7 +278,7 @@ When passing baggage context explicitly we strongly suggest sticking to the foll
   2. Defaulted non-function parameters (e.g. `(mode: Mode = .default)`),
   3. Required function parameters, including required trailing closures (e.g. `(onNext elementHandler: (Value) -> ())`),
   4. Defaulted function parameters, including optional trailing closures (e.g. `(onComplete completionHandler: (Reason) -> ()) = { _ in }`).
-- Baggage Context should be passed as **the last parameter in the required non-function parameters group in a function declaration**.
+- Logging Context should be passed as **the last parameter in the required non-function parameters group in a function declaration**.
 
 This way when reading the call side, users of these APIs can learn to "ignore" or "skim over" the context parameter and the method signature remains human-readable and “Swifty”.
 
@@ -311,7 +311,7 @@ rather than _"request (ignore this context parameter when reading) that URL"_.
 
 Generally libraries should favor accepting the general `LoggingContext` type, and **not** attempt to wrap it, as it will result in difficult to compose APIs between multiple libraries. Because end users are likely going to be combining various libraries in a single application, it is important that they can "just pass along" the same context object through all APIs, regardless which other library they are calling into.
 
-Frameworks may need to be more opinionated here, and e.g. already have some form of "per request context" contextual object which they will conform to `LoggingContext`. _Within_ such framework it is fine and expected to accept and pass the explicit `SomeFrameworkContext`, however when designing APIs which may be called _by_ other libraries, such framework should be able to accept a generic `LoggingContext` rather than it's own specific type.
+Frameworks may need to be more opinionated here, and e.g. already have some form of "per request context" contextual object which they will conform to `LoggingContext`. _Within_ such framework it is fine and expected to accept and pass the explicit `SomeFrameworkContext`, however when designing APIs which may be called _by_ other libraries, such framework should be able to accept a generic `LoggingContext` rather than its own specific type.
 
 #### Existing context argument
 
@@ -452,7 +452,7 @@ When creating a tracer you need to create two types:
 
 > The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.
 
-### Defining, injecting and extracting baggage
+### Defining, injecting and extracting Baggage
 
 ```swift
 import Tracing
