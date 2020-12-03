@@ -28,6 +28,10 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
     + [Tracing Backends](#tracing-backends)
     + [Libraries & Frameworks](#libraries---frameworks)
 * [Getting Started](#getting-started)
+    + [Dependencies & Tracer backend](#dependencies---tracer-backend)
+    + [Benefiting from instrumented libraries/frameworks](#benefiting-from-instrumented-libraries-frameworks)
+    + [Instrumenting your code](#instrumenting-your-code)
+    + [More examples](#more-examples)
 * [In-Depth Guide](#in-depth-guide)
 * In-Depth Guide for **Application Developers**
     + [Setting up instruments](#application-developers--setting-up-instruments)
@@ -68,7 +72,7 @@ If you know of any other library please send in a [pull request](https://github.
 
 ### Libraries & Frameworks
 
-The following libraries already support Swift Distributed Tracing or Baggage in their APIs:
+As this API package was just released, no projects have yet fully adopted it, the following table for not serves as reference to prior work in adopting tracing work. As projects move to adopt tracing completely, the table will be used to track adoption phases of the various libraries.
 
 | Library | Integrates | Status |
 | ------- | ---------- | ------ |
@@ -475,17 +479,13 @@ func handler(request: HTTPRequest, context: LoggingContext) {
 > In case your library makes use of the `NIOHTTP1.HTTPHeaders` type we already have an `HTTPHeadersInjector` &
 `HTTPHeadersExtractor` available as part of the `NIOInstrumentation` library.
 
-For your library/framework to be able to carry `LoggingContext` across asynchronous boundaries, it's crucial that you
-carry the context throughout your entire call chain in order to avoid dropping metadata.
-
-**TODO:** More documentation and examples will follow here as a few initial libraries adopt these types, so we can use them as case studies. 
+For your library/framework to be able to carry `LoggingContext` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
 
 ### Tracing your library
 
-When your library/framework can benefit from tracing, you should make use of it by addentionally integrating the
-`Tracing` library. In order to work with the tracer
-[configured by the end-user](#Bootstrapping-the-Instrumentation-System), it adds a property to `InstrumentationSystem`
-that gives you back a `Tracer`. You can then use that tracer to start `Span`s. In an HTTP client you e.g.
+When your library/framework can benefit from tracing, you should make use of it by integrating the `Tracing` library. 
+
+In order to work with the tracer [configured by the end-user](#Bootstrapping-the-Instrumentation-System), it adds a property to `InstrumentationSystem` that gives you back a `Tracer`. You can then use that tracer to start `Span`s. In an HTTP client you e.g.
 should start a `Span` when sending the outgoing HTTP request:
 
 ```swift
