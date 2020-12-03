@@ -446,9 +446,24 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
                                         \--cook---------x    [5s]
 ```
 
-The above trace is achieved by starting and 
+The above trace is achieved by starting and ending spans in all the mentioned functions, for example, like this:
 
-> ❗️ It is tremendously important to **always `end()` a started `Span`**! Failing to do so is an error, and a tracer *may* decide to either crash the application or log warnings when an not-ended span is deinitialized.
+```swift
+let tracer: Tracer
+
+func makeDinner(context: LoggingContext) async throws -> Meal {
+  tracer.withSpan(operationName: "makeDinner", context) {
+    let veggiesFuture = try chopVegetables(context: span.context)
+    let meatFuture = marinateMeat(context: span.context)
+    let ovenFuture = await try preheatOven(temperature: 350, context: span.context)
+    ... 
+  }
+}
+```
+
+> ❗️ It is tremendously important to **always `end()` a started `Span`**! make sure to end any started span on _every_ code path, including error paths 
+> 
+> Failing to do so is an error, and a tracer *may* decide to either crash the application or log warnings when an not-ended span is deinitialized.
 
 
 ## Library/Framework developers: Instrumenting your software
