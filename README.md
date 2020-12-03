@@ -34,9 +34,11 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
     + [More examples](#more-examples)
 * [In-Depth Guide](#in-depth-guide)
 * In-Depth Guide for **Application Developers**
-    + [Setting up instruments](#application-developers--setting-up-instruments)
-    + [Passing context objects](#passing-context-objects)
+    + [Setting up instruments & tracers](#setting-up-instruments--tracers)
+    + [Bootstrapping the InstrumentationSystem](#bootstrapping-the-instrumentationsystem)
+    + [Context propagation](#passing-context-objects)
     + [Creating context objects](#creating-context-objects--and-when-not-to-do-so-)
+    + [Working with `Span`s](#spans)
 * In-Depth Guide for: **Library/Framework developers**
     + [Instrumenting your software](#library-framework-developers--instrumenting-your-software)
     + [Extracting & injecting LoggingContext](#extracting---injecting-LoggingContext)
@@ -44,8 +46,6 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 * In-Depth Guide for: **Instrument developers**
     + [Creating an `Instrument`](#instrument-developers--creating-an-instrument)
     + [Creating a `Tracer`](#creating-a--tracer-)
-* [Bootstrapping the Instrumentation System](#bootstrapping-the-instrumentation-system)
-    + [Bootstrapping multiple instruments using MultiplexInstrument](#bootstrapping-multiple-instruments-using-multiplexinstrument)
 * [Contributing](#contributing)
 
 ---
@@ -171,8 +171,9 @@ When using client libraries that support distributed tracing, they will accept a
 Adding a span to synchronous functions can be achieved like this:
 
 ```swift
-func handleRequest(_ op: String, context: LoggingContext) -> String { 
-  let span = InstrumentationSystem.tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
+func handleRequest(_ op: String, context: LoggingContext) -> String {
+  let tracer = InstrumentationSystem.tracer
+  let span = tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
   defer { span.end() }
   
   return "done:\(op)"
@@ -194,8 +195,9 @@ If this function were asynchronous, and returning a [Swift NIO](https://github.c
 we need to end the span when the future completes. We can do so in its `onComplete`:
 
 ```swift
-func handleRequest(_ op: String, context: LoggingContext) -> EventLoopFuture<String> { 
-  let span = InstrumentationSystem.tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
+func handleRequest(_ op: String, context: LoggingContext) -> EventLoopFuture<String> {
+  let tracer = InstrumentationSystem.tracer
+  let span = tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
   
   let future: EventLoopFuture<String> = someOperation(op)
   future.whenComplete { _ in 
@@ -212,7 +214,8 @@ To do this within the future we could manually invoke the `span.recordError` API
 
 ```swift
 func handleRequest(_ op: String, context: LoggingContext) -> EventLoopFuture<String> {
-  let span = InstrumentationSystem.tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
+  let tracer = InstrumentationSystem.tracer
+  let span = tracer.startSpan(operationName: "handleRequest(\(name))", context: context)
 
   let future: EventLoopFuture<String> = someOperation(op)
   future.whenComplete { result in
@@ -426,7 +429,8 @@ Please refer to the respective functions documentation for details.
 
 If using a framework which itself has a "`...Context`" object you may want to inspect it for similar factory functions, as `LoggingContext` is a protocol, that may be conformed to by frameworks to provide a smoother user experience.
 
-### Starting and ending spans
+<a name="spans"></a>
+### Working with `Span`s
 
 The primary purpose of this API is to start and end so-called `Span` types.
 
@@ -441,6 +445,10 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
       \- preheatOven -----------------x |                    [10s]
                                         \--cook---------x    [5s]
 ```
+
+The above trace is achieved by starting and 
+
+> ❗️ It is tremendously important to **always `end()` a started `Span`**! Failing to do so is an error, and a tracer *may* decide to either crash the application or log warnings when an not-ended span is deinitialized.
 
 
 ## Library/Framework developers: Instrumenting your software
