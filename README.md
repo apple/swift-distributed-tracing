@@ -232,11 +232,11 @@ Swift offers developers a suite of observability libraries: logging, metrics and
 Specifically, it is recommended to bootstrap systems in the following order:
 
 1. [Swift Log](https://github.com/apple/swift-log#default-logger-behavior)'s `LoggingSystem`
-2. Swift Metrics' `MetricsSystem`
+2. [Swift Metrics](https://github.com/apple/swift-metrics#selecting-a-metrics-backend-implementation-applications-only)' `MetricsSystem`
 3. Swift Tracing's `InstrumentationSystem`
 4. Finally, any other parts of your application
 
-Bootstrapping   tracing systems may attempt to emit metrics about their status etc.
+This is because tracing systems may attempt to emit metrics about their status etc, so it is useful that such information be 
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
