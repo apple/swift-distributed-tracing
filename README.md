@@ -4,7 +4,7 @@ A Distributed Tracing API for Swift.
 
 This is a collection of Swift libraries enabling the instrumentation of server side applications using tools such as tracers. Our goal is to provide a common foundation that allows to freely choose how to instrument systems with minimal changes to your actual code.
 
-While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, it's primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
+While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, its primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
 ---
 
@@ -28,16 +28,16 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
     + [Tracing Backends](#tracing-backends)
     + [Libraries & Frameworks](#libraries---frameworks)
 * [Getting Started](#getting-started)
-* [In Depth Guide](#in-depth-guide)
-* **Application Developers**
+* [In-Depth Guide](#in-depth-guide)
+* In-Depth Guide for **Application Developers**
     + [Setting up instruments](#application-developers--setting-up-instruments)
     + [Passing context objects](#passing-context-objects)
     + [Creating context objects](#creating-context-objects--and-when-not-to-do-so-)
-* Getting Started: **Library/Framework developers**
+* In-Depth Guide for: **Library/Framework developers**
     + [Instrumenting your software](#library-framework-developers--instrumenting-your-software)
     + [Extracting & injecting LoggingContext](#extracting---injecting-LoggingContext)
     + [Tracing your library](#tracing-your-library)
-* Getting Started: **Instrument developers**
+* In-Depth Guide for: **Instrument developers**
     + [Creating an `Instrument`](#instrument-developers--creating-an-instrument)
     + [Creating a `Tracer`](#creating-a--tracer-)
 * [Bootstrapping the Instrumentation System](#bootstrapping-the-instrumentation-system)
@@ -52,6 +52,7 @@ This project is designed in a very open and extensible manner, such that various
 
 The purpose of the tracing package is to serve as common API for all tracer and instrumentation implementations. Thanks to this, libraries may only need to be instrumented once, and then be used with any tracer which conforms to this API.
 
+<a name="backends"></a>
 ### Tracing Backends
  
 Compatible `Tracer` implementations:
@@ -91,7 +92,77 @@ If you know of any other library please send in a [pull request](https://github.
 
 In this short getting started example, we'll go through bootstrapping, immediately benefiting from tracing, and instrumenting our own synchronous and asynchronous APIs. The following sections will explain all the pieces of the API in more depth. When in doubt, you may want to refer to the [OpenTelemetry](https://opentelemetry.io), [Zipkin](https://zipkin.io), or [Jaeger](https://www.jaegertracing.io) documentations because all the concepts for different tracers are quite similar. 
 
-Initially 
+### Dependencies & Tracer backend
+
+In order to use tracing you will need to bootstrap a tracing backend ([available backends](#backends)). 
+
+When developing an *application* locate the specific tracer library you would like to use and add it as an dependency directly:
+
+```swift
+.package(url: "<https://example.com/some-awesome-tracer-backend.git", from: "..."),
+```
+
+Alternatively, or when developing a *library/framework*, you should not depend on a specific tracer, and instead only depend on the tracing package directly, by adding the following to your `Package.swift`:
+
+```
+.package(url: "https://github.com/apple/swift-distributed-tracing.git", from: "0.1.0"),
+```
+
+To your main target, add a dependency on `Tracing` library and the instrument you want to use:
+
+```swift
+.target(
+    name: "MyApplication", 
+    dependencies: [
+        "Tracing",
+        "<AwesomeTracing>", // the specific tracer
+    ]
+),
+```
+
+Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A `Tracer` is a type of `Instrument` and can be offered used to globally bootstrap the tracing system, like this:
+
+
+```swift
+import Tracing // the tracing API
+import AwesomeTracing // the specific tracer
+
+InstrumentationSystem.bootstrap(AwesomeTracing())
+```
+
+If you don't bootstrap  (or other instrument) the default no-op tracer is used, which will result in no trace data being collected.
+
+### Benefiting from instrumented libraries/frameworks
+
+**Automatically reported spans**: When using an already instrumented library, e.g. an HTTP Server which automatically emits spans internally, this is all you have to do to enable tracing. It should now automatically record and emit spans using your configured backend.
+
+**Using baggage and logging context**: The primary transport type for tracing metadata is called `Baggage`, and the primary type used to pass around baggage context and loggers is `LoggingContext`. Logging context combines baggage context values with a smart `Logger` that automatically includes any baggage values ("trace metadata") when it is used for logging. For example, when using an instrumented HTTP server, the API could look like this:
+
+```swift
+SomeHTTPLibrary.handle { (request, context) in 
+  context.logger.info("Wow, tracing!") // automatically includes tracing metadata such as "trace-id"
+  return try doSomething(request context: context)
+}
+```
+
+In this snippet, we use the context logger to log a very useful message. However it is even more useful than it seems at first sight: if a tracer was installed and extracted tracing information from the incoming request, it would automatically log our message _with_ the trace information, allowing us to co-relate all log statements made during handling of this specific request:
+
+```
+2020-12-04T05:46:38+0000 example-trace-id=1111-23-1234556 info: Wow tracing!
+2020-12-04T05:46:38+0000 example-trace-id=9999-22-9879797 info: Wow tracing!
+2020-12-04T05:46:38+0000 example-trace-id=9999-22-9879797 user=Alice info: doSomething() for user Alice
+2020-12-04T05:46:38+0000 example-trace-id=1111-23-1234556 user=Charlie info: doSomething() for user Charlie
+2020-12-04T05:46:38+0000 example-trace-id=1111-23-1234556 user=Charlie error: doSomething() could not complete request!
+2020-12-04T05:46:38+0000 example-trace-id=9999-22-9879797 user=alice info: doSomething() completed
+```
+
+Thanks to tracing, and trace identifiers, even if not using tracing visualization libraries, we can immediately co-relate log statements and know that the request `1111-23-1234556` has failed. Since our application can also _add_ values to the context, we can quickly notice that the error seems to occur for the user `Charlie` and not for user `Alice`. Perhaps the user Charlie has exceeded some quotas, does not have permissions or we have a bug in parsing names that include the letter `h`? We don't know _yet_, but thanks to tracing we can much quicker begin our investigation.
+
+**Passing context to client libraries**: When using client libraries that support distributed tracing, they will accept a `Baggage.LoggingContext` type as their _last_ parameter in many calls.
+
+When using client libraries that support distributed tracing, they will accept a `Baggage.LoggingContext` type as their _last_ parameter in many calls. Please refer to [Context argument naming/positioning](https://github.com/apple/swift-distributed-tracing/tree/wip-readme-release#context-propagation-by-explicit-loggingcontext-passing) in the [Context propagation](https://github.com/apple/swift-distributed-tracing/tree/wip-readme-release#context-propagation-by-explicit-loggingcontext-passing) section of this readme to learn more about how to properly pass context values around.
+
+### Instrumenting your code
 
 Adding a span to synchronous functions can be achieved like this:
 
@@ -160,9 +231,9 @@ Once a system, or multiple systems have been instrumented, a Tracer been selecte
 
 ![Simple example trace in Zipkin Web UI](images/zipkin_trace.png)
 
-**TODO: Show how this relates to async/await**
+### Future work: Tracing asynchronous functions
 
-#### Future work: Tracing asynchronous functions
+> ⚠️ This section refers to in-development upcoming Swift Concurrency features and can be tried out using nightly snapshots of the Swift toolchain.
 
 With Swift's ongoing work towards asynchronous functions, actors, and tasks, tracing in Swift will become more pleasant than it is today.
 
@@ -176,7 +247,6 @@ func perform(context: LoggingContext) async -> String {
   return await someWork()
 }
 ```
-
 
 
 ## In-Depth Guide
