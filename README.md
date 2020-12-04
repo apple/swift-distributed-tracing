@@ -11,8 +11,8 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 
 This project uses the context progagation types defined independently in:
 
-- [swift-distributed-tracing-baggage](https://github.com/apple/swift-distributed-tracing-baggage-core) -- `LoggingContext` (Swift Log dependency)
-- [swift-distributed-tracing-baggage-core](https://github.com/apple/swift-distributed-tracing-baggage) -- defining `Baggage` (zero dependencies)
+- [swift-distributed-tracing-baggage](https://github.com/apple/swift-distributed-tracing-baggage) -- `LoggingContext` (Swift Log dependency)
+- [swift-distributed-tracing-baggage-core](https://github.com/apple/swift-distributed-tracing-baggage-core) -- defining `Baggage` (zero dependencies)
 
 ---
 
