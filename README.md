@@ -455,8 +455,9 @@ func makeDinner(context: LoggingContext) async throws -> Meal {
   tracer.withSpan(operationName: "makeDinner", context) {
     let veggiesFuture = try chopVegetables(context: span.context)
     let meatFuture = marinateMeat(context: span.context)
-    let ovenFuture = await try preheatOven(temperature: 350, context: span.context)
-    ... 
+    let ovenFuture = try preheatOven(temperature: 350, context: span.context)
+    ...
+    return cook(veggies, meat, oven)
   }
 }
 ```
