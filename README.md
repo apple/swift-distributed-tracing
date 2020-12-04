@@ -6,6 +6,14 @@ This is a collection of Swift libraries enabling the instrumentation of server s
 
 While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, its primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
+
+---
+
+This project uses the context progagation types defined independently in:
+
+- [swift-distributed-tracing-baggage](https://github.com/apple/swift-distributed-tracing-baggage-core) -- `LoggingContext` (Swift Log dependency)
+- [swift-distributed-tracing-baggage-core](https://github.com/apple/swift-distributed-tracing-baggage) -- defining `Baggage` (zero dependencies)
+
 ---
 
 ### Important note on Adoption
