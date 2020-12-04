@@ -317,7 +317,7 @@ Specifically, it is recommended to bootstrap systems in the following order:
 3. Swift Tracing's `InstrumentationSystem`
 4. Finally, any other parts of your application
 
-This is because tracing systems may attempt to emit metrics about their status etc, so it is useful that such information be 
+This is because tracing systems may attempt to emit metrics about their status etc. 
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
