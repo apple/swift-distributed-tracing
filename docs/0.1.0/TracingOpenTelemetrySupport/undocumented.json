@@ -1,0 +1,131 @@
+{
+  "warnings": [
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+EndUser.swift",
+      "line": 46,
+      "symbol": "EndUserAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+EndUser.swift",
+      "line": 48,
+      "symbol": "EndUserAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+EndUser.swift",
+      "line": 53,
+      "symbol": "EndUserAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+GRPCSemantics.swift",
+      "line": 48,
+      "symbol": "GRPCAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+GRPCSemantics.swift",
+      "line": 50,
+      "symbol": "GRPCAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+GRPCSemantics.swift",
+      "line": 55,
+      "symbol": "GRPCAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift",
+      "line": 72,
+      "symbol": "HTTPAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift",
+      "line": 74,
+      "symbol": "HTTPAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift",
+      "line": 79,
+      "symbol": "HTTPAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+NetSemantics.swift",
+      "line": 54,
+      "symbol": "NetAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+NetSemantics.swift",
+      "line": 56,
+      "symbol": "NetAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+NetSemantics.swift",
+      "line": 61,
+      "symbol": "NetAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+PeerSemantics.swift",
+      "line": 42,
+      "symbol": "PeerAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+PeerSemantics.swift",
+      "line": 44,
+      "symbol": "PeerAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+PeerSemantics.swift",
+      "line": 49,
+      "symbol": "PeerAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+RPCSemantics.swift",
+      "line": 46,
+      "symbol": "RPCAttributes.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+RPCSemantics.swift",
+      "line": 48,
+      "symbol": "RPCAttributes.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/TracingOpenTelemetrySupport/SpanAttribute+RPCSemantics.swift",
+      "line": 53,
+      "symbol": "RPCAttributes.NestedSpanAttributes.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/code"
+}

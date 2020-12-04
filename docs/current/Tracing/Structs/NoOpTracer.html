@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>NoOpTracer Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Struct/NoOpTracer" class="dashAnchor"></a>
+
+    <a title="NoOpTracer Structure Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          Tracing 0.1.0 Docs
+        </a>
+         (69% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/apple/swift-distributed-tracing-baggage">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fapple.github.io%2Fswift-distributed-tracing-baggage%2Fdocs%2F0.1.0%2FTracing%2Fdocsets%2FTracing.xml">
+            <img class="header-icon" src="../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">Tracing Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      NoOpTracer Structure Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttribute.html">SpanAttribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanKind.html">SpanKind</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Array.html">Array</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Bool.html">Bool</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Double.html">Double</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Float.html">Float</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/InstrumentationSystem.html">InstrumentationSystem</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Int.html">Int</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Int16.html">Int16</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Int32.html">Int32</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Int64.html">Int64</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Int8.html">Int8</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/String.html">String</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/NestedSpanAttributesProtocol.html">NestedSpanAttributesProtocol</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Span.html">Span</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SpanAttributeConvertible.html">SpanAttributeConvertible</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SpanAttributeNamespace.html">SpanAttributeNamespace</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Tracer.html">Tracer</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NoOpTracer.html">NoOpTracer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NoOpTracer/NoOpSpan.html">– NoOpSpan</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanAttributeKey.html">SpanAttributeKey</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs.html#/SpanAttributes">SpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanAttributes.html">SpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanEvent.html">SpanEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanLink.html">SpanLink</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanStatus.html">SpanStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SpanStatus/CanonicalCode.html">– CanonicalCode</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>NoOpTracer</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">NoOpTracer</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/Tracer.html">Tracer</a></span></code></pre>
+
+                </div>
+              </div>
+            <p>No operation Tracer, used when no tracing is required.</p>
+
+              <div class="slightly-smaller">
+                <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L19-L72">Show on GitHub</a>
+              </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:7Tracing10NoOpTracerVACycfc"></a>
+                    <a name="//apple_ref/swift/Method/init()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:7Tracing10NoOpTracerVACycfc">init()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:7Tracing6TracerP9startSpan_7baggage6ofKind2atAA0D0_pSS_11CoreBaggage0J0VAA0dG0O8Dispatch0K8WallTimeVtF"></a>
+                    <a name="//apple_ref/swift/Method/startSpan(_:baggage:ofKind:at:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:7Tracing6TracerP9startSpan_7baggage6ofKind2atAA0D0_pSS_11CoreBaggage0J0VAA0dG0O8Dispatch0K8WallTimeVtF">startSpan(_:<wbr>baggage:<wbr>ofKind:<wbr>at:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">startSpan</span><span class="p">(</span>
+    <span class="n">_</span> <span class="nv">operationName</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">baggage</span><span class="p">:</span> <span class="kt">Baggage</span><span class="p">,</span>
+    <span class="n">ofKind</span> <span class="nv">kind</span><span class="p">:</span> <span class="kt"><a href="../Enums/SpanKind.html">SpanKind</a></span><span class="p">,</span>
+    <span class="n">at</span> <span class="nv">time</span><span class="p">:</span> <span class="kt">DispatchWallTime</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Protocols/Span.html">Span</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L22-L29">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:7Tracing6TracerP10forceFlushyyF"></a>
+                    <a name="//apple_ref/swift/Method/forceFlush()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:7Tracing6TracerP10forceFlushyyF">forceFlush()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">forceFlush</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L41">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15Instrumentation10InstrumentP6inject_4into5usingy11CoreBaggage0G0V_qd__zqd_0_t7CarrierQyd_0_Rsd__AA8InjectorRd_0_r0_lF"></a>
+                    <a name="//apple_ref/swift/Method/inject(_:into:using:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15Instrumentation10InstrumentP6inject_4into5usingy11CoreBaggage0G0V_qd__zqd_0_t7CarrierQyd_0_Rsd__AA8InjectorRd_0_r0_lF">inject(_:<wbr>into:<wbr>using:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="n">inject</span><span class="o">&lt;</span><span class="kt">Carrier</span><span class="p">,</span> <span class="kt">Inject</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">baggage</span><span class="p">:</span> <span class="kt">Baggage</span><span class="p">,</span> <span class="n">into</span> <span class="nv">carrier</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">Carrier</span><span class="p">,</span> <span class="n">using</span> <span class="nv">injector</span><span class="p">:</span> <span class="kt">Inject</span><span class="p">)</span>
+    <span class="k">where</span> <span class="kt">Inject</span><span class="p">:</span> <span class="kt">Injector</span><span class="p">,</span> <span class="kt">Carrier</span> <span class="o">==</span> <span class="kt">Inject</span><span class="o">.</span><span class="kt">Carrier</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L33-L36">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15Instrumentation10InstrumentP7extract_4into5usingyqd___11CoreBaggage0G0Vzqd_0_t7CarrierQyd_0_Rsd__AA9ExtractorRd_0_r0_lF"></a>
+                    <a name="//apple_ref/swift/Method/extract(_:into:using:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15Instrumentation10InstrumentP7extract_4into5usingyqd___11CoreBaggage0G0Vzqd_0_t7CarrierQyd_0_Rsd__AA9ExtractorRd_0_r0_lF">extract(_:<wbr>into:<wbr>using:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="n">extract</span><span class="o">&lt;</span><span class="kt">Carrier</span><span class="p">,</span> <span class="kt">Extract</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">carrier</span><span class="p">:</span> <span class="kt">Carrier</span><span class="p">,</span> <span class="n">into</span> <span class="nv">baggage</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">Baggage</span><span class="p">,</span> <span class="n">using</span> <span class="nv">extractor</span><span class="p">:</span> <span class="kt">Extract</span><span class="p">)</span>
+    <span class="k">where</span> <span class="kt">Extract</span><span class="p">:</span> <span class="kt">Extractor</span><span class="p">,</span> <span class="kt">Carrier</span> <span class="o">==</span> <span class="kt">Extract</span><span class="o">.</span><span class="kt">Carrier</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L38-L41">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:7Tracing10NoOpTracerV0bC4SpanC"></a>
+                    <a name="//apple_ref/swift/Class/NoOpSpan" class="dashAnchor"></a>
+                    <a class="token" href="#/s:7Tracing10NoOpTracerV0bC4SpanC">NoOpSpan</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Structs/NoOpTracer/NoOpSpan.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">NoOpSpan</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/Span.html">Span</a></span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/Tracing/NoOpTracer.swift#L43-L71">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2020 <a class="link" href="https://github.com/apple/swift-distributed-tracing-baggage" target="_blank" rel="external">Swift Distributed Tracing team</a>. All rights reserved. (Last updated: 2020-12-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

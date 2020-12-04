@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>NestedSpanAttributes Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../../js/jquery.min.js" defer></script>
+    <script src="../../js/jazzy.js" defer></script>
+    
+    <script src="../../js/lunr.min.js" defer></script>
+    <script src="../../js/typeahead.jquery.js" defer></script>
+    <script src="../../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Struct/NestedSpanAttributes" class="dashAnchor"></a>
+
+    <a title="NestedSpanAttributes Structure Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../../index.html">
+          TracingOpenTelemetrySupport 0.1.0 Docs
+        </a>
+         (85% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/apple/swift-distributed-tracing-baggage">
+            <img class="header-icon" src="../../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fapple.github.io%2Fswift-distributed-tracing-baggage%2Fdocs%2F0.1.0%2FTracingOpenTelemetrySupport%2Fdocsets%2FTracingOpenTelemetrySupport.xml">
+            <img class="header-icon" src="../../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../../index.html">TracingOpenTelemetrySupport Reference</a>
+      <img class="carat" src="../../img/carat.png" />
+      NestedSpanAttributes Structure Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName.html">SpanAttributeName</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/EndUser.html">– EndUser</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/GRPC.html">– GRPC</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/HTTP.html">– HTTP</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Net.html">– Net</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Peer.html">– Peer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/RPC.html">– RPC</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Extensions/SpanAttributes.html">SpanAttributes</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/EndUserAttributes.html">EndUserAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/EndUserAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/GRPCAttributes.html">GRPCAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/GRPCAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/HTTPAttributes.html">HTTPAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/HTTPAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes.html">NetAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/PeerAttributes.html">PeerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/PeerAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RPCAttributes.html">RPCAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RPCAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>NestedSpanAttributes</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">NestedSpanAttributes</span> <span class="p">:</span> <span class="kt">NestedSpanAttributesProtocol</span></code></pre>
+
+                </div>
+              </div>
+            
+              <div class="slightly-smaller">
+                <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L78-L144">Show on GitHub</a>
+              </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesVAEycfc"></a>
+                    <a name="//apple_ref/swift/Method/init()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesVAEycfc">init()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6method0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/method" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6method0A00G12AttributeKeyVySSGvp">method</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>HTTP request method. E.g. &ldquo;GET&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">method</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L82">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV3url0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/url" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV3url0A00G12AttributeKeyVySSGvp">url</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Full HTTP request URL in the form scheme://host[:port]/path?query[#fragment].
+Usually the fragment is not transmitted over HTTP, but if it is known, it should be included nevertheless.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L86">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6target0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/target" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6target0A00G12AttributeKeyVySSGvp">target</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The full request target as passed in a HTTP request line or equivalent, e.g. &ldquo;/path/12314/?q=ddds#123&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">target</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L89">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV4host0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/host" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV4host0A00G12AttributeKeyVySSGvp">host</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The value of the HTTP host header. When the header is empty or not present, this attribute should be the same.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">host</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L92">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6scheme0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/scheme" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6scheme0A00G12AttributeKeyVySSGvp">scheme</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The URI scheme identifying the used protocol: &ldquo;http&rdquo; or &ldquo;https&rdquo;</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">scheme</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L95">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10statusCode0A00G12AttributeKeyVySiGvp"></a>
+                    <a name="//apple_ref/swift/Property/statusCode" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10statusCode0A00G12AttributeKeyVySiGvp">statusCode</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>HTTP response status code. E.g. 200.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">statusCode</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">Int</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L98">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10statusText0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/statusText" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10statusText0A00G12AttributeKeyVySSGvp">statusText</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>HTTP reason phrase. E.g. &ldquo;OK&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">statusText</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L101">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6flavor0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/flavor" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV6flavor0A00G12AttributeKeyVySSGvp">flavor</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Kind of HTTP protocol used: &ldquo;1.0&rdquo;, &ldquo;1.1&rdquo;, &ldquo;2&rdquo;, &ldquo;SPDY&rdquo; or &ldquo;QUIC&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">flavor</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L104">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV9userAgent0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/userAgent" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV9userAgent0A00G12AttributeKeyVySSGvp">userAgent</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Value of the HTTP User-Agent header sent by the client.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">userAgent</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L107">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV20requestContentLength0A00G12AttributeKeyVySiGvp"></a>
+                    <a name="//apple_ref/swift/Property/requestContentLength" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV20requestContentLength0A00G12AttributeKeyVySiGvp">requestContentLength</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often,
+but not always, present as the Content-Length header. For requests using transport encoding, this should be the
+compressed size.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">requestContentLength</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">Int</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L112-L114">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV32requestContentLengthUncompressed0A00G12AttributeKeyVySiGvp"></a>
+                    <a name="//apple_ref/swift/Property/requestContentLengthUncompressed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV32requestContentLengthUncompressed0A00G12AttributeKeyVySiGvp">requestContentLengthUncompressed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The size of the uncompressed request payload body after transport decoding. Not set if transport encoding not used.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">requestContentLengthUncompressed</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">Int</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L117-L119">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV21responseContentLength0A00G12AttributeKeyVySiGvp"></a>
+                    <a name="//apple_ref/swift/Property/responseContentLength" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV21responseContentLength0A00G12AttributeKeyVySiGvp">responseContentLength</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and
+is often, but not always, present as the Content-Length header. For requests using transport encoding, this
+should be the compressed size.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">responseContentLength</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">Int</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L124-L126">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV33responseContentLengthUncompressed0A00G12AttributeKeyVySiGvp"></a>
+                    <a name="//apple_ref/swift/Property/responseContentLengthUncompressed" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV33responseContentLengthUncompressed0A00G12AttributeKeyVySiGvp">responseContentLengthUncompressed</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The size of the uncompressed response payload body after transport decoding. Not set if transport encoding not used.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">responseContentLengthUncompressed</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">Int</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L129-L131">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10serverName0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/serverName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV10serverName0A00G12AttributeKeyVySSGvp">serverName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The primary server name of the matched virtual host. This should be obtained via configuration.
+If no such configuration can be obtained, this attribute MUST NOT be set (<code>net.hostName</code> should be used instead).</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">serverName</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L135">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV11serverRoute0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/serverRoute" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV11serverRoute0A00G12AttributeKeyVySSGvp">serverRoute</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The matched route (path template). E.g. &ldquo;/users/:userID?&rdquo;.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">serverRoute</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L138">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV14serverClientIP0A00G12AttributeKeyVySSGvp"></a>
+                    <a name="//apple_ref/swift/Property/serverClientIP" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport14HTTPAttributesV20NestedSpanAttributesV14serverClientIP0A00G12AttributeKeyVySSGvp">serverClientIP</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The IP address of the original client behind all proxies, if known (e.g. from X-Forwarded-For).
+Note that this is not necessarily the same as <code>net.peerIP</code>, which would identify the network-level peer,
+which may be a proxy.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">serverClientIP</span><span class="p">:</span> <span class="kt">SpanAttribute</span><span class="o">.</span><span class="kt">Key</span><span class="o">&lt;</span><span class="kt">String</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing-baggage/tree/0.1.0/Sources/TracingOpenTelemetrySupport/SpanAttribute+HTTPSemantics.swift#L143">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2020 <a class="link" href="https://github.com/apple/swift-distributed-tracing-baggage" target="_blank" rel="external">Swift Distributed Tracing team</a>. All rights reserved. (Last updated: 2020-12-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

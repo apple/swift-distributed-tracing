@@ -1,0 +1,369 @@
+{
+  "warnings": [
+    {
+      "file": "/code/Sources/Tracing/NoOpTracer.swift",
+      "line": 20,
+      "symbol": "NoOpTracer.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/NoOpTracer.swift",
+      "line": 43,
+      "symbol": "NoOpTracer.NoOpSpan",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/NoOpTracer.swift",
+      "line": 47,
+      "symbol": "NoOpTracer.NoOpSpan.init(baggage:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 130,
+      "symbol": "SpanAttributeKey",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 131,
+      "symbol": "SpanAttributeKey.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 133,
+      "symbol": "SpanAttributeKey.init(name:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 144,
+      "symbol": "SpanAttributeNamespace",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 148,
+      "symbol": "SpanAttributeNamespace.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 150,
+      "symbol": "SpanAttributeNamespace.subscript(dynamicMember:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 152,
+      "symbol": "SpanAttributeNamespace.subscript(dynamicMember:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 156,
+      "symbol": "NestedSpanAttributesProtocol",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 157,
+      "symbol": "NestedSpanAttributesProtocol.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 166,
+      "symbol": "NestedSpanAttributesProtocol",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 172,
+      "symbol": "SpanAttributeNamespace",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 173,
+      "symbol": "SpanAttributeNamespace.subscript(dynamicMember:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 202,
+      "symbol": "SpanAttributeNamespace.subscript(dynamicMember:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 215,
+      "symbol": "SpanAttribute.Key",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 217,
+      "symbol": "SpanAttribute.int(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 218,
+      "symbol": "SpanAttribute.intArray(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 220,
+      "symbol": "SpanAttribute.double(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 221,
+      "symbol": "SpanAttribute.doubleArray(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 223,
+      "symbol": "SpanAttribute.bool(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 224,
+      "symbol": "SpanAttribute.boolArray(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 226,
+      "symbol": "SpanAttribute.string(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 227,
+      "symbol": "SpanAttribute.stringArray(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 229,
+      "symbol": "SpanAttribute.stringConvertible(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 230,
+      "symbol": "SpanAttribute.stringConvertibleArray(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 234,
+      "symbol": "SpanAttribute.int(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 238,
+      "symbol": "SpanAttribute.int(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 242,
+      "symbol": "SpanAttribute.int(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 246,
+      "symbol": "SpanAttribute.int(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 309,
+      "symbol": "SpanAttribute.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 317,
+      "symbol": "SpanAttributeConvertible",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 318,
+      "symbol": "SpanAttributeConvertible.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 325,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 331,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 337,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 343,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 349,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 355,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 362,
+      "symbol": "Array.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 391,
+      "symbol": "String.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 418,
+      "symbol": "Int.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 424,
+      "symbol": "Int8.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 430,
+      "symbol": "Int16.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 436,
+      "symbol": "Int32.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 442,
+      "symbol": "Int64.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 451,
+      "symbol": "Float.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 457,
+      "symbol": "Double.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 472,
+      "symbol": "Bool.toSpanAttribute()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 584,
+      "symbol": "SpanStatus.canonicalCode",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/code/Sources/Tracing/Span.swift",
+      "line": 585,
+      "symbol": "SpanStatus.message",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/code"
+}
