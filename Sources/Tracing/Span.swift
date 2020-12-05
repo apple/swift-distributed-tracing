@@ -169,6 +169,10 @@ extension NestedSpanAttributesProtocol {
     }
 }
 
+extension NestedSpanAttributesProtocol {
+    public typealias Key = SpanAttributeKey
+}
+
 extension SpanAttributeNamespace {
     public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
         where T: SpanAttributeConvertible {
