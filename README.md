@@ -34,9 +34,9 @@ This project uses the context progagation types defined independently in:
 
 * [Compatibility](#compatibility)
     + [Tracing Backends](#tracing-backends)
-    + [Libraries & Frameworks](#libraries---frameworks)
+    + [Libraries & Frameworks](#libraries--frameworks)
 * [Getting Started](#getting-started)
-    + [Dependencies & Tracer backend](#dependencies---tracer-backend)
+    + [Dependencies & Tracer backend](#dependencies--tracer-backend)
     + [Benefiting from instrumented libraries/frameworks](#benefiting-from-instrumented-libraries-frameworks)
     + [Instrumenting your code](#instrumenting-your-code)
     + [More examples](#more-examples)
@@ -49,7 +49,7 @@ This project uses the context progagation types defined independently in:
     + [Working with `Span`s](#spans)
 * In-Depth Guide for: **Library/Framework developers**
     + [Instrumenting your software](#library-framework-developers--instrumenting-your-software)
-    + [Extracting & injecting LoggingContext](#extracting---injecting-LoggingContext)
+    + [Extracting & injecting Baggage](#extracting--injecting-baggage)
     + [Tracing your library](#tracing-your-library)
 * In-Depth Guide for: **Instrument developers**
     + [Creating an `Instrument`](#instrument-developers--creating-an-instrument)
