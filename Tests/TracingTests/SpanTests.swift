@@ -229,15 +229,15 @@ public struct HTTPAttributes: SpanAttributeNamespace {
     public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
 
-        public var statusCode: SpanAttribute.Key<Int> {
+        public var statusCode: Key<Int> {
             "http.status_code"
         }
 
-        public var codesArray: SpanAttribute.Key<[Int]> {
+        public var codesArray: Key<[Int]> {
             "http.codes_array"
         }
 
-        public var customType: SpanAttribute.Key<CustomAttributeValue> {
+        public var customType: Key<CustomAttributeValue> {
             "http.custom_value"
         }
     }

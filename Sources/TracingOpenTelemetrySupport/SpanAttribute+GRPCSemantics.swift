@@ -55,18 +55,18 @@ public struct GRPCAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// The type of message, e.g. "SENT" or "RECEIVED".
-        public var messageType: SpanAttribute.Key<String> { .init(name: SpanAttributeName.GRPC.messageType) }
+        public var messageType: Key<String> { .init(name: SpanAttributeName.GRPC.messageType) }
 
         /// The message id calculated as two different counters starting from 1, one for sent messages and one for received messages.
-        public var messageID: SpanAttribute.Key<Int> { .init(name: SpanAttributeName.GRPC.messageID) }
+        public var messageID: Key<Int> { .init(name: SpanAttributeName.GRPC.messageID) }
 
         /// The compressed message size in bytes.
-        public var messageCompressedSize: SpanAttribute.Key<Int> {
+        public var messageCompressedSize: Key<Int> {
             .init(name: SpanAttributeName.GRPC.messageCompressedSize)
         }
 
         /// The uncompressed message size in bytes.
-        public var messageUncompressedSize: SpanAttribute.Key<Int> {
+        public var messageUncompressedSize: Key<Int> {
             .init(name: SpanAttributeName.GRPC.messageUncompressedSize)
         }
     }

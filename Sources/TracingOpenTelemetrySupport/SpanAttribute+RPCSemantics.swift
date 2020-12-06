@@ -53,13 +53,13 @@ public struct RPCAttributes: SpanAttributeNamespace {
         public init() {}
 
         /// A string identifying the remoting system, e.g., "grpc", "java_rmi" or "wcf".
-        public var system: SpanAttribute.Key<String> { .init(name: SpanAttributeName.RPC.system) }
+        public var system: Key<String> { .init(name: SpanAttributeName.RPC.system) }
 
         /// The full name of the service being called, including its package name, if applicable.
-        public var service: SpanAttribute.Key<String> { .init(name: SpanAttributeName.RPC.service) }
+        public var service: Key<String> { .init(name: SpanAttributeName.RPC.service) }
 
         /// The name of the method being called, must be equal to the $method part in the span name.
-        public var method: SpanAttribute.Key<String> { .init(name: SpanAttributeName.RPC.method) }
+        public var method: Key<String> { .init(name: SpanAttributeName.RPC.method) }
     }
 }
 #endif
