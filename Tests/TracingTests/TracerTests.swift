@@ -71,7 +71,7 @@ final class TracerTests: XCTestCase {
         }
 
         XCTAssertEqual(value, "yes")
-        // XCTAssertEqual(spanEnded, true)
+        XCTAssertEqual(spanEnded, true)
     }
 
     func testWithSpan_throws() {
