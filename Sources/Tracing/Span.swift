@@ -589,6 +589,7 @@ public struct SpanStatus {
     public let message: String?
 
     /// Create a new `SpanStatus`.
+    ///
     /// - Parameters:
     ///   - code: The `Code` of this `SpanStatus`.
     ///   - message: The optional descriptive message of this `SpanStatus`. Defaults to nil.
@@ -601,8 +602,6 @@ public struct SpanStatus {
     ///
     /// - SeeAlso: For the semantics of status codes see [OpenTelemetry Specification: setStatus](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-status)
     public enum Code {
-        /// The default status.
-        case unset
         /// The Span has been validated by an Application developer or Operator to have completed successfully.
         case ok
         /// The Span contains an error.
