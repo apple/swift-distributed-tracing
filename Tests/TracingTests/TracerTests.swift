@@ -63,11 +63,15 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(NoOpTracer())
         }
 
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
         let value = tracer.withSpan("hello", baggage: .topLevel) { _ in
             "yes"
         }
 
         XCTAssertEqual(value, "yes")
+        // XCTAssertEqual(spanEnded, true)
     }
 
     func testWithSpan_throws() {
@@ -77,11 +81,15 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(NoOpTracer())
         }
 
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
         do {
             _ = try tracer.withSpan("hello", baggage: .topLevel) { _ in
                 throw ExampleSpanError()
             }
         } catch {
+            XCTAssertEqual(spanEnded, true)
             XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
             return
         }

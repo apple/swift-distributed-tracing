@@ -19,6 +19,7 @@ import Tracing
 
 final class TestTracer: Tracer {
     private(set) var spans = [TestSpan]()
+    var onEndSpan: (Span) -> Void = { _ in }
 
     func startSpan(
         _ operationName: String,
@@ -30,8 +31,9 @@ final class TestTracer: Tracer {
             operationName: operationName,
             startTime: time,
             baggage: baggage,
-            kind: kind
-        ) { _ in }
+            kind: kind,
+            onEnd: onEndSpan
+        )
         self.spans.append(span)
         return span
     }
