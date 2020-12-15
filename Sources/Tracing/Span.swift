@@ -583,61 +583,29 @@ extension SpanAttributes: ExpressibleByDictionaryLiteral {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Status
 
-/// Represents the status of a finished Span. It's composed of a canonical code in conjunction with an optional descriptive message.
+/// Represents the status of a finished Span. It's composed of a status code in conjunction with an optional descriptive message.
 public struct SpanStatus {
-    public let canonicalCode: CanonicalCode
+    public let code: Code
     public let message: String?
 
     /// Create a new `SpanStatus`.
+    ///
     /// - Parameters:
-    ///   - canonicalCode: The canonical code of this `SpanStatus`.
+    ///   - code: The `Code` of this `SpanStatus`.
     ///   - message: The optional descriptive message of this `SpanStatus`. Defaults to nil.
-    public init(canonicalCode: CanonicalCode, message: String? = nil) {
-        self.canonicalCode = canonicalCode
+    public init(code: Code, message: String? = nil) {
+        self.code = code
         self.message = message
     }
 
-    /// Represents the canonical set of status codes of a finished Span, following
-    /// the [Standard GRPC](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md) codes:
-    public enum CanonicalCode {
-        /// The operation completed successfully.
+    /// A code representing the status of a `Span`.
+    ///
+    /// - SeeAlso: For the semantics of status codes see [OpenTelemetry Specification: setStatus](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-status)
+    public enum Code {
+        /// The Span has been validated by an Application developer or Operator to have completed successfully.
         case ok
-        /// The operation was cancelled (typically by the caller).
-        case cancelled
-        /// An unknown error.
-        case unknown
-        /// Client specified an invalid argument. Note that this differs from `.failedPrecondition`. `.invalidArgument` indicates arguments that
-        /// are problematic regardless of the state of the system.
-        case invalidArgument
-        /// Deadline expired before operation could complete. For operations that change the state of the system,
-        /// this error may be returned even if the operation has completed successfully.
-        case deadlineExceeded
-        /// Some requested entity (e.g., file or directory) was not found.
-        case notFound
-        /// Some entity that we attempted to create (e.g., file or directory) already exists.
-        case alreadyExists
-        /// The caller does not have permission to execute the specified operation.
-        /// `.permissionDenied` must not be used if the caller cannot be identified (use `.unauthenticated` instead for those errors).
-        case permissionDenied
-        /// Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.
-        case resourceExhausted
-        /// Operation was rejected because the system is not in a state required for the operation's execution.
-        case failedPrecondition
-        /// The operation was aborted, typically due to a concurrency issue like sequencer check failures, transaction aborts, etc.
-        case aborted
-        /// Operation was attempted past the valid range. E.g., seeking or reading past end of file.
-        /// Unlike `.invalidArgument`, this error indicates a problem that may be fixed if the system state changes.
-        case outOfRange
-        /// Operation is not implemented or not supported/enabled in this service.
-        case unimplemented
-        /// Internal errors. Means some invariants expected by underlying system has been broken.
-        case `internal`
-        /// The service is currently unavailable. This is a most likely a transient condition and may be corrected by retrying with a backoff.
-        case unavailable
-        /// Unrecoverable data loss or corruption.
-        case dataLoss
-        /// The request does not have valid authentication credentials for the operation.
-        case unauthenticated
+        /// The Span contains an error.
+        case error
     }
 }
 
