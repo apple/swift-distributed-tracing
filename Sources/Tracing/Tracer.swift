@@ -98,11 +98,11 @@ extension Tracer {
         _ function: (Span) throws -> T
     ) rethrows -> T {
         let span = self.startSpan(operationName, context: context, ofKind: kind)
+        defer { span.end() }
         do {
             return try function(span)
         } catch {
             span.recordError(error)
-            span.end()
             throw error // rethrow
         }
     }
@@ -125,11 +125,11 @@ extension Tracer {
         _ function: (Span) throws -> T
     ) rethrows -> T {
         let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        defer { span.end() }
         do {
             return try function(span)
         } catch {
             span.recordError(error)
-            span.end()
             throw error // rethrow
         }
     }
