@@ -89,7 +89,7 @@ final class TracerTests: XCTestCase {
                 throw ExampleSpanError()
             }
         } catch {
-            XCTAssertTrue(spanEnded, true)
+            XCTAssertTrue(spanEnded)
             XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
             return
         }
