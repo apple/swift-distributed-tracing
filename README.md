@@ -172,7 +172,7 @@ Thanks to tracing, and trace identifiers, even if not using tracing visualizatio
 
 **Passing context to client libraries**: When using client libraries that support distributed tracing, they will accept a `Baggage.LoggingContext` type as their _last_ parameter in many calls.
 
-When using client libraries that support distributed tracing, they will accept a `Baggage.LoggingContext` type as their _last_ parameter in many calls. Please refer to [Context argument naming/positioning](https://github.com/apple/swift-distributed-tracing/tree/wip-readme-release#context-propagation-by-explicit-loggingcontext-passing) in the [Context propagation](https://github.com/apple/swift-distributed-tracing/tree/wip-readme-release#context-propagation-by-explicit-loggingcontext-passing) section of this readme to learn more about how to properly pass context values around.
+When using client libraries that support distributed tracing, they will accept a `Baggage.LoggingContext` type as their _last_ parameter in many calls. Please refer to [Context argument naming/positioning](#context-propagation-by-explicit-loggingcontext-passing) in the [Context propagation](#context-propagation-by-explicit-loggingcontext-passing) section of this readme to learn more about how to properly pass context values around.
 
 ### Instrumenting your code
 
