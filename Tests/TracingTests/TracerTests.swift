@@ -95,6 +95,21 @@ final class TracerTests: XCTestCase {
         }
         XCTFail("Should have throw")
     }
+
+    func testWithSpan_context() {
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        tracer.withSpan("", context: DefaultLoggingContext.topLevel(logger: Logger(label: "test"))) { _ in }
+
+        XCTAssertTrue(spanEnded)
+    }
 }
 
 struct ExampleSpanError: Error, Equatable {}

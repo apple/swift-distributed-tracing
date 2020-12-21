@@ -97,14 +97,7 @@ extension Tracer {
         ofKind kind: SpanKind = .internal,
         _ function: (Span) throws -> T
     ) rethrows -> T {
-        let span = self.startSpan(operationName, context: context, ofKind: kind)
-        defer { span.end() }
-        do {
-            return try function(span)
-        } catch {
-            span.recordError(error)
-            throw error // rethrow
-        }
+        return try self.withSpan(operationName, baggage: context.baggage, function)
     }
 
     /// Execute a specific task within a newly created `Span`.

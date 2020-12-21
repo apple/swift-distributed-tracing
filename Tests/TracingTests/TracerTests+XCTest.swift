@@ -29,6 +29,7 @@ extension TracerTests {
                 ("testContextPropagationWithNoOpSpan", testContextPropagationWithNoOpSpan),
                 ("testWithSpan_success", testWithSpan_success),
                 ("testWithSpan_throws", testWithSpan_throws),
+                ("testWithSpan_context", testWithSpan_context),
            ]
    }
 }
