@@ -28,5 +28,6 @@ else
 fi
 
 bash $here/validate_license_headers.sh
+bash $here/validate_language.sh
 bash $here/validate_format.sh
 bash $here/validate_naming.sh

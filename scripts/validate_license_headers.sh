@@ -35,7 +35,7 @@ function replace_acceptable_years() {
 }
 
 printf "=> Checking license headers\n"
-tmp=$(mktemp /tmp/.swift-baggage-context-sanity_XXXXXX)
+tmp=$(mktemp /tmp/.swift-baggage-context-soundness_XXXXXX)
 
 for language in swift-or-c bash dtrace; do
   printf "   * $language... "
