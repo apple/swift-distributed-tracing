@@ -25,7 +25,7 @@ extension SpanAttributeSemanticsTests {
    @available(*, deprecated, message: "not actually deprecated. Just deprecated to allow deprecated tests (which test deprecated functionality) without warnings")
    static var allTests : [(String, (SpanAttributeSemanticsTests) -> () throws -> Void)] {
       return [
-                ("testDynamicMemberLookup", testDynamicMemberLookup),
+                ("testDynamicMemberLookupForEachNamespace", testDynamicMemberLookupForEachNamespace),
            ]
    }
 }

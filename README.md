@@ -572,7 +572,7 @@ When creating a tracer you need to create two types:
 1. Your tracer conforming to `Tracer`
 2. A span class conforming to `Span`
 
-> The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.
+> The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.
 
 ### Defining, injecting and extracting Baggage
 

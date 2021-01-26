@@ -20,7 +20,7 @@ import Dispatch
 ///
 /// Creating a `Span` is delegated to a `Tracer` and end users should never create them directly.
 ///
-/// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#span) which this type is compatible with.
+/// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: AnyObject {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
@@ -600,7 +600,7 @@ public struct SpanStatus {
 
     /// A code representing the status of a `Span`.
     ///
-    /// - SeeAlso: For the semantics of status codes see [OpenTelemetry Specification: setStatus](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/api.md#set-status)
+    /// - SeeAlso: For the semantics of status codes see [OpenTelemetry Specification: setStatus](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#set-status)
     public enum Code {
         /// The Span has been validated by an Application developer or Operator to have completed successfully.
         case ok

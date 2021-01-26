@@ -22,6 +22,12 @@ extension SpanAttributeName {
         public static let service = "rpc.service"
         /// - See: RPCAttributes
         public static let method = "rpc.method"
+
+        /// - See: RPCAttributes.GRPCAttributes
+        public enum GRPC {
+            /// - See: RPCAttributes.GRPCAttributes
+            public static let statusCode = "rpc.grpc.status_code"
+        }
     }
 }
 
@@ -40,7 +46,7 @@ extension SpanAttributes {
 
 /// Semantic conventions for RPC spans as defined in the OpenTelemetry spec.
 ///
-/// - SeeAlso: [OpenTelemetry: Semantic conventions for RPC spans](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/rpc.md) (as of August 2020)
+/// - SeeAlso: [OpenTelemetry: Semantic conventions for RPC spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/semantic_conventions/rpc.md)
 @dynamicMemberLookup
 public struct RPCAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
@@ -60,6 +66,34 @@ public struct RPCAttributes: SpanAttributeNamespace {
 
         /// The name of the method being called, must be equal to the $method part in the span name.
         public var method: Key<String> { .init(name: SpanAttributeName.RPC.method) }
+    }
+
+    /// Semantic conventions for gRPC spans.
+    public var gRPC: GRPCAttributes {
+        get {
+            .init(attributes: self.attributes)
+        }
+        set {
+            self.attributes = newValue.attributes
+        }
+    }
+
+    /// Semantic concentions for gRPC spans as defined in the OpenTelemetry spec.
+    ///
+    /// - SeeAlso: [OpenTelemetry: Semantic conventions for gRPC spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/semantic_conventions/rpc.md#grpc)
+    public struct GRPCAttributes: SpanAttributeNamespace {
+        public var attributes: SpanAttributes
+
+        public init(attributes: SpanAttributes) {
+            self.attributes = attributes
+        }
+
+        public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+            public init() {}
+
+            /// The [numeric status code](https://github.com/grpc/grpc/blob/v1.33.2/doc/statuscodes.md) of the gRPC request.
+            public var statusCode: Key<Int> { .init(name: SpanAttributeName.RPC.GRPC.statusCode) }
+        }
     }
 }
 #endif
