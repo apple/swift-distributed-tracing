@@ -42,7 +42,7 @@ services:
       - $SSH_AUTH_SOCK:/tmp/ssh-agent:z
     environment: # FIXME: temp while private
       - SSH_AUTH_SOCK=/tmp/ssh-agent
-      - GIT_SSH_COMMAND=ssh -vv -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no    
+      - GIT_SSH_COMMAND=ssh -vv -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
     command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors $${SANITIZER_ARG-}"
 
   # util
