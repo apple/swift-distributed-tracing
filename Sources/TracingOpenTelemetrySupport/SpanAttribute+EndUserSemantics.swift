@@ -14,13 +14,13 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: EndUserAttributes
+    /// - SeeAlso: EndUserAttributes
     public enum EndUser {
-        /// - See: EndUserAttributes
+        /// - SeeAlso: EndUserAttributes
         public static let id = "enduser.id"
-        /// - See: EndUserAttributes
+        /// - SeeAlso: EndUserAttributes
         public static let role = "enduser.role"
-        /// - See: EndUserAttributes
+        /// - SeeAlso: EndUserAttributes
         public static let scope = "enduser.scope"
     }
 }

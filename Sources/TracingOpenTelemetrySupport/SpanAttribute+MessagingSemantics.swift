@@ -14,44 +14,44 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: MessagingAttributes
+    /// - SeeAlso: MessagingAttributes
     public enum Messaging {
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let system = "messaging.system"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let destination = "messaging.destination"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let destinationKind = "messaging.destination_kind"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let tempDestination = "messaging.temp_destination"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let `protocol` = "messaging.protocol"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let protocolVersion = "messaging.protocol_version"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let url = "messaging.url"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let messageID = "messaging.message_id"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let conversationID = "messaging.conversation_id"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let messagePayloadSizeBytes = "messaging.message_payload_size_bytes"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let messagePayloadCompressedSizeBytes = "messaging.message_payload_compressed_size_bytes"
-        /// - See: MessagingAttributes
+        /// - SeeAlso: MessagingAttributes
         public static let operation = "messaging.operation"
 
-        /// - See: MessagingAttributes.KafkaAttributes
+        /// - SeeAlso: MessagingAttributes.KafkaAttributes
         public enum Kafka {
-            /// - See: MessagingAttributes.KafkaAttributes
+            /// - SeeAlso: MessagingAttributes.KafkaAttributes
             public static let messageKey = "messaging.kafka.message_key"
-            /// - See: MessagingAttributes.KafkaAttributes
+            /// - SeeAlso: MessagingAttributes.KafkaAttributes
             public static let consumerGroup = "messaging.kafka.consumer_group"
-            /// - See: MessagingAttributes.KafkaAttributes
+            /// - SeeAlso: MessagingAttributes.KafkaAttributes
             public static let clientID = "messaging.kafka.client_id"
-            /// - See: MessagingAttributes.KafkaAttributes
+            /// - SeeAlso: MessagingAttributes.KafkaAttributes
             public static let partition = "messaging.kafka.partition"
-            /// - See: MessagingAttributes.KafkaAttributes
+            /// - SeeAlso: MessagingAttributes.KafkaAttributes
             public static let tombstone = "messaging.kafka.tombstone"
         }
     }

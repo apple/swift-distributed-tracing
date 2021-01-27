@@ -14,15 +14,15 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: ExceptionAttributes
+    /// - SeeAlso: ExceptionAttributes
     public enum Exception {
-        /// - See: ExceptionAttributes
+        /// - SeeAlso: ExceptionAttributes
         public static let type = "exception.type"
-        /// - See: ExceptionAttributes
+        /// - SeeAlso: ExceptionAttributes
         public static let message = "exception.message"
-        /// - See: ExceptionAttributes
+        /// - SeeAlso: ExceptionAttributes
         public static let stacktrace = "exception.stacktrace"
-        /// - See: ExceptionAttributes
+        /// - SeeAlso: ExceptionAttributes
         public static let escaped = "exception.escaped"
     }
 }

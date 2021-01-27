@@ -14,34 +14,34 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: FaaSAttributes
+    /// - SeeAlso: FaaSAttributes
     public enum FaaS {
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let trigger = "faas.trigger"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let execution = "faas.execution"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let time = "faas.time"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let cron = "faas.cron"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let coldstart = "faas.coldstart"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let invokedName = "faas.invoked_name"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let invokedProvider = "faas.invoked_provider"
-        /// - See: FaaSAttributes
+        /// - SeeAlso: FaaSAttributes
         public static let invokedRegion = "faas.invoked_region"
 
-        /// - See: FaaSAttributes.DocumentAttributes
+        /// - SeeAlso: FaaSAttributes.DocumentAttributes
         public enum Document {
-            /// - See: FaaSAttributes.DocumentAttributes
+            /// - SeeAlso: FaaSAttributes.DocumentAttributes
             public static let collection = "faas.document.collection"
-            /// - See: FaaSAttributes.DocumentAttributes
+            /// - SeeAlso: FaaSAttributes.DocumentAttributes
             public static let operation = "faas.document.operation"
-            /// - See: FaaSAttributes.DocumentAttributes
+            /// - SeeAlso: FaaSAttributes.DocumentAttributes
             public static let time = "faas.document.time"
-            /// - See: FaaSAttributes.DocumentAttributes
+            /// - SeeAlso: FaaSAttributes.DocumentAttributes
             public static let name = "faas.document.name"
         }
     }

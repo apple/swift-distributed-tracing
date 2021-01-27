@@ -14,40 +14,40 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: HTTPAttributes
+    /// - SeeAlso: HTTPAttributes
     public enum HTTP {
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let method = "http.method"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let url = "http.url"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let target = "http.target"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let host = "http.host"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let scheme = "http.scheme"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let statusCode = "http.status_code"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let flavor = "http.flavor"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let userAgent = "http.user_agent"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let requestContentLength = "http.request_content_length"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let requestContentLengthUncompressed = "http.request_content_length_uncompressed"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let responseContentLength = "http.response_content_length"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let responseContentLengthUncompressed = "http.response_content_length_uncompressed"
 
-        /// - See: HTTPAttributes.ServerAttributes
+        /// - SeeAlso: HTTPAttributes.ServerAttributes
         public enum Server {
-            /// - See: HTTPAttributes.ServerAttributes
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
             public static let name = "http.server_name"
-            /// - See: HTTPAttributes.ServerAttributes
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
             public static let route = "http.route"
-            /// - See: HTTPAttributes.ServerAttributes
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
             public static let clientIP = "http.client_ip"
         }
     }

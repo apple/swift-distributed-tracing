@@ -14,18 +14,18 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: RPCAttributes
+    /// - SeeAlso: RPCAttributes
     public enum RPC {
-        /// - See: RPCAttributes
+        /// - SeeAlso: RPCAttributes
         public static let system = "rpc.system"
-        /// - See: RPCAttributes
+        /// - SeeAlso: RPCAttributes
         public static let service = "rpc.service"
-        /// - See: RPCAttributes
+        /// - SeeAlso: RPCAttributes
         public static let method = "rpc.method"
 
-        /// - See: RPCAttributes.GRPCAttributes
+        /// - SeeAlso: RPCAttributes.GRPCAttributes
         public enum GRPC {
-            /// - See: RPCAttributes.GRPCAttributes
+            /// - SeeAlso: RPCAttributes.GRPCAttributes
             public static let statusCode = "rpc.grpc.status_code"
         }
     }

@@ -14,28 +14,28 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: NetAttributes
+    /// - SeeAlso: NetAttributes
     public enum Net {
-        /// - See: NetAttributes
+        /// - SeeAlso: NetAttributes
         public static let transport = "net.transport"
 
-        /// - See: NetAttributes.PeerAttributes
+        /// - SeeAlso: NetAttributes.PeerAttributes
         public enum Peer {
-            /// - See: NetAttributes.PeerAttributes
+            /// - SeeAlso: NetAttributes.PeerAttributes
             public static let ip = "net.peer.ip"
-            /// - See: NetAttributes.PeerAttributes
+            /// - SeeAlso: NetAttributes.PeerAttributes
             public static let port = "net.peer.port"
-            /// - See: NetAttributes.PeerAttributes
+            /// - SeeAlso: NetAttributes.PeerAttributes
             public static let name = "net.peer.name"
         }
 
-        /// - See: NetAttributes.HostAttributes
+        /// - SeeAlso: NetAttributes.HostAttributes
         public enum Host {
-            /// - See: NetAttributes.HostAttributes
+            /// - SeeAlso: NetAttributes.HostAttributes
             public static let ip = "net.host.ip"
-            /// - See: NetAttributes.HostAttributes
+            /// - SeeAlso: NetAttributes.HostAttributes
             public static let port = "net.host.port"
-            /// - See: NetAttributes.HostAttributes
+            /// - SeeAlso: NetAttributes.HostAttributes
             public static let name = "net.host.name"
         }
     }

@@ -14,54 +14,54 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: DatabaseAttributes
+    /// - SeeAlso: DatabaseAttributes
     public enum Database {
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let system = "db.system"
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let connectionString = "db.connection_string"
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let user = "db.user"
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let name = "db.name"
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let statement = "db.statement"
-        /// - See: DatabaseAttributes
+        /// - SeeAlso: DatabaseAttributes
         public static let operation = "db.operation"
 
-        /// - See: DatabaseAttributes.MSSQLAttributes
+        /// - SeeAlso: DatabaseAttributes.MSSQLAttributes
         public enum MSSQL {
-            /// - See: DatabaseAttributes.MSSQLAttributes
+            /// - SeeAlso: DatabaseAttributes.MSSQLAttributes
             public static let instanceName = "db.mssql.instance_name"
         }
 
-        /// - See: DatabaseAttributes.CassandraAttributes
+        /// - SeeAlso: DatabaseAttributes.CassandraAttributes
         public enum Cassandra {
-            /// - See: DatabaseAttributes.CassandraAttributes
+            /// - SeeAlso: DatabaseAttributes.CassandraAttributes
             public static let keyspace = "db.cassandra.keyspace"
         }
 
-        /// - See: DatabaseAttributes.HBaseAttributes
+        /// - SeeAlso: DatabaseAttributes.HBaseAttributes
         public enum HBase {
-            /// - See: DatabaseAttributes.HBaseAttributes
+            /// - SeeAlso: DatabaseAttributes.HBaseAttributes
             public static let namespace = "db.hbase.namespace"
         }
 
-        /// - See: DatabaseAttributes.RedisAttributes
+        /// - SeeAlso: DatabaseAttributes.RedisAttributes
         public enum Redis {
-            /// - See: DatabaseAttributes.RedisAttributes
+            /// - SeeAlso: DatabaseAttributes.RedisAttributes
             public static let databaseIndex = "db.redis.database_index"
         }
 
-        /// - See: DatabaseAttributes.MongoDBAttributes
+        /// - SeeAlso: DatabaseAttributes.MongoDBAttributes
         public enum MongoDB {
-            /// - See: DatabaseAttributes.MongoDBAttributes
+            /// - SeeAlso: DatabaseAttributes.MongoDBAttributes
             public static let collection = "db.mongodb.collection"
         }
 
-        /// - See: DatabaseAttributes.SQLAttributes
+        /// - SeeAlso: DatabaseAttributes.SQLAttributes
         public enum SQL {
-            /// - See: DatabaseAttributes.SQLAttributes
+            /// - SeeAlso: DatabaseAttributes.SQLAttributes
             public static let table = "db.sql.table"
         }
     }

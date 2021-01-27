@@ -14,9 +14,9 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: PeerAttributes
+    /// - SeeAlso: PeerAttributes
     public enum Peer {
-        /// - See: PeerAttributes
+        /// - SeeAlso: PeerAttributes
         public static let service = "peer.service"
     }
 }
