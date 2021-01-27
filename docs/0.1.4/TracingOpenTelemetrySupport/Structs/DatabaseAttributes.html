@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>DatabaseAttributes Structure Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Struct/DatabaseAttributes" class="dashAnchor"></a>
+
+    <a title="DatabaseAttributes Structure Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          TracingOpenTelemetrySupport 0.1.4 Docs
+        </a>
+         (80% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/apple/swift-distributed-tracing">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fapple.github.io%2Fswift-distributed-tracing%2Fdocs%2F0.1.4%2FTracingOpenTelemetrySupport%2Fdocsets%2FTracingOpenTelemetrySupport.xml">
+            <img class="header-icon" src="../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">TracingOpenTelemetrySupport Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      DatabaseAttributes Structure Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName.html">SpanAttributeName</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/Database.html">– Database</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/EndUser.html">– EndUser</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/Exception.html">– Exception</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/FaaS.html">– FaaS</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/HTTP.html">– HTTP</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/Messaging.html">– Messaging</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/Net.html">– Net</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/Peer.html">– Peer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SpanAttributeName/RPC.html">– RPC</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/SpanAttributes.html">SpanAttributes</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes.html">DatabaseAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/MSSQLAttributes.html">– MSSQLAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/CassandraAttributes.html">– CassandraAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/HBaseAttributes.html">– HBaseAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/RedisAttributes.html">– RedisAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/MongoDBAttributes.html">– MongoDBAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/DatabaseAttributes/SQLAttributes.html">– SQLAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/EndUserAttributes.html">EndUserAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/EndUserAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ExceptionAttributes.html">ExceptionAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ExceptionAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/FaaSAttributes.html">FaaSAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/FaaSAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/FaaSAttributes/DocumentAttributes.html">– DocumentAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/HTTPAttributes.html">HTTPAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/HTTPAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/HTTPAttributes/ServerAttributes.html">– ServerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MessagingAttributes.html">MessagingAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MessagingAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MessagingAttributes/KafkaAttributes.html">– KafkaAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NetAttributes.html">NetAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NetAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NetAttributes/PeerAttributes.html">– PeerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NetAttributes/HostAttributes.html">– HostAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/PeerAttributes.html">PeerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/PeerAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RPCAttributes.html">RPCAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RPCAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RPCAttributes/GRPCAttributes.html">– GRPCAttributes</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>DatabaseAttributes</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">@dynamicMemberLookup</span>
+<span class="kd">public</span> <span class="kd">struct</span> <span class="kt">DatabaseAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                </div>
+              </div>
+            <p>Semantic conventions for database client calls as defined in the OpenTelemetry spec.</p>
+<div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/semantic_conventions/database.md">OpenTelemetry: Database attributes</a>
+
+</div>
+
+              <div class="slightly-smaller">
+                <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L87-L304">Show on GitHub</a>
+              </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV10attributes0A004SpanF0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/attributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV10attributes0A004SpanF0Vvp">attributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">attributes</span><span class="p">:</span> <span class="kt">SpanAttributes</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV10attributesAC0A004SpanF0V_tcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(attributes:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV10attributesAC0A004SpanF0V_tcfc">init(attributes:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">attributes</span><span class="p">:</span> <span class="kt">SpanAttributes</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L90-L92">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/General"></a>
+                <a name="//apple_ref/swift/Section/General" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/General"></a>
+                  <h3 class="section-name"><p>General</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:7Tracing22SpanAttributeNamespaceP06NestedB10AttributesQa"></a>
+                    <a name="//apple_ref/swift/Struct/NestedSpanAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:7Tracing22SpanAttributeNamespaceP06NestedB10AttributesQa">NestedSpanAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                        <a href="../Structs/DatabaseAttributes/NestedSpanAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">NestedSpanAttributes</span> <span class="p">:</span> <span class="kt">NestedSpanAttributesProtocol</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L96-L126">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/MSSQL"></a>
+                <a name="//apple_ref/swift/Section/MSSQL" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/MSSQL"></a>
+                  <h3 class="section-name"><p>MSSQL</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5mssqlAC15MSSQLAttributesVvp"></a>
+                    <a name="//apple_ref/swift/Property/mssql" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5mssqlAC15MSSQLAttributesVvp">mssql</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic MSSQL client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">mssql</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/MSSQLAttributes.html">MSSQLAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L131-L138">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV15MSSQLAttributesV"></a>
+                    <a name="//apple_ref/swift/Struct/MSSQLAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV15MSSQLAttributesV">MSSQLAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for MSSQL client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/MSSQLAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">MSSQLAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L141-L157">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Cassandra"></a>
+                <a name="//apple_ref/swift/Section/Cassandra" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Cassandra"></a>
+                  <h3 class="section-name"><p>Cassandra</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV9cassandraAC09CassandraF0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/cassandra" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV9cassandraAC09CassandraF0Vvp">cassandra</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic Cassandra client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">cassandra</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/CassandraAttributes.html">CassandraAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L162-L169">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV09CassandraF0V"></a>
+                    <a name="//apple_ref/swift/Struct/CassandraAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV09CassandraF0V">CassandraAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for Cassandra client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/CassandraAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">CassandraAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L172-L185">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/HBase"></a>
+                <a name="//apple_ref/swift/Section/HBase" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/HBase"></a>
+                  <h3 class="section-name"><p>HBase</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5hbaseAC05HBaseF0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/hbase" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5hbaseAC05HBaseF0Vvp">hbase</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic HBase client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">hbase</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/HBaseAttributes.html">HBaseAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L190-L197">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV05HBaseF0V"></a>
+                    <a name="//apple_ref/swift/Struct/HBaseAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV05HBaseF0V">HBaseAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for HBase client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/HBaseAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">HBaseAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L200-L214">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Redis"></a>
+                <a name="//apple_ref/swift/Section/Redis" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Redis"></a>
+                  <h3 class="section-name"><p>Redis</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5redisAC05RedisF0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/redis" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV5redisAC05RedisF0Vvp">redis</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic Redis client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">redis</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/RedisAttributes.html">RedisAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L219-L226">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV05RedisF0V"></a>
+                    <a name="//apple_ref/swift/Struct/RedisAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV05RedisF0V">RedisAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for Redis client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/RedisAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">RedisAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L229-L243">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/MongoDB"></a>
+                <a name="//apple_ref/swift/Section/MongoDB" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/MongoDB"></a>
+                  <h3 class="section-name"><p>MongoDB</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV7mongodbAC17MongoDBAttributesVvp"></a>
+                    <a name="//apple_ref/swift/Property/mongodb" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV7mongodbAC17MongoDBAttributesVvp">mongodb</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic MongoDB client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">mongodb</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/MongoDBAttributes.html">MongoDBAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L248-L255">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV17MongoDBAttributesV"></a>
+                    <a name="//apple_ref/swift/Struct/MongoDBAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV17MongoDBAttributesV">MongoDBAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for MongoDB client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/MongoDBAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">MongoDBAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L258-L271">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/SQL"></a>
+                <a name="//apple_ref/swift/Section/SQL" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/SQL"></a>
+                  <h3 class="section-name"><p>SQL</p>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV3sqlAC13SQLAttributesVvp"></a>
+                    <a name="//apple_ref/swift/Property/sql" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV3sqlAC13SQLAttributesVvp">sql</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic SQL client call attributes.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">sql</span><span class="p">:</span> <span class="kt"><a href="../Structs/DatabaseAttributes/SQLAttributes.html">SQLAttributes</a></span> <span class="p">{</span> <span class="k">get</span> <span class="k">set</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L276-L283">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport18DatabaseAttributesV13SQLAttributesV"></a>
+                    <a name="//apple_ref/swift/Struct/SQLAttributes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport18DatabaseAttributesV13SQLAttributesV">SQLAttributes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Semantic conventions for SQL client calls as defined in the OpenTelemetry spec.</p>
+
+                        <a href="../Structs/DatabaseAttributes/SQLAttributes.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">SQLAttributes</span> <span class="p">:</span> <span class="kt">SpanAttributeNamespace</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+DatabaseSemantics.swift#L286-L303">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2021 <a class="link" href="https://github.com/apple/swift-distributed-tracing" target="_blank" rel="external">Swift Distributed Tracing team</a>. All rights reserved. (Last updated: 2021-01-27)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>InstrumentationSystem Enumeration Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Enum/InstrumentationSystem" class="dashAnchor"></a>
+
+    <a title="InstrumentationSystem Enumeration Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          Instrumentation 0.1.4 Docs
+        </a>
+         (95% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/apple/swift-distributed-tracing">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fapple.github.io%2Fswift-distributed-tracing%2Fdocs%2F0.1.4%2FInstrumentation%2Fdocsets%2FInstrumentation.xml">
+            <img class="header-icon" src="../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">Instrumentation Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      InstrumentationSystem Enumeration Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/InstrumentationSystem.html">InstrumentationSystem</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Extractor.html">Extractor</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Injector.html">Injector</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Instrument.html">Instrument</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/MultiplexInstrument.html">MultiplexInstrument</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/NoOpInstrument.html">NoOpInstrument</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>InstrumentationSystem</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">InstrumentationSystem</span></code></pre>
+
+                </div>
+              </div>
+            <p><code>InstrumentationSystem</code> is a global facility where the default cross-cutting tool can be configured.
+It is set up just once in a given program to select the desired <code><a href="../Protocols/Instrument.html">Instrument</a></code> implementation.</p>
+<h1 id='bootstrap-multiple-instruments' class='heading'>Bootstrap multiple Instruments</h1>
+
+<p>If you need to use more that one cross-cutting tool you can do so by using <code><a href="../Structs/MultiplexInstrument.html">MultiplexInstrument</a></code>.</p>
+<h1 id='access-the-instrument' class='heading'>Access the Instrument</h1>
+
+<p><code><a href="../Enums/InstrumentationSystem.html#/s:15Instrumentation0A6SystemO10instrumentAA10Instrument_pvpZ">InstrumentationSystem.instrument</a></code>: Returns whatever you passed to <code>.bootstrap</code> as an <code><a href="../Protocols/Instrument.html">Instrument</a></code>.</p>
+
+              <div class="slightly-smaller">
+                <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/Instrumentation/InstrumentationSystem.swift#L24-L61">Show on GitHub</a>
+              </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15Instrumentation0A6SystemO9bootstrapyyAA10Instrument_pFZ"></a>
+                    <a name="//apple_ref/swift/Method/bootstrap(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15Instrumentation0A6SystemO9bootstrapyyAA10Instrument_pFZ">bootstrap(_:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Globally select the desired <code><a href="../Protocols/Instrument.html">Instrument</a></code> implementation.</p>
+<div class="aside aside-warning">
+    <p class="aside-title">Warning</p>
+    Do not call this method more than once. This will lead to a crash.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="n">_</span> <span class="nv">instrument</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Instrument.html">Instrument</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>instrument</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code><a href="../Protocols/Instrument.html">Instrument</a></code> you want to share globally within your system.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/Instrumentation/InstrumentationSystem.swift#L33-L44">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:15Instrumentation0A6SystemO10instrumentAA10Instrument_pvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/instrument" class="dashAnchor"></a>
+                    <a class="token" href="#/s:15Instrumentation0A6SystemO10instrumentAA10Instrument_pvpZ">instrument</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the globally configured <code><a href="../Protocols/Instrument.html">Instrument</a></code>.</p>
+
+<p>Defaults to a no-op <code><a href="../Protocols/Instrument.html">Instrument</a></code> if <code>boostrap</code> wasn&rsquo;t called before.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">instrument</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Instrument.html">Instrument</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/Instrumentation/InstrumentationSystem.swift#L58-L60">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2021 <a class="link" href="https://github.com/apple/swift-distributed-tracing" target="_blank" rel="external">Swift Distributed Tracing team</a>. All rights reserved. (Last updated: 2021-01-27)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

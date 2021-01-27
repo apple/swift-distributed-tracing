@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Messaging Enumeration Reference</title>
+    <link rel="stylesheet" type="text/css" href="../../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../../js/jquery.min.js" defer></script>
+    <script src="../../js/jazzy.js" defer></script>
+    
+    <script src="../../js/lunr.min.js" defer></script>
+    <script src="../../js/typeahead.jquery.js" defer></script>
+    <script src="../../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Enum/Messaging" class="dashAnchor"></a>
+
+    <a title="Messaging Enumeration Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../../index.html">
+          TracingOpenTelemetrySupport 0.1.4 Docs
+        </a>
+         (80% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/apple/swift-distributed-tracing">
+            <img class="header-icon" src="../../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fapple.github.io%2Fswift-distributed-tracing%2Fdocs%2F0.1.4%2FTracingOpenTelemetrySupport%2Fdocsets%2FTracingOpenTelemetrySupport.xml">
+            <img class="header-icon" src="../../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../../index.html">TracingOpenTelemetrySupport Reference</a>
+      <img class="carat" src="../../img/carat.png" />
+      Messaging Enumeration Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName.html">SpanAttributeName</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Database.html">– Database</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/EndUser.html">– EndUser</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Exception.html">– Exception</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/FaaS.html">– FaaS</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/HTTP.html">– HTTP</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Messaging.html">– Messaging</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Net.html">– Net</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/Peer.html">– Peer</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Enums/SpanAttributeName/RPC.html">– RPC</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Extensions/SpanAttributes.html">SpanAttributes</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes.html">DatabaseAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/MSSQLAttributes.html">– MSSQLAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/CassandraAttributes.html">– CassandraAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/HBaseAttributes.html">– HBaseAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/RedisAttributes.html">– RedisAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/MongoDBAttributes.html">– MongoDBAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/DatabaseAttributes/SQLAttributes.html">– SQLAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/EndUserAttributes.html">EndUserAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/EndUserAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/ExceptionAttributes.html">ExceptionAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/ExceptionAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/FaaSAttributes.html">FaaSAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/FaaSAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/FaaSAttributes/DocumentAttributes.html">– DocumentAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/HTTPAttributes.html">HTTPAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/HTTPAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/HTTPAttributes/ServerAttributes.html">– ServerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/MessagingAttributes.html">MessagingAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/MessagingAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/MessagingAttributes/KafkaAttributes.html">– KafkaAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes.html">NetAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes/PeerAttributes.html">– PeerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/NetAttributes/HostAttributes.html">– HostAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/PeerAttributes.html">PeerAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/PeerAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RPCAttributes.html">RPCAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RPCAttributes/NestedSpanAttributes.html">– NestedSpanAttributes</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../../Structs/RPCAttributes/GRPCAttributes.html">– GRPCAttributes</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>Messaging</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Messaging</span></code></pre>
+
+                </div>
+              </div>
+            <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+              <div class="slightly-smaller">
+                <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L18-L57">Show on GitHub</a>
+              </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO6systemSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/system" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO6systemSSvpZ">system</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">system</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L20">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO11destinationSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/destination" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO11destinationSSvpZ">destination</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">destination</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L22">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15destinationKindSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/destinationKind" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15destinationKindSSvpZ">destinationKind</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">destinationKind</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L24">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15tempDestinationSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/tempDestination" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15tempDestinationSSvpZ">tempDestination</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">tempDestination</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L26">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO8protocolSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/protocol" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO8protocolSSvpZ">protocol</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">let</span> <span class="p">`</span><span class="nv">protocol</span><span class="p">`:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L28">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15protocolVersionSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/protocolVersion" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO15protocolVersionSSvpZ">protocolVersion</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">protocolVersion</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L30">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO3urlSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/url" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO3urlSSvpZ">url</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L32">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO9messageIDSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/messageID" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO9messageIDSSvpZ">messageID</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">messageID</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L34">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO14conversationIDSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/conversationID" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO14conversationIDSSvpZ">conversationID</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">conversationID</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L36">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO23messagePayloadSizeBytesSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/messagePayloadSizeBytes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO23messagePayloadSizeBytesSSvpZ">messagePayloadSizeBytes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">messagePayloadSizeBytes</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L38">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO33messagePayloadCompressedSizeBytesSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/messagePayloadCompressedSizeBytes" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO33messagePayloadCompressedSizeBytesSSvpZ">messagePayloadCompressedSizeBytes</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">messagePayloadCompressedSizeBytes</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L40">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO9operationSSvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/operation" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO9operationSSvpZ">operation</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">operation</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L42">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO5KafkaO"></a>
+                    <a name="//apple_ref/swift/Enum/Kafka" class="dashAnchor"></a>
+                    <a class="token" href="#/s:27TracingOpenTelemetrySupport17SpanAttributeNameO9MessagingO5KafkaO">Kafka</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <div class="aside aside-see-also">
+    <p class="aside-title">See also</p>
+    MessagingAttributes.KafkaAttributes
+
+</div>
+
+                        <a href="../../Enums/SpanAttributeName/Messaging/Kafka.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Kafka</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="slightly-smaller">
+                        <a href="https://github.com/apple/swift-distributed-tracing/tree/0.1.4/Sources/TracingOpenTelemetrySupport/SpanAttribute+MessagingSemantics.swift#L45-L56">Show on GitHub</a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2021 <a class="link" href="https://github.com/apple/swift-distributed-tracing" target="_blank" rel="external">Swift Distributed Tracing team</a>. All rights reserved. (Last updated: 2021-01-27)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>
