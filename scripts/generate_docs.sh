@@ -68,7 +68,7 @@ jazzy_args=(--clean
             --theme fullwidth
             --xcodebuild-arguments -scheme,$project_xcodeproj_name-Package)
 cat > "$module_switcher" <<"EOF"
-# Swift Distributed Tracing Baggage Docs
+# Swift Distributed Tracing Docs
 
 This project contains modules:
 EOF
