@@ -109,7 +109,6 @@ EOF
   (
     cd "$here/.."
     find . \
-      \( \! -path './UseCases/.build/*' -a \
       \( \! -path './.build/*' \) -a \
       \( "${matching_files[@]}" \) -a \
       \( \! \( "${exceptions[@]}" \) \) \) | while read line; do
