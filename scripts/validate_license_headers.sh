@@ -111,7 +111,7 @@ EOF
     find . \
       \( \! -path './.build/*' \) -a \
       \( "${matching_files[@]}" \) -a \
-      \( \! \( "${exceptions[@]}" \) \) \) | while read line; do
+      \( \! \( "${exceptions[@]}" \) \) | while read line; do
       if [[ "$(cat "$line" | replace_acceptable_years | head -n $expected_lines | shasum)" != "$expected_sha" ]]; then
         printf "\033[0;31mmissing headers in file '$line'!\033[0m\n"
         diff -u <(cat "$line" | replace_acceptable_years | head -n $expected_lines) "$tmp"
