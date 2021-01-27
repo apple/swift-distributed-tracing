@@ -14,40 +14,42 @@
 import Tracing
 
 extension SpanAttributeName {
-    /// - See: HTTPAttributes
+    /// - SeeAlso: HTTPAttributes
     public enum HTTP {
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let method = "http.method"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let url = "http.url"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let target = "http.target"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let host = "http.host"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let scheme = "http.scheme"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let statusCode = "http.status_code"
-        /// - See: HTTPAttributes
-        public static let statusText = "http.status_text"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let flavor = "http.flavor"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let userAgent = "http.user_agent"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let requestContentLength = "http.request_content_length"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let requestContentLengthUncompressed = "http.request_content_length_uncompressed"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let responseContentLength = "http.response_content_length"
-        /// - See: HTTPAttributes
+        /// - SeeAlso: HTTPAttributes
         public static let responseContentLengthUncompressed = "http.response_content_length_uncompressed"
-        /// - See: HTTPAttributes
-        public static let serverName = "http.server_name"
-        /// - See: HTTPAttributes
-        public static let serverRoute = "http.route"
-        /// - See: HTTPAttributes
-        public static let serverClientIP = "http.client_ip"
+
+        /// - SeeAlso: HTTPAttributes.ServerAttributes
+        public enum Server {
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
+            public static let name = "http.server_name"
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
+            public static let route = "http.route"
+            /// - SeeAlso: HTTPAttributes.ServerAttributes
+            public static let clientIP = "http.client_ip"
+        }
     }
 }
 
@@ -66,7 +68,7 @@ extension SpanAttributes {
 
 /// Semantic conventions for HTTP spans as defined in the OpenTelemetry spec.
 ///
-/// - SeeAlso: [OpenTelemetry: Semantic conventions for HTTP spans](https://github.com/open-telemetry/opentelemetry-specification/blob/b70565d5a8a13d26c91fb692879dc874d22c3ac8/specification/trace/semantic_conventions/http.md) (as of August 2020)
+/// - SeeAlso: [OpenTelemetry: Semantic conventions for HTTP spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/semantic_conventions/http.md)
 @dynamicMemberLookup
 public struct HTTPAttributes: SpanAttributeNamespace {
     public var attributes: SpanAttributes
@@ -74,6 +76,8 @@ public struct HTTPAttributes: SpanAttributeNamespace {
     public init(attributes: SpanAttributes) {
         self.attributes = attributes
     }
+
+    // MARK: - General
 
     public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
         public init() {}
@@ -97,10 +101,10 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         /// HTTP response status code. E.g. 200.
         public var statusCode: Key<Int> { .init(name: SpanAttributeName.HTTP.statusCode) }
 
-        /// HTTP reason phrase. E.g. "OK".
-        public var statusText: Key<String> { .init(name: SpanAttributeName.HTTP.statusText) }
-
         /// Kind of HTTP protocol used: "1.0", "1.1", "2", "SPDY" or "QUIC".
+        ///
+        /// - Note: If `net.transport` is not specified, it can be assumed to be `IP.TCP` except if `http.flavor`
+        /// is `QUIC`, in which case `IP.UDP` is assumed.
         public var flavor: Key<String> { .init(name: SpanAttributeName.HTTP.flavor) }
 
         /// Value of the HTTP User-Agent header sent by the client.
@@ -129,18 +133,45 @@ public struct HTTPAttributes: SpanAttributeNamespace {
         public var responseContentLengthUncompressed: Key<Int> {
             .init(name: SpanAttributeName.HTTP.responseContentLengthUncompressed)
         }
+    }
 
-        /// The primary server name of the matched virtual host. This should be obtained via configuration.
-        /// If no such configuration can be obtained, this attribute MUST NOT be set (`net.hostName` should be used instead).
-        public var serverName: Key<String> { .init(name: SpanAttributeName.HTTP.serverName) }
+    // MARK: - Server
 
-        /// The matched route (path template). E.g. "/users/:userID?".
-        public var serverRoute: Key<String> { .init(name: SpanAttributeName.HTTP.serverRoute) }
+    /// Semantic conventions for HTTP server spans.
+    public var server: ServerAttributes {
+        get {
+            .init(attributes: self.attributes)
+        }
+        set {
+            self.attributes = newValue.attributes
+        }
+    }
 
-        /// The IP address of the original client behind all proxies, if known (e.g. from X-Forwarded-For).
-        /// Note that this is not necessarily the same as `net.peerIP`, which would identify the network-level peer,
-        /// which may be a proxy.
-        public var serverClientIP: Key<String> { .init(name: SpanAttributeName.HTTP.serverClientIP) }
+    /// Semantic conventions for HTTP Server spans as defined in the OpenTelemetry spec.
+    ///
+    /// - SeeAlso: [OpenTelemetry: Semantic conventions for HTTP Server spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/semantic_conventions/http.md#http-server)
+    public struct ServerAttributes: SpanAttributeNamespace {
+        public var attributes: SpanAttributes
+
+        public init(attributes: SpanAttributes) {
+            self.attributes = attributes
+        }
+
+        public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+            public init() {}
+
+            /// The primary server name of the matched virtual host. This should be obtained via configuration.
+            /// If no such configuration can be obtained, this attribute MUST NOT be set (`net.hostName` should be used instead).
+            public var name: Key<String> { .init(name: SpanAttributeName.HTTP.Server.name) }
+
+            /// The matched route (path template). E.g. "/users/:userID?".
+            public var route: Key<String> { .init(name: SpanAttributeName.HTTP.Server.route) }
+
+            /// The IP address of the original client behind all proxies, if known (e.g. from [X-Forwarded-For](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)).
+            ///
+            /// - Note: This is not necessarily the same as `net.peer.ip`, which would identify the network-level peer, which may be a proxy.
+            public var clientIP: Key<String> { .init(name: SpanAttributeName.HTTP.Server.clientIP) }
+        }
     }
 }
 #endif
