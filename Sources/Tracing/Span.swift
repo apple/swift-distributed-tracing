@@ -584,7 +584,7 @@ extension SpanAttributes: ExpressibleByDictionaryLiteral {
 // MARK: Span Status
 
 /// Represents the status of a finished Span. It's composed of a status code in conjunction with an optional descriptive message.
-public struct SpanStatus {
+public struct SpanStatus: Equatable {
     public let code: Code
     public let message: String?
 
