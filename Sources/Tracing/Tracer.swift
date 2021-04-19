@@ -127,3 +127,65 @@ extension Tracer {
         }
     }
 }
+
+#if compiler(>=5.5) // we cannot write this on one line with `&&` because Swift 5.0 doesn't like it...
+#if compiler(>=5.5) && $AsyncAwait
+import _Concurrency
+
+@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
+extension Tracer {
+    /// Execute a specific async task within a newly created `Span`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `function` completes.
+    ///
+    /// - Parameters:
+    ///   - name: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - time: The `DispatchTime` at which to start the new `Span`.
+    ///   - function: async function to wrap in a span start/end and execute immediately
+    /// - Throws: the error the `function` has thrown (if any)
+    /// - Returns: the value returned by `function`
+    public func withSpan<T>(
+        _ operationName: String,
+        ofKind kind: SpanKind = .internal,
+        at time: DispatchWallTime = .now(),
+        _ function: () async throws -> T
+    ) async rethrows -> T {
+        let baggage = Task.local(\.baggage)
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, at: time)
+        defer {
+            span.end()
+        }
+        return try await Task.withLocal(\.baggage, boundTo: span.baggage, operation: function)
+    }
+
+    /// Execute a specific async task within a newly created `Span`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `function` completes.
+    ///
+    /// - Parameters:
+    ///   - name: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - time: The `DispatchTime` at which to start the new `Span`.
+    ///   - function: async function to wrap in a span start/end and execute immediately
+    /// - Throws: the error the `function` has thrown (if any)
+    /// - Returns: the value returned by `function`
+    public func withSpan<T>(
+        _ operationName: String,
+        ofKind kind: SpanKind = .internal,
+        at time: DispatchWallTime = .now(),
+        // swiftformat:disable:next redundantParens
+        _ function: (Span) async throws -> T
+    ) async rethrows -> T {
+        let baggage = Task.local(\.baggage)
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, at: time)
+        defer {
+            span.end()
+        }
+        return try await Task.withLocal(\.baggage, boundTo: span.baggage) {
+            try await function(span)
+        }
+    }
+}
+#endif
+#endif

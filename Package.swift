@@ -9,7 +9,7 @@ let package = Package(
         .library(name: "TracingOpenTelemetrySupport", targets: ["TracingOpenTelemetrySupport"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.1.1")
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .branch("async")),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
