@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import InstrumentationBaggage
 import Dispatch
+@_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
 /// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,

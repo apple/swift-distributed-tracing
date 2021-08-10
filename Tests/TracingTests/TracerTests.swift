@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 @testable import Instrumentation
+import InstrumentationBaggage
 import Tracing
 import XCTest
 
@@ -175,7 +175,7 @@ final class TracerTests: XCTestCase {
             "world"
         }
 
-        try testAsync {
+        try self.testAsync {
             let value = try await tracer.withSpan("hello") { (span: Span) -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 return try await operation(span: span)
@@ -206,7 +206,7 @@ final class TracerTests: XCTestCase {
             throw ExampleSpanError()
         }
 
-        testAsync {
+        self.testAsync {
             do {
                 _ = try await tracer.withSpan("hello", operation)
             } catch {

@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import InstrumentationBaggage
 import Dispatch
 @_exported import Instrumentation
+@_exported import InstrumentationBaggage
 
 /// No operation Tracer, used when no tracing is required.
 public struct NoOpTracer: Tracer {

@@ -26,8 +26,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 import Foundation
+import InstrumentationBaggage
 
 @inline(never)
 func take1(context: BaggageContext) -> Int {

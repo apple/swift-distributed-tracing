@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 import Foundation
 import Instrumentation
+import InstrumentationBaggage
 import Tracing
 
 final class TracedLock {

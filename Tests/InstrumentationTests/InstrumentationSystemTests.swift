@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 @testable import Instrumentation
+import InstrumentationBaggage
 import XCTest
 
 extension InstrumentationSystem {

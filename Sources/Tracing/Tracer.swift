@@ -12,9 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import InstrumentationBaggage
 import Dispatch
 @_exported import Instrumentation
+@_exported import InstrumentationBaggage
 
 /// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
@@ -112,7 +112,7 @@ extension Tracer {
         ofKind kind: SpanKind = .internal,
         _ operation: (Span) throws -> T
     ) rethrows -> T {
-        try withSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind) { span in
+        try self.withSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind) { span in
             try Baggage.$current.withValue(span.baggage) {
                 try operation(span)
             }
@@ -133,7 +133,7 @@ extension Tracer {
     public func withSpan<T>(
         _ operationName: String,
         ofKind kind: SpanKind = .internal,
-        _ operation: (Span) async throws -> T
+        _ operation: Span async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind)
         defer { span.end() }

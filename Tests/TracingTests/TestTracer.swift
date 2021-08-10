@@ -12,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 import Dispatch
 import Foundation
 import Instrumentation
+import InstrumentationBaggage
 import Tracing
 
 final class TestTracer: Tracer {

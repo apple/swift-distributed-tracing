@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
 import Instrumentation
+import InstrumentationBaggage
 import Tracing
 import XCTest
 
