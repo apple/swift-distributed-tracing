@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import InstrumentationBaggage
 @testable import Instrumentation
 import Tracing
 import XCTest
@@ -93,23 +94,142 @@ final class TracerTests: XCTestCase {
             XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
             return
         }
-        XCTFail("Should have throw")
+        XCTFail("Should have thrown")
     }
 
-    func testWithSpan_context() {
+    #if swift(>=5.5)
+    func testWithSpan_automaticBaggagePropagation_sync() throws {
+        guard #available(macOS 12, iOS 15, tvOS 15, watchOS 8, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
         let tracer = TestTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
         defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+            InstrumentationSystem.bootstrapInternal(nil)
         }
 
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        tracer.withSpan("", context: DefaultLoggingContext.topLevel(logger: Logger(label: "test"))) { _ in }
+        func operation(span: Span) -> String {
+            "world"
+        }
 
+        let value = tracer.withSpan("hello") { (span: Span) -> String in
+            XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
+            return operation(span: span)
+        }
+
+        XCTAssertEqual(value, "world")
         XCTAssertTrue(spanEnded)
     }
+
+    func testWithSpan_automaticBaggagePropagation_sync_throws() throws {
+        guard #available(macOS 12, iOS 15, tvOS 15, watchOS 8, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: Span) throws -> String {
+            throw ExampleSpanError()
+        }
+
+        do {
+            _ = try tracer.withSpan("hello", operation)
+        } catch {
+            XCTAssertTrue(spanEnded)
+            XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+            return
+        }
+        XCTFail("Should have thrown")
+    }
+
+    func testWithSpan_automaticBaggagePropagation_async() throws {
+        guard #available(macOS 12, iOS 15, tvOS 15, watchOS 8, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: Span) async throws -> String {
+            "world"
+        }
+
+        try testAsync {
+            let value = try await tracer.withSpan("hello") { (span: Span) -> String in
+                XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
+                return try await operation(span: span)
+            }
+
+            XCTAssertEqual(value, "world")
+            XCTAssertTrue(spanEnded)
+        }
+
+    }
+
+    func testWithSpan_automaticBaggagePropagation_async_throws() throws {
+        guard #available(macOS 12, iOS 15, tvOS 15, watchOS 8, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: Span) async throws -> String {
+            throw ExampleSpanError()
+        }
+
+        testAsync {
+            do {
+                _ = try await tracer.withSpan("hello", operation)
+            } catch {
+                XCTAssertTrue(spanEnded)
+                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+                return
+            }
+            XCTFail("Should have thrown")
+        }
+    }
+
+    @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+    /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
+    /// - Parameter operation: The operation to test.
+    func testAsync(_ operation: @escaping () async throws -> Void) rethrows {
+        let group = DispatchGroup()
+        group.enter()
+        Task.detached {
+            do {
+                try await operation()
+            } catch {
+                throw error
+            }
+            group.leave()
+        }
+        group.wait()
+    }
+    #endif
 }
 
 struct ExampleSpanError: Error, Equatable {}

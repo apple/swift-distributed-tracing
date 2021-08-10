@@ -34,15 +34,6 @@ services:
 
   test:
     <<: *common
-    security_opt: # FIXME: temp while private
-      - label=type:container_runtime_t
-    volumes: # FIXME: temp while private
-      - ..:/code:z
-      - ~/.ssh:/root/.ssh
-      - $SSH_AUTH_SOCK:/tmp/ssh-agent:z
-    environment: # FIXME: temp while private
-      - SSH_AUTH_SOCK=/tmp/ssh-agent
-      - GIT_SSH_COMMAND=ssh -vv -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
     command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors $${SANITIZER_ARG-}"
 
   # util

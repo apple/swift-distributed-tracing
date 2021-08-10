@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -36,8 +37,6 @@ private func registerBenchmark(_ name: String, _ function: @escaping (Int) -> Vo
     registerBenchmark(BenchmarkInfo(name: name, runFunction: function, tags: tags))
 }
 
-#if swift(>=5.2)
 registerBenchmark(SpanAttributesDSLBenchmarks)
-#endif
 
 main()

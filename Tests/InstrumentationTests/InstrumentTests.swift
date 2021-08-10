@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import InstrumentationBaggage
 import Instrumentation
 import XCTest
 
@@ -52,7 +53,7 @@ private struct DictionaryExtractor: Extractor {
 }
 
 private final class FirstFakeTracer: Instrument {
-    enum TraceIDKey: Baggage.Key {
+    enum TraceIDKey: BaggageKey {
         typealias Value = String
 
         static let name: String? = "FirstFakeTraceID"
@@ -75,7 +76,7 @@ private final class FirstFakeTracer: Instrument {
 }
 
 private final class SecondFakeTracer: Instrument {
-    enum TraceIDKey: Baggage.Key {
+    enum TraceIDKey: BaggageKey {
         typealias Value = String
 
         static let name: String? = "SecondFakeTraceID"

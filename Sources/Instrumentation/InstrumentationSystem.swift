@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import InstrumentationBaggage
 
 /// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
 /// It is set up just once in a given program to select the desired `Instrument` implementation.

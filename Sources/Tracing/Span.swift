@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Baggage
+@_exported import InstrumentationBaggage
 import Dispatch
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included

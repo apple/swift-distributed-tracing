@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import InstrumentationBaggage
 import Instrumentation
 import Tracing
 import XCTest
@@ -254,6 +255,6 @@ public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttr
 }
 #endif
 
-private struct TestBaggageContextKey: Baggage.Key {
+private struct TestBaggageContextKey: BaggageKey {
     typealias Value = String
 }

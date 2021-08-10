@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
@@ -6,10 +6,10 @@ let package = Package(
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
-        .library(name: "TracingOpenTelemetrySupport", targets: ["TracingOpenTelemetrySupport"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.1.1")
+        // TODO: Use tagged baggage dependency once released
+        .package(url: "https://github.com/slashmo/swift-distributed-tracing-baggage.git", .branch("remove-logging")),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -18,13 +18,13 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                "Baggage",
+                .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
-                "Instrumentation",
+                .target(name: "Instrumentation"),
             ]
         ),
 
@@ -34,29 +34,13 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
-                "Instrumentation",
+                .target(name: "Instrumentation"),
             ]
         ),
         .testTarget(
             name: "TracingTests",
             dependencies: [
-                "Tracing",
-            ]
-        ),
-
-        // ==== ----------------------------------------------------------------------------------------------------------------
-        // MARK: Support libraries
-
-        .target(
-            name: "TracingOpenTelemetrySupport",
-            dependencies: [
-                "Tracing"
-            ]
-        ),
-        .testTarget(
-            name: "TracingOpenTelemetrySupportTests",
-            dependencies: [
-                "TracingOpenTelemetrySupport",
+                .target(name: "Tracing"),
             ]
         ),
 
@@ -66,10 +50,9 @@ let package = Package(
         .target(
             name: "_TracingBenchmarks",
             dependencies: [
-                "Baggage",
-                "Tracing",
-                "TracingOpenTelemetrySupport",
-                "_TracingBenchmarkTools",
+                .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
+                .target(name: "Tracing"),
+                .target(name: "_TracingBenchmarkTools"),
             ]
         ),
         .target(

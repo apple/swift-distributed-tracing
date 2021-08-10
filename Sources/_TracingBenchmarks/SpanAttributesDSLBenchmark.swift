@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,11 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.2)
-
 import _TracingBenchmarkTools
 import Tracing
-import TracingOpenTelemetrySupport
 
 public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
     BenchmarkInfo(
@@ -71,16 +69,13 @@ public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
     ),
 ]
 
-private var context: LoggingContext!
 private var span: Span!
 
 private func setUp() {
-    context = DefaultLoggingContext.topLevel(logger: .init(label: ""))
-    span = InstrumentationSystem.tracer.startSpan("something", context: context)
+    span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
 }
 
 private func tearDown() {
-    context = nil
     span = nil
 }
 
@@ -91,14 +86,14 @@ func bench_empty(times: Int) throws {}
 
 func bench_makeSpan(times: Int) throws {
     for _ in 0 ..< times {
-        let span = InstrumentationSystem.tracer.startSpan("something", context: context)
+        let span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
         _ = span
     }
 }
 
 func bench_startSpan_end(times: Int) throws {
     for _ in 0 ..< times {
-        let span = InstrumentationSystem.tracer.startSpan("something", context: context)
+        let span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
         span.end()
     }
 }
@@ -133,4 +128,29 @@ func bench_set_Int_dsl(times: Int) throws {
     }
 }
 
-#endif
+extension SpanAttributes {
+    var http: HTTPAttributes {
+        get {
+            .init(attributes: self)
+        }
+        set {
+            self = newValue.attributes
+        }
+    }
+}
+
+@dynamicMemberLookup
+struct HTTPAttributes: SpanAttributeNamespace {
+    var attributes: SpanAttributes
+
+    init(attributes: SpanAttributes) {
+        self.attributes = attributes
+    }
+
+    struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+        init() {}
+
+        var method: Key<String> { "http.method" }
+        var statusCode: Key<Int> { "http.status_code" }
+    }
+}

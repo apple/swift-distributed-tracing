@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -29,7 +30,10 @@ extension TracerTests {
                 ("testContextPropagationWithNoOpSpan", testContextPropagationWithNoOpSpan),
                 ("testWithSpan_success", testWithSpan_success),
                 ("testWithSpan_throws", testWithSpan_throws),
-                ("testWithSpan_context", testWithSpan_context),
+                ("testWithSpan_automaticBaggagePropagation_sync", testWithSpan_automaticBaggagePropagation_sync),
+                ("testWithSpan_automaticBaggagePropagation_sync_throws", testWithSpan_automaticBaggagePropagation_sync_throws),
+                ("testWithSpan_automaticBaggagePropagation_async", testWithSpan_automaticBaggagePropagation_async),
+                ("testWithSpan_automaticBaggagePropagation_async_throws", testWithSpan_automaticBaggagePropagation_async_throws),
            ]
    }
 }

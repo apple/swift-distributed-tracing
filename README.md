@@ -9,24 +9,9 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 
 ---
 
-This project uses the context progagation types defined independently in:
+This project uses the context progagation type defined independently in:
 
-- 🧳 [swift-distributed-tracing-baggage](https://github.com/apple/swift-distributed-tracing-baggage) -- [`LoggingContext`](https://apple.github.io/swift-distributed-tracing-baggage/docs/current/Baggage/Protocols/LoggingContext.html) (Swift Log dependency)
-- 🧳 [swift-distributed-tracing-baggage-core](https://github.com/apple/swift-distributed-tracing-baggage-core) -- defining [`Baggage`](https://apple.github.io/swift-distributed-tracing-baggage-core/docs/current/CoreBaggage/Structs/Baggage.html) (zero dependencies)
-
----
-
-### Important note on Adoption
-
-> ⚠️  ⚠️  ⚠️
->
-> We anticipate the upcoming [Swift Concurrency](https://forums.swift.org/t/swift-concurrency-roadmap/41611) features to have significant impact on the usage of these APIs, if task-local values **(proposal coming soon)** are accepted into the language.
-> 
-> As such, we advice to adopt these APIs carefully, and offer them _optionally_, i.e. provide defaulted values for context parameters such that users do not necessarily have to use them – because the upcoming Swift Concurrency story should enable APIs to gain automatic context propagation using task locals (if the proposal were to be accepted).
-> 
-> At this point in time we would like to focus on Tracer implementations, final API polish and adoption in "glue" libraries between services, such as AsyncHTTPClient, gRPC and similar APIs.
->
-> ⚠️  ⚠️  ⚠️
+- 🧳 [swift-distributed-tracing-baggage](https://github.com/apple/swift-distributed-tracing-baggage) -- [`Baggage`](https://apple.github.io/swift-distributed-tracing-baggage/docs/current/InstrumentationBaggage/Structs/Baggage.html) (zero dependencies)
 
 ---
 
@@ -579,7 +564,7 @@ When creating a tracer you need to create two types:
 ```swift
 import Tracing
 
-private enum TraceIDKey: Baggage.Key {
+private enum TraceIDKey: BaggageKey {
   typealias Value = String
 }
 
