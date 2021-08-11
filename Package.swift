@@ -8,8 +8,7 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        // TODO: Use tagged baggage dependency once released
-        .package(url: "https://github.com/slashmo/swift-distributed-tracing-baggage.git", .branch("remove-logging")),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", from: "0.2.0"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
