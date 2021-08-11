@@ -18,11 +18,11 @@ import XCTest
 
 extension InstrumentationSystem {
     public static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
-        return self._findInstrument(where: { $0 is T }) as? T
+        self._findInstrument(where: { $0 is T }) as? T
     }
 
     public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
-        return self._findInstrument(where: { $0 is I }) as? I
+        self._findInstrument(where: { $0 is I }) as? I
     }
 }
 

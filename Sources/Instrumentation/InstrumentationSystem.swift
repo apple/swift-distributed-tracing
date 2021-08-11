@@ -57,14 +57,14 @@ public enum InstrumentationSystem {
     ///
     /// Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
     public static var instrument: Instrument {
-        return self.lock.withReaderLock { self._instrument }
+        self.lock.withReaderLock { self._instrument }
     }
 }
 
 extension InstrumentationSystem {
     /// :nodoc: INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        return self.lock.withReaderLock {
+        self.lock.withReaderLock {
             if let multiplex = self._instrument as? MultiplexInstrument {
                 return multiplex.firstInstrument(where: predicate)
             } else if predicate(self._instrument) {

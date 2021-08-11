@@ -18,7 +18,7 @@ import XCTest
 
 extension InstrumentationSystem {
     public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
-        return self._findInstrument(where: { $0 is I }) as? I
+        self._findInstrument(where: { $0 is I }) as? I
     }
 }
 

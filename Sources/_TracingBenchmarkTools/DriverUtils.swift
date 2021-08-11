@@ -55,12 +55,12 @@ public struct BenchResults {
         return self.samples[index]
     }
 
-    var sampleCount: T { return self.samples.count }
-    var min: T { return self.samples.first! }
-    var max: T { return self.samples.last! }
-    var mean: T { return Int(self.stats.mean.rounded()) }
-    var sd: T { return Int(self.stats.standardDeviation.rounded()) }
-    var median: T { return self[0.5] }
+    var sampleCount: T { self.samples.count }
+    var min: T { self.samples.first! }
+    var max: T { self.samples.last! }
+    var mean: T { Int(self.stats.mean.rounded()) }
+    var sd: T { Int(self.stats.standardDeviation.rounded()) }
+    var median: T { self[0.5] }
 }
 
 public var registeredBenchmarks: [BenchmarkInfo] = []
@@ -136,14 +136,14 @@ struct TestConfig {
             // We support specifying multiple tags by splitting on comma, i.e.:
             //  --tags=Array,Dictionary
             //  --skip-tags=Array,Set,unstable,skip
-            return Set(
+            Set(
                 try tags.split(separator: ",").map(String.init).map {
                     try checked({ BenchmarkCategory(rawValue: $0) }, $0)
                 }
             )
         }
         func finiteDouble(value: String) -> Double? {
-            return Double(value).flatMap { $0.isFinite ? $0 : nil }
+            Double(value).flatMap { $0.isFinite ? $0 : nil }
         }
 
         // Configure the command line argument parser
@@ -251,7 +251,7 @@ struct TestConfig {
 
         // We always prepare the configuration string and call the print to have
         // the same memory usage baseline between verbose and normal mode.
-        let testList = self.tests.map { $0.1.name }.joined(separator: ", ")
+        let testList = self.tests.map(\.1.name).joined(separator: ", ")
         let configuration = """
         --- CONFIG ---
         NumSamples: \(numSamples ?? 0)
@@ -289,17 +289,17 @@ struct TestConfig {
         let indices = Dictionary(
             uniqueKeysWithValues:
             zip(
-                allTests.map { $0.name },
+                allTests.map(\.name),
                 (1...).lazy.map { String($0) }
             )
         )
 
         func byTags(b: BenchmarkInfo) -> Bool {
-            return b.tags.isSuperset(of: tags) &&
+            b.tags.isSuperset(of: tags) &&
                 b.tags.isDisjoint(with: skipTags)
         }
         func byNamesOrIndices(b: BenchmarkInfo) -> Bool {
-            return specifiedTests.contains(b.name) ||
+            specifiedTests.contains(b.name) ||
                 specifiedTests.contains(indices[b.name]!)
         } // !! "`allTests` have been assigned an index"
         return allTests
@@ -312,8 +312,8 @@ struct Stats {
     var n: Int = 0
     var S: Double = 0.0
     var mean: Double = 0.0
-    var variance: Double { return self.n < 2 ? 0.0 : self.S / Double(self.n - 1) }
-    var standardDeviation: Double { return self.variance.squareRoot() }
+    var variance: Double { self.n < 2 ? 0.0 : self.S / Double(self.n - 1) }
+    var standardDeviation: Double { self.variance.squareRoot() }
 
     static func collect(_ s: inout Stats, _ x: Int) {
         Stats.runningMeanVariance(&s, Double(x))
@@ -354,7 +354,7 @@ public final class Timer {
     }
 
     public func getTimeAsInt() -> UInt64 {
-        return UInt64(getTime().tv_nsec)
+        UInt64(getTime().tv_nsec)
     }
 
     public func diffTimeInNanoSeconds(from start: TimeT, to end: TimeT) -> UInt64 {
@@ -379,11 +379,11 @@ public final class Timer {
     }
 
     public func getTime() -> TimeT {
-        return mach_absolute_time()
+        mach_absolute_time()
     }
 
     public func getTimeAsInt() -> UInt64 {
-        return UInt64(getTime())
+        UInt64(getTime())
     }
 
     public func diffTimeInNanoSeconds(from start: TimeT, to end: TimeT) -> UInt64 {
@@ -394,10 +394,10 @@ public final class Timer {
 }
 
 extension UInt64 {
-    public var nanoseconds: Int { return Int(self) }
-    public var microseconds: Int { return Int(self / 1000) }
-    public var milliseconds: Int { return Int(self / 1000 / 1000) }
-    public var seconds: Int { return Int(self / 1000 / 1000 / 1000) }
+    public var nanoseconds: Int { Int(self) }
+    public var microseconds: Int { Int(self / 1000) }
+    public var milliseconds: Int { Int(self / 1000 / 1000) }
+    public var seconds: Int { Int(self / 1000 / 1000 / 1000) }
 }
 
 enum TimeUnit: String {
@@ -421,7 +421,7 @@ enum TimeUnit: String {
 
 extension TimeUnit: CustomStringConvertible {
     public var description: String {
-        return self.rawValue
+        self.rawValue
     }
 }
 
@@ -448,7 +448,7 @@ final class TestRunner {
     private static func getExecutedInstructions() -> UInt64 {
         // FIXME: there is a Linux PMC API you can use to get this, but it's
         // not quite so straightforward.
-        return 0
+        0
     }
 
     #else
@@ -461,7 +461,7 @@ final class TestRunner {
 //            }
 //            return u.ri_instructions
 //        } else {
-        return 0
+        0
 //        }
     }
     #endif
@@ -534,7 +534,7 @@ final class TestRunner {
 
     /// Time in nanoseconds spent running the last function
     var lastSampleTime: UInt64 {
-        return timer.diffTimeInNanoSeconds(from: start, to: end)
+        timer.diffTimeInNanoSeconds(from: start, to: end)
     }
 
     /// Measure the `fn` and return the average sample time per iteration (in c.timeUnit).

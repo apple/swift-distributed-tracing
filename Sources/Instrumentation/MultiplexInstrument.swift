@@ -30,18 +30,20 @@ public struct MultiplexInstrument {
 
 extension MultiplexInstrument {
     func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        return self.instruments.first(where: predicate)
+        self.instruments.first(where: predicate)
     }
 }
 
 extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier {
+        where Inject: Injector, Carrier == Inject.Carrier
+    {
         self.instruments.forEach { $0.inject(baggage, into: &carrier, using: injector) }
     }
 
     public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier {
+        where Extract: Extractor, Carrier == Extract.Carrier
+    {
         self.instruments.forEach { $0.extract(carrier, into: &baggage, using: extractor) }
     }
 }

@@ -75,7 +75,7 @@ func checked<T>(
 class ArgumentParser<U> {
     private var result: U
     private var validOptions: [String] {
-        return self.arguments.compactMap { $0.name }
+        self.arguments.compactMap(\.name)
     }
 
     private var arguments: [Argument] = []
@@ -220,7 +220,7 @@ class ArgumentParser<U> {
     ) {
         self.arguments.append(
             Argument(name: name, help: help)
-            { try self.parseArgument(name, property, defaultValue, parser) }
+                { try self.parseArgument(name, property, defaultValue, parser) }
         )
     }
 

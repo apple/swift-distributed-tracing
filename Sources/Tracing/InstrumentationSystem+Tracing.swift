@@ -22,6 +22,6 @@ extension InstrumentationSystem {
     ///
     /// - Returns: A `Tracer` if the system was bootstrapped with one, and `NoOpTracer` otherwise.
     public static var tracer: Tracer {
-        return (self._findInstrument(where: { $0 is Tracer }) as? Tracer) ?? NoOpTracer()
+        (self._findInstrument(where: { $0 is Tracer }) as? Tracer) ?? NoOpTracer()
     }
 }

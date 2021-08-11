@@ -247,7 +247,7 @@ typealias HTTPHeaders = [(String, String)]
 
 struct HTTPHeadersExtractor: Extractor {
     func extract(key: String, from headers: HTTPHeaders) -> String? {
-        return headers.first(where: { $0.0 == key })?.1
+        headers.first(where: { $0.0 == key })?.1
     }
 }
 

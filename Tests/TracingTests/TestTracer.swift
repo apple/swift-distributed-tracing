@@ -44,7 +44,8 @@ final class TestTracer: Tracer {
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where
         Extract: Extractor,
-        Carrier == Extract.Carrier {
+        Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         baggage.traceID = traceID
     }
@@ -52,7 +53,8 @@ final class TestTracer: Tracer {
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where
         Inject: Injector,
-        Carrier == Inject.Carrier {
+        Carrier == Inject.Carrier
+    {
         guard let traceID = baggage.traceID else { return }
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
     }
@@ -67,7 +69,7 @@ extension TestTracer {
 extension Baggage {
     var traceID: String? {
         get {
-            return self[TestTracer.TraceIDKey.self]
+            self[TestTracer.TraceIDKey.self]
         }
         set {
             self[TestTracer.TraceIDKey.self] = newValue

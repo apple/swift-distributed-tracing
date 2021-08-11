@@ -48,7 +48,7 @@ private struct DictionaryInjector: Injector {
 
 private struct DictionaryExtractor: Extractor {
     func extract(key: String, from dictionary: [String: String]) -> String? {
-        return dictionary[key]
+        dictionary[key]
     }
 }
 
@@ -63,13 +63,15 @@ private final class FirstFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier {
+        where Inject: Injector, Carrier == Inject.Carrier
+    {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier {
+        where Extract: Extractor, Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
@@ -90,7 +92,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Inject: Injector,
-        Carrier == Inject.Carrier {
+        Carrier == Inject.Carrier
+    {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
@@ -100,7 +103,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Extract: Extractor,
-        Carrier == Extract.Carrier {
+        Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }

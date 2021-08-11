@@ -26,18 +26,20 @@ public struct NoOpTracer: Tracer {
         ofKind kind: SpanKind,
         at time: DispatchWallTime
     ) -> Span {
-        return NoOpSpan(baggage: baggage)
+        NoOpSpan(baggage: baggage)
     }
 
     public func forceFlush() {}
 
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier {
+        where Inject: Injector, Carrier == Inject.Carrier
+    {
         // no-op
     }
 
     public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier {
+        where Extract: Extractor, Carrier == Extract.Carrier
+    {
         // no-op
     }
 
@@ -59,7 +61,7 @@ public struct NoOpTracer: Tracer {
 
         public var attributes: SpanAttributes {
             get {
-                return [:]
+                [:]
             }
             set {
                 // ignore

@@ -90,7 +90,7 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    internal func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
+    func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockRead()
         defer {
             self.unlock()
@@ -107,7 +107,7 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    internal func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
+    func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockWrite()
         defer {
             self.unlock()

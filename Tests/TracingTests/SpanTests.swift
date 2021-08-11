@@ -204,7 +204,7 @@ final class SpanTests: XCTestCase {
 
 extension SpanAttribute {
     var name: Key<String> {
-        return "name"
+        "name"
     }
 }
 

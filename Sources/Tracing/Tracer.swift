@@ -54,7 +54,7 @@ extension Tracer {
         baggage: Baggage,
         ofKind kind: SpanKind = .internal
     ) -> Span {
-        return self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now())
+        self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now())
     }
 }
 
@@ -133,7 +133,7 @@ extension Tracer {
     public func withSpan<T>(
         _ operationName: String,
         ofKind kind: SpanKind = .internal,
-        _ operation: Span async throws -> T
+        _ operation: (Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind)
         defer { span.end() }

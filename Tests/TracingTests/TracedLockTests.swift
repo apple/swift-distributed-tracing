@@ -65,7 +65,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         ofKind kind: SpanKind,
         at time: DispatchWallTime
     ) -> Span {
-        return TracedLockPrintlnSpan(
+        TracedLockPrintlnSpan(
             operationName: operationName,
             startTime: time,
             kind: kind,
