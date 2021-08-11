@@ -21,6 +21,10 @@ import Dispatch
 public protocol Tracer: Instrument {
     /// Start a new `Span` with the given `Baggage` at a given time.
     ///
+    /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
+    /// and recording errors when thrown. Use `startSpan` iff you need to pass the span manually to a different
+    /// location in your source code to end it.
+    ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new `Span`.
