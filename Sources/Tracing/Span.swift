@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Baggage
 import Dispatch
+@_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
 /// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
@@ -175,7 +176,8 @@ extension NestedSpanAttributesProtocol {
 
 extension SpanAttributeNamespace {
     public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
-        where T: SpanAttributeConvertible {
+        where T: SpanAttributeConvertible
+    {
         get {
             let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
             let spanAttribute = self.attributes[key.name]?.toSpanAttribute()
@@ -204,7 +206,8 @@ extension SpanAttributeNamespace {
     }
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute.int(0)[keyPath: dynamicMember]
     }
 }
@@ -254,7 +257,7 @@ public enum SpanAttribute: Equatable {
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
     internal static var _namespace: SpanAttribute {
-        return .int(0)
+        .int(0)
     }
 
     internal var anyValue: Any {
@@ -311,7 +314,7 @@ public enum SpanAttribute: Equatable {
 
 extension SpanAttribute: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return self
+        self
     }
 }
 
@@ -327,37 +330,37 @@ public protocol SpanAttributeConvertible {
 
 extension Array where Element == Int {
     public func toSpanAttribute() -> SpanAttribute {
-        return .intArray(self.map(Int64.init))
+        .intArray(self.map(Int64.init))
     }
 }
 
 extension Array where Element == Int8 {
     public func toSpanAttribute() -> SpanAttribute {
-        return .intArray(self.map(Int64.init))
+        .intArray(self.map(Int64.init))
     }
 }
 
 extension Array where Element == Int16 {
     public func toSpanAttribute() -> SpanAttribute {
-        return .intArray(self.map(Int64.init))
+        .intArray(self.map(Int64.init))
     }
 }
 
 extension Array where Element == Int32 {
     public func toSpanAttribute() -> SpanAttribute {
-        return .intArray(self.map(Int64.init))
+        .intArray(self.map(Int64.init))
     }
 }
 
 extension Array where Element == Int64 {
     public func toSpanAttribute() -> SpanAttribute {
-        return .intArray(self)
+        .intArray(self)
     }
 }
 
 extension Array where Element == Double {
     public func toSpanAttribute() -> SpanAttribute {
-        return .doubleArray(self)
+        .doubleArray(self)
     }
 }
 
@@ -393,7 +396,7 @@ extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertibl
 
 extension String: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .string(self)
+        .string(self)
     }
 }
 
@@ -420,31 +423,31 @@ extension SpanAttribute: ExpressibleByIntegerLiteral {
 
 extension Int: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .int(Int64(self))
+        .int(Int64(self))
     }
 }
 
 extension Int8: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .int(Int64(self))
+        .int(Int64(self))
     }
 }
 
 extension Int16: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .int(Int64(self))
+        .int(Int64(self))
     }
 }
 
 extension Int32: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .int(Int64(self))
+        .int(Int64(self))
     }
 }
 
 extension Int64: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .int(self)
+        .int(self)
     }
 }
 
@@ -453,13 +456,13 @@ extension Int64: SpanAttributeConvertible {
 
 extension Float: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .double(Double(self))
+        .double(Double(self))
     }
 }
 
 extension Double: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .double(self)
+        .double(self)
     }
 }
 
@@ -474,7 +477,7 @@ extension SpanAttribute: ExpressibleByFloatLiteral {
 
 extension Bool: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        return .bool(self)
+        .bool(self)
     }
 }
 
@@ -519,7 +522,7 @@ extension SpanAttributes {
     /// - Returns: The `SpanAttribute` identified by the given name, or `nil` if it's not present.
     public subscript(_ name: String) -> SpanAttributeConvertible? {
         get {
-            return self._attributes[name]
+            self._attributes[name]
         }
         set {
             self._attributes[name] = newValue?.toSpanAttribute()
@@ -543,12 +546,12 @@ extension SpanAttributes {
 
     /// - Returns: Number of attributes stored.
     public var count: Int {
-        return self._attributes.count
+        self._attributes.count
     }
 
     /// Returns true if the collection contains no attributes.
     public var isEmpty: Bool {
-        return self._attributes.isEmpty
+        self._attributes.isEmpty
     }
 }
 
@@ -568,7 +571,8 @@ extension SpanAttributes {
 
     /// Enables for type-safe nested namespaces for attribute accessors.
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace {
+        where Namespace: SpanAttributeNamespace
+    {
         SpanAttribute._namespace[keyPath: dynamicMember]
     }
 }

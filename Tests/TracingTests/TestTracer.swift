@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,10 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
 import Dispatch
 import Foundation
 import Instrumentation
+import InstrumentationBaggage
 import Tracing
 
 final class TestTracer: Tracer {
@@ -43,7 +44,8 @@ final class TestTracer: Tracer {
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where
         Extract: Extractor,
-        Carrier == Extract.Carrier {
+        Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         baggage.traceID = traceID
     }
@@ -51,14 +53,15 @@ final class TestTracer: Tracer {
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where
         Inject: Injector,
-        Carrier == Inject.Carrier {
+        Carrier == Inject.Carrier
+    {
         guard let traceID = baggage.traceID else { return }
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
     }
 }
 
 extension TestTracer {
-    enum TraceIDKey: Baggage.Key {
+    enum TraceIDKey: BaggageKey {
         typealias Value = String
     }
 }
@@ -66,7 +69,7 @@ extension TestTracer {
 extension Baggage {
     var traceID: String? {
         get {
-            return self[TestTracer.TraceIDKey.self]
+            self[TestTracer.TraceIDKey.self]
         }
         set {
             self[TestTracer.TraceIDKey.self] = newValue

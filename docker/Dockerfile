@@ -1,4 +1,4 @@
-ARG swift_version=5.0
+ARG swift_version=5.2
 ARG ubuntu_version=bionic
 ARG base_image=swift:$swift_version-$ubuntu_version
 FROM $base_image
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y lsof dnsutils netcat-openbsd net-tools 
 
 # ruby and jazzy for docs generation
 RUN apt-get update && apt-get install -y ruby ruby-dev libsqlite3-dev
-RUN gem install jazzy --no-ri --no-rdoc
+RUN gem install jazzy -v 0.13.7 --no-ri --no-rdoc
 
 # tools
 RUN mkdir -p $HOME/.tools
@@ -26,7 +26,7 @@ RUN echo 'export PATH="$HOME/.tools:$PATH"' >> $HOME/.profile
 
 # swiftformat (until part of the toolchain)
 
-ARG swiftformat_version=0.44.6
+ARG swiftformat_version=0.48.11
 RUN git clone --branch $swiftformat_version --depth 1 https://github.com/nicklockwood/SwiftFormat $HOME/.tools/swift-format
 RUN cd $HOME/.tools/swift-format && swift build -c release
 RUN ln -s $HOME/.tools/swift-format/.build/release/swiftformat $HOME/.tools/swiftformat

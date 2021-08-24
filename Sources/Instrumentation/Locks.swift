@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -89,7 +90,7 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    internal func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
+    func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockRead()
         defer {
             self.unlock()
@@ -106,7 +107,7 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    internal func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
+    func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockWrite()
         defer {
             self.unlock()

@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+
+  runtime-setup:
+    image: swift-distributed-tracing:18.04-5.5
+    build:
+      args:
+        base_image: "swiftlang/swift:nightly-5.5-bionic"
+
+  test:
+    image: swift-distributed-tracing:18.04-5.5
+    environment: []
+      #- SANITIZER_ARG=--sanitize=thread
+
+  shell:
+    image: swift-distributed-tracing:18.04-5.5
+
+  docs:
+    image: swift-distributed-tracing:18.04-5.5

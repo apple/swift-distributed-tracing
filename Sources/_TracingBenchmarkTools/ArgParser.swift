@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -74,7 +75,7 @@ func checked<T>(
 class ArgumentParser<U> {
     private var result: U
     private var validOptions: [String] {
-        return self.arguments.compactMap { $0.name }
+        self.arguments.compactMap(\.name)
     }
 
     private var arguments: [Argument] = []
@@ -219,7 +220,7 @@ class ArgumentParser<U> {
     ) {
         self.arguments.append(
             Argument(name: name, help: help)
-            { try self.parseArgument(name, property, defaultValue, parser) }
+                { try self.parseArgument(name, property, defaultValue, parser) }
         )
     }
 

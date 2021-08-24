@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -22,7 +23,6 @@ import XCTest
 
 #if os(Linux) || os(FreeBSD)
    @testable import InstrumentationTests
-   @testable import TracingOpenTelemetrySupportTests
    @testable import TracingTests
 
 // This protocol is necessary to we can call the 'run' method (on an existential of this protocol)
@@ -36,7 +36,6 @@ class LinuxMainRunnerImpl: LinuxMainRunner {
        XCTMain([
              testCase(InstrumentTests.allTests),
              testCase(InstrumentationSystemTests.allTests),
-             testCase(SpanAttributeSemanticsTests.allTests),
              testCase(SpanTests.allTests),
              testCase(TracedLockTests.allTests),
              testCase(TracerTests.allTests),

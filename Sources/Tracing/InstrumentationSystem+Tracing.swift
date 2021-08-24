@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -21,6 +22,6 @@ extension InstrumentationSystem {
     ///
     /// - Returns: A `Tracer` if the system was bootstrapped with one, and `NoOpTracer` otherwise.
     public static var tracer: Tracer {
-        return (self._findInstrument(where: { $0 is Tracer }) as? Tracer) ?? NoOpTracer()
+        (self._findInstrument(where: { $0 is Tracer }) as? Tracer) ?? NoOpTracer()
     }
 }

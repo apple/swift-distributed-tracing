@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
 import Instrumentation
+import InstrumentationBaggage
 import XCTest
 
 final class InstrumentTests: XCTestCase {
@@ -47,12 +48,12 @@ private struct DictionaryInjector: Injector {
 
 private struct DictionaryExtractor: Extractor {
     func extract(key: String, from dictionary: [String: String]) -> String? {
-        return dictionary[key]
+        dictionary[key]
     }
 }
 
 private final class FirstFakeTracer: Instrument {
-    enum TraceIDKey: Baggage.Key {
+    enum TraceIDKey: BaggageKey {
         typealias Value = String
 
         static let name: String? = "FirstFakeTraceID"
@@ -62,20 +63,22 @@ private final class FirstFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier {
+        where Inject: Injector, Carrier == Inject.Carrier
+    {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier {
+        where Extract: Extractor, Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }
 }
 
 private final class SecondFakeTracer: Instrument {
-    enum TraceIDKey: Baggage.Key {
+    enum TraceIDKey: BaggageKey {
         typealias Value = String
 
         static let name: String? = "SecondFakeTraceID"
@@ -89,7 +92,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Inject: Injector,
-        Carrier == Inject.Carrier {
+        Carrier == Inject.Carrier
+    {
         guard let traceID = baggage[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
@@ -99,7 +103,8 @@ private final class SecondFakeTracer: Instrument {
     )
         where
         Extract: Extractor,
-        Carrier == Extract.Carrier {
+        Carrier == Extract.Carrier
+    {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         baggage[TraceIDKey.self] = traceID
     }

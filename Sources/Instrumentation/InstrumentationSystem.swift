@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
+import InstrumentationBaggage
 
 /// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
 /// It is set up just once in a given program to select the desired `Instrument` implementation.
@@ -56,14 +57,14 @@ public enum InstrumentationSystem {
     ///
     /// Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
     public static var instrument: Instrument {
-        return self.lock.withReaderLock { self._instrument }
+        self.lock.withReaderLock { self._instrument }
     }
 }
 
 extension InstrumentationSystem {
     /// :nodoc: INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        return self.lock.withReaderLock {
+        self.lock.withReaderLock {
             if let multiplex = self._instrument as? MultiplexInstrument {
                 return multiplex.firstInstrument(where: predicate)
             } else if predicate(self._instrument) {

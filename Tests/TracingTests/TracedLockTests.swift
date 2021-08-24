@@ -2,7 +2,8 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -11,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Baggage
 @testable import Instrumentation
+import InstrumentationBaggage
 import Tracing
 import XCTest
 
@@ -49,7 +50,7 @@ final class TracedLockTests: XCTestCase {
 // ==== ------------------------------------------------------------------------
 // MARK: test keys
 
-enum TaskIDKey: Baggage.Key {
+enum TaskIDKey: BaggageKey {
     typealias Value = String
     static let name: String? = "LockedOperationNameKey"
 }
@@ -64,7 +65,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         ofKind kind: SpanKind,
         at time: DispatchWallTime
     ) -> Span {
-        return TracedLockPrintlnSpan(
+        TracedLockPrintlnSpan(
             operationName: operationName,
             startTime: time,
             kind: kind,
