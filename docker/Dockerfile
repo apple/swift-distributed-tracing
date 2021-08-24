@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y lsof dnsutils netcat-openbsd net-tools 
 
 # ruby and jazzy for docs generation
 RUN apt-get update && apt-get install -y ruby ruby-dev libsqlite3-dev
-RUN gem install jazzy --no-ri --no-rdoc
+RUN gem install jazzy -v 0.13.7 --no-ri --no-rdoc
 
 # tools
 RUN mkdir -p $HOME/.tools
