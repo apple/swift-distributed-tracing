@@ -56,9 +56,8 @@ Compatible `Tracer` implementations:
 
 | Library | Status | Description |
 | ------- | ------ | ----------- |
-| [@slashmo](https://github.com/slashmo) / [Swift **Jaeger** Client](https://github.com/slashmo/jaeger-client-swift) | Complete | Thrift and JSON formats, supported; including **Zipkin** format. |
+| [@slashmo](https://github.com/slashmo) / [**OpenTelemetry** Swift](https://github.com/slashmo/opentelemetry-swift) | Complete | Exports spans to OpenTelemetry Collector; **X-Ray** & **Jaeger** propagation available via extensions. |
 | [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | Complete (?) | ... |
-| OpenTelemetry | TODO | ... | ... |
 | _Your library?_ | ... | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
