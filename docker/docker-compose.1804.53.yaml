@@ -16,6 +16,3 @@ services:
 
   shell:
     image: swift-distributed-tracing:18.04-5.3
-
-  docs:
-    image: swift-distributed-tracing:18.04-5.3
