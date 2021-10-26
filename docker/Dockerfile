@@ -16,9 +16,8 @@ ENV LANGUAGE en_US.UTF-8
 RUN apt-get update && apt-get install -y wget
 RUN apt-get update && apt-get install -y lsof dnsutils netcat-openbsd net-tools curl jq # used by integration tests
 
-# ruby and jazzy for docs generation
-RUN apt-get update && apt-get install -y ruby ruby-dev libsqlite3-dev
-RUN gem install jazzy -v 0.13.7 --no-ri --no-rdoc
+# ruby for generating linux tests
+RUN apt-get update && apt-get install -y ruby
 
 # tools
 RUN mkdir -p $HOME/.tools
