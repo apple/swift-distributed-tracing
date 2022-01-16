@@ -220,7 +220,7 @@ final class TracerTests: XCTestCase {
     }
 
     #if swift(>=5.5)
-    @available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
     /// - Parameter operation: The operation to test.
     func testAsync(_ operation: @escaping () async throws -> Void) rethrows {
