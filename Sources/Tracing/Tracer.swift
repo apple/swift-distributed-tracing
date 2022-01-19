@@ -97,8 +97,8 @@ extension Tracer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: Task-local Baggage propagation
 
-#if swift(>=5.5)
-@available(macOS 12, iOS 15, tvOS 15, watchOS 8, *)
+#if swift(>=5.5) && canImport(_Concurrency)
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Tracer {
     /// Execute the given operation within a newly created `Span`,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
