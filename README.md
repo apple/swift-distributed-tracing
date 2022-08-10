@@ -402,7 +402,7 @@ When adapting an existing library/framework to support `LoggingContext` and it a
 
 Examples:
 
-- `Lamda.Context` may contain `baggage` and a `logger` and should be able to conform to `LoggingContext`
+- `Lambda.Context` may contain `baggage` and a `logger` and should be able to conform to `LoggingContext`
   - passing context to a `Lambda.Context` unaware library becomes: `http.request(url: "...", context: context)`.
 - `ChannelHandlerContext` offers a way to set/get baggage on the underlying channel via `context.baggage = ...`
   - this context is not passed outside a handler, but within it may be passed as is, and the baggage may be accessed on it directly through it.
@@ -414,8 +414,8 @@ Generally application developers _should not_ create new context objects, but ra
 
 If really necessary, or for the purposes of testing, one can create a baggage or context using one of the two factory functions:
 
-- [`DefaultLoggingContext.topLevel(logger:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift#L232-L259) or [`Baggage.topLevel`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift#L79-L103) - which creates an empty context/baggage, without any values. It should _not_ be used too frequently, and as the name implies in applications it only should be used on the "top level" of the application, or at the beginning of a contextless (e.g. timer triggered) event processing.
-- [`DefaultLoggingContext.TODO(logger:reason:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift#L262-L292) or [`Baggage.TODO`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift#L107-L136) - which should be used to mark a parameter where "before this code goes into production, a real context should be passed instead." An application can be run with `-DBAGGAGE_CRASH_TODOS` to cause the application to crash whenever a TODO context is still in use somewhere, making it easy to diagnose and avoid breaking context propagation by accidentally leaving in a `TODO` context in production.
+- [`DefaultLoggingContext.topLevel(logger:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift) or [`Baggage.topLevel`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which creates an empty context/baggage, without any values. It should _not_ be used too frequently, and as the name implies in applications it only should be used on the "top level" of the application, or at the beginning of a contextless (e.g. timer triggered) event processing.
+- [`DefaultLoggingContext.TODO(logger:reason:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift) or [`Baggage.TODO`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which should be used to mark a parameter where "before this code goes into production, a real context should be passed instead." An application can be run with `-DBAGGAGE_CRASH_TODOS` to cause the application to crash whenever a TODO context is still in use somewhere, making it easy to diagnose and avoid breaking context propagation by accidentally leaving in a `TODO` context in production.
 
 Please refer to the respective functions documentation for details.
 
