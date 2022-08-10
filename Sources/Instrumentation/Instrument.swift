@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -44,22 +44,22 @@ public protocol Injector {
 /// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
 /// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
 public protocol Instrument {
-    /// Extract values from a `Carrier` by using the given extractor and inject them into the given `BaggageContext`.
+    /// Extract values from a `Carrier` by using the given extractor and inject them into the given `Baggage`.
     /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
     ///   - baggage: The `Baggage` into which these values should be injected.
-    ///   - extractor: The `Extractor` that extracts values from the given `Carrier`.
+    ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where Extract: Extractor, Extract.Carrier == Carrier
 
-    /// Inject values from a `BaggageContext` and inject them into the given `Carrier` using the given `Injector`.
+    /// Extract values from a `Baggage` and inject them into the given `Carrier` using the given ``Injector``.
     ///
     /// - Parameters:
     ///   - baggage: The `Baggage` from which relevant information will be extracted.
     ///   - carrier: The `Carrier` into which this information will be injected.
-    ///   - injector: The `Injector` used to inject extracted `BaggageContext` into the given `Carrier`.
+    ///   - injector: The ``Injector`` used to inject extracted `Baggage` into the given `Carrier`.
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Inject.Carrier == Carrier
 }

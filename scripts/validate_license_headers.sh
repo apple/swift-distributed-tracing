@@ -33,6 +33,7 @@ here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 function replace_acceptable_years() {
   # this needs to replace all acceptable forms with 'YEARS'
   sed -e 's/2020-2021/YEARS/' -e 's/2020/YEARS/' -e 's/2021/YEARS/'
+  sed -e 's/202[01]-202[12]/YEARS/' -e 's/202[012]/YEARS/'
 }
 
 printf "=> Checking license headers\n"
@@ -46,7 +47,7 @@ for language in swift-or-c bash dtrace; do
   matching_files=( -name '*' )
   case "$language" in
       swift-or-c)
-        exceptions=( -name c_nio_http_parser.c -o -name c_nio_http_parser.h -o -name cpp_magic.h -o -name Package.swift -o -name CNIOSHA1.h -o -name c_nio_sha1.c -o -name ifaddrs-android.c -o -name ifaddrs-android.h)
+        exceptions=( -name Package.swift -o -name 'Package@*.swift' )
         matching_files=( -name '*.swift' -o -name '*.c' -o -name '*.h' )
         cat > "$tmp" <<"EOF"
 //===----------------------------------------------------------------------===//

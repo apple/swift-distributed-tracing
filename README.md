@@ -226,9 +226,9 @@ While this is verbose, this is only the low-level building blocks that this libr
 
 > Eventually convenience wrappers will be provided, automatically wrapping future types etc. We welcome such contributions, but likely they should live in `swift-distributed-tracing-extras`.
 
-Once a system, or multiple systems have been instrumented, a Tracer been selected and your application runs and emits some trace information, you will be able to inspect how your application is behaving by looking at one of the various trace UIs, such as e.g. Zipkin:
+Once a system, or multiple systems have been instrumented, a Tracer has been selected and your application runs and emits some trace information, you will be able to inspect how your application is behaving by looking at one of the various trace UIs, such as e.g. Zipkin:
 
-![Simple example trace in Zipkin Web UI](images/zipkin_trace.png)
+![Simple example trace in Zipkin Web UI](Sources/Tracing/Docs.docc/Resources/zipkin_trace.png)
 
 ### More examples
 
