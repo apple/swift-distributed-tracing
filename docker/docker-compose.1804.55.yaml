@@ -6,7 +6,8 @@ services:
     image: swift-distributed-tracing:18.04-5.5
     build:
       args:
-        base_image: "swiftlang/swift:nightly-5.5-bionic"
+        ubuntu_version: "bionic"
+        swift_version: "5.5"
 
   test:
     image: swift-distributed-tracing:18.04-5.5
