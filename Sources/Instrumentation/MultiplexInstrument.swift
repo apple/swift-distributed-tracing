@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -14,15 +14,15 @@
 
 import InstrumentationBaggage
 
-/// A pseudo-`Instrument` that may be used to instrument using multiple other `Instrument`s across a
-/// common `BaggageContext`.
+/// A pseudo-``Instrument`` that may be used to instrument using multiple other ``Instrument``s across a
+/// common `Baggage`.
 public struct MultiplexInstrument {
     private var instruments: [Instrument]
 
-    /// Create a `MultiplexInstrument`.
+    /// Create a ``MultiplexInstrument``.
     ///
-    /// - Parameter instruments: An array of `Instrument`s, each of which will be used to `inject`/`extract`
-    /// through the same `BaggageContext`.
+    /// - Parameter instruments: An array of ``Instrument``s, each of which will be used to ``Instrument/inject(_:into:using:)`` or ``Instrument/extract(_:into:using:)``
+    /// through the same `Baggage`.
     public init(_ instruments: [Instrument]) {
         self.instruments = instruments
     }

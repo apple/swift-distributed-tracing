@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -16,10 +16,10 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// An `Instrument` with added functionality for distributed tracing. Is uses the span-based tracing model and is
+/// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
 public protocol Tracer: Instrument {
-    /// Start a new `Span` with the given `Baggage` at a given time.
+    /// Start a new ``Span`` with the given `Baggage` at a given time.
     ///
     /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
     /// and recording errors when thrown. Use `startSpan` iff you need to pass the span manually to a different
@@ -27,9 +27,9 @@ public protocol Tracer: Instrument {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new `Span`.
-    ///   - kind: The `SpanKind` of the new `Span`.
-    ///   - time: The `DispatchTime` at which to start the new `Span`.
+    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - time: The `DispatchTime` at which to start the new ``Span``.
     func startSpan(
         _ operationName: String,
         baggage: Baggage,
@@ -47,12 +47,12 @@ public protocol Tracer: Instrument {
 }
 
 extension Tracer {
-    /// Start a new `Span` with the given `Baggage` starting at `DispatchWallTime.now()`.
+    /// Start a new ``Span`` with the given `Baggage` starting at `DispatchWallTime.now()`.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: Baggage potentially containing trace identifiers of a parent `Span`.
-    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     public func startSpan(
         _ operationName: String,
         baggage: Baggage,
@@ -66,14 +66,14 @@ extension Tracer {
 // MARK: Starting spans: `withSpan`
 
 extension Tracer {
-    /// Execute a specific task within a newly created `Span`.
+    /// Execute a specific task within a newly created ``Span``.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: Baggage potentially containing trace identifiers of a parent `Span`.
-    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
@@ -100,14 +100,14 @@ extension Tracer {
 #if swift(>=5.5) && canImport(_Concurrency)
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Tracer {
-    /// Execute the given operation within a newly created `Span`,
+    /// Execute the given operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
@@ -123,14 +123,14 @@ extension Tracer {
         }
     }
 
-    /// Execute the given async operation within a newly created `Span`,
+    /// Execute the given async operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)

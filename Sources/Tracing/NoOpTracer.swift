@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -16,7 +16,7 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// No operation Tracer, used when no tracing is required.
+/// No operation ``Tracer``, used when no tracing is required.
 public struct NoOpTracer: Tracer {
     public init() {}
 

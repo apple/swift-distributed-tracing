@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
@@ -9,7 +9,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.3.0")),
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -47,7 +46,7 @@ let package = Package(
         // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Performance / Benchmarks
 
-        .executableTarget(
+        .target(
             name: "_TracingBenchmarks",
             dependencies: [
                 .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
@@ -57,8 +56,7 @@ let package = Package(
         ),
         .target(
             name: "_TracingBenchmarkTools",
-            dependencies: [],
-            exclude: ["README_SWIFT.md"]
+            dependencies: []
         ),
     ]
 )

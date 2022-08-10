@@ -11,8 +11,8 @@ services:
 
   test:
     image: swift-distributed-tracing:20.04-5.6
-    environment: []
-      #- SANITIZER_ARG=--sanitize=thread
+    environment:
+      - FORCE_TEST_DISCOVERY=--enable-test-discovery
 
   shell:
     image: swift-distributed-tracing:20.04-5.6

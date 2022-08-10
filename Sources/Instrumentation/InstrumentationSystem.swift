@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -15,21 +15,21 @@
 import InstrumentationBaggage
 
 /// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
-/// It is set up just once in a given program to select the desired `Instrument` implementation.
+/// It is set up just once in a given program to select the desired ``Instrument`` implementation.
 ///
 /// # Bootstrap multiple Instruments
-/// If you need to use more that one cross-cutting tool you can do so by using `MultiplexInstrument`.
+/// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
 /// # Access the Instrument
-/// `InstrumentationSystem.instrument`: Returns whatever you passed to `.bootstrap` as an `Instrument`.
+/// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
     private static var _instrument: Instrument = NoOpInstrument()
     private static var isInitialized = false
 
-    /// Globally select the desired `Instrument` implementation.
+    /// Globally select the desired ``Instrument`` implementation.
     ///
-    /// - Parameter instrument: The `Instrument` you want to share globally within your system.
+    /// - Parameter instrument: The ``Instrument`` you want to share globally within your system.
     /// - Warning: Do not call this method more than once. This will lead to a crash.
     public static func bootstrap(_ instrument: Instrument) {
         self.lock.withWriterLock {
@@ -44,18 +44,18 @@ public enum InstrumentationSystem {
         }
     }
 
-    /// For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by `bootstrap()`.
+    /// For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by ``bootstrap(_:)``.
     ///
-    /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the `NoOpInstrument` is bootstrapped.
+    /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the ``NoOpInstrument`` is bootstrapped.
     internal static func bootstrapInternal(_ instrument: Instrument?) {
         self.lock.withWriterLock {
             self._instrument = instrument ?? NoOpInstrument()
         }
     }
 
-    /// Returns the globally configured `Instrument`.
+    /// Returns the globally configured ``Instrument``.
     ///
-    /// Defaults to a no-op `Instrument` if `boostrap` wasn't called before.
+    /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
     public static var instrument: Instrument {
         self.lock.withReaderLock { self._instrument }
     }

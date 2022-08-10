@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -19,7 +19,7 @@ import Dispatch
 /// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
 /// in which case this span should be considered as "child" of the previous span.
 ///
-/// Creating a `Span` is delegated to a `Tracer` and end users should never create them directly.
+/// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: AnyObject {
@@ -30,8 +30,8 @@ public protocol Span: AnyObject {
     /// - Parameter status: The status of this `Span`.
     func setStatus(_ status: SpanStatus)
 
-    /// Add a `SpanEvent` in place.
-    /// - Parameter event: The `SpanEvent` to add to this `Span`.
+    /// Add a ``SpanEvent`` in place.
+    /// - Parameter event: The ``SpanEvent`` to add to this `Span`.
     func addEvent(_ event: SpanEvent)
 
     /// Record an error of the given type described by the the given message.
@@ -46,7 +46,7 @@ public protocol Span: AnyObject {
     /// Returns true if this `Span` is recording information like events, attributes, status, etc.
     var isRecording: Bool { get }
 
-    /// Add a `SpanLink` in place.
+    /// Add a ``SpanLink`` in place.
     /// - Parameter link: The `SpanLink` to add to this `Span`.
     func addLink(_ link: SpanLink)
 
@@ -79,15 +79,15 @@ extension Span {
     ///
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
-    /// - SeeAlso: `Span.end(at:)` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
-    ///   Generally though prefer using the `end()` version of this API in user code and structure your system such that it can be called in the right place and time.
+    /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
         self.end(at: .now())
     }
 
-    /// Adds a `SpanLink` between this `Span` and the given `Span`.
+    /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
     /// - Parameter other: The `Span` to link to.
-    /// - Parameter attributes: The `SpanAttributes` describing this link. Defaults to no attributes.
+    /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
     public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
     }
@@ -96,12 +96,12 @@ extension Span {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Event
 
-/// An event that occurred during a `Span`.
+/// An event that occurred during a ``Span``.
 public struct SpanEvent: Equatable {
     /// The human-readable name of this `SpanEvent`.
     public let name: String
 
-    /// One or more `SpanAttribute`s with the same restrictions as defined for `Span` attributes.
+    /// One or more ``SpanAttribute``s with the same restrictions as defined for ``Span`` attributes.
     public var attributes: SpanAttributes
 
     /// The `DispatchWallTime` at which this event occurred.
@@ -213,7 +213,7 @@ extension SpanAttributeNamespace {
 }
 #endif
 
-/// The value of an attribute used to describe a `Span` or `SpanEvent`.
+/// The value of an attribute used to describe a ``Span`` or ``SpanEvent``.
 ///
 /// Arrays are allowed but are enforced to be homogenous.
 ///
@@ -491,7 +491,7 @@ extension SpanAttribute: ExpressibleByBooleanLiteral {
 // MARK: SpanAttributes: Namespaces
 
 #if swift(>=5.2)
-/// A container of `SpanAttribute`s.
+/// A container of ``SpanAttribute``s.
 @dynamicMemberLookup
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
@@ -505,12 +505,13 @@ public struct SpanAttributes: Equatable {
 
 extension SpanAttributes {
     /// Create a set of attributes by wrapping the given dictionary.
+    ///
     /// - Parameter attributes: The attributes dictionary to wrap.
     public init(_ attributes: [String: SpanAttribute]) {
         self._attributes = attributes
     }
 
-    /// Accesses the `SpanAttribute` with the given name for reading and writing.
+    /// Accesses the ``SpanAttribute`` with the given name for reading and writing.
     ///
     /// Please be cautious to not abuse this APIs power to read attributes to "smuggle" values between calls.
     /// Only `Baggage` is intended to carry information in a readable fashion between functions / processes / nodes.
@@ -595,14 +596,14 @@ public struct SpanStatus: Equatable {
     /// Create a new `SpanStatus`.
     ///
     /// - Parameters:
-    ///   - code: The `Code` of this `SpanStatus`.
+    ///   - code: The ``SpanStatus/Code-swift.enum`` of this `SpanStatus`.
     ///   - message: The optional descriptive message of this `SpanStatus`. Defaults to nil.
     public init(code: Code, message: String? = nil) {
         self.code = code
         self.message = message
     }
 
-    /// A code representing the status of a `Span`.
+    /// A code representing the status of a ``Span``.
     ///
     /// - SeeAlso: For the semantics of status codes see [OpenTelemetry Specification: setStatus](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#set-status)
     public enum Code {
@@ -616,7 +617,7 @@ public struct SpanStatus: Equatable {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Kind
 
-/// Describes the relationship between the Span, its parents, and its children in a Trace.
+/// Describes the relationship between the ``Span``, its parents, and its children in a Trace.
 public enum SpanKind {
     /// Indicates that the span covers server-side handling of a synchronous RPC or other remote request.
     /// This span is the child of a remote `.client` span that was expected to wait for a response.
@@ -637,20 +638,20 @@ public enum SpanKind {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Link
 
-/// A link to another `Span`.
-/// The other `Span`s information is stored in `context` and `attributes` may be used to
+/// A link to another ``Span``.
+/// The other ``Span``s information is stored in `context` and `attributes` may be used to
 /// further describe the link.
 public struct SpanLink {
-    /// A `Baggage` containing identifying information about the link target `Span`.
+    /// A `Baggage` containing identifying information about the link target ``Span``.
     public let baggage: Baggage
 
-    /// `SpanAttributes` further describing the connection between the `Span`s.
+    /// ``SpanAttributes`` further describing the connection between the ``Span``s.
     public let attributes: SpanAttributes
 
     /// Create a new `SpanLink`.
     /// - Parameters:
-    ///   - context: The `Baggage` identifying the targeted `Span`.
-    ///   - attributes: `SpanAttributes` that further describe the link. Defaults to no attributes.
+    ///   - context: The `Baggage` identifying the targeted ``Span``.
+    ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
     public init(baggage: Baggage, attributes: SpanAttributes = [:]) {
         self.baggage = baggage
         self.attributes = attributes
