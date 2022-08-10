@@ -150,7 +150,7 @@ When adapting an existing library/framework to support `LoggingContext` and it a
 
 Examples:
 
-- `Lamda.Context` may contain `baggage` and a `logger` and should be able to conform to `LoggingContext`
+- `Lambda.Context` may contain `baggage` and a `logger` and should be able to conform to `LoggingContext`
   - passing context to a `Lambda.Context` unaware library becomes: `http.request(url: "...", context: context)`.
 - `ChannelHandlerContext` offers a way to set/get baggage on the underlying channel via `context.baggage = ...`
   - this context is not passed outside a handler, but within it may be passed as is, and the baggage may be accessed on it directly through it.
