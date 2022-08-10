@@ -3,7 +3,7 @@
 ##
 ## This source file is part of the Swift Distributed Tracing open source project
 ##
-## Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+## Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
 ## authors
 ## Licensed under Apache License v2.0
 ##
@@ -32,7 +32,6 @@ here="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function replace_acceptable_years() {
   # this needs to replace all acceptable forms with 'YEARS'
-  sed -e 's/2020-2021/YEARS/' -e 's/2020/YEARS/' -e 's/2021/YEARS/'
   sed -e 's/202[01]-202[12]/YEARS/' -e 's/202[012]/YEARS/'
 }
 
