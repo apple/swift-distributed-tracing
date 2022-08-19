@@ -166,11 +166,11 @@ extension Tracer {
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
-        baggage: Baggage?,
+        baggage: Baggage,
         ofKind kind: SpanKind = .internal,
         _ operation: (Span) async throws -> T
     ) async rethrows -> T {
-        let span = self.startSpan(operationName, baggage: baggage ?? .topLevel, ofKind: kind)
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {
