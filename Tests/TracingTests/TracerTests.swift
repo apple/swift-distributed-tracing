@@ -187,6 +187,40 @@ final class TracerTests: XCTestCase {
         #endif
     }
 
+    func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() throws {
+        #if swift(>=5.5) && canImport(_Concurrency)
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: Span) async -> String {
+            "world"
+        }
+
+        self.testAsync {
+            var fromNonAsyncWorld = Baggage.topLevel
+            fromNonAsyncWorld.traceID = "1234-5678"
+            let value = await tracer.withSpan("hello", baggage: fromNonAsyncWorld) { (span: Span) -> String in
+                XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
+                XCTAssertEqual(span.baggage.traceID, fromNonAsyncWorld.traceID)
+                return await operation(span: span)
+            }
+
+            XCTAssertEqual(value, "world")
+            XCTAssertTrue(spanEnded)
+        }
+        #endif
+    }
+
     func testWithSpan_automaticBaggagePropagation_async_throws() throws {
         #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
