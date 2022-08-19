@@ -150,5 +150,36 @@ extension Tracer {
             throw error // rethrow
         }
     }
+
+    /// Execute the given async operation within a newly created `Span`,
+    /// started as a child of the passed in `Baggage` or as a root span if `nil`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - baggage: The baggage to be used for the newly created span. It may be obtained by the user manually from the `Baggage.current`,
+    //               task local and modified before passing into this function. The baggage will be made the current task-local baggage for the duration of the `operation`.
+    ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
+    ///   - operation: operation to wrap in a span start/end and execute immediately
+    /// - Returns: the value returned by `operation`
+    /// - Throws: the error the `operation` has thrown (if any)
+    public func withSpan<T>(
+        _ operationName: String,
+        baggage: Baggage?,
+        ofKind kind: SpanKind = .internal,
+        _ operation: (Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startSpan(operationName, baggage: baggage ?? .topLevel, ofKind: kind)
+        defer { span.end() }
+        do {
+            return try await Baggage.$current.withValue(span.baggage) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
 }
 #endif
