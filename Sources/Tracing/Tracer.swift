@@ -70,8 +70,15 @@ extension Tracer {
         file fileID: String = #fileID,
         line: UInt = #line
     ) -> Span {
-        self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now(),
-                function: function, file: fileID, line: line)
+        self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: fileID,
+            line: line
+        )
     }
 }
 
@@ -102,8 +109,15 @@ extension Tracer {
         line: UInt = #line,
         _ operation: (Span) throws -> T
     ) rethrows -> T {
-        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now(),
-                function: function, file: fileID, line: line)
+        let span = self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try operation(span)
@@ -142,8 +156,14 @@ extension Tracer {
         line: UInt = #line,
         _ operation: (Span) throws -> T
     ) rethrows -> T {
-        try self.withSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind,
-                function: function, file: fileID, line: line) { span in
+        try self.withSpan(
+            operationName,
+            baggage: .current ?? .topLevel,
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        ) { span in
             try Baggage.$current.withValue(span.baggage) {
                 try operation(span)
             }
@@ -172,8 +192,14 @@ extension Tracer {
         line: UInt = #line,
         _ operation: (Span) async throws -> T
     ) async rethrows -> T {
-        let span = self.startSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind,
-                function: function, file: fileID, line: line)
+        let span = self.startSpan(
+            operationName,
+            baggage: .current ?? .topLevel,
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {

@@ -71,8 +71,8 @@ final class DynamicTracepointTracerTests: XCTestCase {
         let fakeLine: UInt = 66
         let fakeNextLine: UInt = fakeLine + 11
 
-        logic(fakeLine: 55)
-        traceMeLogic(fakeLine: fakeLine)
+        self.logic(fakeLine: 55)
+        self.traceMeLogic(fakeLine: fakeLine)
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
@@ -84,9 +84,9 @@ final class DynamicTracepointTracerTests: XCTestCase {
 
     func logic(fakeLine: UInt) {
         InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
-
         }
     }
+
     func traceMeLogic(fakeLine: UInt) {
         InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
             InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
@@ -125,7 +125,7 @@ final class DynamicTracepointTestTracer: Tracer {
                 }
             }
 
-            return match 
+            return match
         }
     }
 
@@ -139,20 +139,21 @@ final class DynamicTracepointTestTracer: Tracer {
                    at time: DispatchWallTime,
                    function: String,
                    file fileID: String,
-                   line: UInt) -> Tracing.Span {
+                   line: UInt) -> Tracing.Span
+    {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return NoOpTracer.NoOpSpan(baggage: baggage)
         }
 
         let span = TracepointSpan(
-                operationName: operationName,
-                startTime: time,
-                baggage: baggage,
-                kind: kind,
-                file: fileID,
-                line: line,
-                onEnd: onEndSpan
+            operationName: operationName,
+            startTime: time,
+            baggage: baggage,
+            kind: kind,
+            file: fileID,
+            line: line,
+            onEnd: onEndSpan
         )
         self.spans.append(span)
         return span
@@ -198,8 +199,7 @@ final class DynamicTracepointTestTracer: Tracer {
         self.activeTracepoints.insert(TracepointID(function: function, fileID: fileID, line: line)).inserted
     }
 
-    func forceFlush() {
-    }
+    func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
@@ -235,7 +235,8 @@ extension DynamicTracepointTestTracer {
              kind: SpanKind,
              file fileID: String,
              line: UInt,
-             onEnd: @escaping (Span) -> Void) {
+             onEnd: @escaping (Span) -> Void)
+        {
             self.operationName = operationName
             self.startTime = startTime
             self.baggage = baggage
