@@ -27,6 +27,7 @@ final class TestTracer: Tracer {
         baggage: Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
+        function: String,
         file fileID: String,
         line: UInt
     ) -> Span {

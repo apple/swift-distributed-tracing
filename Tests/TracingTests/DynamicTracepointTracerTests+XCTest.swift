@@ -26,7 +26,8 @@ extension DynamicTracepointTracerTests {
    @available(*, deprecated, message: "not actually deprecated. Just deprecated to allow deprecated tests (which test deprecated functionality) without warnings")
    static var allTests : [(String, (DynamicTracepointTracerTests) -> () throws -> Void)] {
       return [
-                ("test_adhoc_enableAdHoc", test_adhoc_enableAdHoc),
+                ("test_adhoc_enableBySourceLoc", test_adhoc_enableBySourceLoc),
+                ("test_adhoc_enableByFunction", test_adhoc_enableByFunction),
            ]
    }
 }

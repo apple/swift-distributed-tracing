@@ -23,7 +23,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
         InstrumentationSystem.bootstrapInternal(nil)
     }
 
-    func test_adhoc_enableAdHoc() {
+    func test_adhoc_enableBySourceLoc() {
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -32,8 +32,9 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
 
         let fileID = #fileID
-        let line: UInt = 7777 // trick number, see withSpan below.
-        tracer.enableTracepoint(fileID: fileID, line: line)
+        let fakeLine: UInt = 77 // trick number, see withSpan below.
+        let fakeNextLine: UInt = fakeLine + 11
+        tracer.enableTracepoint(fileID: fileID, line: fakeLine)
         // Imagine this is set via some "ops command", e.g. `<control> <pid, or ssh or something> trace enable Sample.swift:1234`
         // Effectively enabling tracepoints is similar to tracer bullets, tho bullets are generally "one off",
         // but here we could attach a trace-rate, so e.g.: control `<pid> trace enable Sample:1234 .2` to set 20% sampling rate etc.
@@ -41,27 +42,91 @@ final class DynamicTracepointTracerTests: XCTestCase {
         tracer.withSpan("dont") { _ in
             // don't capture this span...
         }
-        tracer.withSpan("yes", file: #fileID, line: 7777) { _ in
+        tracer.withSpan("yes", line: fakeLine) { _ in
             // do capture this span, and all child spans of it!
-            tracer.withSpan("yes-inner", file: #fileID, line: 8888) { _ in
+            tracer.withSpan("yes-inner", line: fakeNextLine) { _ in
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(line)")
+            XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(line)")
-        XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-8888")
+        XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
+        XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+    }
+
+    func test_adhoc_enableByFunction() {
+        let tracer = DynamicTracepointTestTracer()
+
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
+
+        let fileID = #fileID
+        tracer.enableTracepoint(function: "traceMeLogic(fakeLine:)")
+
+        let fakeLine: UInt = 66
+        let fakeNextLine: UInt = fakeLine + 11
+
+        logic(fakeLine: 55)
+        traceMeLogic(fakeLine: fakeLine)
+
+        XCTAssertEqual(tracer.spans.count, 2)
+        for span in tracer.spans {
+            XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+        }
+        XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
+        XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+    }
+
+    func logic(fakeLine: UInt) {
+        InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
+
+        }
+    }
+    func traceMeLogic(fakeLine: UInt) {
+        InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
+            InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
+                // inside
+            }
+        }
     }
 }
 
 final class DynamicTracepointTestTracer: Tracer {
     private(set) var activeTracepoints: Set<TracepointID> = []
+
     struct TracepointID: Hashable {
-        let fileID: String
-        let line: UInt
+        let function: String?
+        let fileID: String?
+        let line: UInt?
+
+        func matches(tracepoint: TracepointID) -> Bool {
+            var match = true
+            if let fun = self.function {
+                match = match && fun == tracepoint.function
+                if !match { // short-circuit further checks
+                    return false
+                }
+            }
+            if let fid = self.fileID {
+                match = match && fid == tracepoint.fileID
+                if !match { // short-circuit further checks
+                    return false
+                }
+            }
+            if let l = self.line {
+                match = match && l == tracepoint.line
+                if !match { // short-circuit further checks
+                    return false
+                }
+            }
+
+            return match 
+        }
     }
 
     private(set) var spans: [TracepointSpan] = []
@@ -72,22 +137,22 @@ final class DynamicTracepointTestTracer: Tracer {
                    baggage: InstrumentationBaggage.Baggage,
                    ofKind kind: Tracing.SpanKind,
                    at time: DispatchWallTime,
+                   function: String,
                    file fileID: String,
-                   line: UInt) -> Tracing.Span
-    {
-        let tracepoint = TracepointID(fileID: fileID, line: line)
+                   line: UInt) -> Tracing.Span {
+        let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return NoOpTracer.NoOpSpan(baggage: baggage)
         }
 
         let span = TracepointSpan(
-            operationName: operationName,
-            startTime: time,
-            baggage: baggage,
-            kind: kind,
-            file: fileID,
-            line: line,
-            onEnd: onEndSpan
+                operationName: operationName,
+                startTime: time,
+                baggage: baggage,
+                kind: kind,
+                file: fileID,
+                line: line,
+                onEnd: onEndSpan
         )
         self.spans.append(span)
         return span
@@ -115,15 +180,26 @@ final class DynamicTracepointTestTracer: Tracer {
     }
 
     func isActive(tracepoint: TracepointID) -> Bool {
-        self.activeTracepoints.contains(tracepoint)
+        for activeTracepoint in self.activeTracepoints {
+            if activeTracepoint.matches(tracepoint: tracepoint) {
+                return true
+            }
+        }
+        return false
     }
 
     @discardableResult
-    func enableTracepoint(fileID: String, line: UInt) -> Bool {
-        self.activeTracepoints.insert(TracepointID(fileID: fileID, line: line)).inserted
+    func enableTracepoint(fileID: String, line: UInt? = nil) -> Bool {
+        self.activeTracepoints.insert(TracepointID(function: nil, fileID: fileID, line: line)).inserted
     }
 
-    func forceFlush() {}
+    @discardableResult
+    func enableTracepoint(function: String, fileID: String? = nil, line: UInt? = nil) -> Bool {
+        self.activeTracepoints.insert(TracepointID(function: function, fileID: fileID, line: line)).inserted
+    }
+
+    func forceFlush() {
+    }
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
@@ -159,8 +235,7 @@ extension DynamicTracepointTestTracer {
              kind: SpanKind,
              file fileID: String,
              line: UInt,
-             onEnd: @escaping (Span) -> Void)
-        {
+             onEnd: @escaping (Span) -> Void) {
             self.operationName = operationName
             self.startTime = startTime
             self.baggage = baggage
