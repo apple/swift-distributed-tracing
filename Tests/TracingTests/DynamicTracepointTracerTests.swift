@@ -31,7 +31,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(NoOpTracer())
         }
 
-
         let fileID = #fileID
         let line: UInt = 7777 // trick number, see withSpan below.
         tracer.enableTracepoint(fileID: fileID, line: line)
@@ -39,12 +38,12 @@ final class DynamicTracepointTracerTests: XCTestCase {
         // Effectively enabling tracepoints is similar to tracer bullets, tho bullets are generally "one off",
         // but here we could attach a trace-rate, so e.g.: control `<pid> trace enable Sample:1234 .2` to set 20% sampling rate etc.
 
-        tracer.withSpan("dont") { span in
+        tracer.withSpan("dont") { _ in
             // don't capture this span...
         }
-        tracer.withSpan("yes", file: #fileID, line: 7777) { span in
+        tracer.withSpan("yes", file: #fileID, line: 7777) { _ in
             // do capture this span, and all child spans of it!
-            tracer.withSpan("yes-inner", file: #fileID, line: 8888) { inner in
+            tracer.withSpan("yes-inner", file: #fileID, line: 8888) { _ in
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
@@ -56,7 +55,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(line)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-8888")
     }
-
 }
 
 final class DynamicTracepointTestTracer: Tracer {
@@ -75,28 +73,28 @@ final class DynamicTracepointTestTracer: Tracer {
                    ofKind kind: Tracing.SpanKind,
                    at time: DispatchWallTime,
                    file fileID: String,
-                   line: UInt) -> Tracing.Span {
-
+                   line: UInt) -> Tracing.Span
+    {
         let tracepoint = TracepointID(fileID: fileID, line: line)
-        guard shouldRecord(tracepoint: tracepoint) else {
+        guard self.shouldRecord(tracepoint: tracepoint) else {
             return NoOpTracer.NoOpSpan(baggage: baggage)
         }
 
         let span = TracepointSpan(
-                operationName: operationName,
-                startTime: time,
-                baggage: baggage,
-                kind: kind,
-                file: fileID,
-                line: line,
-                onEnd: onEndSpan
+            operationName: operationName,
+            startTime: time,
+            baggage: baggage,
+            kind: kind,
+            file: fileID,
+            line: line,
+            onEnd: onEndSpan
         )
         self.spans.append(span)
         return span
     }
 
     private func shouldRecord(tracepoint: TracepointID) -> Bool {
-        if isActive(tracepoint: tracepoint) {
+        if self.isActive(tracepoint: tracepoint) {
             // this tracepoint was specifically activated!
             return true
         }
@@ -117,16 +115,15 @@ final class DynamicTracepointTestTracer: Tracer {
     }
 
     func isActive(tracepoint: TracepointID) -> Bool {
-        activeTracepoints.contains(tracepoint)
+        self.activeTracepoints.contains(tracepoint)
     }
 
     @discardableResult
     func enableTracepoint(fileID: String, line: UInt) -> Bool {
-        return self.activeTracepoints.insert(TracepointID(fileID: fileID, line: line)).inserted
+        self.activeTracepoints.insert(TracepointID(fileID: fileID, line: line)).inserted
     }
 
-    func forceFlush() {
-    }
+    func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
@@ -162,8 +159,8 @@ extension DynamicTracepointTestTracer {
              kind: SpanKind,
              file fileID: String,
              line: UInt,
-             onEnd: @escaping (Span) -> Void
-        ) {
+             onEnd: @escaping (Span) -> Void)
+        {
             self.operationName = operationName
             self.startTime = startTime
             self.baggage = baggage
@@ -201,7 +198,5 @@ extension DynamicTracepointTestTracer {
             self.endTime = time
             self.onEnd(self)
         }
-
     }
-
 }

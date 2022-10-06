@@ -66,6 +66,7 @@ extension TestTracer {
     enum TraceIDKey: BaggageKey {
         typealias Value = String
     }
+
     enum SpanIDKey: BaggageKey {
         typealias Value = String
     }
