@@ -43,7 +43,7 @@ public protocol Injector {
 
 /// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
 /// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
-public protocol Instrument {
+public protocol InstrumentProtocol {
     /// Extract values from a `Carrier` by using the given extractor and inject them into the given `Baggage`.
     /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
     ///

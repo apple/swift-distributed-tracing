@@ -58,7 +58,7 @@ enum TaskIDKey: BaggageKey {
 // ==== ------------------------------------------------------------------------
 // MARK: PrintLn Tracer
 
-private final class TracedLockPrintlnTracer: Tracer {
+private final class TracedLockPrintlnTracer: TracerProtocol {
     func startSpan(
         _ operationName: String,
         baggage: Baggage,

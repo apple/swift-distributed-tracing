@@ -18,7 +18,7 @@ import Dispatch
 
 /// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
-public protocol Tracer: Instrument {
+public protocol TracerProtocol: InstrumentProtocol {
     /// Start a new ``Span`` with the given `Baggage` at a given time.
     ///
     /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
@@ -46,7 +46,7 @@ public protocol Tracer: Instrument {
     func forceFlush()
 }
 
-extension Tracer {
+extension TracerProtocol {
     /// Start a new ``Span`` with the given `Baggage` starting at `DispatchWallTime.now()`.
     ///
     /// - Parameters:
@@ -65,7 +65,7 @@ extension Tracer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
-extension Tracer {
+extension TracerProtocol {
     /// Execute a specific task within a newly created ``Span``.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
@@ -99,7 +99,7 @@ extension Tracer {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Tracer {
+extension TracerProtocol {
     /// Execute the given operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///

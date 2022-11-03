@@ -18,7 +18,7 @@ import Instrumentation
 import InstrumentationBaggage
 import Tracing
 
-final class TestTracer: Tracer {
+final class TestTracer: TracerProtocol {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (Span) -> Void = { _ in }
 

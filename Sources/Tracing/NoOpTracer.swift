@@ -17,7 +17,7 @@ import Dispatch
 @_exported import InstrumentationBaggage
 
 /// No operation ``Tracer``, used when no tracing is required.
-public struct NoOpTracer: Tracer {
+public struct NoOpTracer: TracerProtocol {
     public init() {}
 
     public func startSpan(
