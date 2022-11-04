@@ -19,14 +19,14 @@ Creating an instrument means adopting the ``Instrument`` protocol (or ``Tracer``
 
 `Instrument` has two requirements:
 
-1. A method to inject values inside a `LoggingContext` into a generic carrier (e.g. HTTP headers)
-2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `LoggingContext`
+1. A method to inject values inside a `FIXME!!!` into a generic carrier (e.g. HTTP headers)
+2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `FIXME!!!`
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
 act on the provided information or to add additional information to be carried across these boundaries.
 
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
-how to retrieve values from the `LoggingContext` and how to set values on it.
+how to retrieve values from the `FIXME!!!` and how to set values on it.
 
 ### Creating a `Tracer`
 
@@ -57,7 +57,7 @@ extension Baggage {
   }
 }
 
-var context = DefaultLoggingContext.topLevel(logger: ...)
+var context = DefaultFIXME!!!.topLevel(logger: ...)
 context.baggage.traceID = "4bf92f3577b34da6a3ce929d0e0e4736"
 print(context.baggage.traceID ?? "new trace id")
 ```
@@ -67,10 +67,10 @@ print(context.baggage.traceID ?? "new trace id")
 
 When hitting boundaries like an outgoing HTTP request you call out to the [configured instrument(s)](#Bootstrapping-the-Instrumentation-System):
 
-An HTTP client e.g. should inject the given `LoggingContext` into the HTTP headers of its outbound request:
+An HTTP client e.g. should inject the given `FIXME!!!` into the HTTP headers of its outbound request:
 
 ```swift
-func get(url: String, context: LoggingContext) {
+func get(url: String, context: FIXME!!!) {
   var request = HTTPRequest(url: url)
   InstrumentationSystem.instrument.inject(
     context.baggage,
@@ -84,7 +84,7 @@ On the receiving side, an HTTP server should use the following `Instrument` API 
 `HTTPRequest` into:
 
 ```swift
-func handler(request: HTTPRequest, context: LoggingContext) {
+func handler(request: HTTPRequest, context: FIXME!!!) {
   InstrumentationSystem.instrument.extract(
     request.headers,
     into: &context.baggage,
@@ -97,7 +97,7 @@ func handler(request: HTTPRequest, context: LoggingContext) {
 > In case your library makes use of the `NIOHTTP1.HTTPHeaders` type we already have an `HTTPHeadersInjector` &
 `HTTPHeadersExtractor` available as part of the `NIOInstrumentation` library.
 
-For your library/framework to be able to carry `LoggingContext` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
+For your library/framework to be able to carry `FIXME!!!` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
 
 ### Tracing your library
 
@@ -107,7 +107,7 @@ In order to work with the tracer [configured by the end-user](#Bootstrapping-the
 should start a `Span` when sending the outgoing HTTP request:
 
 ```swift
-func get(url: String, context: LoggingContext) {
+func get(url: String, context: FIXME!!!) {
   var request = HTTPRequest(url: url)
 
   // inject the request headers into the baggage as explained above
@@ -142,14 +142,14 @@ Creating an instrument means adopting the `Instrument` protocol (or `Tracer` in 
 
 `Instrument` has two requirements:
 
-1. A method to inject values inside a `LoggingContext` into a generic carrier (e.g. HTTP headers)
-2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `LoggingContext`
+1. A method to inject values inside a `FIXME!!!` into a generic carrier (e.g. HTTP headers)
+2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `FIXME!!!`
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
 act on the provided information or to add additional information to be carried across these boundaries.
 
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
-how to retrieve values from the `LoggingContext` and how to set values on it.
+how to retrieve values from the `FIXME!!!` and how to set values on it.
 
 ### Creating a `Tracer`
 
@@ -180,7 +180,7 @@ extension Baggage {
   }
 }
 
-var context = DefaultLoggingContext.topLevel(logger: ...)
+var context = DefaultFIXME!!!.topLevel(logger: ...)
 context.baggage.traceID = "4bf92f3577b34da6a3ce929d0e0e4736"
 print(context.baggage.traceID ?? "new trace id")
 ```

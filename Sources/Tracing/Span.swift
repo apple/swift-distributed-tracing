@@ -16,8 +16,8 @@ import Dispatch
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
-/// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
-/// in which case this span should be considered as "child" of the previous span.
+/// with it. A `Span` can be created from a `Baggage` which contains span information, in which case this span should
+/// be considered as "child" of the previous span.
 ///
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
@@ -76,8 +76,6 @@ extension Span {
     ///
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
-    ///
-    /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.

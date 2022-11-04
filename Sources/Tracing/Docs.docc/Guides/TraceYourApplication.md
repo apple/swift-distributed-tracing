@@ -73,9 +73,9 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([FancyInstrument(), OtherFan
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
-### Context propagation, by explicit `LoggingContext` passing
+### Context propagation, by explicit `FIXME!!!` passing
 
-> `LoggingContext` naming has been carefully selected and it reflects the type's purpose and utility: It binds a [Swift Log `Logger`](https://github.com/apple/swift-log) with an associated distributed tracing [Baggage](https://github.com/apple/swift-distributed-tracing-baggage).
+> `FIXME!!!` naming has been carefully selected and it reflects the type's purpose and utility: It binds a [Swift Log `Logger`](https://github.com/apple/swift-log) with an associated distributed tracing [Baggage](https://github.com/apple/swift-distributed-tracing-baggage).
 >
 > It _also_ is used for tracing, by tracers reaching in to read or modify the carried baggage.
 
@@ -84,9 +84,9 @@ carried throughout the entire system–including across process and service boun
 for a context object to be passed around your application and the libraries/frameworks you depend on, but also carried
 over asynchronous boundaries like an HTTP call to another service of your app.
 
-`LoggingContext` should always be passed around explicitly.
+`FIXME!!!` should always be passed around explicitly.
 
-Libraries which support tracing are expected to accept a `LoggingContext` parameter, which can be passed through the entire application. Make sure to always pass along the context that's previously handed to you. E.g., when making an HTTP request using `AsyncHTTPClient` in a `NIO` handler, you can use the `ChannelHandlerContext`s `baggage` property to access the `LoggingContext`.
+Libraries which support tracing are expected to accept a `FIXME!!!` parameter, which can be passed through the entire application. Make sure to always pass along the context that's previously handed to you. E.g., when making an HTTP request using `AsyncHTTPClient` in a `NIO` handler, you can use the `ChannelHandlerContext`s `baggage` property to access the `FIXME!!!`.
 
 #### Context argument naming/positioning
 
@@ -109,21 +109,21 @@ This way when reading the call side, users of these APIs can learn to "ignore" o
 
 Examples:
 
-- `func request(_ url: URL,` **`context: LoggingContext`** `)`, which may be called as `httpClient.request(url, context: context)`
-- `func handle(_ request: RequestObject,` **`context: LoggingContext`**`)`
+- `func request(_ url: URL,` **`context: FIXME!!!`** `)`, which may be called as `httpClient.request(url, context: context)`
+- `func handle(_ request: RequestObject,` **`context: FIXME!!!`**`)`
   - if a "framework context" exists and _carries_ the baggage context already, it is permitted to pass that context
     together with the baggage;
-  - it is _strongly recommended_ to store the baggage context as `baggage` property of `FrameworkContext`, and conform `FrameworkContext` to `LoggingContext` in such cases, in order to avoid the confusing spelling of `context.context`, and favoring the self-explanatory `context.baggage` spelling when the baggage is contained in a framework context object.
+  - it is _strongly recommended_ to store the baggage context as `baggage` property of `FrameworkContext`, and conform `FrameworkContext` to `FIXME!!!` in such cases, in order to avoid the confusing spelling of `context.context`, and favoring the self-explanatory `context.baggage` spelling when the baggage is contained in a framework context object.
 - `func receiveMessage(_ message: Message, context: FrameworkContext)`
-- `func handle(element: Element,` **`context: LoggingContext`** `, settings: Settings? = nil)`
+- `func handle(element: Element,` **`context: FIXME!!!`** `, settings: Settings? = nil)`
   - before any defaulted non-function parameters
-- `func handle(element: Element,` **`context: LoggingContext`** `, settings: Settings? = nil, onComplete: () -> ())`
+- `func handle(element: Element,` **`context: FIXME!!!`** `, settings: Settings? = nil, onComplete: () -> ())`
   - before defaulted parameters, which themselfes are before required function parameters
-- `func handle(element: Element,` **`context: LoggingContext`** `, onError: (Error) -> (), onComplete: (() -> ())? = nil)`
+- `func handle(element: Element,` **`context: FIXME!!!`** `, onError: (Error) -> (), onComplete: (() -> ())? = nil)`
 
 In case there are _multiple_ "framework-ish" parameters, such as passing a NIO `EventLoop` or similar, we suggest:
 
-- `func perform(_ work: Work, for user: User,` _`frameworkThing: Thing, eventLoop: NIO.EventLoop,`_ **`context: LoggingContext`**`)`
+- `func perform(_ work: Work, for user: User,` _`frameworkThing: Thing, eventLoop: NIO.EventLoop,`_ **`context: FIXME!!!`**`)`
   - pass the baggage as **last** of such non-domain specific parameters as it will be _by far more_ omnipresent than any
     specific framework parameter - as it is expected that any framework should be accepting a context if it can do so.
     While not all libraries are necessarily going to be implemented using the same frameworks.
@@ -134,23 +134,23 @@ rather than _"request (ignore this context parameter when reading) that URL"_.
 
 #### When to use what context type?
 
-Generally libraries should favor accepting the general `LoggingContext` type, and **not** attempt to wrap it, as it will result in difficult to compose APIs between multiple libraries. Because end users are likely going to be combining various libraries in a single application, it is important that they can "just pass along" the same context object through all APIs, regardless which other library they are calling into.
+Generally libraries should favor accepting the general `FIXME!!!` type, and **not** attempt to wrap it, as it will result in difficult to compose APIs between multiple libraries. Because end users are likely going to be combining various libraries in a single application, it is important that they can "just pass along" the same context object through all APIs, regardless which other library they are calling into.
 
-Frameworks may need to be more opinionated here, and e.g. already have some form of "per request context" contextual object which they will conform to `LoggingContext`. _Within_ such framework it is fine and expected to accept and pass the explicit `SomeFrameworkContext`, however when designing APIs which may be called _by_ other libraries, such framework should be able to accept a generic `LoggingContext` rather than its own specific type.
+Frameworks may need to be more opinionated here, and e.g. already have some form of "per request context" contextual object which they will conform to `FIXME!!!`. _Within_ such framework it is fine and expected to accept and pass the explicit `SomeFrameworkContext`, however when designing APIs which may be called _by_ other libraries, such framework should be able to accept a generic `FIXME!!!` rather than its own specific type.
 
 #### Existing context argument
 
-When adapting an existing library/framework to support `LoggingContext` and it already has a "framework context" which is expected to be passed through "everywhere", we suggest to follow these guidelines for adopting LoggingContext:
+When adapting an existing library/framework to support `FIXME!!!` and it already has a "framework context" which is expected to be passed through "everywhere", we suggest to follow these guidelines for adopting FIXME!!!:
 
 1. Add a `Baggage` as a property called `baggage` to your own `context` type, so that the call side for your
    users becomes `context.baggage` (rather than the confusing `context.context`)
-2. If you cannot or it would not make sense to carry baggage inside your framework's context object, pass (and accept (!)) the `LoggingContext` in your framework functions like follows:
-- if they take no framework context, accept a `context: LoggingContext` which is the same guideline as for all other cases
+2. If you cannot or it would not make sense to carry baggage inside your framework's context object, pass (and accept (!)) the `FIXME!!!` in your framework functions like follows:
+- if they take no framework context, accept a `context: FIXME!!!` which is the same guideline as for all other cases
 - if they already _must_ take a context object and you are out of words (or your API already accepts your framework context as "context"), pass the baggage as **last** parameter (see above) yet call the parameter `baggage` to disambiguate your `context` object from the `baggage` context object.
 
 Examples:
 
-- `Lambda.Context` may contain `baggage` and a `logger` and should be able to conform to `LoggingContext`
+- `Lambda.Context` may contain `baggage` and a `logger` and should be able to conform to `FIXME!!!`
   - passing context to a `Lambda.Context` unaware library becomes: `http.request(url: "...", context: context)`.
 - `ChannelHandlerContext` offers a way to set/get baggage on the underlying channel via `context.baggage = ...`
   - this context is not passed outside a handler, but within it may be passed as is, and the baggage may be accessed on it directly through it.
@@ -162,12 +162,12 @@ Generally application developers _should not_ create new context objects, but ra
 
 If really necessary, or for the purposes of testing, one can create a baggage or context using one of the two factory functions:
 
-- [`DefaultLoggingContext.topLevel(logger:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift) or [`Baggage.topLevel`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which creates an empty context/baggage, without any values. It should _not_ be used too frequently, and as the name implies in applications it only should be used on the "top level" of the application, or at the beginning of a contextless (e.g. timer triggered) event processing.
-- [`DefaultLoggingContext.TODO(logger:reason:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/LoggingContext.swift) or [`Baggage.TODO`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which should be used to mark a parameter where "before this code goes into production, a real context should be passed instead." An application can be run with `-DBAGGAGE_CRASH_TODOS` to cause the application to crash whenever a TODO context is still in use somewhere, making it easy to diagnose and avoid breaking context propagation by accidentally leaving in a `TODO` context in production.
+- [`DefaultFIXME!!!.topLevel(logger:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/FIXME!!!.swift) or [`Baggage.topLevel`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which creates an empty context/baggage, without any values. It should _not_ be used too frequently, and as the name implies in applications it only should be used on the "top level" of the application, or at the beginning of a contextless (e.g. timer triggered) event processing.
+- [`DefaultFIXME!!!.TODO(logger:reason:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/FIXME!!!.swift) or [`Baggage.TODO`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which should be used to mark a parameter where "before this code goes into production, a real context should be passed instead." An application can be run with `-DBAGGAGE_CRASH_TODOS` to cause the application to crash whenever a TODO context is still in use somewhere, making it easy to diagnose and avoid breaking context propagation by accidentally leaving in a `TODO` context in production.
 
 Please refer to the respective functions documentation for details.
 
-If using a framework which itself has a "`...Context`" object you may want to inspect it for similar factory functions, as `LoggingContext` is a protocol, that may be conformed to by frameworks to provide a smoother user experience.
+If using a framework which itself has a "`...Context`" object you may want to inspect it for similar factory functions, as `FIXME!!!` is a protocol, that may be conformed to by frameworks to provide a smoother user experience.
 
 ### Working with `Span`s
 

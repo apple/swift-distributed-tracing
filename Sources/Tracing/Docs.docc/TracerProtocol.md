@@ -12,3 +12,4 @@
 ### Manual Span management
 
 - ``startSpan(_:baggage:ofKind:)``
+- ``startSpan(_:baggage:ofKind:at:)``
