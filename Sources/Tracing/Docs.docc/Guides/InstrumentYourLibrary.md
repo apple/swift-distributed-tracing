@@ -292,3 +292,11 @@ It is worth noting that double-ending a span should be considered a programmer e
 >  Note: The problem with finding a span that was ended in two places is that its lifecycle seems to be incorrectly managed, and therefore the span timing information is at risk of being incorrect.
 >
 > Please also take care to never `end()` a span that was created using `withSpan()`  APIs, because `withSpan` will automatically end the span when the closure returns.
+
+### Global vs. "Stored" Tracers and Instruments
+
+Tracing functions similarily to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using ``InstrumentationSystem/tracer`` gets the "right" tracer at runtime.
+
+You may be tempted to allow users _configuring_ a tracer as part of your applications intialization. Generally we advice against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
+
+On the other hand, it may be valuable for testing scenarios to be able to set a tracer on a specific instance of your library. Therefore, if you really want to offer a configurable `Instrument` or `Tracer` then we suggest defaulting this setting to `nil`, and if it is `nil`, reaching to the global `InstrumentationSystem/instrument` or `InstrumentationSystem/tracer` - this way it is possible to override a tracer for testing on a per-instance basis, but the default mode of operation that end-users expect from libraries remains working.
