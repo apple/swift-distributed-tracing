@@ -10,7 +10,7 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 
 ### Quickstart Guides
 
-We provide a number of guides, aimed at getting your started with tracing your systems and have prepared them from three "angles":
+We provide a number of guides aimed at getting your started with tracing your systems and have prepared them from three "angles":
 
 1. **Application developers** who create server-side applications
     * please refer to the <doc:TraceYourApplication> guide.
