@@ -4,7 +4,7 @@
 
 This guide is aimed at ``TracerProtocol`` and ``InstrumentProtocol`` implementation authors.
 
-This guide is for you, if you find yourself in need of implementing your own tracing client such as Zipkin, Jaeger, X-Trace, OpenTelemetry or something similar that is custom to your company or distributed system.
+This guide is for you if you find yourself in need of implementing your own tracing client such as Zipkin, Jaeger, X-Trace, OpenTelemetry or something similar that is custom to your company or distributed system.
 
 ## Do you need an Instrument or a Tracer?
 
@@ -14,12 +14,12 @@ A tracer is-an instrument as well, and further refines it with the ability to st
 
 ## Creating an instrument
 
-Creating an instrument means adopting the ``Instrument`` protocol (or ``Tracer`` in case you develop a tracer).
-`Instrument` is part of the `Instrumentation` library & `Tracing` contains the ``Tracer`` protocol.
+Creating an instrument means adopting the ``InstrumentProtocol`` protocol (or ``TracerProtocol`` in case you develop a tracer).
+``InstrumentProtocol`` is part of the `Instrumentation` library and `Tracing` contains the ``TracerProtocol`` protocol.
 
 `Instrument` has two requirements:
 
-1. A method to inject values inside a `FIXME!!!` into a generic carrier (e.g. HTTP headers)
+1. A method to inject values into a `FIXME!!!` a generic carrier (e.g. HTTP headers)
 2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `FIXME!!!`
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
@@ -81,7 +81,7 @@ func get(url: String, context: FIXME!!!) {
 ```
 
 On the receiving side, an HTTP server should use the following `Instrument` API to extract the HTTP headers of the given
-`HTTPRequest` into:
+`HTTPRequest`:
 
 ```swift
 func handler(request: HTTPRequest, context: FIXME!!!) {
@@ -94,7 +94,7 @@ func handler(request: HTTPRequest, context: FIXME!!!) {
 }
 ```
 
-> In case your library makes use of the `NIOHTTP1.HTTPHeaders` type we already have an `HTTPHeadersInjector` &
+> In case your library makes use of the `NIOHTTP1.HTTPHeaders` type we already have an `HTTPHeadersInjector` and
 `HTTPHeadersExtractor` available as part of the `NIOInstrumentation` library.
 
 For your library/framework to be able to carry `FIXME!!!` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
@@ -129,7 +129,7 @@ func get(url: String, context: FIXME!!!) {
 }
 ```
 
-> ⚠️ Make sure to ALWAYS end spans. Ensure that all paths taken by the code will result in ending the span.
+> ⚠️ Make sure to ALWAYS end spans to ensure that all paths taken by the code will result in ending the span.
 > Make sure that error cases also set the error attribute and end the span.
 
 > In the above example we used the semantic `http.method` attribute that gets exposed via the

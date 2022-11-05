@@ -2,13 +2,12 @@
 
 ## Overview
 
-This guide is aimed at **application developers** who have some server-side system and with to make use of distributed tracing
-in order to improve their experience understanding, and performance tuning and debugging their services in production or development.
+This guide is aimed at **application developers** who have some server-side system and want to make use of distributed tracing
+in order to improve their understanding and facilitate performance tuning and debugging their services in production or development.
 
-Distributed tracing offers a way to gain additional insight into your application is performing in production,
-without having to reconstruct the "big picture" from manually piecing together log lines and figuring out what happened
+Distributed tracing offers a way to gain additional insight into how your application is performing in production, without having to reconstruct the "big picture" from manually piecing together log lines and figuring out what happened
 after what else and _why_. Distributed traces, as the name implies, also span multiple nodes in a micro-service architecture
-or clustered system, and provide a profiler like experience to debugging the handling of a "request" or otherwise defined span.
+or clustered system, and provide a profiler-like experience to debugging the handling of a "request" or otherwise defined span.
 
 ### Setting up instruments & tracers
 
@@ -92,7 +91,7 @@ Libraries which support tracing are expected to accept a `FIXME!!!` parameter, w
 
 > 💡 This general style recommendation has been ironed out together with the Swift standard library, core team, the SSWG as well as members of the community. Please respect these recommendations when designing APIs such that all APIs are able to "feel the same" yielding a great user experience for our end users ❤️
 >
-> It is possible that the ongoing Swift Concurrency efforts, and "Task Local" values will resolve this explicit context passing problem, however until these arrive in the language, please adopt the "context is the last parameter" style as outlined here.
+> It is possible that the ongoing Swift Concurrency efforts and "Task Local" values will resolve this explicit context passing problem, however until these arrive in the language, please adopt the "context is the last parameter" style as outlined here.
 
 Propagating baggage context through your system is to be done explicitly, meaning as a parameter in function calls, following the "flow" of execution.
 
