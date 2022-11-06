@@ -16,9 +16,19 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
-/// based on the OpenTracing/OpenTelemetry spec.
-public protocol TracerProtocol: InstrumentProtocol {
+/// Convenience entry point to operations on the tracer configured
+/// on the global ``InstrumentationSystem`` using the `InstrumentationSystem/bootstrap(_:)` method.
+///
+/// If no tracer was bootstrapped, these operations will default to a no-op tracer (creating no spans).
+///
+/// For implementing a new tracer, see ``TracerProtocol``.
+enum Tracer: TracerStartSpanOps {
+    func startSpan(_ operationName: String, baggage: Baggage, ofKind kind: SpanKind, at time: DispatchWallTime) -> Span {
+        InstrumentationSystem.tracer.startSpan(operationName, baggage: baggage, ofKind: kind, at: time)
+    }
+}
+
+public protocol TracerStartSpanOps {
     /// Start a new ``Span`` with the given `Baggage` at a given time.
     ///
     /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
@@ -36,17 +46,9 @@ public protocol TracerProtocol: InstrumentProtocol {
         ofKind kind: SpanKind,
         at time: DispatchWallTime
     ) -> Span
-
-    /// Export all ended spans to the configured backend that have not yet been exported.
-    ///
-    /// This function should only be called in cases where it is absolutely necessary,
-    /// such as when using some FaaS providers that may suspend the process after an invocation, but before the backend exports the completed spans.
-    ///
-    /// This function should not block indefinitely, implementations should offer a configurable timeout for flush operations.
-    func forceFlush()
 }
 
-extension TracerProtocol {
+extension TracerStartSpanOps {
     /// Start a new ``Span`` with the given `Baggage` starting at `DispatchWallTime.now()`.
     ///
     /// - Parameters:
@@ -65,7 +67,7 @@ extension TracerProtocol {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
-extension TracerProtocol {
+extension TracerStartSpanOps {
     /// Execute a specific task within a newly created ``Span``.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
@@ -92,6 +94,33 @@ extension TracerProtocol {
             throw error // rethrow
         }
     }
+
+    /// Execute a specific task within a newly created ``Span``.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
+    ///   - operation: operation to wrap in a span start/end and execute immediately
+    /// - Returns: the value returned by `operation`
+    /// - Throws: the error the `operation` has thrown (if any)
+    public func withSpan<T>(
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind = .internal,
+        _ operation: () throws -> T
+    ) rethrows -> T {
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        defer { span.end() }
+        do {
+            return try operation()
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
@@ -99,7 +128,7 @@ extension TracerProtocol {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension TracerProtocol {
+extension TracerStartSpanOps {
     /// Execute the given operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///
@@ -123,6 +152,32 @@ extension TracerProtocol {
         }
     }
 
+    /// Execute the given operation within a newly created ``Span``,
+    /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
+    ///
+    /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
+    ///   - operation: operation to wrap in a span start/end and execute immediately
+    /// - Returns: the value returned by `operation`
+    /// - Throws: the error the `operation` has thrown (if any)
+    public func withSpan<T>(
+        _ operationName: String,
+        ofKind kind: SpanKind = .internal,
+        _ operation: () throws -> T
+    ) rethrows -> T {
+        try self.withSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind) { span in
+            try Baggage.$current.withValue(span.baggage) {
+                try operation()
+            }
+        }
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+extension TracerStartSpanOps {
     /// Execute the given async operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///
@@ -183,3 +238,18 @@ extension TracerProtocol {
     }
 }
 #endif
+
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: TracerProtocol
+
+/// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
+/// based on the OpenTracing/OpenTelemetry spec.
+public protocol TracerProtocol: TracerStartSpanOps, InstrumentProtocol {
+    /// Export all ended spans to the configured backend that have not yet been exported.
+    ///
+    /// This function should only be called in cases where it is absolutely necessary,
+    /// such as when using some FaaS providers that may suspend the process after an invocation, but before the backend exports the completed spans.
+    ///
+    /// This function should not block indefinitely, implementations should offer a configurable timeout for flush operations.
+    func forceFlush()
+}

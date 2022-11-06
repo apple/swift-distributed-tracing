@@ -2,8 +2,6 @@
 
 ## Topics
 
-
-
 ### Working with Spans
 
 - ``withSpan(_:ofKind:_:)-11n3y``

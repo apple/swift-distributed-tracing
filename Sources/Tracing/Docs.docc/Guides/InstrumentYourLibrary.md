@@ -260,7 +260,7 @@ In such situations you can resort to using the ``TracerProtocol/startSpan(_:bagg
 // Callback heavy APIs may need to store and manage spans manually:
 var span: Span? 
 
-func startHandline(request: HTTPRequest) {
+func startHandling(request: HTTPRequest) {
   self.span = InstrumentationSystem.tracer.startSpan("\(request.path)")
   
   userCode.handle(request)
