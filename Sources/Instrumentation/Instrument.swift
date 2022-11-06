@@ -15,8 +15,39 @@
 import InstrumentationBaggage
 
 public enum Instrument {
+
+    /// Convenience to access the globally bootstrapped instrument on ``InstrumentationSystem``.
+    ///
+    /// Equivalent to ``InstrumentationSystem/instrument``.
     static var current: InstrumentProtocol {
         InstrumentationSystem.instrument
+    }
+
+    /// Obtain the ``current`` instrument which was bootstrapped on the global ``InstrumentationSystem``,
+    /// and invoke ``InstrumentProtocol/extract(_:into:using:)`` on it.
+    ///
+    /// Extract values from a `Carrier` by using the given extractor and inject them into the given `Baggage`.
+    /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
+    ///
+    /// - Parameters:
+    ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
+    ///   - baggage: The `Baggage` into which these values should be injected.
+    ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
+    public static func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
+        Instrument.current.extract(carrier, into: &baggage, using: extractor)
+    }
+
+    /// Obtain the ``current`` instrument which was bootstrapped on the global ``InstrumentationSystem``,
+    /// and invoke ``InstrumentProtocol/extract(_:into:using:)`` on it.
+    ///
+    /// Take values from a `Baggage` and inject them into the given `Carrier` using the given ``Injector``.
+    ///
+    /// - Parameters:
+    ///   - baggage: The `Baggage` from which relevant information will be extracted.
+    ///   - carrier: The `Carrier` into which this information will be injected.
+    ///   - injector: The ``Injector`` used to inject extracted `Baggage` into the given `Carrier`.
+    public static func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject) where Inject: Injector, Inject.Carrier == Carrier {
+        Instrument.current.inject(baggage, into: &carrier, using: injector)
     }
 }
 
@@ -33,7 +64,7 @@ public protocol InstrumentProtocol {
     func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
         where Extract: Extractor, Extract.Carrier == Carrier
 
-    /// Extract values from a `Baggage` and inject them into the given `Carrier` using the given ``Injector``.
+    /// Take values from a `Baggage` and inject them into the given `Carrier` using the given ``Injector``.
     ///
     /// - Parameters:
     ///   - baggage: The `Baggage` from which relevant information will be extracted.
