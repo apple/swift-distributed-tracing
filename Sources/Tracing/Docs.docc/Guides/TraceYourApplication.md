@@ -6,46 +6,80 @@ This guide is aimed at **application developers** who have some server-side syst
 in order to improve their understanding and facilitate performance tuning and debugging their services in production or development.
 
 Distributed tracing offers a way to gain additional insight into how your application is performing in production, without having to reconstruct the "big picture" from manually piecing together log lines and figuring out what happened
-after what else and _why_. Distributed traces, as the name implies, also span multiple nodes in a micro-service architecture
+after what else and _why_. Distributed traces, as the name implies, also span multiple nodes in a microservice architecture
 or clustered system, and provide a profiler-like experience to debugging the handling of a "request" or otherwise defined span.
 
-### Setting up instruments & tracers
+### Setting up
 
-As an end-user building server applications you get to choose what instruments to use to instrument your system. Here are
-all the steps you need to take to get up and running:
+The first step to get metadata propagation and tracing working in your application is picking an instrumentation or tracer 
+implementation. A complete [list of swift-distributed-tracing implementations](http://github.com/apple/swift-distributed-tracing) 
+is available in this project's README. Select an implementation you'd like to use and follow its bootstrap steps.
 
-Add a package dependency for this repository in your `Package.swift` file, and one for the specific instrument you want
-to use, in this case `FancyInstrument`:
+> Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
+> in this guide we'll use the community maintained [`opentelemetry-swift`](https://github.com/slashmo/opentelemetry-swift) 
+> tracer, as an example of how you'd start using tracing in your real applications.
+> 
+> If you'd rather implement your own tracer, refer to <doc:ImplementATracer>.
+
+Once you have selected an implementation, add it as a dependency to your `Package.swift` file. 
 
 ```swift
-// depend on some instrumentation library:
-.package(url: "<example-fancy-instrument.git>", from: "<1.2.3>"),
+// Depend on the instrumentation library, e.g. opentelemetry-swift:
+.package(url: "https://github.com/slashmo/opentelemetry-swift.git", from: "<latest-version>"),
 
-// which generally will already depend on the tracing API,
-// however you can depend on it explicitly as well:
-.package(url: "https://github.com/apple/swift-distributed-tracing.git", from: 1.0.0),
+// This will automatically include a dependency on the swift-distributed-tracing API:
+// .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: 1.0.0),
 ```
 
-To your main target, add a dependency on the `Instrumentation library` and the instrument you want to use:
+Next, add the dependency to your application target:
 
 ```swift
 .target(
     name: "MyApplication",
     dependencies: [
-      .product(name: "FancyInstrument", package: "example-fancy-instrument"),
+      .product(name: "OpenTelemetry", package: "opentelemetry-swift"),
     ]
 ),
 ```
 
-### Bootstrapping the `InstrumentationSystem`
+### Bootstrapping the Tracer
 
-Instead of providing each instrumented library with a specific instrument explicitly, you *bootstrap* the
-`InstrumentationSystem` which acts as a singleton that libraries/frameworks access when calling out to the configured
-`Instrument`:
+Similar to [swift-log](https://github.com/apple/swift-log) and [swift-metrics](https://github.com/apple/swift-metrics),
+the first thing you'll need to do in your application to use tracing, is to bootstrap the global instance of the tracing system.
+
+This will allow not only your code, that we're about to write, to use tracing, but also all other libraries which
+have been implemented against the distributed tracing API to use it as well. For example, by configuring the global
+tracing system, an HTTP server or client will automatically handle trace propagation for you, so make sure to always
+bootstrap your tracer globally, otherwise you might miss out on its crucial context propagation features.
+
+How the tracer library is initialized will differ from library to library, so refer to the respective implementation's
+documentation. Once you're ready, pass the tracer or instrument to the ``InstrumentationSystem/bootstrap(_:)`` method, 
+e.g. like this:
 
 ```swift
-InstrumentationSystem.bootstrap(FancyInstrument())
+import Tracing // this library
+
+// Import and prepare whatever the specific tracer implementation needs.
+// In our example case, we'll prepare the OpenTelemetry tracing system:
+import NIO
+import OpenTelemetry
+
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let otel = OTel(serviceName: "onboarding", eventLoopGroup: group)
+try otel.start().wait()
+
+// Bootstrap the tracing system:
+InstrumentationSystem.bootstrap(otel.tracer())
 ```
+
+You'll notice that the API specifically talks about Instrumentation rather than just Tracing.
+This is because it is also possible to use various instrumentation systems, e.g. which only take care
+of propagating certain `Baggage` values across process boundaries, without using tracing itself.
+
+In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for ``InstrumentProtocol``,
+as well as ``TracerProtocol`` implementations.
+
+Our guide focuses on tracing through, so let's continue with that in mind.
 
 #### Recommended bootstrap order
 
@@ -55,16 +89,56 @@ Specifically, it is recommended to bootstrap systems in the following order:
 
 1. [Swift Log](https://github.com/apple/swift-log#default-logger-behavior)'s `LoggingSystem`
 2. [Swift Metrics](https://github.com/apple/swift-metrics#selecting-a-metrics-backend-implementation-applications-only)' `MetricsSystem`
-3. Swift Tracing's `InstrumentationSystem`
+3. [Swift Distributed Tracing](https://github.com/apple/swift-distributed-tracing)'s `InstrumentationSystem`
 4. Finally, any other parts of your application
 
-This is because tracing systems may attempt to emit metrics about their status etc.
+This is because tracing systems may attempt to emit logs or metrics about their status etc.
+
+If you intend to use trace identifiers for log correlation (i.e. logging a `trace-id` in every log statement that is part of a trace),
+then don't forget to also configure a swift-lot `MetadataProvider`.
+
+A typical bootstrap could look something like this:
+
+```swift
+import OpenTelemetry
+import StatsdMetrics
+import FancyLogging
+
+extension Logger.MetadataProvider {
+
+    // Include the following OpenTelemetry tracer specific metadata in log statements:
+    static let otel = Logger.MetadataProvider { baggage in
+        guard let spanContext = baggage?.spanContext else { return nil }
+        return [
+          "trace-id": "\(spanContext.traceID)",
+          "span-id": "\(spanContext.spanID)",
+        ]
+    }
+}
+
+// 1) bootstrap swift-log: stdout-logger
+LoggingSystem.bootstrap(
+  StreamLogHandler.standardOutput,
+  metadataProvider: .otel
+)
+
+// 2) bootstrap metrics: statsd
+let statsdClient = try StatsdClient(host: host, port: port)
+MetricsSystem.bootstrap(statsdClient)
+
+// 3) bootstrap swift-distributed-tracing: open-telemetry
+let group: MultiThreadedEventLoopGroup = ...
+let otel = OTel(serviceName: "onboarding", eventLoopGroup: group)
+
+try otel.start().wait()
+InstrumentationSystem.bootstrap(otel.tracer())
+
+// 4) Continue starting your application ...
+```
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
-It is important to note that `InstrumentationSystem.bootstrap(_: InstrumentProtocol)` must only be called once. In case you
-want to bootstrap the system to use multiple instruments, you group them in a `MultiplexInstrument` first, which you
-then pass along to the `bootstrap` method like this:
+If you'd find yourself in need of using multiple instrumentation or tracer implementations you can group them in a `MultiplexInstrument` first, which you then pass along to the `bootstrap` method like this:
 
 ```swift
 InstrumentationSystem.bootstrap(MultiplexInstrument([FancyInstrument(), OtherFancyInstrument()]))
@@ -72,156 +146,298 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([FancyInstrument(), OtherFan
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
-### Context propagation, by explicit `FIXME!!!` passing
-
-> `FIXME!!!` naming has been carefully selected and it reflects the type's purpose and utility: It binds a [Swift Log `Logger`](https://github.com/apple/swift-log) with an associated distributed tracing [Baggage](https://github.com/apple/swift-distributed-tracing-baggage).
->
-> It _also_ is used for tracing, by tracers reaching in to read or modify the carried baggage.
-
-For instrumentation and tracing to work, certain pieces of metadata (usually in the form of identifiers), must be
-carried throughout the entire system–including across process and service boundaries. Because of that, it's essential
-for a context object to be passed around your application and the libraries/frameworks you depend on, but also carried
-over asynchronous boundaries like an HTTP call to another service of your app.
-
-`FIXME!!!` should always be passed around explicitly.
-
-Libraries which support tracing are expected to accept a `FIXME!!!` parameter, which can be passed through the entire application. Make sure to always pass along the context that's previously handed to you. E.g., when making an HTTP request using `AsyncHTTPClient` in a `NIO` handler, you can use the `ChannelHandlerContext`s `baggage` property to access the `FIXME!!!`.
-
-#### Context argument naming/positioning
-
-> 💡 This general style recommendation has been ironed out together with the Swift standard library, core team, the SSWG as well as members of the community. Please respect these recommendations when designing APIs such that all APIs are able to "feel the same" yielding a great user experience for our end users ❤️
->
-> It is possible that the ongoing Swift Concurrency efforts and "Task Local" values will resolve this explicit context passing problem, however until these arrive in the language, please adopt the "context is the last parameter" style as outlined here.
-
-Propagating baggage context through your system is to be done explicitly, meaning as a parameter in function calls, following the "flow" of execution.
-
-When passing baggage context explicitly we strongly suggest sticking to the following style guideline:
-
-- Assuming the general parameter ordering of Swift function is as follows (except DSL exceptions):
-  1. Required non-function parameters (e.g. `(url: String)`),
-  2. Defaulted non-function parameters (e.g. `(mode: Mode = .default)`),
-  3. Required function parameters, including required trailing closures (e.g. `(onNext elementHandler: (Value) -> ())`),
-  4. Defaulted function parameters, including optional trailing closures (e.g. `(onComplete completionHandler: (Reason) -> ()) = { _ in }`).
-- Logging Context should be passed as **the last parameter in the required non-function parameters group in a function declaration**.
-
-This way when reading the call side, users of these APIs can learn to "ignore" or "skim over" the context parameter and the method signature remains human-readable and “Swifty”.
-
-Examples:
-
-- `func request(_ url: URL,` **`context: FIXME!!!`** `)`, which may be called as `httpClient.request(url, context: context)`
-- `func handle(_ request: RequestObject,` **`context: FIXME!!!`**`)`
-  - if a "framework context" exists and _carries_ the baggage context already, it is permitted to pass that context
-    together with the baggage;
-  - it is _strongly recommended_ to store the baggage context as `baggage` property of `FrameworkContext`, and conform `FrameworkContext` to `FIXME!!!` in such cases, in order to avoid the confusing spelling of `context.context`, and favoring the self-explanatory `context.baggage` spelling when the baggage is contained in a framework context object.
-- `func receiveMessage(_ message: Message, context: FrameworkContext)`
-- `func handle(element: Element,` **`context: FIXME!!!`** `, settings: Settings? = nil)`
-  - before any defaulted non-function parameters
-- `func handle(element: Element,` **`context: FIXME!!!`** `, settings: Settings? = nil, onComplete: () -> ())`
-  - before defaulted parameters, which themselfes are before required function parameters
-- `func handle(element: Element,` **`context: FIXME!!!`** `, onError: (Error) -> (), onComplete: (() -> ())? = nil)`
-
-In case there are _multiple_ "framework-ish" parameters, such as passing a NIO `EventLoop` or similar, we suggest:
-
-- `func perform(_ work: Work, for user: User,` _`frameworkThing: Thing, eventLoop: NIO.EventLoop,`_ **`context: FIXME!!!`**`)`
-  - pass the baggage as **last** of such non-domain specific parameters as it will be _by far more_ omnipresent than any
-    specific framework parameter - as it is expected that any framework should be accepting a context if it can do so.
-    While not all libraries are necessarily going to be implemented using the same frameworks.
-
-We feel it is important to preserve Swift's human-readable nature of function definitions. In other words, we intend to
-keep the read-out-loud phrasing of methods to remain _"request that URL (ignore reading out loud the context parameter)"_
-rather than _"request (ignore this context parameter when reading) that URL"_.
-
-#### When to use what context type?
-
-Generally libraries should favor accepting the general `FIXME!!!` type, and **not** attempt to wrap it, as it will result in difficult to compose APIs between multiple libraries. Because end users are likely going to be combining various libraries in a single application, it is important that they can "just pass along" the same context object through all APIs, regardless which other library they are calling into.
-
-Frameworks may need to be more opinionated here, and e.g. already have some form of "per request context" contextual object which they will conform to `FIXME!!!`. _Within_ such framework it is fine and expected to accept and pass the explicit `SomeFrameworkContext`, however when designing APIs which may be called _by_ other libraries, such framework should be able to accept a generic `FIXME!!!` rather than its own specific type.
-
-#### Existing context argument
-
-When adapting an existing library/framework to support `FIXME!!!` and it already has a "framework context" which is expected to be passed through "everywhere", we suggest to follow these guidelines for adopting FIXME!!!:
-
-1. Add a `Baggage` as a property called `baggage` to your own `context` type, so that the call side for your
-   users becomes `context.baggage` (rather than the confusing `context.context`)
-2. If you cannot or it would not make sense to carry baggage inside your framework's context object, pass (and accept (!)) the `FIXME!!!` in your framework functions like follows:
-- if they take no framework context, accept a `context: FIXME!!!` which is the same guideline as for all other cases
-- if they already _must_ take a context object and you are out of words (or your API already accepts your framework context as "context"), pass the baggage as **last** parameter (see above) yet call the parameter `baggage` to disambiguate your `context` object from the `baggage` context object.
-
-Examples:
-
-- `Lambda.Context` may contain `baggage` and a `logger` and should be able to conform to `FIXME!!!`
-  - passing context to a `Lambda.Context` unaware library becomes: `http.request(url: "...", context: context)`.
-- `ChannelHandlerContext` offers a way to set/get baggage on the underlying channel via `context.baggage = ...`
-  - this context is not passed outside a handler, but within it may be passed as is, and the baggage may be accessed on it directly through it.
-  - Example: [https://github.com/apple/swift-nio/pull/1574](https://github.com/apple/swift-nio/pull/1574)
-
-### Creating context objects (and when not to do so)
-
-Generally application developers _should not_ create new context objects, but rather keep passing on a context value that they were given by e.g. the web framework invoking the their code.
-
-If really necessary, or for the purposes of testing, one can create a baggage or context using one of the two factory functions:
-
-- [`DefaultFIXME!!!.topLevel(logger:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/FIXME!!!.swift) or [`Baggage.topLevel`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which creates an empty context/baggage, without any values. It should _not_ be used too frequently, and as the name implies in applications it only should be used on the "top level" of the application, or at the beginning of a contextless (e.g. timer triggered) event processing.
-- [`DefaultFIXME!!!.TODO(logger:reason:)`](https://github.com/apple/swift-distributed-tracing-baggage/blob/main/Sources/Baggage/FIXME!!!.swift) or [`Baggage.TODO`](https://github.com/apple/swift-distributed-tracing-baggage-core/blob/main/Sources/CoreBaggage/Baggage.swift) - which should be used to mark a parameter where "before this code goes into production, a real context should be passed instead." An application can be run with `-DBAGGAGE_CRASH_TODOS` to cause the application to crash whenever a TODO context is still in use somewhere, making it easy to diagnose and avoid breaking context propagation by accidentally leaving in a `TODO` context in production.
-
-Please refer to the respective functions documentation for details.
-
-If using a framework which itself has a "`...Context`" object you may want to inspect it for similar factory functions, as `FIXME!!!` is a protocol, that may be conformed to by frameworks to provide a smoother user experience.
-
-### Working with `Span`s
+### Introducing Trace Spans
 
 The primary way you interact with distributed tracing is by starting ``Span``s.
 
-Spans form hierarchies with their parent spans, and end up being visualized using various tools, usually in a format similar to gant charts. So for example, if we had multiple operations that compose making dinner, they would be modelled as child spans of a main `makeDinner` span. Any sub tasks are again modelled as child spans of any given operation, and so on, resulting in a trace view similar to:
+Spans form hierarchies with their parent spans, and end up being visualized using various tools, usually in a format similar to gant charts. So for example, if we had multiple operations that compose making dinner, they would be modelled as child spans of a main `makeDinner` span. Any sub tasks are again modelled as child spans of any given operation, and so on.
 
-```
->-v-v-v----- makeDinner ------------------------v---------------x  [15s]
-  \-|-|- chopVegetables------v---x              |                  [2s]
-    | |  \- chop-carrot ---x |                  |                  [1s]
-    | |                      \--- chop-potato-x |                  [1s]
-    \-|- marinateMeat -----------x              |                  [3s]
-      \- preheatOven ------------x              |                  [10s]
-                                                \--cook---------x  [5s]
-```
+In order to discuss how tracing works, let us first look at a sample trace, before we even take a look at the any source code. This reflects how you may find yourself using tracing once it has been adopted in your microservice or distributed system architecture: there are many services involved, and often times only from a trace you can know where to start looking at a performance or logical regression in the system. 
 
-The above trace is achieved by starting and ending spans in all the mentioned functions.
+> Experiment: **Follow along!** You can follow along and explore the generated traces, and the code producing them by opening the sample project located in `Samples/Dinner`!
+>
+> The sample includes a docker-compose file which starts an [OpenTelemetry](https://opentelemetry.io) [collector](https://opentelemetry.io/docs/collector/), as well as two UIs which can be used to explore the generated traces: 
+>
+> - [Zipkin](http://zipkin.io) - available at [http://127.0.0.1:9411](http://127.0.0.1:9411)
+> - [Jaeger](https://www.jaegertracing.io) - available at [http://127.0.0.1:16686](http://127.0.0.1:16686)
+>
+> In order to start these containers, navigate to the `Samples/Dinner` project and run `docker-compose`, like this:
+>
+> ```bash
+> $ cd Samples/Dinner
+> $ docker-compose -f docker/docker-compose.yaml up --build
+> # Starting docker_zipkin_1 ... done
+> # Starting docker_jaeger_1 ... done
+> # Recreating docker_otel-collector_1 ... done
+> # Attaching to docker_jaeger_1, docker_zipkin_1, docker_otel-collector_1
+> ```
+>
+> This will run docker containers with the services described above, and expose their ports via localhost, including the collector to which we now can export our traces from our development machine. 
+>
+> Keep these containers running, and then, in another terminal window run the sample app that will generate some traces:
+>
+> ```bash
+> $ swift run -c release
+> ```
+
+Once you have run the sample app, you need to hit "search" in either trace visualization UI, and navigate through to expand the trace view. You'll be greeted with a trace looking somwhat like this (in Zipkin):
+
+![Make dinner trace diagram](makeDinner-zipkin-01)
+
+Or, if you prefer Jaeger, it'd look something like this:
+
+![Make dinner trace diagram](makeDinner-jaeger-01)
+
+Take a moment to look at the trace spans featured in these diagrams. 
+
+By looking at them, you should be able to get a rough idea what the code is doing. That's right, it is a top-level `makeDinner` method, that seems to be performing a bunch of tasks in order to prepare a nice meal.
+
+You may also notice that all those traces are executing in the same _service_: the `DinnerService`. This means that we only had one process involved in this trace. Further, by investigating this trace, we can spot that the `chopVegetables` parent span starts two child spans: `chop-carrot` and `chop-potato`, but does so **sequentially**! If we were looking to optimize the time it takes for `makeDinner` to complete, parallelizing these vegetable chopping tasks could be a good idea.
+
+Now, let us take a brief look at the code creating all these spans. 
+
+> Tip: You can refer to the full code by viewing the `main.swift` file in the Dinner sample app.
 
 ```swift
-let tracer: any TracerProtocol
-
 func makeDinner() async throws -> Meal {
-  tracer.withSpan("makeDinner", context) { 
-    async let veggiesFuture = try chopVegetables()
-    async let meatFuture = marinateMeat()
-    async let ovenFuture = try preheatOven(temperature: 350)
+  try await InstrumentationSystem.tracer.withSpan("makeDinner") { _ in
+    async let veggies = try chopVegetables()
+    async let meat = marinateMeat()
+    async let oven = preheatOven(temperature: 350)
     // ...
     return try await cook(veggies, meat, oven)
   }
 }
 
-func chopVegetables() async throws {
-  await tracer.withSpan("chopVegetables", context) {
-    try await chop(.carrot) 
-    try await chop(.potato) 
-  }
-}
-func chop(_ vegetable: Vegetable) async {
-  await tracer.withSpan("chop-\(vegetable)", context) {
-    // ...
-  }
-}
-
-func marinateMeat() {
-  tracer.withSpan("marinateMeat", context) {
-    // ... 
+func chopVegetables() async throws -> [Vegetable] {
+  await Tracer.withSpan("chopVegetables") {
+    // Chop the vegetables...!
+    // 
+    // However, since chopping is a very difficult operation, 
+    // one chopping task can be performed at the same time on a single service!
+    // (Imagine that... we cannot parallelize these two tasks, and need to involve another service).
+    let carrot = try await chop(.carrot) 
+    let potato = try await chop(.potato) 
+    return [carrot, potato]
   }
 }
 
 // ... 
 ```
 
-The preferr
+It seems that the sequential work on the vegetable chopping is not accidental... we cannot do two of those at the same time on a single service. Therfore, let's introduce new services that will handle the vegetable chopping for us! 
 
-> ❗️ It is tremendously important to **always `end()` a started ``Span``**! make sure to end any started span on _every_ code path, including error paths
->
-> Failing to do so is an error, and a tracer *may* decide to either crash the application or log warnings when an not-ended span is deinitialized.
+For example, we could split out the vegetable chopping into a service on its own, and request it (via an HTTP, gRPC, or `distributed actor` call), to chop some vegetables for us. The resulting trace will have the same information, even though a part of it now has been executing on a different host! To further illustrate that, let us re-draw the previous diagram, while adding node designations to each span:
+
+A trace of such system would then look like this: 
+
+![A new service handling "chopping" tasks is introduced, it has 3 spans about chopping](makeDinner-zipkin-02)
+
+The `DinnerService` reached out to `ChoppingService-1` that it discovered, and then to parallelize the work, it submitted the secondary chopping task to another service (`ChoppingService-2`). Those two tasks are now performed in parallel, leading to a an improved response time of `makeDinner` service call.
+
+Let us have another look at these spans in Jaeger. The search UI will show us both the previous, and latest execution traces, so we can compare how the execution changed over time:
+
+![Search view in Jaeger, showing the different versions of traces](makeDinner-jaeger-02)
+
+The different services are color coded, and we can see them execute in parallel here as well:
+
+![Trace view in Jaeger, spans are parallel now](makeDinner-jaeger-03)
+
+One additional view we can explore in Jaeger is a **flamegraph** based off the traces. Here we can compare the "before" and "after" flamegraphs:
+
+**Before:**
+
+![](makeDinner-jaeger-040-before)
+
+**After:**
+
+![](makeDinner-jaeger-041-after)
+
+By investigating flamegraphs, you are able to figure out the percentage of time spent and dominating certain functions. Our example was a fairly typical change, where we sped up the `chopVegetables` from taking 65% of the `makeDinner` execution, to just 43%. The flamegraph view can be useful in complex applications, in order to quickly locate which methods or services are taking the most time, and would be worth optimizing, as the span overview sometime can get pretty "busy" in a larger system, performing many calls.
+
+This was just a quick introduction to tracing, but hopefully you are now excited to learn more about tracing and using it to monitor and improve your server side Swift applications! In the following sections we'll discuss how to actually instrument your code, and how to make spans effective by including as much relevant information in them as possible.
+
+### Efficiently working with Spans
+
+We already saw the basic API to spawn a trace span, the ``TracerProtocol/withSpan(_:ofKind:_:)-28ctq`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
+
+Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from it's creation, until the operation closure returns:
+
+```swift
+Tracer.withSpan("Working on my novel") { span in 
+  write(.novel)
+}
+```
+
+This API is available both in synchronous and asynchronous contexts. The closure also is passed a `span` object which is a mutable, but `Sendable ` object that tracer implementations must provide. A `Span` is an in memory representation of the trace span that can be enriched with various information about this execution. For example, if the span represents an HTTP request, one would typically add **span attributes** for `http.method`, `http.path` etc. 
+
+Throwing out of the operation closure automatically records an error in the `span`
+
+#### Span Attributes
+
+Span ``Span/attributes`` are additional information you can record in a ``Span`` which are then associated with the span and accessible in tracing visualization systems. 
+
+While you are free to record any information you want in attributes, it usually is best to  to stick to "well known" and standardized values, in order to make querying for them _across_ services more consistent. We will discuss pre-defined attributes below.
+
+Recording extra attributes in a Span is simple. You can record any information you want into the ``Span/attributes`` object using the subscript syntax, like this: 
+
+```swift
+Tracer.withSpan("showAttributes") { span in 
+  span.attributes["http.method"] = "POST"
+  span.attributes["http.status_code"] = 200
+}
+```
+
+Once the span is ``Span/end()``-ed the attributes are flushed along with it to the backend tracing system.
+
+However it may be beneficial to use type-safe span attributes instead, so both the String keys and values can be set in a more discoverable, as well as type-safe way.
+
+Attributes show up when you click on a specific `Span` in a trave visualization system. For example, like this in Jaeger:
+
+![Attributes show up under the Span in Jaeger](jaeger-attribute)
+
+Note that some attributes, like for example the information about the process emitting the trace are included in the span automatically. Refer to your tracer's documentation to learn more about how to configure what attributes it should include by default. Common things to include are hostnames, region information or other things which can identify the node in a cluster.
+
+#### Predefined Type-safe Span Attributes
+
+The tracing API provides a way to declare and re-use well known span attributes in a type-safe way. Many of those are defined in `swift-distributed-tracing-extras`, and allow e.g. for setting HTTP values like this:
+
+For example, you can include the `TracingOpenTelemetrySemanticConventions` into your project like this:
+
+```swift
+import PackageDescription
+
+let package = Package(
+    // ...
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: "..."),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-extras.git", from: "..."),
+    ],
+    targets: [
+        .target(
+            name: "MyTarget",
+            dependencies: [
+                .product(name: "Tracing", package: "swift-distributed-tracing"),
+                .product(name: "TracingOpenTelemetrySemanticConventions", package: "swift-distributed-tracing-extras"),
+            ]
+        ),
+      // ...
+    ]
+)
+
+```
+
+In order to gain a whole set of well-typed attributes which are pre-defined by the [OpenTelemetry](http://opentelemetry.io) initiatve. 
+
+For example, like these for HTTP:
+
+```swift
+attributes.http.method = "GET"
+attributes.http.url = "https://www.swift.org/download"
+attributes.http.target = "/download"
+attributes.http.host = "www.swift.org"
+attributes.http.scheme = "https"
+attributes.http.statusCode = 418
+attributes.http.flavor = "1.1"
+attributes.http.userAgent = "test"
+attributes.http.retryCount = 42
+```
+
+or these, for database operations–which can be very useful to detect slow queries in your system:
+
+```swift
+attributes.db.system = "postgresql"
+attributes.db.connectionString = "test"
+attributes.db.user = "swift"
+attributes.db.statement = "SELECT name, display_lang FROM Users WHERE id={};"
+```
+
+Using such standardized attributes allows you, and other developers of other services you interact with, have a consistent and simple to search by attribute namespace.
+
+#### Declaring your own type-safe Span Attributes
+
+You can define your own type-safe span attributes, which is useful if your team or company has a certain set of attributes you like to set in all services; This way it is easier to remember what attributes one should be setting, and what their types should be, because the attributes pop up in your favorite IDE's autocompletion.
+
+Doing so requires some boilerplate, but you only have to do this once, and later on the use-sites of those attributes look quite neat (as you've seen above). Here is how you would declare a custom `http.method` nested attribute:
+
+```swift
+extension SpanAttributes {
+    /// Semantic conventions for HTTP spans.
+    ///
+    /// OpenTelemetry Spec: [Semantic conventions for HTTP spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.11.0/specification/trace/semantic_conventions/http.md#semantic-conventions-for-http-spans)
+    public var http: HTTPAttributes {
+        get {
+            .init(attributes: self)
+        }
+        set {
+            self = newValue.attributes
+        }
+    }
+}
+```
+
+```swift
+/// Semantic conventions for HTTP spans.
+///
+/// OpenTelemetry Spec: [Semantic conventions for HTTP spans](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.11.0/specification/trace/semantic_conventions/http.md#semantic-conventions-for-http-spans)
+@dynamicMemberLookup
+public struct HTTPAttributes: SpanAttributeNamespace {
+    public var attributes: SpanAttributes
+
+    public init(attributes: SpanAttributes) {
+        self.attributes = attributes
+    }
+
+    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+        public init() {}
+
+        /// HTTP request method. E.g. "GET".
+        public var method: Key<String> { "http.method" }
+    }
+}
+```
+
+### Span Events
+
+Events are similar to logs in the sense that they signal "something happened" during the execution of the ``Span``.
+
+> Note: There is a general tension between logs and trace events, as they can be used to achieve very similar outcomes. Consult the documentation of your tracing solution and how you'll be reading and investigating logs correlated to traces, and vice versa, and stick to a pattern that works best for your project.
+
+Events are recorded into a span like this:
+
+```swift
+Tracer.withSpan("showEvents") { span in 
+  if cacheHit { 
+    span.addEvent("cache-hit")
+    return cachedValue
+  }
+                               
+  return computeValue()
+}
+```
+
+An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/time`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
+
+Events usually show up in a in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
+
+**Jaeger:**
+
+![An event during the cook span](makeDinner-jaeger-event)
+
+**Zipkin:**
+
+![An event during the cook span](makeDinner-zipkin-event)
+
+Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for Events (although you could simmulate it with attributes).
+
+### Where (and how) do Baggage and Spans propagate?
+
+
+
+### Integrations
+
+#### Swift-log integration
+
+> Warning: This integration is currently proposed, but merged in swift-log. Please participate in the proposal review over here: [https://github.com/apple/swift-log/pull/235](https://github.com/apple/swift-log/pull/235)
+
+The swift-log integration
