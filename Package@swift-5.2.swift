@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.3.0")),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.4.1")),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------

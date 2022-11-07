@@ -63,7 +63,10 @@ private final class TracedLockPrintlnTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
     ) -> Span {
         TracedLockPrintlnSpan(
             operationName: operationName,

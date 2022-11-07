@@ -26,7 +26,10 @@ final class TestTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
     ) -> Span {
         let span = TestSpan(
             operationName: operationName,
@@ -64,6 +67,10 @@ extension TestTracer {
     enum TraceIDKey: BaggageKey {
         typealias Value = String
     }
+
+    enum SpanIDKey: BaggageKey {
+        typealias Value = String
+    }
 }
 
 extension Baggage {
@@ -73,6 +80,15 @@ extension Baggage {
         }
         set {
             self[TestTracer.TraceIDKey.self] = newValue
+        }
+    }
+
+    var spanID: String? {
+        get {
+            self[TestTracer.SpanIDKey.self]
+        }
+        set {
+            self[TestTracer.SpanIDKey.self] = newValue
         }
     }
 }

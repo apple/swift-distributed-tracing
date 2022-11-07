@@ -24,7 +24,10 @@ public struct NoOpTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
     ) -> Span {
         NoOpSpan(baggage: baggage)
     }
