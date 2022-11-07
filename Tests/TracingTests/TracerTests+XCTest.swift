@@ -32,6 +32,7 @@ extension TracerTests {
                 ("testWithSpan_throws", testWithSpan_throws),
                 ("testWithSpan_automaticBaggagePropagation_sync", testWithSpan_automaticBaggagePropagation_sync),
                 ("testWithSpan_automaticBaggagePropagation_sync_throws", testWithSpan_automaticBaggagePropagation_sync_throws),
+                ("testWithSpan_operation_withoutSpanPassed", testWithSpan_operation_withoutSpanPassed),
                 ("testWithSpan_automaticBaggagePropagation_async", testWithSpan_automaticBaggagePropagation_async),
                 ("testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation", testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation),
                 ("testWithSpan_automaticBaggagePropagation_async_throws", testWithSpan_automaticBaggagePropagation_async_throws),
