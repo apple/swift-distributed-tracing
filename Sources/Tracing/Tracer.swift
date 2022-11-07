@@ -275,7 +275,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await Baggage.withValue(span.baggage) {
+            return try await Baggage.$current.withValue(span.baggage) {
                 try await operation(span)
             }
         } catch {
@@ -312,7 +312,7 @@ extension Tracer {
         let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, function: function, file: fileID, line: line)
         defer { span.end() }
         do {
-            return try await Baggage.withValue(span.baggage) {
+            return try await Baggage.$current.withValue(span.baggage) {
                 try await operation(span)
             }
         } catch {

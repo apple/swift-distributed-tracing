@@ -87,8 +87,10 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func logic(fakeLine: UInt) {
+        #if swift(>=5.5)
         InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
         }
+        #endif
     }
 
     func traceMeLogic(fakeLine: UInt) {
@@ -166,6 +168,7 @@ final class DynamicTracepointTestTracer: Tracer {
     }
 
     private func shouldRecord(tracepoint: TracepointID) -> Bool {
+        #if swift(>=5.5) && canImport(_Concurrency)
         if self.isActive(tracepoint: tracepoint) {
             // this tracepoint was specifically activated!
             return true
@@ -184,6 +187,9 @@ final class DynamicTracepointTestTracer: Tracer {
         // there is some active trace already, so we should record as well
         // TODO: this logic may need to become smarter
         return true
+        #else
+        return false
+        #endif
     }
 
     func isActive(tracepoint: TracepointID) -> Bool {
