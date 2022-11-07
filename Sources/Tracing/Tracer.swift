@@ -60,7 +60,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     public func startSpan(
@@ -88,7 +88,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - file: The `file` where the span was started.
     ///   - line: The file line where the span was started.
     public func startSpan(
@@ -126,7 +126,7 @@ extension Tracer {
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
@@ -167,7 +167,7 @@ extension Tracer {
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - file: The `#file` where the span was started.
     ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
@@ -216,7 +216,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
@@ -252,7 +252,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
@@ -295,7 +295,7 @@ extension Tracer {
     //               task local and modified before passing into this function. The baggage will be made the current task-local baggage for the duration of the `operation`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
     ///   - operation: operation to wrap in a span start/end and execute immediately
-    ///   - function: The function name in which the span was started
+    ///   - function: The function name in which the span was started.
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
