@@ -24,6 +24,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func test_adhoc_enableBySourceLoc() {
+        #if swift(>=5.5)
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -55,9 +56,11 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #endif
     }
 
     func test_adhoc_enableByFunction() {
+        #if swift(>=5.5)
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -80,6 +83,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #endif
     }
 
     func logic(fakeLine: UInt) {
@@ -88,11 +92,13 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func traceMeLogic(fakeLine: UInt) {
+        #if swift(>=5.5)
         InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
             InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
             }
         }
+        #endif
     }
 }
 
