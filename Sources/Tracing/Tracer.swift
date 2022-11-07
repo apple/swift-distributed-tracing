@@ -53,8 +53,6 @@ public protocol Tracer: Instrument {
 }
 
 extension Tracer {
-
-
     #if swift(>=5.3.0)
     /// Start a new ``Span`` with the given `Baggage` starting "now".
     ///
@@ -94,12 +92,12 @@ extension Tracer {
     ///   - file: The `file` where the span was started.
     ///   - line: The file line where the span was started.
     public func startSpan(
-            _ operationName: String,
-            baggage: Baggage,
-            ofKind kind: SpanKind = .internal,
-            function: String = #function,
-            file: String = #file,
-            line: UInt = #line
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file: String = #file,
+        line: UInt = #line
     ) -> Span {
         self.startSpan(
             operationName,
@@ -112,7 +110,6 @@ extension Tracer {
         )
     }
     #endif
-
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
