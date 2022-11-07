@@ -116,7 +116,7 @@ final class TracerTests: XCTestCase {
             "world"
         }
 
-        let value = tracer.withSpan("hello") { (span: Span) -> String in
+        let value = tracer.withSpan("hello") { span -> String in
             XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
             return operation(span: span)
         }
@@ -156,6 +156,32 @@ final class TracerTests: XCTestCase {
         #endif
     }
 
+    func testWithSpan_operation_withoutSpanPassed() throws {
+        #if swift(>=5.5) && canImport(_Concurrency)
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spansEnded = 0
+        tracer.onEndSpan = { _ in spansEnded += 1 }
+
+        tracer.withSpan("hello") {
+            // ...
+        }
+        tracer.withSpan("hello-again", baggage: .topLevel) {
+            // ...
+        }
+
+        XCTAssertEqual(spansEnded, 2)
+        #endif
+    }
+
     func testWithSpan_automaticBaggagePropagation_async() throws {
         #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
@@ -176,7 +202,7 @@ final class TracerTests: XCTestCase {
         }
 
         try self.testAsync {
-            let value = try await tracer.withSpan("hello") { (span: Span) -> String in
+            let value = try await tracer.withSpan("hello") { span -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 return try await operation(span: span)
             }
@@ -209,7 +235,7 @@ final class TracerTests: XCTestCase {
         self.testAsync {
             var fromNonAsyncWorld = Baggage.topLevel
             fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withSpan("hello", baggage: fromNonAsyncWorld) { (span: Span) -> String in
+            let value = await tracer.withSpan("hello", baggage: fromNonAsyncWorld) { span -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 XCTAssertEqual(span.baggage.traceID, fromNonAsyncWorld.traceID)
                 return await operation(span: span)

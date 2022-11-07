@@ -19,7 +19,28 @@ import Dispatch
 /// with it. A `Span` can be created from a `Baggage` which contains span information, in which case this span should
 /// be considered as "child" of the previous span.
 ///
-/// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
+/// Creating a `Span` is delegated to an implementation of ``TracerProtocol`` and end-users should never instantiate spans directly.
+/// Most commonly, a span is started using the `withSpan` API of a tracer, like this:
+///
+/// ```
+/// tracer.withSpan("working-on-\(thing)") { span in
+///     // ...
+/// }
+/// ```
+///
+/// Once started, a span contains its start time and additional metadata necessary for the tracing backend to handle e.g.
+/// further child spans.
+///
+/// ### Child Spans
+///
+///
+/// ## Manual lifetime management
+/// In some situations it may not be possible
+///
+/// > Warning: Generally spans should be started using the ``TracerProtocol/withSpan(_:ofKind:_:)-11n3y`` method,
+/// > however it may sometimes be necessary to use the alternate ``TracerProtocol/startSpan(_:baggage:ofKind:)`` API.
+/// > If the `startSpan` API is used to create a span, it must be explicitly ended using ``end()`` on *every* code-path
+/// > leading to the logical end of the span. Omitting to end a span or ending it twice is a programmer error.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: AnyObject {
@@ -84,6 +105,7 @@ extension Span {
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
+    ///
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
     public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {

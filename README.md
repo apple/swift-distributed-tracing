@@ -37,7 +37,7 @@ The table below illustrates the
 
 | Library                                          | Status                                                      | Baggage propagation | Automatic spans (e.g. "request" span)                     |
 |--------------------------------------------------|-------------------------------------------------------------|-------------------|-----------------------------------------------------------|
-| [Swift gRPC](https://github.com/grpc/grpc-swift) | [PR - in progress](https://github.com/grpc/grpc-swift/pull/1510) | WIP               | Pending                                                   |                               |
+| [gRPC Swift](https://github.com/grpc/grpc-swift) | [PR - in progress](https://github.com/grpc/grpc-swift/pull/1510) | WIP               | Pending                                                   |                               |
 | _Your library?_                                  |  ...               | ... |[Get in touch!](https://forums.swift.org/c/server/43) |
 
 

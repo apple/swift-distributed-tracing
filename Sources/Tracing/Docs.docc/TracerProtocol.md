@@ -2,8 +2,6 @@
 
 ## Topics
 
-
-
 ### Working with Spans
 
 - ``withSpan(_:ofKind:_:)-11n3y``
@@ -12,4 +10,4 @@
 ### Manual Span management
 
 - ``startSpan(_:baggage:ofKind:)``
-- ``startSpan(_:baggage:ofKind:at:)``
+- ``Span/end()``

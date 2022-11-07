@@ -7,7 +7,7 @@ This guide is aimed at library and framework developers who wish to instrument t
 Doing so within a library may enable automatic trace propagation and is key to propagating trace information across
 distributed nodes, e.g. by instrumenting the HTTP client used by such system.
 
-Other examples of libraries which benefit _the most_ from being instrumented using distributed tracing include:
+Other examples of libraries which would benefit _the most_ from being instrumented using distributed tracing include:
 
 - HTTP Clients (e.g. AsyncHTTPClient),
 - HTTP Servers (e.g. Vapor or Smoke),
@@ -20,16 +20,16 @@ it is them who must inject and extract contextual baggage metadata to enable dis
 
 Following those, any database or other complex library which may be able to emit useful information about its internals are
 also good candidates to being instrumented. Note that libraries may do so optionally, or hide the "verboseness" of such traces
-behind options, or only attach information if a Span is already active etc. Please review your library's documentation to learn
+behind options, or only attach information if a ``Span`` is already active etc. Please review your library's documentation to learn
 more about it has integrated tracing support.
 
 ### Propagating baggage metadata
 
-When crossing boundaries between processes, such as making or receiving an HTTP request, the library responsible for doing so, should invoke instrumentation in order to inject or extract the contextual baggage metadata into/from the "carrier" type (such as the `HTTPResponse`) type.
+When crossing boundaries between processes, such as making or receiving an HTTP request, the library responsible for doing so should invoke instrumentation in order to inject or extract the contextual baggage metadata into/from the "carrier" type (such as the `HTTPResponse`) type.
 
 #### Handling outbound requests
 
-When a library makes an "outgoing" request or message interaction, it should invoke the  method of a configured instrument. This will invoke whichever instrument the end-user has configured and allow them to customize what metadata gets to be propagated. This can be by the following diagram:
+When a library makes an "outgoing" request or message interaction, it should invoke the method of a configured instrument. This will invoke whichever instrument the end-user has configured and allow them to customize what metadata gets to be propagated. This can be depicted by the following diagram:
 
 ```
                         ┌──────────────────────────────────┐
@@ -84,7 +84,7 @@ struct HTTPRequestInjector: Injector {
 }
 ```
 
-Once the metadata has been injected, the request – including all the additional metadata – is sent over the network.
+Once the metadata has been injected, the request–including all the additional metadata–is sent over the network.
 
 > Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``TracerProtocol``.
 
@@ -113,7 +113,7 @@ On the receiving side, an HTTP server needs to perform the inverse operation, as
 └────
 ```
 
-This is very similar to what we were doing on the outbound side, but the roles of baggage and request are somewhat inversed: we're extracting values from the carrier into the baggage. The code performing this task could look something like this:
+This is very similar to what we were doing on the outbound side, but the roles of baggage and request are somewhat reversed: we're extracting values from the carrier into the baggage. The code performing this task could look something like this:
 
 ```swift
 func handler(request: HTTPRequest) async {
@@ -158,7 +158,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``TracerProtocol`` APIs in order to later "*pick up*" the baggage and and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
+This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``TracerProtocol`` APIs in order to later "*pick up*" the baggage and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
 
 > Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the contextual baggage information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
 >
@@ -200,11 +200,11 @@ actor MySampleServer {
 }
 ```
 
-While this code is very simple for illustration purposes, and it may seem suprising why there are those two separate places where we need to call into user-code separately. But in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of such callbacks. Always consider if and when to restore baggage such that it makes sense for the end user.
+While this code is very simple for illustration purposes, and it may seem surprising why there are two separate places where we need to call into user-code separately, in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of callbacks. Always consider if and when to restore baggage such that it makes sense for the end user.
 
 ### Starting Trace Spans in Your Library
 
-The above steps are enough if you wanted to provide contextual baggage propagation. It already enables techniques such as *correlation ids* which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the baggage is set.
+The above steps are enough if you wanted to provide contextual baggage propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the baggage is set.
 
 Many libraries also have the opportunity to start trace spans themselfes, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the `HTTPServer` can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
 
@@ -260,7 +260,7 @@ In such situations you can resort to using the ``TracerProtocol/startSpan(_:bagg
 // Callback heavy APIs may need to store and manage spans manually:
 var span: Span? 
 
-func startHandline(request: HTTPRequest) {
+func startHandling(request: HTTPRequest) {
   self.span = InstrumentationSystem.tracer.startSpan("\(request.path)")
   
   userCode.handle(request)
@@ -292,3 +292,11 @@ It is worth noting that double-ending a span should be considered a programmer e
 >  Note: The problem with finding a span that was ended in two places is that its lifecycle seems to be incorrectly managed, and therefore the span timing information is at risk of being incorrect.
 >
 > Please also take care to never `end()` a span that was created using `withSpan()`  APIs, because `withSpan` will automatically end the span when the closure returns.
+
+### Global vs. "Stored" Tracers and Instruments
+
+Tracing functions similarily to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using ``InstrumentationSystem/tracer`` gets the "right" tracer at runtime.
+
+You may be tempted to allow users _configuring_ a tracer as part of your applications intialization. Generally we advice against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
+
+On the other hand, it may be valuable for testing scenarios to be able to set a tracer on a specific instance of your library. Therefore, if you really want to offer a configurable `Instrument` or `Tracer` then we suggest defaulting this setting to `nil`, and if it is `nil`, reaching to the global `InstrumentationSystem/instrument` or `InstrumentationSystem/tracer` - this way it is possible to override a tracer for testing on a per-instance basis, but the default mode of operation that end-users expect from libraries remains working.
