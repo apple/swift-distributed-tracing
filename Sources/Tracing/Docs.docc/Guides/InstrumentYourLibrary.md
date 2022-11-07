@@ -74,7 +74,7 @@ As you can see, the library does not know anything about what tracing system or 
 
 All it has to do is query for the current [task-local](https://developer.apple.com/documentation/swift/tasklocal) `Baggage` value, and if one is present, call on the instrumentation system to inject it into the request.
 
-Since neither the tracing API nor the specific tracer backend is aware of this library's specific `HTTPRequest` type, we also need to implement an ``Injector`` which takes on the responsibility of adding the metadata into the carrier type (which in our case is the `HTTPRequest`). An injector could for example be implemented like this:
+Since neither the tracing API, nor the specific tracer backend are aware of this library's specific `HTTPRequest` type, we also need to implement an ``Injector`` which takes on the responsibility of adding the metadata into the carrier type (which in our case is the `HTTPRequest`). An injector could for example be implemented like this:
 
 ```swift
 struct HTTPRequestInjector: Injector {
@@ -84,13 +84,13 @@ struct HTTPRequestInjector: Injector {
 }
 ```
 
-Once the metadata has been injected, the request–including all the additional metadata is sent over the network.
+Once the metadata has been injected, the request–including all the additional metadata–is sent over the network.
 
 > Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``TracerProtocol``.
 
 #### Handling inbound requests
 
-On the receiving side, an HTTP server needs to perform the inverse operation, as it receives the request from the network and forms an `HTTPRequest` object, and before it passes it to user-code, it must extract any trace metadata from the request headers into the `Baggage`:
+On the receiving side, an HTTP server needs to perform the inverse operation, as it receives the request from the network and forms an `HTTPRequest` object. Before it is passed it to user-code, it must extract any trace metadata from the request headers into the `Baggage`. 
 
 ```
                    ┌──────────────────────────────────┐
@@ -160,7 +160,7 @@ func handler(request: HTTPRequest) async {
 
 This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``TracerProtocol`` APIs in order to later "*pick up*" the baggage and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
 
-> Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the contextual baggage information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the trade-id automatically, e.g. like this: 
+> Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the contextual baggage information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
 >
 > `12:43:32 info [trace-id=463a...13ad] Logging during handling of a request!`
 
@@ -204,11 +204,11 @@ While this code is very simple for illustration purposes, and it may seem surpri
 
 ### Starting Trace Spans in Your Library
 
-The above steps are enough if you wanted to provide contextual baggage propagation, and already enables techniques such as *correlation ids* which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the baggage is set.
+The above steps are enough if you wanted to provide contextual baggage propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the baggage is set.
 
-Many libraries also have the opportunity to start trace spans themselves, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the HTTPServer can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
+Many libraries also have the opportunity to start trace spans themselfes, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the `HTTPServer` can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
 
-Let us revisit the previous sample HTTPServer which restores baggage around invoking the user-code, and further extend it to start a span including basic information about the HTTPRequest being handled:
+Let us revisit the previous sample `HTTPServer` which restored baggage around invoking the user-code, and further extend it to start a span including basic information about the `HTTPRequest` being handled:
 
 ```swift
 // SUB-OPTIMAL EXAMPLE:
@@ -272,11 +272,11 @@ func finishHandling(request: HTTPRequest, response: HTTPResponse) {
 }
 ```
 
-It is very important to _always_ end spans that have been started, as otherwise resources they use may keep accumulating and lead to memory leaks, or worse issues in tracing backends depending on their implementation.
+It is very important to _always_ end spans that are started, as attached resources may keep accumulating and lead to memory leaks or worse issues in tracing backends depending on their implementation.
 
-The manual way of managing spans also means that error paths need to be treated with increased attention. This is something the `withSpan` APIs handle automatically, but we cannot rely on the `withSpan` detecting an error thrown out of its body closure anymore when using the `startSpan`/`end` APIs.
+The manual way of managing spans also means that error paths need to be treated with increased attention. This is something that `withSpan` APIs handle automatically, but we cannot rely on `withSpan` detecting an error thrown out of its body closure anymore when using the `startSpan`/`end` APIs.
 
-When an error is thrown, or if the span should for some reason be considered errored, you should invoke the ``Span/recordError(_:)`` method and pass an ``Error`` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
+When an error is thrown, or if the span should be considered errored for some reason, you should invoke the ``Span/recordError(_:)`` method and pass an ``Error`` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
 
 ```swift
 var span: Span
