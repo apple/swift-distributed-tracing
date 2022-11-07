@@ -40,34 +40,85 @@ public protocol TracerStartSpanOps {
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - time: The `DispatchTime` at which to start the new ``Span``.
+    ///   - function: The function name in which the span was started
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     func startSpan(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
     ) -> Span
 }
 
-extension TracerStartSpanOps {
-    /// Start a new ``Span`` with the given `Baggage` starting at `DispatchWallTime.now()`.
+extension Tracer {
+    #if swift(>=5.3.0)
+    /// Start a new ``Span`` with the given `Baggage` starting "now".
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     public func startSpan(
         _ operationName: String,
         baggage: Baggage,
-        ofKind kind: SpanKind = .internal
+        ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line
     ) -> Span {
-        self.startSpan(operationName, baggage: baggage, ofKind: kind, at: .now())
+        self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: fileID,
+            line: line
+        )
     }
+    #else
+    /// Start a new ``Span`` with the given `Baggage` starting "now".
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
+    ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
+    ///   - function: The function name in which the span was started.
+    ///   - file: The `file` where the span was started.
+    ///   - line: The file line where the span was started.
+    public func startSpan(
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file: String = #file,
+        line: UInt = #line
+    ) -> Span {
+        self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: file,
+            line: line
+        )
+    }
+    #endif
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
 extension TracerStartSpanOps {
+    #if swift(>=5.3.0)
     /// Execute a specific task within a newly created ``Span``.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
@@ -77,15 +128,29 @@ extension TracerStartSpanOps {
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
         _ operation: (Span) throws -> T
     ) rethrows -> T {
-        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        let span = self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try operation(span)
@@ -94,7 +159,7 @@ extension TracerStartSpanOps {
             throw error // rethrow
         }
     }
-
+    #else
     /// Execute a specific task within a newly created ``Span``.
     ///
     /// DO NOT `end()` the passed in span manually. It will be ended automatically when the `operation` returns.
@@ -104,23 +169,38 @@ extension TracerStartSpanOps {
     ///   - baggage: Baggage potentially containing trace identifiers of a parent ``Span``.
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
+    ///   - function: The function name in which the span was started.
+    ///   - file: The `#file` where the span was started.
+    ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind = .internal,
-        _ operation: () throws -> T
+        function: String = #function,
+        file: String = #file,
+        line: UInt = #line,
+        _ operation: (Span) throws -> T
     ) rethrows -> T {
-        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        let span = self.startSpan(
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: .now(),
+            function: function,
+            file: file,
+            line: line
+        )
         defer { span.end() }
         do {
-            return try operation()
+            return try operation(span)
         } catch {
             span.recordError(error)
             throw error // rethrow
         }
     }
+    #endif
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
@@ -138,14 +218,27 @@ extension TracerStartSpanOps {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
         ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
         _ operation: (Span) throws -> T
     ) rethrows -> T {
-        try self.withSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind) { span in
+        try self.withSpan(
+            operationName,
+            baggage: .current ?? .topLevel,
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        ) { span in
             try Baggage.$current.withValue(span.baggage) {
                 try operation(span)
             }
@@ -187,14 +280,27 @@ extension TracerStartSpanOps {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - kind: The ``SpanKind`` of the ``Span`` to be created. Defaults to ``SpanKind/internal``.
     ///   - operation: operation to wrap in a span start/end and execute immediately
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
         ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
         _ operation: (Span) async throws -> T
     ) async rethrows -> T {
-        let span = self.startSpan(operationName, baggage: .current ?? .topLevel, ofKind: kind)
+        let span = self.startSpan(
+            operationName,
+            baggage: .current ?? .topLevel,
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {
@@ -217,15 +323,21 @@ extension TracerStartSpanOps {
     //               task local and modified before passing into this function. The baggage will be made the current task-local baggage for the duration of the `operation`.
     ///   - kind: The `SpanKind` of the `Span` to be created. Defaults to `.internal`.
     ///   - operation: operation to wrap in a span start/end and execute immediately
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
         _ operation: (Span) async throws -> T
     ) async rethrows -> T {
-        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind)
+        let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, function: function, file: fileID, line: line)
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {
