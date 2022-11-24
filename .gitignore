@@ -6,3 +6,5 @@
 xcuserdata/
 .swiftpm
 /Package.resolved
+.history
+.vscode
