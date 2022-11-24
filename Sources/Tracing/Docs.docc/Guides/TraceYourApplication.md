@@ -28,7 +28,7 @@ Once you have selected an implementation, add it as a dependency to your `Packag
 .package(url: "https://github.com/slashmo/opentelemetry-swift.git", from: "<latest-version>"),
 
 // This will automatically include a dependency on the swift-distributed-tracing API:
-// .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: 1.0.0),
+// .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: "1.0.0"),
 ```
 
 Next, add the dependency to your application target:
@@ -102,7 +102,6 @@ A typical bootstrap could look something like this:
 ```swift
 import OpenTelemetry
 import StatsdMetrics
-import FancyLogging
 
 extension Logger.MetadataProvider {
 

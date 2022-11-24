@@ -8,7 +8,9 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.4.1")),
+        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage", .upToNextMinor(from: "0.4.1")),
+        // .package(url: "https://github.com/apple/swift-log.git", from: "1.4.4"),
+        .package(url: "https://github.com/ktoso/swift-log", .branch("wip-baggage-in-handlers-but-not-api")),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
@@ -19,6 +21,7 @@ let package = Package(
             name: "Instrumentation",
             dependencies: [
                 .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
+                .product(name: "Logging", package: "swift-log"),
             ]
         ),
         .testTarget(

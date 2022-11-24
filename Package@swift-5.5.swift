@@ -9,6 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.4.1")),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.4"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -18,6 +19,7 @@ let package = Package(
             name: "Instrumentation",
             dependencies: [
                 .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
+                .product(name: "Logging", package: "swift-log"),
             ]
         ),
         .testTarget(
