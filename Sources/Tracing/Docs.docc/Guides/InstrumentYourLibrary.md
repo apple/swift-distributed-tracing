@@ -293,6 +293,35 @@ It is worth noting that double-ending a span should be considered a programmer e
 >
 > Please also take care to never `end()` a span that was created using `withSpan()`  APIs, because `withSpan` will automatically end the span when the closure returns.
 
+#### Storing and restoring baggage across callbacks 
+
+Note also since a `Span` contains an instrumentation `Baggage`, you can also pass the span's baggage to any APIs which may need it, or even restore the baggage e.g. for loggers to pick it up while emitting log statements:
+
+```swift
+class StatefulHandler {
+    var span: Span
+
+    func startHandling(request: HTTPRequest) {
+        self.span = InstrumentationSystem.tracer.startSpan("\(request.path)")
+    }
+
+    // callback, form other task, so we don't have the task-local information here anymore
+    func onSomethingHappening(event: SomeEvent) {
+        Baggage.withValue(span.baggage) { // restore task-local baggage
+            // which allows the baggage to be used by loggers and tracers as usual again: 
+            log.info("Event happened: \(event)")
+
+            // since the baggage was restored here, the startSpan will pick it up,
+            // and the "event-id" span will be a child of the "request.path" span we started before.
+            InstrumentationSystem.tracer.startSpan("event-\(event.id)") {
+                // ... handle the event ...
+            }
+        }
+    }
+}
+
+```
+
 ### Global vs. "Stored" Tracers and Instruments
 
 Tracing functions similarily to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using ``InstrumentationSystem/tracer`` gets the "right" tracer at runtime.
