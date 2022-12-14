@@ -6,9 +6,9 @@ This is a collection of Swift libraries enabling the instrumentation of server s
 
 While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, its primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
-> Warning: The docs below, showcasing the 0.3.x series of the logging integration are **deprecated** thanks to the latest inclusion of [metadata providers in swift-log](https://github.com/apple/swift-log/pull/238). Thanks to the introduction of [task local values in Swift](https://developer.apple.com/documentation/swift/tasklocal), and metadata providers in swift-log, the `LoggingContext` pattern showcased below has become an _anti-pattern_. Please give us a moment to finish the [new documentation PR #69](https://github.com/apple/swift-distributed-tracing/pull/69) which will explain the new integration style.
+> Warning: The docs below, showcasing the 0.3.x series of the logging integration are **deprecated** thanks to the latest inclusion of [metadata providers in swift-log](https://github.com/apple/swift-log/pull/238). With the introduction of [task local values in Swift](https://developer.apple.com/documentation/swift/tasklocal), and metadata providers in swift-log, the `LoggingContext` pattern showcased below has become an _anti-pattern_. Please give us a moment to finish the [new documentation PR #69](https://github.com/apple/swift-distributed-tracing/pull/69), which will explain the new integration style in detail.
 > 
-> Tracer APIs will not change substancially, as we're closing up on announcing a 1.0 very soon. Please look forward to beta releases very soon! 
+> Tracer APIs will not change substantially, as we're closing up on announcing version 1.0. Please look forward to beta releases very soon! 
 
 ---
 
