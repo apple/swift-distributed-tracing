@@ -58,6 +58,7 @@ enum TaskIDKey: BaggageKey {
 // ==== ------------------------------------------------------------------------
 // MARK: PrintLn Tracer
 
+/// Only intended to be used in single-threaded testing.
 private final class TracedLockPrintlnTracer: Tracer {
     func startSpan(
         _ operationName: String,
@@ -158,3 +159,8 @@ private final class TracedLockPrintlnTracer: Tracer {
         }
     }
 }
+
+#if compiler(>=5.6.0)
+extension TracedLockPrintlnTracer: Sendable {}
+extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {}
+#endif

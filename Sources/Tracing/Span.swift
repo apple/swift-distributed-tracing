@@ -22,7 +22,7 @@ import Dispatch
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject {
+public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
@@ -650,10 +650,26 @@ public struct SpanLink {
 
     /// Create a new `SpanLink`.
     /// - Parameters:
-    ///   - context: The `Baggage` identifying the targeted ``Span``.
+    ///   - baggage: The `Baggage` identifying the targeted ``Span``.
     ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
     public init(baggage: Baggage, attributes: SpanAttributes = [:]) {
         self.baggage = baggage
         self.attributes = attributes
     }
 }
+
+#if compiler(>=5.6)
+@preconcurrency public protocol _SwiftTracingSendableSpan: Sendable {}
+#else
+public protocol _SwiftTracingSendableSpan {}
+#endif
+
+#if compiler(>=5.6)
+extension SpanAttributes: Sendable {}
+extension SpanAttribute: @unchecked Sendable {}
+extension SpanStatus: Sendable {}
+extension SpanEvent: @unchecked Sendable {} // unchecked because of DispatchWallTime
+extension SpanKind: Sendable {}
+extension SpanStatus.Code: Sendable {}
+extension SpanLink: Sendable {}
+#endif

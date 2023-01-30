@@ -104,6 +104,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 }
 
+/// Only intended to be used in single-threaded testing.
 final class DynamicTracepointTestTracer: Tracer {
     private(set) var activeTracepoints: Set<TracepointID> = []
 
@@ -227,6 +228,7 @@ final class DynamicTracepointTestTracer: Tracer {
 }
 
 extension DynamicTracepointTestTracer {
+    /// Only intended to be used in single-threaded testing.
     final class TracepointSpan: Tracing.Span {
         private let operationName: String
         private let kind: SpanKind
@@ -288,3 +290,8 @@ extension DynamicTracepointTestTracer {
         }
     }
 }
+
+#if compiler(>=5.6.0)
+extension DynamicTracepointTestTracer: @unchecked Sendable {}
+extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {}
+#endif
