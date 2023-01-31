@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
+@preconcurrency import struct Dispatch.DispatchWallTime
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
@@ -233,8 +233,13 @@ public enum SpanAttribute: Equatable {
     case string(String)
     case stringArray([String])
 
+    #if swift(>=5.6)
+    case stringConvertible(CustomStringConvertible & Sendable)
+    case stringConvertibleArray([CustomStringConvertible & Sendable])
+    #else
     case stringConvertible(CustomStringConvertible)
     case stringConvertibleArray([CustomStringConvertible])
+    #endif
 
     #if swift(>=5.2)
     // older swifts get confused and can't resolve if we mean the `case int(Int64)` or any of those overloads
@@ -666,9 +671,9 @@ public protocol _SwiftTracingSendableSpan {}
 
 #if compiler(>=5.6)
 extension SpanAttributes: Sendable {}
-extension SpanAttribute: @unchecked Sendable {}
+extension SpanAttribute: Sendable {} // @unchecked because some payloads are CustomStringConvertible
 extension SpanStatus: Sendable {}
-extension SpanEvent: @unchecked Sendable {} // unchecked because of DispatchWallTime
+extension SpanEvent: Sendable {}
 extension SpanKind: Sendable {}
 extension SpanStatus.Code: Sendable {}
 extension SpanLink: Sendable {}
