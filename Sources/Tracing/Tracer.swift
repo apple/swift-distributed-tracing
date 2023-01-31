@@ -29,7 +29,7 @@ public protocol Tracer: Instrument {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - time: The `DispatchTime` at which to start the new ``Span``.
+    ///   - time: The time at which to start the new ``Span``.
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.

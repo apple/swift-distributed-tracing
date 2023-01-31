@@ -18,6 +18,7 @@ import Instrumentation
 import InstrumentationBaggage
 import Tracing
 
+/// Only intended to be used in single-threaded testing.
 final class TestTracer: Tracer {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (Span) -> Void = { _ in }
@@ -93,6 +94,7 @@ extension Baggage {
     }
 }
 
+/// Only intended to be used in single-threaded testing.
 final class TestSpan: Span {
     private let operationName: String
     private let kind: SpanKind
@@ -156,3 +158,8 @@ final class TestSpan: Span {
         self.onEnd(self)
     }
 }
+
+#if compiler(>=5.6.0)
+extension TestTracer: @unchecked Sendable {} // only intended for single threaded testing
+extension TestSpan: @unchecked Sendable {} // only intended for single threaded testing
+#endif

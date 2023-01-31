@@ -12,7 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
+#if swift(>=5.6.0)
+@preconcurrency import struct Dispatch.DispatchWallTime
+#else
+import struct Dispatch.DispatchWallTime
+#endif
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
@@ -22,7 +26,7 @@ import Dispatch
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject {
+public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
@@ -233,8 +237,13 @@ public enum SpanAttribute: Equatable {
     case string(String)
     case stringArray([String])
 
+    #if swift(>=5.6)
+    case stringConvertible(CustomStringConvertible & Sendable)
+    case stringConvertibleArray([CustomStringConvertible & Sendable])
+    #else
     case stringConvertible(CustomStringConvertible)
     case stringConvertibleArray([CustomStringConvertible])
+    #endif
 
     #if swift(>=5.2)
     // older swifts get confused and can't resolve if we mean the `case int(Int64)` or any of those overloads
@@ -383,11 +392,18 @@ extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertibl
             return .boolArray(value)
         } else if let value = self as? [String] {
             return .stringArray(value)
-        } else if let value = self as? [CustomStringConvertible] {
-            return .stringConvertibleArray(value)
-        } else {
-            fatalError("Not supported SpanAttribute array type: \(type(of: self))")
         }
+        #if swift(>=5.6.0)
+        if let value = self as? [CustomStringConvertible & Sendable] {
+            return .stringConvertibleArray(value)
+        }
+        #else
+        if let value = self as? [CustomStringConvertible] {
+            return .stringConvertibleArray(value)
+        }
+        #endif
+
+        fatalError("Not supported SpanAttribute array type: \(type(of: self))")
     }
 }
 
@@ -650,10 +666,26 @@ public struct SpanLink {
 
     /// Create a new `SpanLink`.
     /// - Parameters:
-    ///   - context: The `Baggage` identifying the targeted ``Span``.
+    ///   - baggage: The `Baggage` identifying the targeted ``Span``.
     ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
     public init(baggage: Baggage, attributes: SpanAttributes = [:]) {
         self.baggage = baggage
         self.attributes = attributes
     }
 }
+
+#if compiler(>=5.6)
+@preconcurrency public protocol _SwiftTracingSendableSpan: Sendable {}
+#else
+public protocol _SwiftTracingSendableSpan {}
+#endif
+
+#if compiler(>=5.6)
+extension SpanAttributes: Sendable {}
+extension SpanAttribute: Sendable {} // @unchecked because some payloads are CustomStringConvertible
+extension SpanStatus: Sendable {}
+extension SpanEvent: Sendable {}
+extension SpanKind: Sendable {}
+extension SpanStatus.Code: Sendable {}
+extension SpanLink: Sendable {}
+#endif
