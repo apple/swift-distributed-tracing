@@ -24,11 +24,7 @@ public protocol _SwiftInstrumentationSendable {}
 /// Conforming types are used to extract values from a specific `Carrier`.
 public protocol Extractor: _SwiftInstrumentationSendable {
     /// The carrier to extract values from.
-    #if swift(>=5.6.0)
     associatedtype Carrier: Sendable
-    #else
-    associatedtype Carrier
-    #endif
 
     /// Extract the value for the given key from the `Carrier`.
     ///
@@ -41,11 +37,7 @@ public protocol Extractor: _SwiftInstrumentationSendable {
 /// Conforming types are used to inject values into a specific `Carrier`.
 public protocol Injector: _SwiftInstrumentationSendable {
     /// The carrier to inject values into.
-    #if swift(>=5.6.0)
     associatedtype Carrier: Sendable
-    #else
-    associatedtype Carrier
-    #endif
 
     /// Inject the given value for the given key into the given `Carrier`.
     ///
