@@ -12,7 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if swift(>=5.6.0)
 @preconcurrency import struct Dispatch.DispatchWallTime
+#else
+import struct Dispatch.DispatchWallTime
+#endif
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
