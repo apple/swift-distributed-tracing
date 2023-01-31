@@ -292,6 +292,6 @@ extension DynamicTracepointTestTracer {
 }
 
 #if compiler(>=5.6.0)
-extension DynamicTracepointTestTracer: @unchecked Sendable {}
-extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {}
+extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing
+extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {} // only intended for single threaded testing
 #endif

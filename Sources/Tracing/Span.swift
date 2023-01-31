@@ -392,11 +392,18 @@ extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertibl
             return .boolArray(value)
         } else if let value = self as? [String] {
             return .stringArray(value)
-        } else if let value = self as? [CustomStringConvertible] {
-            return .stringConvertibleArray(value)
-        } else {
-            fatalError("Not supported SpanAttribute array type: \(type(of: self))")
         }
+        #if swift(>=5.6.0)
+        if let value = self as? [CustomStringConvertible & Sendable] {
+            return .stringConvertibleArray(value)
+        }
+        #else
+        if let value = self as? [CustomStringConvertible] {
+            return .stringConvertibleArray(value)
+        }
+        #endif
+
+        fatalError("Not supported SpanAttribute array type: \(type(of: self))")
     }
 }
 

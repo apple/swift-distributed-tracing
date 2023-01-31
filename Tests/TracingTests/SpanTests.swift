@@ -244,7 +244,7 @@ public struct HTTPAttributes: SpanAttributeNamespace {
     }
 }
 
-public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttributeConvertible {
+public struct CustomAttributeValue: Equatable, _CustomAttributeValueSendable, CustomStringConvertible, SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
         .stringConvertible(self)
     }
@@ -253,6 +253,12 @@ public struct CustomAttributeValue: Equatable, CustomStringConvertible, SpanAttr
         "CustomAttributeValue()"
     }
 }
+#endif
+
+#if swift(>=5.6.0)
+typealias _CustomAttributeValueSendable = Sendable
+#else
+typealias _CustomAttributeValueSendable = Any
 #endif
 
 private struct TestBaggageContextKey: BaggageKey {
