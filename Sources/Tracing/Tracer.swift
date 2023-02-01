@@ -23,7 +23,6 @@ import Dispatch
 ///
 /// Equivalent to ``InstrumentationSystem/tracer``.
 public enum Tracer {
-
     /// Convenience to access the globally bootstrapped tracer on ``InstrumentationSystem``.
     ///
     /// Equivalent to ``InstrumentationSystem/tracer``.
@@ -32,11 +31,9 @@ public enum Tracer {
     }
 }
 
-
 /// An `InstrumentProtocol` with added functionality for distributed tracing. It uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
 public protocol TracerProtocol: InstrumentProtocol {
-
     /// The type of `Span` that this tracer can create.
     associatedtype Span: SpanProtocol
 

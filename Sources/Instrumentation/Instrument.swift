@@ -21,7 +21,6 @@ import InstrumentationBaggage
 ///
 /// Equivalent to ``InstrumentationSystem/instrument``.
 public enum Instrument {
-
     /// Convenience to access the globally bootstrapped instrument on ``InstrumentationSystem``.
     ///
     /// Equivalent to ``InstrumentationSystem/instrument``.
@@ -56,7 +55,6 @@ public protocol InstrumentProtocol: _SwiftInstrumentationSendable {
 // ===== ---------------------------------------------------------------------------------------------------------------
 // MARK: Instrument
 
-
 /// Conforming types are used to extract values from a specific `Carrier`.
 public protocol Extractor: _SwiftInstrumentationSendable {
     /// The carrier to extract values from.
@@ -90,8 +88,6 @@ public protocol Injector: _SwiftInstrumentationSendable {
 
 // ===== ---------------------------------------------------------------------------------------------------------------
 // MARK: Sendable support
-
-
 
 /// Typealias used to simplify Support of old Swift versions which do not have `Sendable` defined.
 #if swift(>=5.6.0)

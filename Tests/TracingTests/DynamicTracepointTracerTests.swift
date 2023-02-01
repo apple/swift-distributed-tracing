@@ -251,7 +251,8 @@ extension DynamicTracepointTestTracer {
                 kind: .internal,
                 file: fileID,
                 line: line,
-                onEnd: { _ in () })
+                onEnd: { _ in () }
+            )
             span.isRecording = false
             return span
         }
