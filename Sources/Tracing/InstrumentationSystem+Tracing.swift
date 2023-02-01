@@ -21,7 +21,13 @@ extension InstrumentationSystem {
     /// tracing instrument as passed to the multiplex instrument. If none is found, a ``NoOpTracer`` is returned.
     ///
     /// - Returns: A ``TracerProtocol`` if the system was bootstrapped with one, and ``NoOpTracer`` otherwise.
+    #if swift(>=5.6.0) // because we must use `any Existential` to avoid warnings
     public static var tracer: any TracerProtocol {
         (self._findInstrument(where: { $0 is any TracerProtocol }) as? any TracerProtocol) ?? NoOpTracer()
     }
+    #else
+    public static var tracer: any TracerProtocol {
+        (self._findInstrument(where: { $0 is TracerProtocol }) as? TracerProtocol) ?? NoOpTracer()
+    }
+    #endif
 }

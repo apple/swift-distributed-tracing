@@ -56,7 +56,7 @@ public enum InstrumentationSystem {
     /// Returns the globally configured ``InstrumentProtocol``.
     ///
     /// Defaults to a no-op ``InstrumentProtocol`` if ``bootstrap(_:)`` wasn't called before.
-    public static var instrument: any InstrumentProtocol {
+    public static var instrument: InstrumentProtocol {
         self.lock.withReaderLock { self._instrument }
     }
 }

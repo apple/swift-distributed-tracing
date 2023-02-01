@@ -24,7 +24,7 @@ public enum Instrument {
     /// Convenience to access the globally bootstrapped instrument on ``InstrumentationSystem``.
     ///
     /// Equivalent to ``InstrumentationSystem/instrument``.
-    public var current: any InstrumentProtocol {
+    public var current: InstrumentProtocol {
         InstrumentationSystem.instrument
     }
 }
