@@ -105,7 +105,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class DynamicTracepointTestTracer: Tracer {
+final class DynamicTracepointTestTracer: TracerProtocol {
     private(set) var activeTracepoints: Set<TracepointID> = []
 
     struct TracepointID: Hashable {
@@ -139,7 +139,7 @@ final class DynamicTracepointTestTracer: Tracer {
     }
 
     private(set) var spans: [TracepointSpan] = []
-    var onEndSpan: (Span) -> Void = { _ in
+    var onEndSpan: (SpanProtocol) -> Void = { _ in
     }
 
     func startSpan(_ operationName: String,
@@ -148,11 +148,11 @@ final class DynamicTracepointTestTracer: Tracer {
                    at time: DispatchWallTime,
                    function: String,
                    file fileID: String,
-                   line: UInt) -> Tracing.Span
+                   line: UInt) -> TracepointSpan
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
-            return NoOpTracer.NoOpSpan(baggage: baggage)
+            return TracepointSpan.notRecording(file: fileID, line: line)
         }
 
         let span = TracepointSpan(
@@ -229,7 +229,7 @@ final class DynamicTracepointTestTracer: Tracer {
 
 extension DynamicTracepointTestTracer {
     /// Only intended to be used in single-threaded testing.
-    final class TracepointSpan: Tracing.Span {
+    final class TracepointSpan: Tracing.SpanProtocol {
         private let operationName: String
         private let kind: SpanKind
 
@@ -241,7 +241,20 @@ extension DynamicTracepointTestTracer {
         private(set) var baggage: Baggage
         private(set) var isRecording: Bool = false
 
-        let onEnd: (Span) -> Void
+        let onEnd: (TracepointSpan) -> Void
+
+        static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
+            let span = TracepointSpan(
+                operationName: "",
+                startTime: .now(),
+                baggage: .topLevel,
+                kind: .internal,
+                file: fileID,
+                line: line,
+                onEnd: { _ in () })
+            span.isRecording = false
+            return span
+        }
 
         init(operationName: String,
              startTime: DispatchWallTime,
@@ -249,7 +262,7 @@ extension DynamicTracepointTestTracer {
              kind: SpanKind,
              file fileID: String,
              line: UInt,
-             onEnd: @escaping (Span) -> Void)
+             onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
             self.startTime = startTime

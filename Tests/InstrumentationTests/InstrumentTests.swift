@@ -52,7 +52,7 @@ private struct DictionaryExtractor: Extractor {
     }
 }
 
-private final class FirstFakeTracer: Instrument {
+private final class FirstFakeTracer: InstrumentProtocol {
     enum TraceIDKey: BaggageKey {
         typealias Value = String
 
@@ -77,7 +77,7 @@ private final class FirstFakeTracer: Instrument {
     }
 }
 
-private final class SecondFakeTracer: Instrument {
+private final class SecondFakeTracer: InstrumentProtocol {
     enum TraceIDKey: BaggageKey {
         typealias Value = String
 

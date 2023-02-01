@@ -15,13 +15,13 @@
 @_exported import Instrumentation
 
 extension InstrumentationSystem {
-    /// Returns the ``Tracer`` bootstrapped as part of the `InstrumentationSystem`.
+    /// Returns the ``TracerProtocol`` bootstrapped as part of the `InstrumentationSystem`.
     ///
     /// If the system was bootstrapped with a `MultiplexInstrument` this function attempts to locate the _first_
     /// tracing instrument as passed to the multiplex instrument. If none is found, a ``NoOpTracer`` is returned.
     ///
-    /// - Returns: A ``Tracer`` if the system was bootstrapped with one, and ``NoOpTracer`` otherwise.
-    public static var tracer: Tracer {
-        (self._findInstrument(where: { $0 is Tracer }) as? Tracer) ?? NoOpTracer()
+    /// - Returns: A ``TracerProtocol`` if the system was bootstrapped with one, and ``NoOpTracer`` otherwise.
+    public static var tracer: any TracerProtocol {
+        (self._findInstrument(where: { $0 is any TracerProtocol }) as? any TracerProtocol) ?? NoOpTracer()
     }
 }

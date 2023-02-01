@@ -8,7 +8,7 @@ When instrumenting server applications there are typically three parties involve
 
 1. **Application developers** create server-side applications
 2. **Library/Framework developers** provide building blocks to create these applications
-3. **Instrument developers** provide tools to collect distributed metadata about your application
+3. **InstrumentProtocol developers** provide tools to collect distributed metadata about your application
 
 For applications to be instrumented correctly these three parts have to play along nicely.
 
@@ -42,7 +42,7 @@ To your main target, add a dependency on the `Instrumentation library` and the i
 
 Instead of providing each instrumented library with a specific instrument explicitly, you *bootstrap* the
 `InstrumentationSystem` which acts as a singleton that libraries/frameworks access when calling out to the configured
-`Instrument`:
+`InstrumentProtocol`:
 
 ```swift
 InstrumentationSystem.bootstrap(FancyInstrument())
@@ -63,7 +63,7 @@ This is because tracing systems may attempt to emit metrics about their status e
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
-It is important to note that `InstrumentationSystem.bootstrap(_: Instrument)` must only be called once. In case you
+It is important to note that `InstrumentationSystem.bootstrap(_: InstrumentProtocol)` must only be called once. In case you
 want to bootstrap the system to use multiple instruments, you group them in a `MultiplexInstrument` first, which you
 then pass along to the `bootstrap` method like this:
 
@@ -188,7 +188,7 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
 The above trace is achieved by starting and ending spans in all the mentioned functions, for example, like this:
 
 ```swift
-let tracer: Tracer
+let tracer: TracerProtocol
 
 func makeDinner(context: LoggingContext) async throws -> Meal {
   tracer.withSpan(operationName: "makeDinner", context) {
@@ -225,7 +225,7 @@ func get(url: String, context: LoggingContext) {
 }
 ```
 
-On the receiving side, an HTTP server should use the following `Instrument` API to extract the HTTP headers of the given
+On the receiving side, an HTTP server should use the following `InstrumentProtocol` API to extract the HTTP headers of the given
 `HTTPRequest` into:
 
 ```swift
@@ -248,7 +248,7 @@ For your library/framework to be able to carry `LoggingContext` across asynchron
 
 When your library/framework can benefit from tracing, you should make use of it by integrating the `Tracing` library.
 
-In order to work with the tracer configured by the end-user (see <doc:InDepthGuide#Bootstrapping-the-InstrumentationSystem>), it adds a property to `InstrumentationSystem` that gives you back a ``Tracer``. You can then use that tracer to start ``Span``s. In an HTTP client you e.g.
+In order to work with the tracer configured by the end-user (see <doc:InDepthGuide#Bootstrapping-the-InstrumentationSystem>), it adds a property to `InstrumentationSystem` that gives you back a ``TracerProtocol``. You can then use that tracer to start ``Span``s. In an HTTP client you e.g.
 should start a ``Span`` when sending the outgoing HTTP request:
 
 ```swift
@@ -280,12 +280,12 @@ func get(url: String, context: LoggingContext) {
 > In the above example we used the semantic `http.method` attribute that gets exposed via the
 `TracingOpenTelemetrySupport` library.
 
-## Instrument developers: Creating an instrument
+## InstrumentProtocol developers: Creating an instrument
 
-Creating an instrument means adopting the `Instrument` protocol (or ``Tracer`` in case you develop a tracer).
-`Instrument` is part of the `Instrumentation` library & `Tracing` contains the ``Tracer`` protocol.
+Creating an instrument means adopting the `InstrumentProtocol` protocol (or ``TracerProtocol`` in case you develop a tracer).
+`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the ``TracerProtocol`` protocol.
 
-`Instrument` has two requirements:
+`InstrumentProtocol` has two requirements:
 
 1. A method to inject values inside a `LoggingContext` into a generic carrier (e.g. HTTP headers)
 2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `LoggingContext`
@@ -296,11 +296,11 @@ act on the provided information or to add additional information to be carried a
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
 how to retrieve values from the `LoggingContext` and how to set values on it.
 
-### Creating a `Tracer`
+### Creating a `TracerProtocol`
 
 When creating a tracer you need to create two types:
 
-1. Your tracer conforming to ``Tracer``
+1. Your tracer conforming to ``TracerProtocol``
 2. A span class conforming to ``Span``
 
 > ``Span`` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.

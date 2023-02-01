@@ -16,9 +16,30 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
+// ==== ----------------------------------------------------------------------------------------------------------------
+// MARK: Tracer
+
+/// Convenience for accessing the globally bootstrapped ``TracerProtocol``.
+///
+/// Equivalent to ``InstrumentationSystem/tracer``.
+public enum Tracer {
+
+    /// Convenience to access the globally bootstrapped tracer on ``InstrumentationSystem``.
+    ///
+    /// Equivalent to ``InstrumentationSystem/tracer``.
+    public var current: any TracerProtocol {
+        InstrumentationSystem.tracer
+    }
+}
+
+
+/// An `InstrumentProtocol` with added functionality for distributed tracing. It uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
-public protocol Tracer: Instrument {
+public protocol TracerProtocol: InstrumentProtocol {
+
+    /// The type of `Span` that this tracer can create.
+    associatedtype Span: SpanProtocol
+
     /// Start a new ``Span`` with the given `Baggage` at a given time.
     ///
     /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
@@ -52,7 +73,7 @@ public protocol Tracer: Instrument {
     func forceFlush()
 }
 
-extension Tracer {
+extension TracerProtocol {
     #if swift(>=5.3.0)
     /// Start a new ``Span`` with the given `Baggage` starting "now".
     ///
@@ -115,7 +136,7 @@ extension Tracer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
-extension Tracer {
+extension TracerProtocol {
     #if swift(>=5.3.0)
     /// Execute a specific task within a newly created ``Span``.
     ///
@@ -206,7 +227,7 @@ extension Tracer {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Tracer {
+extension TracerProtocol {
     /// Execute the given operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.
     ///
@@ -263,7 +284,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (Span) async throws -> T
+        _ operation: (SpanProtocol) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -307,7 +328,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (Span) async throws -> T
+        _ operation: (SpanProtocol) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(operationName, baggage: baggage, ofKind: kind, function: function, file: fileID, line: line)
         defer { span.end() }

@@ -23,10 +23,10 @@ import struct Dispatch.DispatchWallTime
 /// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
 /// in which case this span should be considered as "child" of the previous span.
 ///
-/// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
+/// Creating a `Span` is delegated to a ``TracerProtocol`` and end users should never create them directly.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject, _SwiftTracingSendableSpan {
+public protocol SpanProtocol: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
@@ -70,7 +70,7 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     func end(at time: DispatchWallTime)
 }
 
-extension Span {
+extension SpanProtocol {
     /// End this `Span` at the current time.
     ///
     /// ### Rules about ending Spans
@@ -92,7 +92,7 @@ extension Span {
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
-    public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
+    public func addLink(_ other: SpanProtocol, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
     }
 }

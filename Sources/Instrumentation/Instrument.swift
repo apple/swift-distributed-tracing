@@ -14,45 +14,27 @@
 
 import InstrumentationBaggage
 
-/// Typealias used to simplify Support of old Swift versions which do not have `Sendable` defined.
-#if swift(>=5.6.0)
-@preconcurrency public protocol _SwiftInstrumentationSendable: Sendable {}
-#else
-public protocol _SwiftInstrumentationSendable {}
-#endif
+// ===== ---------------------------------------------------------------------------------------------------------------
+// MARK: Instrument
 
-/// Conforming types are used to extract values from a specific `Carrier`.
-public protocol Extractor: _SwiftInstrumentationSendable {
-    /// The carrier to extract values from.
-    associatedtype Carrier
+/// Convenience for accessing the globally bootstrapped ``InstrumentProtocol``.
+///
+/// Equivalent to ``InstrumentationSystem/instrument``.
+public enum Instrument {
 
-    /// Extract the value for the given key from the `Carrier`.
+    /// Convenience to access the globally bootstrapped instrument on ``InstrumentationSystem``.
     ///
-    /// - Parameters:
-    ///   - key: The key to be extracted.
-    ///   - carrier: The `Carrier` to extract from.
-    func extract(key: String, from carrier: Carrier) -> String?
-}
-
-/// Conforming types are used to inject values into a specific `Carrier`.
-public protocol Injector: _SwiftInstrumentationSendable {
-    /// The carrier to inject values into.
-    associatedtype Carrier
-
-    /// Inject the given value for the given key into the given `Carrier`.
-    ///
-    /// - Parameters:
-    ///   - value: The value to be injected.
-    ///   - key: The key for which to inject the value.
-    ///   - carrier: The `Carrier` to inject into.
-    func inject(_ value: String, forKey key: String, into carrier: inout Carrier)
+    /// Equivalent to ``InstrumentationSystem/instrument``.
+    public var current: any InstrumentProtocol {
+        InstrumentationSystem.instrument
+    }
 }
 
 /// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
 /// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
-public protocol Instrument: _SwiftInstrumentationSendable {
+public protocol InstrumentProtocol: _SwiftInstrumentationSendable {
     /// Extract values from a `Carrier` by using the given extractor and inject them into the given `Baggage`.
-    /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
+    /// It's quite common for `InstrumentProtocol`s to come up with new values if they weren't passed along in the given `Carrier`.
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
@@ -70,3 +52,50 @@ public protocol Instrument: _SwiftInstrumentationSendable {
     func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Inject.Carrier == Carrier
 }
+
+// ===== ---------------------------------------------------------------------------------------------------------------
+// MARK: Instrument
+
+
+/// Conforming types are used to extract values from a specific `Carrier`.
+public protocol Extractor: _SwiftInstrumentationSendable {
+    /// The carrier to extract values from.
+    ///
+    /// For example, this could be an "http request" type.
+    associatedtype Carrier
+
+    /// Extract the value for the given key from the `Carrier`.
+    ///
+    /// - Parameters:
+    ///   - key: The key to be extracted.
+    ///   - carrier: The `Carrier` to extract from.
+    func extract(key: String, from carrier: Carrier) -> String?
+}
+
+/// Conforming types are used to inject values into a specific `Carrier`.
+public protocol Injector: _SwiftInstrumentationSendable {
+    /// The carrier to inject values into.
+    ///
+    /// For example, this could be an "http request" type.
+    associatedtype Carrier
+
+    /// Inject the given value for the given key into the given `Carrier`.
+    ///
+    /// - Parameters:
+    ///   - value: The value to be injected.
+    ///   - key: The key for which to inject the value.
+    ///   - carrier: The `Carrier` to inject into.
+    func inject(_ value: String, forKey key: String, into carrier: inout Carrier)
+}
+
+// ===== ---------------------------------------------------------------------------------------------------------------
+// MARK: Sendable support
+
+
+
+/// Typealias used to simplify Support of old Swift versions which do not have `Sendable` defined.
+#if swift(>=5.6.0)
+@preconcurrency public protocol _SwiftInstrumentationSendable: Sendable {}
+#else
+public protocol _SwiftInstrumentationSendable {}
+#endif

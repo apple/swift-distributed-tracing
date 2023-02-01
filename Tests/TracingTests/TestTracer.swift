@@ -19,9 +19,9 @@ import InstrumentationBaggage
 import Tracing
 
 /// Only intended to be used in single-threaded testing.
-final class TestTracer: Tracer {
+final class TestTracer: TracerProtocol {
     private(set) var spans = [TestSpan]()
-    var onEndSpan: (Span) -> Void = { _ in }
+    var onEndSpan: (SpanProtocol) -> Void = { _ in }
 
     func startSpan(
         _ operationName: String,
@@ -31,7 +31,7 @@ final class TestTracer: Tracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Span {
+    ) -> TestSpan {
         let span = TestSpan(
             operationName: operationName,
             startTime: time,
@@ -95,7 +95,7 @@ extension Baggage {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class TestSpan: Span {
+final class TestSpan: SpanProtocol {
     private let operationName: String
     private let kind: SpanKind
 
@@ -122,14 +122,14 @@ final class TestSpan: Span {
 
     private(set) var isRecording = false
 
-    let onEnd: (Span) -> Void
+    let onEnd: (SpanProtocol) -> Void
 
     init(
         operationName: String,
         startTime: DispatchWallTime,
         baggage: Baggage,
         kind: SpanKind,
-        onEnd: @escaping (Span) -> Void
+        onEnd: @escaping (SpanProtocol) -> Void
     ) {
         self.operationName = operationName
         self.startTime = startTime

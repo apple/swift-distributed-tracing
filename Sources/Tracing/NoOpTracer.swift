@@ -16,8 +16,8 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// No operation ``Tracer``, used when no tracing is required.
-public struct NoOpTracer: Tracer {
+/// No operation ``TracerProtocol``, used when no tracing is required.
+public struct NoOpTracer: TracerProtocol {
     public init() {}
 
     public func startSpan(
@@ -28,7 +28,7 @@ public struct NoOpTracer: Tracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Span {
+    ) -> NoOpSpan {
         NoOpSpan(baggage: baggage)
     }
 
@@ -46,7 +46,7 @@ public struct NoOpTracer: Tracer {
         // no-op
     }
 
-    public final class NoOpSpan: Span {
+    public final class NoOpSpan: SpanProtocol {
         public let baggage: Baggage
         public let isRecording = false
 

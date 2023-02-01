@@ -69,7 +69,7 @@ public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
     ),
 ]
 
-private var span: Span!
+private var span: SpanProtocol!
 
 private func setUp() {
     span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
