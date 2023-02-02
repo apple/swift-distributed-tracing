@@ -197,6 +197,103 @@ final class SpanTests: XCTestCase {
         }
         XCTAssertEqual(statusCode, 418)
     }
+
+    func testAttributesAsStringMetadata() {
+        var attributes = SpanAttributes()
+        attributes["http.status_code"] = 418
+        attributes["http.target"] = "target"
+
+        var metadata: [String: SwiftLogMetadataValue] = [:]
+        metadata[attributeKey: "http_target"] = attributes["http.target"]
+        #if swift(>=5.2)
+        metadata[attributeKey: "http_status_code"] = attributes.sampleHttp.statusCode
+        #else
+        metadata[attributeKey: "http_status_code"] = attributes["http.status_code"]
+        #endif
+
+
+        XCTAssertEqual(metadata["http_status_code"], SwiftLogMetadataValue.string("418"))
+        XCTAssertEqual(metadata["http_target"], SwiftLogMetadataValue.string("target"))
+    }
+}
+
+enum SwiftLogMetadataValue: Equatable {
+    case string(String)
+    #if compiler(>=5.7)
+    case stringConvertible(CustomStringConvertible & Sendable)
+    #else
+    case stringConvertible(CustomStringConvertible)
+    #endif
+    case dictionary([String: SwiftLogMetadataValue])
+    case array([SwiftLogMetadataValue])
+
+    static func ==(lhs: SwiftLogMetadataValue, rhs: SwiftLogMetadataValue) -> Bool {
+        switch (lhs, rhs) {
+        case (.string(let l), .string(let r)):
+            return l == r
+        case (.array(let l), .array(let r)):
+            return l == r
+        case (.stringConvertible(let l), .stringConvertible(let r)):
+            return "\(l)" == "\(r)"
+        case (.dictionary(let l), .dictionary(let r)):
+            return l.count == r.count &&
+                l.keys.allSatisfy { key in r[key] == l[key] }
+        default:
+            return false
+        }
+    }
+}
+
+extension Dictionary where Key == String, Value == SwiftLogMetadataValue {
+    subscript(attributeKey metadataKey: String) -> SpanAttributeConvertible? {
+        get {
+            guard let value = self[metadataKey] else { return nil }
+            switch value {
+            case .string(let value):
+                return SpanAttribute.string(value)
+            case .dictionary:
+                return nil // we can't express dictionaries in span attributes
+            case .array(let values):
+                fatalError()
+            case .stringConvertible(let value):
+                return SpanAttribute.stringConvertible(value)
+            }
+        }
+        set {
+            self[metadataKey] = newValue?.toMetadataValue()
+        }
+    }
+}
+
+extension SpanAttributeConvertible {
+    func toMetadataValue() -> SwiftLogMetadataValue {
+        switch self.toSpanAttribute() {
+        case .int(let value):
+            return SwiftLogMetadataValue.string("\(value)")
+        case .intArray(let values):
+            return SwiftLogMetadataValue.array(values.map { SwiftLogMetadataValue.string("\($0)") })
+
+        case .double(let value):
+            return SwiftLogMetadataValue.string("\(value)")
+        case .doubleArray(let values):
+            return SwiftLogMetadataValue.array(values.map { SwiftLogMetadataValue.string("\($0)") })
+
+        case .bool(let value):
+            return SwiftLogMetadataValue.string("\(value)")
+        case .boolArray(let values):
+            return SwiftLogMetadataValue.array(values.map { SwiftLogMetadataValue.string("\($0)") })
+
+        case .string(let value):
+            return SwiftLogMetadataValue.string("\(value)")
+        case .stringArray(let values):
+            return SwiftLogMetadataValue.array(values.map { SwiftLogMetadataValue.string("\($0)") })
+
+        case .stringConvertible(let value):
+            return SwiftLogMetadataValue.string("\(value)")
+        case .stringConvertibleArray(let values):
+            return SwiftLogMetadataValue.array(values.map { SwiftLogMetadataValue.string("\($0)") })
+        }
+    }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------

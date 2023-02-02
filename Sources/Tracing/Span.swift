@@ -269,7 +269,7 @@ public enum SpanAttribute: Equatable {
         .int(0)
     }
 
-    internal var anyValue: Any {
+    public var anyValue: Any {
         switch self {
         case .int(let value):
             return value
