@@ -145,7 +145,7 @@ final class DynamicTracepointTestTracer: Tracer {
     func startSpan(_ operationName: String,
                    baggage: InstrumentationBaggage.Baggage,
                    ofKind kind: Tracing.SpanKind,
-                   at time: DispatchWallTime,
+                   at time: TracingTime,
                    function: String,
                    file fileID: String,
                    line: UInt) -> Tracing.Span
@@ -235,8 +235,8 @@ extension DynamicTracepointTestTracer {
 
         private var status: SpanStatus?
 
-        private let startTime: DispatchWallTime
-        private(set) var endTime: DispatchWallTime?
+        private let startTime: TracingTime
+        private(set) var endTime: TracingTime?
 
         private(set) var baggage: Baggage
         private(set) var isRecording: Bool = false
@@ -244,7 +244,7 @@ extension DynamicTracepointTestTracer {
         let onEnd: (Span) -> Void
 
         init(operationName: String,
-             startTime: DispatchWallTime,
+             startTime: TracingTime,
              baggage: Baggage,
              kind: SpanKind,
              file fileID: String,
@@ -284,7 +284,7 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func end(at time: DispatchWallTime) {
+        func end(at time: TracingTime) {
             self.endTime = time
             self.onEnd(self)
         }

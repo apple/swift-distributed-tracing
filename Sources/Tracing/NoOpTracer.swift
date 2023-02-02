@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
@@ -24,7 +23,7 @@ public struct NoOpTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: TracingTime,
         function: String,
         file fileID: String,
         line: UInt
@@ -71,7 +70,7 @@ public struct NoOpTracer: Tracer {
             }
         }
 
-        public func end(at time: DispatchWallTime) {
+        public func end(at time: TracingTime) {
             // ignore
         }
     }

@@ -64,7 +64,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: TracingTime,
         function: String,
         file fileID: String,
         line: UInt
@@ -103,8 +103,8 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         private var status: SpanStatus?
 
-        private let startTime: DispatchWallTime
-        private(set) var endTime: DispatchWallTime?
+        private let startTime: TracingTime
+        private(set) var endTime: TracingTime?
 
         let baggage: Baggage
 
@@ -126,7 +126,7 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         init(
             operationName: String,
-            startTime: DispatchWallTime,
+            startTime: TracingTime,
             kind: SpanKind,
             baggage: Baggage
         ) {
@@ -153,7 +153,7 @@ private final class TracedLockPrintlnTracer: Tracer {
 
         func recordError(_ error: Error) {}
 
-        func end(at time: DispatchWallTime) {
+        func end(at time: TracingTime) {
             self.endTime = time
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }

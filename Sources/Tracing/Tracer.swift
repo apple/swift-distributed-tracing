@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
@@ -37,7 +36,7 @@ public protocol Tracer: Instrument {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: TracingTime,
         function: String,
         file fileID: String,
         line: UInt

@@ -12,11 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.6.0)
-@preconcurrency import struct Dispatch.DispatchWallTime
-#else
-import struct Dispatch.DispatchWallTime
-#endif
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
@@ -67,7 +62,7 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end(at time: DispatchWallTime)
+    func end(at time: TracingTime)
 }
 
 extension Span {
@@ -108,15 +103,15 @@ public struct SpanEvent: Equatable {
     /// One or more ``SpanAttribute``s with the same restrictions as defined for ``Span`` attributes.
     public var attributes: SpanAttributes
 
-    /// The `DispatchWallTime` at which this event occurred.
-    public let time: DispatchWallTime
+    /// The time at which this event occurred.
+    public let time: TracingTime
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
     ///   - time: The `DispatchWallTime` at which this event occurred. Defaults to `.now()`.
-    public init(name: String, attributes: SpanAttributes = [:], at time: DispatchWallTime = .now()) {
+    public init(name: String, attributes: SpanAttributes = [:], at time: TracingTime = .now()) {
         self.name = name
         self.attributes = attributes
         self.time = time

@@ -27,7 +27,7 @@ final class TestTracer: Tracer {
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: TracingTime,
         function: String,
         file fileID: String,
         line: UInt
@@ -101,8 +101,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    private let startTime: DispatchWallTime
-    private(set) var endTime: DispatchWallTime?
+    private let startTime: TracingTime
+    private(set) var endTime: TracingTime?
 
     let baggage: Baggage
 
@@ -126,7 +126,7 @@ final class TestSpan: Span {
 
     init(
         operationName: String,
-        startTime: DispatchWallTime,
+        startTime: TracingTime,
         baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (Span) -> Void
@@ -153,7 +153,7 @@ final class TestSpan: Span {
 
     func recordError(_ error: Error) {}
 
-    func end(at time: DispatchWallTime) {
+    func end(at time: TracingTime) {
         self.endTime = time
         self.onEnd(self)
     }
