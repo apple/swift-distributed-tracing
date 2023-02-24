@@ -70,7 +70,7 @@ public protocol SpanProtocol<Clock>: AnyObject, _SwiftTracingSendableSpan {
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end(at time: DispatchWallTime)
+    func end(at time: Clock.Instant)
 }
 
 extension Span {
