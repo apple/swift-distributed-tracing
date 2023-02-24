@@ -17,7 +17,10 @@ import Dispatch
 @_exported import InstrumentationBaggage
 
 /// No operation ``Tracer``, used when no tracing is required.
+@available(macOS 13.0, iOS 15.0, *)
 public struct NoOpTracer: Tracer {
+    public typealias Span = NoOpSpan
+
     public init() {}
 
     public func startSpan(
@@ -46,7 +49,9 @@ public struct NoOpTracer: Tracer {
         // no-op
     }
 
-    public final class NoOpSpan: Span {
+    @available(macOS 13.0, iOS 15.0, *)
+    public final class NoOpSpan: SpanProtocol {
+        public typealias Clock = TracingClock
         public let baggage: Baggage
         public let isRecording = false
 

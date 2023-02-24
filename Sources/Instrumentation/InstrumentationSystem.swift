@@ -22,6 +22,7 @@ import InstrumentationBaggage
 ///
 /// # Access the Instrument
 /// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
+@available(macOS 13.0, iOS 15.0, *)
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
     private static var _instrument: Instrument = NoOpInstrument()
@@ -61,6 +62,7 @@ public enum InstrumentationSystem {
     }
 }
 
+@available(macOS 13.0, iOS 15.0, *)
 extension InstrumentationSystem {
     /// :nodoc: INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {

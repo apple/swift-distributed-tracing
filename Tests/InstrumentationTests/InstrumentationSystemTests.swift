@@ -16,12 +16,14 @@
 import InstrumentationBaggage
 import XCTest
 
+@available(macOS 13.0, iOS 15.0, *)
 extension InstrumentationSystem {
     public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
         self._findInstrument(where: { $0 is I }) as? I
     }
 }
 
+@available(macOS 13.0, iOS 15.0, *)
 final class InstrumentationSystemTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()

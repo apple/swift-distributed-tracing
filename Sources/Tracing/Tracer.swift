@@ -18,7 +18,10 @@ import Dispatch
 
 /// An `Instrument` with added functionality for distributed tracing. It uses the span-based tracing model and is
 /// based on the OpenTracing/OpenTelemetry spec.
+@available(macOS 13.0, iOS 15.0, *)
 public protocol Tracer: Instrument {
+    associatedtype Span: SpanProtocol
+
     /// Start a new ``Span`` with the given `Baggage` at a given time.
     ///
     /// - Note: Prefer to use `withSpan` to start a span as it automatically takes care of ending the span,
@@ -41,7 +44,7 @@ public protocol Tracer: Instrument {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Span
+    ) -> Self.Span
 
     /// Export all ended spans to the configured backend that have not yet been exported.
     ///
@@ -52,6 +55,7 @@ public protocol Tracer: Instrument {
     func forceFlush()
 }
 
+@available(macOS 13.0, iOS 15.0, *)
 extension Tracer {
     #if swift(>=5.3.0)
     /// Start a new ``Span`` with the given `Baggage` starting "now".
@@ -115,6 +119,7 @@ extension Tracer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
+@available(macOS 13.0, iOS 15.0, *)
 extension Tracer {
     #if swift(>=5.3.0)
     /// Execute a specific task within a newly created ``Span``.
@@ -205,7 +210,7 @@ extension Tracer {
 // MARK: Starting spans: Task-local Baggage propagation
 
 #if swift(>=5.5) && canImport(_Concurrency)
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+@available(macOS 13, iOS 15.0, tvOS 13.0, watchOS 6.0, *)
 extension Tracer {
     /// Execute the given operation within a newly created ``Span``,
     /// started as a child of the currently stored task local `Baggage.current` or as a root span if `nil`.

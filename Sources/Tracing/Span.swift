@@ -26,7 +26,10 @@ import struct Dispatch.DispatchWallTime
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject, _SwiftTracingSendableSpan {
+@available(macOS 13.0, iOS 15.0, *)
+public protocol SpanProtocol<Clock>: AnyObject, _SwiftTracingSendableSpan {
+    associatedtype Clock: _Concurrency.Clock where Clock.Duration == Swift.Duration
+
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
