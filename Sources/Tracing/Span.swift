@@ -42,7 +42,7 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     ///
     /// - Parameters:
     ///   - error: The error to be recorded.
-    func recordError(_ error: Error)
+    func recordError(_ error: Error, attributes: SpanAttributes)
 
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes { get set }
@@ -94,6 +94,12 @@ extension Span {
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
     public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
+    }
+}
+
+extension Span {
+    public func recordError(_ error: Error) {
+        self.recordError(error, attributes: [:])
     }
 }
 

@@ -151,7 +151,7 @@ private final class TracedLockPrintlnTracer: Tracer {
             self.events.append(event)
         }
 
-        func recordError(_ error: Error) {}
+        func recordError(_ error: Error, attributes: SpanAttributes) {}
 
         func end(at time: DispatchWallTime) {
             self.endTime = time

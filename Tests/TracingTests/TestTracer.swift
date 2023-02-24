@@ -21,7 +21,7 @@ import Tracing
 /// Only intended to be used in single-threaded testing.
 final class TestTracer: Tracer {
     private(set) var spans = [TestSpan]()
-    var onEndSpan: (Span) -> Void = { _ in }
+    var onEndSpan: (TestSpan) -> Void = { _ in }
 
     func startSpan(
         _ operationName: String,
@@ -104,6 +104,8 @@ final class TestSpan: Span {
     private let startTime: DispatchWallTime
     private(set) var endTime: DispatchWallTime?
 
+    private(set) var recordedErrors: [(Error, SpanAttributes)] = []
+
     let baggage: Baggage
 
     private(set) var events = [SpanEvent]() {
@@ -122,14 +124,14 @@ final class TestSpan: Span {
 
     private(set) var isRecording = false
 
-    let onEnd: (Span) -> Void
+    let onEnd: (TestSpan) -> Void
 
     init(
         operationName: String,
         startTime: DispatchWallTime,
         baggage: Baggage,
         kind: SpanKind,
-        onEnd: @escaping (Span) -> Void
+        onEnd: @escaping (TestSpan) -> Void
     ) {
         self.operationName = operationName
         self.startTime = startTime
@@ -151,7 +153,9 @@ final class TestSpan: Span {
         self.events.append(event)
     }
 
-    func recordError(_ error: Error) {}
+    func recordError(_ error: Error, attributes: SpanAttributes) {
+        self.recordedErrors.append((error, attributes))
+    }
 
     func end(at time: DispatchWallTime) {
         self.endTime = time
