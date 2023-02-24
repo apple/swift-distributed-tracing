@@ -98,7 +98,6 @@ private final class TracedLockPrintlnTracer: Tracer {
         Carrier == Extract.Carrier {}
 
     final class TracedLockPrintlnSpan: Span {
-        private let operationName: String
         private let kind: SpanKind
 
         private var status: SpanStatus?
@@ -106,6 +105,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         private let startTime: DispatchWallTime
         private(set) var endTime: DispatchWallTime?
 
+        var operationName: String
         let baggage: Baggage
 
         private var links = [SpanLink]()
