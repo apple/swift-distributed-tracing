@@ -30,6 +30,23 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
+    /// Returns the name of the operation this span represents.
+    ///
+    /// The name may be changed during the lifetime of a `Span`, this change
+    /// may or may not impact the sampling decision and actually emitting the span,
+    /// depending on how a backend decides to treat renames.
+    ///
+    /// This can still be useful when, for example, we want to immediately start
+    /// span when receiving a request but make it more precise as handling of the request proceeds.
+    /// For example, we can start a span immediately when a request is received in a server,
+    /// and update it to reflect the matched route, if it did match one:
+    ///
+    /// - 1) Start span with basic path (e.g. `operationName = request.head.uri` during `withSpan`)
+    ///   - 2.1) "Route Not Found" -> Record error
+    ///   - 2.2) "Route Found" -> Rename to route (`/users/1` becomes `/users/:userID`)
+    /// - 3) End span
+    var operationName: String { get set }
+
     /// Set the status.
     /// - Parameter status: The status of this `Span`.
     func setStatus(_ status: SpanStatus)
