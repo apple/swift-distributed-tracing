@@ -50,7 +50,7 @@ public struct NoOpTracer: Tracer {
         public let baggage: Baggage
         public let isRecording = false
 
-        public let _operationName: String
+        private let _operationName: String
         public var operationName: String {
             get {
                 self._operationName
