@@ -96,7 +96,6 @@ extension Baggage {
 
 /// Only intended to be used in single-threaded testing.
 final class TestSpan: Span {
-    private let operationName: String
     private let kind: SpanKind
 
     private var status: SpanStatus?
@@ -106,6 +105,7 @@ final class TestSpan: Span {
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
+    var operationName: String
     let baggage: Baggage
 
     private(set) var events = [SpanEvent]() {

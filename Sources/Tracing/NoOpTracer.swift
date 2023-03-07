@@ -29,7 +29,7 @@ public struct NoOpTracer: Tracer {
         file fileID: String,
         line: UInt
     ) -> Span {
-        NoOpSpan(baggage: baggage)
+        NoOpSpan(operationName: operationName, baggage: baggage)
     }
 
     public func forceFlush() {}
@@ -50,7 +50,18 @@ public struct NoOpTracer: Tracer {
         public let baggage: Baggage
         public let isRecording = false
 
-        public init(baggage: Baggage) {
+        private let _operationName: String
+        public var operationName: String {
+            get {
+                self._operationName
+            }
+            set {
+                // ignore
+            }
+        }
+
+        public init(operationName: String, baggage: Baggage) {
+            self._operationName = operationName
             self.baggage = baggage
         }
 

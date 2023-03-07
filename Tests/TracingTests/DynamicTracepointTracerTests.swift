@@ -152,7 +152,7 @@ final class DynamicTracepointTestTracer: Tracer {
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
-            return NoOpTracer.NoOpSpan(baggage: baggage)
+            return NoOpTracer.NoOpSpan(operationName: operationName, baggage: baggage)
         }
 
         let span = TracepointSpan(
@@ -230,7 +230,6 @@ final class DynamicTracepointTestTracer: Tracer {
 extension DynamicTracepointTestTracer {
     /// Only intended to be used in single-threaded testing.
     final class TracepointSpan: Tracing.Span {
-        private let operationName: String
         private let kind: SpanKind
 
         private var status: SpanStatus?
@@ -238,6 +237,7 @@ extension DynamicTracepointTestTracer {
         private let startTime: DispatchWallTime
         private(set) var endTime: DispatchWallTime?
 
+        public var operationName: String
         private(set) var baggage: Baggage
         private(set) var isRecording: Bool = false
 
