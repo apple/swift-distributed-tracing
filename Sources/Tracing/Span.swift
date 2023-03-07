@@ -42,6 +42,7 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     ///
     /// - Parameters:
     ///   - error: The error to be recorded.
+    ///   - attributes: Additional attributes describing the error.
     func recordError(_ error: Error, attributes: SpanAttributes)
 
     /// The attributes describing this `Span`.
