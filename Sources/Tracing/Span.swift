@@ -99,6 +99,10 @@ extension Span {
 }
 
 extension Span {
+    /// Record a failure described by the given error.
+    ///
+    /// - Parameters:
+    ///   - error: The error to be recorded.
     public func recordError(_ error: Error) {
         self.recordError(error, attributes: [:])
     }
