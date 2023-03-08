@@ -71,7 +71,7 @@ public struct NoOpTracer: Tracer {
 
         public func addEvent(_ event: SpanEvent) {}
 
-        public func recordError(_ error: Error) {}
+        public func recordError(_ error: Error, attributes: SpanAttributes) {}
 
         public var attributes: SpanAttributes {
             get {

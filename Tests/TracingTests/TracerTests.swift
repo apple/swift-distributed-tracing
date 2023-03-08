@@ -253,6 +253,37 @@ final class TracerTests: XCTestCase {
         #endif
     }
 
+    func testWithSpan_recordErrorWithAttributes() throws {
+        #if swift(>=5.5) && canImport(_Concurrency)
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var endedSpan: TestSpan?
+        tracer.onEndSpan = { span in endedSpan = span }
+
+        let errorToThrow = ExampleSpanError()
+        let attrsForError: SpanAttributes = ["attr": "value"]
+
+        tracer.withSpan("hello") { span in
+            span.recordError(errorToThrow, attributes: attrsForError)
+        }
+
+        XCTAssertTrue(endedSpan != nil)
+        XCTAssertEqual(endedSpan!.recordedErrors.count, 1)
+        let error = endedSpan!.recordedErrors.first!.0
+        XCTAssertEqual(error as! ExampleSpanError, errorToThrow)
+        let attrs = endedSpan!.recordedErrors.first!.1
+        XCTAssertEqual(attrs, attrsForError)
+        #endif
+    }
+
     #if swift(>=5.5) && canImport(_Concurrency)
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).

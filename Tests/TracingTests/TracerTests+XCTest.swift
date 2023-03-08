@@ -35,6 +35,7 @@ extension TracerTests {
                 ("testWithSpan_automaticBaggagePropagation_async", testWithSpan_automaticBaggagePropagation_async),
                 ("testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation", testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation),
                 ("testWithSpan_automaticBaggagePropagation_async_throws", testWithSpan_automaticBaggagePropagation_async_throws),
+                ("testWithSpan_recordErrorWithAttributes", testWithSpan_recordErrorWithAttributes),
            ]
    }
 }

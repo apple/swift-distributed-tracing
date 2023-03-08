@@ -276,7 +276,7 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func recordError(_ error: Error) {
+        func recordError(_ error: Error, attributes: SpanAttributes) {
             print("")
         }
 
