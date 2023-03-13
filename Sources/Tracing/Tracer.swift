@@ -46,13 +46,13 @@ extension Tracer {
         )
         #else
         InstrumentationSystem.legacyTracer.startAnySpan(
-        operationName,
-        baggage: baggage,
-        ofKind: kind,
-        at: time,
-        function: function,
-        file: fileID,
-        line: line
+            operationName,
+            baggage: baggage,
+            ofKind: kind,
+            at: time,
+            function: function,
+            file: fileID,
+            line: line
         )
         #endif
     }
@@ -105,7 +105,8 @@ extension Tracer {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { anySpan in
+            line: line
+        ) { anySpan in
             try operation(anySpan)
         }
         #else
@@ -114,7 +115,8 @@ extension Tracer {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { anySpan in
+            line: line
+        ) { anySpan in
             try operation(anySpan)
         }
         #endif
@@ -136,7 +138,8 @@ extension Tracer {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { anySpan in
+            line: line
+        ) { anySpan in
             try await operation(anySpan)
         }
     }
@@ -155,7 +158,8 @@ extension Tracer {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { anySpan in
+            line: line
+        ) { anySpan in
             try await operation(anySpan)
         }
     }

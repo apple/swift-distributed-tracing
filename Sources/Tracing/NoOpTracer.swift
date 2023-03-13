@@ -28,19 +28,22 @@ public struct NoOpTracer: LegacyTracerProtocol {
                              at time: DispatchWallTime,
                              function: String,
                              file fileID: String,
-                             line: UInt) -> any SpanProtocol {
+                             line: UInt) -> any SpanProtocol
+    {
         NoOpSpan(baggage: baggage)
     }
 
     public func forceFlush() {}
 
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier {
+        where Inject: Injector, Carrier == Inject.Carrier
+    {
         // no-op
     }
 
     public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier {
+        where Extract: Extractor, Carrier == Extract.Carrier
+    {
         // no-op
     }
 
@@ -88,7 +91,6 @@ public struct NoOpTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension NoOpTracer: TracerProtocol {
-
     public func startSpan(
         _ operationName: String,
         baggage: Baggage,

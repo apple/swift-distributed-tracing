@@ -25,7 +25,7 @@ extension InstrumentationSystem {
     public static var tracer: any TracerProtocol {
         let found: (any TracerProtocol)? =
             (self._findInstrument(where: { $0 is (any TracerProtocol) }) as? (any TracerProtocol))
-         return found ?? NoOpTracer()
+        return found ?? NoOpTracer()
     }
     #endif
 

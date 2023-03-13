@@ -159,12 +159,12 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     }
 
     func startAnySpan(_ operationName: String,
-                   baggage: InstrumentationBaggage.Baggage,
-                   ofKind kind: Tracing.SpanKind,
-                   at time: DispatchWallTime,
-                   function: String,
-                   file fileID: String,
-                   line: UInt) -> any SpanProtocol
+                      baggage: InstrumentationBaggage.Baggage,
+                      ofKind kind: Tracing.SpanKind,
+                      at time: DispatchWallTime,
+                      function: String,
+                      file fileID: String,
+                      line: UInt) -> any SpanProtocol
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
@@ -325,12 +325,13 @@ extension DynamicTracepointTestTracer {
 extension DynamicTracepointTestTracer: TracerProtocol {
     typealias Span = TracepointSpan
     func startSpan(_ operationName: String,
-                      baggage: InstrumentationBaggage.Baggage,
-                      ofKind kind: Tracing.SpanKind,
-                      at time: DispatchWallTime,
-                      function: String,
-                      file fileID: String,
-                      line: UInt) -> TracepointSpan {
+                   baggage: InstrumentationBaggage.Baggage,
+                   ofKind kind: Tracing.SpanKind,
+                   at time: DispatchWallTime,
+                   function: String,
+                   file fileID: String,
+                   line: UInt) -> TracepointSpan
+    {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return TracepointSpan.notRecording(file: fileID, line: line)

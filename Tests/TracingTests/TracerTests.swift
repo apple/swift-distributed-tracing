@@ -60,7 +60,7 @@ final class TracerTests: XCTestCase {
     func testWithSpan_success() {
         guard #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) else {
             return
-    }
+        }
         let tracer = TestTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
         defer {

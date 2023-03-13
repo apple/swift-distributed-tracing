@@ -99,7 +99,6 @@ public protocol SpanProtocol: AnyObject, _SwiftTracingSendableSpan {
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
     // @available(*, deprecated, message: "Use Clock based `end(at:)` instead")
     func end(at time: DispatchWallTime)
-
 }
 
 extension SpanProtocol {

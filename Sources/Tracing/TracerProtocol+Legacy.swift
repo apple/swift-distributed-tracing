@@ -19,7 +19,6 @@ import Dispatch
 // @available(*, deprecated, message: "Use 'TracerProtocol' instead")
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol LegacyTracerProtocol: InstrumentProtocol {
-
     // @available(*, deprecated, message: "Use 'TracerProtocol/startSpan' instead")
     func startAnySpan(
         _ operationName: String,
@@ -38,7 +37,6 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
     ///
     /// This function should not block indefinitely, implementations should offer a configurable timeout for flush operations.
     func forceFlush()
-
 }
 
 // ==== ------------------------------------------------------------------
@@ -46,7 +44,6 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 extension LegacyTracerProtocol {
-
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
     public func startAnySpan(
         _ operationName: String,
@@ -64,7 +61,8 @@ extension LegacyTracerProtocol {
             at: time,
             function: function,
             file: fileID,
-            line: line)
+            line: line
+        )
     }
 
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
@@ -110,7 +108,6 @@ extension LegacyTracerProtocol {
             throw error // rethrow
         }
     }
-
 }
 
 #if swift(>=5.7.0)
@@ -135,7 +132,6 @@ extension TracerProtocol {
         )
     }
 
-
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     // @available(*, deprecated, message: "Use 'TracerProtocol/withSpan' instead")
     public func withAnySpan<T>(
@@ -151,7 +147,8 @@ extension TracerProtocol {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { span in
+            line: line
+        ) { span in
             try operation(span)
         }
     }
@@ -173,7 +170,8 @@ extension TracerProtocol {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { span in
+            line: line
+        ) { span in
             try await operation(span)
         }
     }
@@ -193,11 +191,11 @@ extension TracerProtocol {
             ofKind: kind,
             function: function,
             file: fileID,
-            line: line) { span in
+            line: line
+        ) { span in
             try await operation(span)
         }
     }
     #endif
-
 }
 #endif
