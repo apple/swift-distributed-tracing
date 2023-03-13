@@ -105,6 +105,11 @@ final class DynamicTracepointTracerTests: XCTestCase {
     func logic(fakeLine: UInt) {
         #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
+            // inside
+        }
+        #else
+        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-dont", line: fakeLine) { _ in
+            // inside
         }
         #endif
     }
@@ -113,6 +118,12 @@ final class DynamicTracepointTracerTests: XCTestCase {
         #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
             InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
+                // inside
+            }
+        }
+        #else
+        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes", line: fakeLine) { _ in
+            InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
             }
         }
