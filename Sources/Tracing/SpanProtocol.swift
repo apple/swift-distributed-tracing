@@ -25,8 +25,17 @@ import struct Dispatch.DispatchWallTime
 ///
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
+/// ### Reference semantics
+/// A span always must exhibit reference semantics. Passing around a `span` must allow other pieces of code
+/// modify it safely. The span must therefore employ synchronization techniques adequate to ensure this.
+///
+/// It is allowed to implement `SpanProtocol` using a `struct` or `enum`, however the type must still exhibit reference
+/// semantics. This is useful especially for implementing efficient "no-op" or "tracing is disabled" span implementations,
+/// which can be almost empty struct instances, while their "tracing is enabled" versions should refer all state to an
+/// underlying reference type "box" which contains all the spans data.
+///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject, _SwiftTracingSendableSpan {
+public protocol SpanProtocol: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
@@ -48,10 +57,12 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     var operationName: String { get set }
 
     /// Set the status.
+    ///
     /// - Parameter status: The status of this `Span`.
     func setStatus(_ status: SpanStatus)
 
     /// Add a ``SpanEvent`` in place.
+    ///
     /// - Parameter event: The ``SpanEvent`` to add to this `Span`.
     func addEvent(_ event: SpanEvent)
 
@@ -69,6 +80,7 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     var isRecording: Bool { get }
 
     /// Add a ``SpanLink`` in place.
+    ///
     /// - Parameter link: The `SpanLink` to add to this `Span`.
     func addLink(_ link: SpanLink)
 
@@ -85,10 +97,12 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
+    // @available(*, deprecated, message: "Use Clock based `end(at:)` instead")
     func end(at time: DispatchWallTime)
+
 }
 
-extension Span {
+extension SpanProtocol {
     /// End this `Span` at the current time.
     ///
     /// ### Rules about ending Spans
@@ -108,14 +122,21 @@ extension Span {
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
+    ///
+    /// ### Reference semantics
+    /// This setter `nonmutating` on purpose, a span may be implemented using a `struct`.
+    /// All state mutations performed on a struct must behave using reference semantics:
+    /// sharing a span with various pieces of code, must all be mutating the same underlying
+    /// reference semantics storage.
+    ///
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
-    public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
+    public func addLink(_ other: SpanProtocol, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
     }
 }
 
-extension Span {
+extension SpanProtocol {
     /// Record a failure described by the given error.
     ///
     /// - Parameters:

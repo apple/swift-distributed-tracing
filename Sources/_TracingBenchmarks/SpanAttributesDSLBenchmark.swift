@@ -69,10 +69,10 @@ public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
     ),
 ]
 
-private var span: Span!
+private var span: (any SpanProtocol)!
 
 private func setUp() {
-    span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
+    span = InstrumentationSystem.legacyTracer.startAnySpan("something", baggage: .topLevel)
 }
 
 private func tearDown() {
@@ -86,14 +86,14 @@ func bench_empty(times: Int) throws {}
 
 func bench_makeSpan(times: Int) throws {
     for _ in 0 ..< times {
-        let span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("something", baggage: .topLevel)
         _ = span
     }
 }
 
 func bench_startSpan_end(times: Int) throws {
     for _ in 0 ..< times {
-        let span = InstrumentationSystem.tracer.startSpan("something", baggage: .topLevel)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("something", baggage: .topLevel)
         span.end()
     }
 }

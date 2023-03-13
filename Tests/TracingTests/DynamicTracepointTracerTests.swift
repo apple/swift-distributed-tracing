@@ -40,6 +40,16 @@ final class DynamicTracepointTracerTests: XCTestCase {
         // Effectively enabling tracepoints is similar to tracer bullets, tho bullets are generally "one off",
         // but here we could attach a trace-rate, so e.g.: control `<pid> trace enable Sample:1234 .2` to set 20% sampling rate etc.
 
+        tracer.withAnySpan("dont") { _ in
+            // don't capture this span...
+        }
+        tracer.withAnySpan("yes", line: fakeLine) { _ in
+            // do capture this span, and all child spans of it!
+            tracer.withAnySpan("yes-inner", line: fakeNextLine) { _ in
+                // since the parent of this span was captured, this shall be captured as well
+            }
+        }
+        #if swift(>=5.7.0)
         tracer.withSpan("dont") { _ in
             // don't capture this span...
         }
@@ -49,8 +59,14 @@ final class DynamicTracepointTracerTests: XCTestCase {
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
+        #endif
 
+        #if swift(>=5.7.0)
+        XCTAssertEqual(tracer.spans.count, 4)
+        #else
         XCTAssertEqual(tracer.spans.count, 2)
+        #endif
+
         for span in tracer.spans {
             XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
         }
@@ -87,14 +103,14 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func logic(fakeLine: UInt) {
-        #if swift(>=5.5)
+        #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
         }
         #endif
     }
 
     func traceMeLogic(fakeLine: UInt) {
-        #if swift(>=5.5)
+        #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
             InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
@@ -105,7 +121,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class DynamicTracepointTestTracer: Tracer {
+final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     private(set) var activeTracepoints: Set<TracepointID> = []
 
     struct TracepointID: Hashable {
@@ -139,20 +155,20 @@ final class DynamicTracepointTestTracer: Tracer {
     }
 
     private(set) var spans: [TracepointSpan] = []
-    var onEndSpan: (Span) -> Void = { _ in
+    var onEndSpan: (SpanProtocol) -> Void = { _ in
     }
 
-    func startSpan(_ operationName: String,
+    func startAnySpan(_ operationName: String,
                    baggage: InstrumentationBaggage.Baggage,
                    ofKind kind: Tracing.SpanKind,
                    at time: DispatchWallTime,
                    function: String,
                    file fileID: String,
-                   line: UInt) -> Tracing.Span
+                   line: UInt) -> any SpanProtocol
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
-            return NoOpTracer.NoOpSpan(operationName: operationName, baggage: baggage)
+            return TracepointSpan.notRecording(file: fileID, line: line)
         }
 
         let span = TracepointSpan(
@@ -229,7 +245,7 @@ final class DynamicTracepointTestTracer: Tracer {
 
 extension DynamicTracepointTestTracer {
     /// Only intended to be used in single-threaded testing.
-    final class TracepointSpan: Tracing.Span {
+    final class TracepointSpan: Tracing.SpanProtocol {
         private let kind: SpanKind
 
         private var status: SpanStatus?
@@ -241,7 +257,21 @@ extension DynamicTracepointTestTracer {
         private(set) var baggage: Baggage
         private(set) var isRecording: Bool = false
 
-        let onEnd: (Span) -> Void
+        let onEnd: (TracepointSpan) -> Void
+
+        static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
+            let span = TracepointSpan(
+                operationName: "",
+                startTime: .now(),
+                baggage: .topLevel,
+                kind: .internal,
+                file: fileID,
+                line: line,
+                onEnd: { _ in () }
+            )
+            span.isRecording = false
+            return span
+        }
 
         init(operationName: String,
              startTime: DispatchWallTime,
@@ -249,7 +279,7 @@ extension DynamicTracepointTestTracer {
              kind: SpanKind,
              file fileID: String,
              line: UInt,
-             onEnd: @escaping (Span) -> Void)
+             onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
             self.startTime = startTime
@@ -290,6 +320,36 @@ extension DynamicTracepointTestTracer {
         }
     }
 }
+
+#if compiler(>=5.7.0)
+extension DynamicTracepointTestTracer: TracerProtocol {
+    typealias Span = TracepointSpan
+    func startSpan(_ operationName: String,
+                      baggage: InstrumentationBaggage.Baggage,
+                      ofKind kind: Tracing.SpanKind,
+                      at time: DispatchWallTime,
+                      function: String,
+                      file fileID: String,
+                      line: UInt) -> TracepointSpan {
+        let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
+        guard self.shouldRecord(tracepoint: tracepoint) else {
+            return TracepointSpan.notRecording(file: fileID, line: line)
+        }
+
+        let span = TracepointSpan(
+            operationName: operationName,
+            startTime: time,
+            baggage: baggage,
+            kind: kind,
+            file: fileID,
+            line: line,
+            onEnd: onEndSpan
+        )
+        self.spans.append(span)
+        return span
+    }
+}
+#endif
 
 #if compiler(>=5.6.0)
 extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing

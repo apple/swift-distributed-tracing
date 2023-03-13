@@ -59,8 +59,8 @@ enum TaskIDKey: BaggageKey {
 // MARK: PrintLn Tracer
 
 /// Only intended to be used in single-threaded testing.
-private final class TracedLockPrintlnTracer: Tracer {
-    func startSpan(
+private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
+    func startAnySpan(
         _ operationName: String,
         baggage: Baggage,
         ofKind kind: SpanKind,
@@ -68,7 +68,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Span {
+    ) -> any SpanProtocol {
         TracedLockPrintlnSpan(
             operationName: operationName,
             startTime: time,
@@ -97,7 +97,7 @@ private final class TracedLockPrintlnTracer: Tracer {
         Extract: Extractor,
         Carrier == Extract.Carrier {}
 
-    final class TracedLockPrintlnSpan: Span {
+    final class TracedLockPrintlnSpan: SpanProtocol {
         private let kind: SpanKind
 
         private var status: SpanStatus?
@@ -159,6 +159,27 @@ private final class TracedLockPrintlnTracer: Tracer {
         }
     }
 }
+
+#if swift(>=5.7.0)
+extension TracedLockPrintlnTracer: TracerProtocol {
+    func startSpan(
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind,
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> TracedLockPrintlnSpan {
+        TracedLockPrintlnSpan(
+            operationName: operationName,
+            startTime: time,
+            kind: kind,
+            baggage: baggage
+        )
+    }
+}
+#endif
 
 #if compiler(>=5.6.0)
 extension TracedLockPrintlnTracer: Sendable {}

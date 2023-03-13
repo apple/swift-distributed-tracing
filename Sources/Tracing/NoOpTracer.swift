@@ -16,52 +16,50 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-/// No operation ``Tracer``, used when no tracing is required.
-public struct NoOpTracer: Tracer {
+/// Tracer that ignores all operations, used when no tracing is required.
+public struct NoOpTracer: LegacyTracerProtocol {
+    public typealias Span = NoOpSpan
+
     public init() {}
 
-    public func startSpan(
-        _ operationName: String,
-        baggage: Baggage,
-        ofKind kind: SpanKind,
-        at time: DispatchWallTime,
-        function: String,
-        file fileID: String,
-        line: UInt
-    ) -> Span {
-        NoOpSpan(operationName: operationName, baggage: baggage)
+    public func startAnySpan(_ operationName: String,
+                             baggage: Baggage,
+                             ofKind kind: SpanKind,
+                             at time: DispatchWallTime,
+                             function: String,
+                             file fileID: String,
+                             line: UInt) -> any SpanProtocol {
+        NoOpSpan(baggage: baggage)
     }
 
     public func forceFlush() {}
 
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier
-    {
+        where Inject: Injector, Carrier == Inject.Carrier {
         // no-op
     }
 
     public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier
-    {
+        where Extract: Extractor, Carrier == Extract.Carrier {
         // no-op
     }
 
-    public final class NoOpSpan: Span {
+    public final class NoOpSpan: SpanProtocol {
         public let baggage: Baggage
-        public let isRecording = false
+        public var isRecording: Bool {
+            false
+        }
 
-        private let _operationName: String
         public var operationName: String {
             get {
-                self._operationName
+                "noop"
             }
             set {
                 // ignore
             }
         }
 
-        public init(operationName: String, baggage: Baggage) {
-            self._operationName = operationName
+        public init(baggage: Baggage) {
             self.baggage = baggage
         }
 
@@ -87,3 +85,20 @@ public struct NoOpTracer: Tracer {
         }
     }
 }
+
+#if swift(>=5.7.0)
+extension NoOpTracer: TracerProtocol {
+
+    public func startSpan(
+        _ operationName: String,
+        baggage: Baggage,
+        ofKind kind: SpanKind,
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> Self.Span {
+        NoOpSpan(baggage: baggage)
+    }
+}
+#endif
