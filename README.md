@@ -39,7 +39,7 @@ This project uses the context progagation type defined independently in:
     + [Instrumenting your software](#library-framework-developers--instrumenting-your-software)
     + [Extracting & injecting Baggage](#extracting--injecting-baggage)
     + [Tracing your library](#tracing-your-library)
-* In-Depth Guide for: **InstrumentProtocol developers**
+* In-Depth Guide for: **Instrument developers**
     + [Creating an `InstrumentProtocol`](#instrument-developers--creating-an-instrument)
     + [Creating a `Tracer`](#creating-a--tracer-)
 * [Contributing](#contributing)
@@ -261,7 +261,7 @@ When instrumenting server applications there are typically three parties involve
 
 1. [Application developers](#application-developers-setting-up-instruments) creating server-side applications
 2. [Library/Framework developers](#libraryframework-developers-instrumenting-your-software) providing building blocks to create these applications
-3. [InstrumentProtocol developers](#instrument-developers-creating-an-instrument) providing tools to collect distributed metadata about your application
+3. [Instrument developers](#instrument-developers-creating-an-instrument) providing tools to collect distributed metadata about your application
 
 For applications to be instrumented correctly these three parts have to play along nicely.
 
@@ -536,7 +536,7 @@ func get(url: String, context: LoggingContext) {
 > In the above example we used the semantic `http.method` attribute that gets exposed via the
 `TracingOpenTelemetrySupport` library.
 
-## InstrumentProtocol developers: Creating an instrument
+## Instrument developers: Creating an instrument
 
 Creating an instrument means adopting the `InstrumentProtocol` protocol (or `Tracer` in case you develop a tracer).
 `InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
