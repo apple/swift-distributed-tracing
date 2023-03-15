@@ -218,14 +218,11 @@ extension LegacyTracerProtocol {
         line: UInt = #line,
         _ operation: (any SpanProtocol) async throws -> T
     ) async rethrows -> T {
-        print("HI: \(Self.self) \(#function) @ \(#file):\(#line)")
-
         let span = self.startAnySpan(operationName, baggage: baggage(), ofKind: kind, at: time, function: function, file: fileID, line: line)
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {
-                print("OP: \(#function)")
-                return try await operation(span)
+                try await operation(span)
             }
         } catch {
             span.recordError(error)
@@ -377,6 +374,7 @@ extension TracerProtocol {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    #if swift(>=5.7.0)
     @_unsafeInheritExecutor
     public func withAnySpan<T>(
         _ operationName: String,
@@ -400,5 +398,30 @@ extension TracerProtocol {
             try await operation(span)
         }
     }
+    #else // TODO: remove this if/else when we require 5.7; it is only here to add @_unsafeInheritExecutor
+    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+    public func withAnySpan<T>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at time: DispatchWallTime = .now(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any SpanProtocol) async throws -> T
+    ) async rethrows -> T {
+        try await self.withSpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: time,
+            function: function,
+            file: fileID,
+            line: line
+        ) { span in
+            try await operation(span)
+        }
+    }
+    #endif
 }
 #endif
