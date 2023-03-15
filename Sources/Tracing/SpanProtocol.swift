@@ -25,15 +25,6 @@ import struct Dispatch.DispatchWallTime
 ///
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
-/// ### Reference semantics
-/// A span always must exhibit reference semantics. Passing around a `span` must allow other pieces of code
-/// modify it safely. The span must therefore employ synchronization techniques adequate to ensure this.
-///
-/// It is allowed to implement `SpanProtocol` using a `struct` or `enum`, however the type must still exhibit reference
-/// semantics. This is useful especially for implementing efficient "no-op" or "tracing is disabled" span implementations,
-/// which can be almost empty struct instances, while their "tracing is enabled" versions should refer all state to an
-/// underlying reference type "box" which contains all the spans data.
-///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol SpanProtocol: AnyObject, _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
@@ -121,12 +112,6 @@ extension SpanProtocol {
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
-    ///
-    /// ### Reference semantics
-    /// This setter `nonmutating` on purpose, a span may be implemented using a `struct`.
-    /// All state mutations performed on a struct must behave using reference semantics:
-    /// sharing a span with various pieces of code, must all be mutating the same underlying
-    /// reference semantics storage.
     ///
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
