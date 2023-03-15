@@ -199,7 +199,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -229,11 +228,9 @@ final class TracerTests: XCTestCase {
             XCTAssertEqual(value, "world")
             XCTAssertTrue(spanEnded)
         }
-        #endif
     }
 
     func testWithSpan_automaticBaggagePropagation_async_throws() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -261,7 +258,66 @@ final class TracerTests: XCTestCase {
             }
             XCTFail("Should have thrown")
         }
-        #endif
+    }
+
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_async_throws() throws {
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: SpanProtocol) async throws -> String {
+            throw ExampleSpanError()
+        }
+
+        self.testAsync {
+            do {
+                _ = try await Tracer.withSpan("hello", operation)
+            } catch {
+                XCTAssertTrue(spanEnded)
+                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+                return
+            }
+            XCTFail("Should have thrown")
+        }
+    }
+
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_throws() throws {
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: SpanProtocol) throws -> String {
+            throw ExampleSpanError()
+        }
+
+        self.testAsync {
+            do {
+                _ = try Tracer.withSpan("hello", operation)
+            } catch {
+                XCTAssertTrue(spanEnded)
+                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+                return
+            }
+            XCTFail("Should have thrown")
+        }
     }
 
     func testWithSpan_recordErrorWithAttributes() throws {
