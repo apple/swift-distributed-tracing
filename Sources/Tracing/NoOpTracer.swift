@@ -23,14 +23,14 @@ public struct NoOpTracer: LegacyTracerProtocol {
     public init() {}
 
     public func startAnySpan(_ operationName: String,
-                             baggage: Baggage,
+                             baggage: @autoclosure () -> Baggage,
                              ofKind kind: SpanKind,
                              at time: DispatchWallTime,
                              function: String,
                              file fileID: String,
                              line: UInt) -> any SpanProtocol
     {
-        NoOpSpan(baggage: baggage)
+        NoOpSpan(baggage: baggage())
     }
 
     public func forceFlush() {}
@@ -93,7 +93,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
 extension NoOpTracer: TracerProtocol {
     public func startSpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,

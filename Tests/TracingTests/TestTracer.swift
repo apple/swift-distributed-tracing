@@ -25,7 +25,7 @@ final class TestTracer: LegacyTracerProtocol {
 
     func startAnySpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,
@@ -35,7 +35,7 @@ final class TestTracer: LegacyTracerProtocol {
         let span = TestSpan(
             operationName: operationName,
             startTime: time,
-            baggage: baggage,
+            baggage: baggage(),
             kind: kind,
             onEnd: onEndSpan
         )
@@ -68,7 +68,7 @@ final class TestTracer: LegacyTracerProtocol {
 extension TestTracer: TracerProtocol {
     func startSpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,

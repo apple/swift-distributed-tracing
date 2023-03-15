@@ -76,7 +76,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func test_adhoc_enableByFunction() {
-        #if swift(>=5.5)
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -99,7 +98,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
-        #endif
     }
 
     func logic(fakeLine: UInt) {
@@ -169,14 +167,15 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     var onEndSpan: (SpanProtocol) -> Void = { _ in
     }
 
-    func startAnySpan(_ operationName: String,
-                      baggage: InstrumentationBaggage.Baggage,
-                      ofKind kind: Tracing.SpanKind,
-                      at time: DispatchWallTime,
-                      function: String,
-                      file fileID: String,
-                      line: UInt) -> any SpanProtocol
-    {
+    func startAnySpan(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage,
+        ofKind kind: SpanKind,
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> any SpanProtocol {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return TracepointSpan.notRecording(file: fileID, line: line)
@@ -185,7 +184,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: time,
-            baggage: baggage,
+            baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
@@ -335,6 +334,7 @@ extension DynamicTracepointTestTracer {
 #if compiler(>=5.7.0)
 extension DynamicTracepointTestTracer: TracerProtocol {
     typealias Span = TracepointSpan
+
     func startSpan(_ operationName: String,
                    baggage: InstrumentationBaggage.Baggage,
                    ofKind kind: Tracing.SpanKind,

@@ -62,7 +62,7 @@ enum TaskIDKey: BaggageKey {
 private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
     func startAnySpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,
@@ -73,7 +73,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
             operationName: operationName,
             startTime: time,
             kind: kind,
-            baggage: baggage
+            baggage: baggage()
         )
     }
 
@@ -164,7 +164,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 extension TracedLockPrintlnTracer: TracerProtocol {
     func startSpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,
@@ -175,7 +175,7 @@ extension TracedLockPrintlnTracer: TracerProtocol {
             operationName: operationName,
             startTime: time,
             kind: kind,
-            baggage: baggage
+            baggage: baggage()
         )
     }
 }
