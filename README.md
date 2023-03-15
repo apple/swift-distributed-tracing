@@ -538,8 +538,8 @@ func get(url: String, context: LoggingContext) {
 
 ## Instrument developers: Creating an instrument
 
-Creating an instrument means adopting the `InstrumentProtocol` protocol (or `Tracer` in case you develop a tracer).
-`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
+Creating an instrument means adopting the `InstrumentProtocol` protocol (or `TracerProtocol` in case you develop a tracer).
+`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `TracerProtocol` protocol.
 
 `InstrumentProtocol` has two requirements:
 
@@ -552,11 +552,11 @@ act on the provided information or to add additional information to be carried a
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
 how to retrieve values from the `LoggingContext` and how to set values on it.
 
-### Creating a `Tracer`
+### Creating a Tracer
 
 When creating a tracer you need to create two types:
 
-1. Your tracer conforming to `Tracer`
+1. Your tracer conforming to `TracerProtocol`
 2. A span class conforming to `Span`
 
 > The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.
