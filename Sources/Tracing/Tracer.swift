@@ -26,7 +26,6 @@ public enum Tracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 extension Tracer {
-
     /// Start a new ``Span`` using the global bootstrapped tracer reimplementation.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.

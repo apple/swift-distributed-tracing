@@ -25,7 +25,6 @@ import Dispatch
 /// A tracer is a special kind of instrument with the added ability to start a ``SpanProtocol``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol TracerProtocol: LegacyTracerProtocol {
-
     /// The concrete type of span this tracer will be producing/
     associatedtype Span: SpanProtocol
 
@@ -62,7 +61,6 @@ public protocol TracerProtocol: LegacyTracerProtocol {
         file fileID: String,
         line: UInt
     ) -> Self.Span
-
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
@@ -223,7 +221,6 @@ extension TracerProtocol {
             throw error // rethrow
         }
     }
-
 }
 
 #endif // Swift 5.7

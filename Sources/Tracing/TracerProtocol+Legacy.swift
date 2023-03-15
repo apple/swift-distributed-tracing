@@ -239,7 +239,6 @@ extension LegacyTracerProtocol {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension TracerProtocol {
-
     /// Start a new span returning an existential ``SpanProtocol`` reference.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
@@ -288,7 +287,6 @@ extension TracerProtocol {
             line: line
         )
     }
-
 
     /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
@@ -345,7 +343,6 @@ extension TracerProtocol {
             try operation(span)
         }
     }
-
 
     /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
