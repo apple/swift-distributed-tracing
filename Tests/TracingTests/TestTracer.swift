@@ -19,23 +19,23 @@ import InstrumentationBaggage
 import Tracing
 
 /// Only intended to be used in single-threaded testing.
-final class TestTracer: Tracer {
+final class TestTracer: LegacyTracerProtocol {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
-    func startSpan(
+    func startAnySpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Span {
+    ) -> any SpanProtocol {
         let span = TestSpan(
             operationName: operationName,
             startTime: time,
-            baggage: baggage,
+            baggage: baggage(),
             kind: kind,
             onEnd: onEndSpan
         )
@@ -63,6 +63,30 @@ final class TestTracer: Tracer {
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
     }
 }
+
+#if swift(>=5.7.0)
+extension TestTracer: TracerProtocol {
+    func startSpan(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage,
+        ofKind kind: SpanKind,
+        at time: DispatchWallTime,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> TestSpan {
+        let span = TestSpan(
+            operationName: operationName,
+            startTime: time,
+            baggage: baggage(),
+            kind: kind,
+            onEnd: onEndSpan
+        )
+        self.spans.append(span)
+        return span
+    }
+}
+#endif
 
 extension TestTracer {
     enum TraceIDKey: BaggageKey {
@@ -95,7 +119,7 @@ extension Baggage {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class TestSpan: Span {
+final class TestSpan: SpanProtocol {
     private let kind: SpanKind
 
     private var status: SpanStatus?

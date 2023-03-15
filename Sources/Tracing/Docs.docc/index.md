@@ -62,7 +62,7 @@ To your main target, add a dependency on the `Tracing` library and the instrumen
 ),
 ```
 
-Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A ``Tracer`` is a type of `Instrument` and can be offered used to globally bootstrap the tracing system, like this:
+Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A ``Tracer`` is a type of `InstrumentProtocol` and can be offered used to globally bootstrap the tracing system, like this:
 
 
 ```swift

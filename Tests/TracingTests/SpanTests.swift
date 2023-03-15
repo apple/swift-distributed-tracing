@@ -70,7 +70,7 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let s = InstrumentationSystem.tracer.startSpan("", baggage: .topLevel)
+        let s = InstrumentationSystem.legacyTracer.startAnySpan("", baggage: .topLevel)
         s.attributes["hi"] = [42, 21]
         s.attributes["hi"] = [42.10, 21.0]
         s.attributes["hi"] = [true, false]

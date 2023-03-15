@@ -58,6 +58,9 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_success() {
+        guard #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) else {
+            return
+        }
         let tracer = TestTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
         defer {
@@ -65,11 +68,19 @@ final class TracerTests: XCTestCase {
         }
 
         var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        tracer.onEndSpan = { _ in
+            spanEnded = true
+        }
 
+        #if swift(>=5.7.0)
         let value = tracer.withSpan("hello", baggage: .topLevel) { _ in
             "yes"
         }
+        #else
+        let value = tracer.withAnySpan("hello", baggage: .topLevel) { _ in
+            "yes"
+        }
+        #endif
 
         XCTAssertEqual(value, "yes")
         XCTAssertTrue(spanEnded)
@@ -86,7 +97,7 @@ final class TracerTests: XCTestCase {
         tracer.onEndSpan = { _ in spanEnded = true }
 
         do {
-            _ = try tracer.withSpan("hello", baggage: .topLevel) { _ in
+            _ = try tracer.withAnySpan("hello", baggage: .topLevel) { _ in
                 throw ExampleSpanError()
             }
         } catch {
@@ -112,11 +123,11 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: Span) -> String {
+        func operation(span: SpanProtocol) -> String {
             "world"
         }
 
-        let value = tracer.withSpan("hello") { (span: Span) -> String in
+        let value = tracer.withAnySpan("hello") { (span: SpanProtocol) -> String in
             XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
             return operation(span: span)
         }
@@ -141,12 +152,12 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: Span) throws -> String {
+        func operation(span: SpanProtocol) throws -> String {
             throw ExampleSpanError()
         }
 
         do {
-            _ = try tracer.withSpan("hello", operation)
+            _ = try tracer.withAnySpan("hello", operation)
         } catch {
             XCTAssertTrue(spanEnded)
             XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
@@ -171,12 +182,12 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: Span) async throws -> String {
+        func operation(span: SpanProtocol) async throws -> String {
             "world"
         }
 
         try self.testAsync {
-            let value = try await tracer.withSpan("hello") { (span: Span) -> String in
+            let value = try await tracer.withAnySpan("hello") { (span: SpanProtocol) -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 return try await operation(span: span)
             }
@@ -188,7 +199,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -202,14 +212,14 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: Span) async -> String {
+        func operation(span: SpanProtocol) async -> String {
             "world"
         }
 
         self.testAsync {
             var fromNonAsyncWorld = Baggage.topLevel
             fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withSpan("hello", baggage: fromNonAsyncWorld) { (span: Span) -> String in
+            let value = await tracer.withAnySpan("hello", baggage: fromNonAsyncWorld) { (span: SpanProtocol) -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 XCTAssertEqual(span.baggage.traceID, fromNonAsyncWorld.traceID)
                 return await operation(span: span)
@@ -218,11 +228,9 @@ final class TracerTests: XCTestCase {
             XCTAssertEqual(value, "world")
             XCTAssertTrue(spanEnded)
         }
-        #endif
     }
 
     func testWithSpan_automaticBaggagePropagation_async_throws() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -236,13 +244,13 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: Span) async throws -> String {
+        func operation(span: SpanProtocol) async throws -> String {
             throw ExampleSpanError()
         }
 
         self.testAsync {
             do {
-                _ = try await tracer.withSpan("hello", operation)
+                _ = try await tracer.withAnySpan("hello", operation)
             } catch {
                 XCTAssertTrue(spanEnded)
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
@@ -250,7 +258,66 @@ final class TracerTests: XCTestCase {
             }
             XCTFail("Should have thrown")
         }
-        #endif
+    }
+
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_async_throws() throws {
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: SpanProtocol) async throws -> String {
+            throw ExampleSpanError()
+        }
+
+        self.testAsync {
+            do {
+                _ = try await Tracer.withSpan("hello", operation)
+            } catch {
+                XCTAssertTrue(spanEnded)
+                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+                return
+            }
+            XCTFail("Should have thrown")
+        }
+    }
+
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_throws() throws {
+        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
+            throw XCTSkip("Task locals are not supported on this platform.")
+        }
+
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        var spanEnded = false
+        tracer.onEndSpan = { _ in spanEnded = true }
+
+        func operation(span: SpanProtocol) throws -> String {
+            throw ExampleSpanError()
+        }
+
+        self.testAsync {
+            do {
+                _ = try Tracer.withSpan("hello", operation)
+            } catch {
+                XCTAssertTrue(spanEnded)
+                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+                return
+            }
+            XCTFail("Should have thrown")
+        }
     }
 
     func testWithSpan_recordErrorWithAttributes() throws {
@@ -271,7 +338,7 @@ final class TracerTests: XCTestCase {
         let errorToThrow = ExampleSpanError()
         let attrsForError: SpanAttributes = ["attr": "value"]
 
-        tracer.withSpan("hello") { span in
+        tracer.withAnySpan("hello") { span in
             span.recordError(errorToThrow, attributes: attrsForError)
         }
 
@@ -343,12 +410,14 @@ struct FakeHTTPServer {
     }
 
     func receive(_ request: FakeHTTPRequest) {
-        let tracer = InstrumentationSystem.tracer
-
         var baggage = Baggage.topLevel
         InstrumentationSystem.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
 
-        let span = tracer.startSpan("GET \(request.path)", baggage: baggage)
+        #if swift(>=5.7.0)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        #else
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        #endif
 
         let response = self.catchAllHandler(span.baggage, request, self.client)
         span.attributes["http.status"] = response.status
@@ -364,7 +433,11 @@ final class FakeHTTPClient {
 
     func performRequest(_ baggage: Baggage, request: FakeHTTPRequest) {
         var request = request
-        let span = InstrumentationSystem.tracer.startSpan("GET \(request.path)", baggage: baggage)
+        #if swift(>=5.7.0)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        #else
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        #endif
         self.baggages.append(span.baggage)
         InstrumentationSystem.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
         span.end()

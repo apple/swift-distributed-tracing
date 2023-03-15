@@ -21,7 +21,7 @@ final class TracedLock {
     let name: String
     let underlyingLock: NSLock
 
-    var activeSpan: Span?
+    var activeSpan: SpanProtocol?
 
     init(name: String) {
         self.name = name
@@ -31,7 +31,7 @@ final class TracedLock {
     func lock(baggage: Baggage) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.tracer.startSpan(self.name, baggage: baggage)
+        self.activeSpan = InstrumentationSystem.legacyTracer.startAnySpan(self.name, baggage: baggage)
     }
 
     func unlock(baggage: Baggage) {

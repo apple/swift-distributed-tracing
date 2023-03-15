@@ -14,8 +14,8 @@
 
 import InstrumentationBaggage
 
-/// A "no op" implementation of an ``Instrument``.
-public struct NoOpInstrument: Instrument {
+/// A "no op" implementation of an ``InstrumentProtocol``.
+public struct NoOpInstrument: InstrumentProtocol {
     public init() {}
 
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)

@@ -15,23 +15,24 @@
 import InstrumentationBaggage
 
 /// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
-/// It is set up just once in a given program to select the desired ``Instrument`` implementation.
+/// It is set up just once in a given program to select the desired ``InstrumentProtocol`` implementation.
 ///
 /// # Bootstrap multiple Instruments
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
-/// # Access the Instrument
-/// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
+/// # Access the InstrumentProtocol
+/// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``InstrumentProtocol``.
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
-    private static var _instrument: Instrument = NoOpInstrument()
+    private static var _instrument: InstrumentProtocol = NoOpInstrument()
     private static var isInitialized = false
 
-    /// Globally select the desired ``Instrument`` implementation.
+    /// Globally select the desired ``InstrumentProtocol`` implementation.
     ///
-    /// - Parameter instrument: The ``Instrument`` you want to share globally within your system.
+    /// - Parameter instrument: The ``InstrumentProtocol`` you want to share globally within your system.
     /// - Warning: Do not call this method more than once. This will lead to a crash.
-    public static func bootstrap(_ instrument: Instrument) {
+    public static func bootstrap(_ instrument: InstrumentProtocol) {
         self.lock.withWriterLock {
             precondition(
                 !self.isInitialized, """
@@ -47,23 +48,24 @@ public enum InstrumentationSystem {
     /// For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by ``bootstrap(_:)``.
     ///
     /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the ``NoOpInstrument`` is bootstrapped.
-    internal static func bootstrapInternal(_ instrument: Instrument?) {
+    internal static func bootstrapInternal(_ instrument: InstrumentProtocol?) {
         self.lock.withWriterLock {
             self._instrument = instrument ?? NoOpInstrument()
         }
     }
 
-    /// Returns the globally configured ``Instrument``.
+    /// Returns the globally configured ``InstrumentProtocol``.
     ///
-    /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
-    public static var instrument: Instrument {
+    /// Defaults to a no-op ``InstrumentProtocol`` if ``bootstrap(_:)`` wasn't called before.
+    public static var instrument: InstrumentProtocol {
         self.lock.withReaderLock { self._instrument }
     }
 }
 
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 extension InstrumentationSystem {
     /// :nodoc: INTERNAL API: Do Not Use
-    public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+    public static func _findInstrument(where predicate: (InstrumentProtocol) -> Bool) -> InstrumentProtocol? {
         self.lock.withReaderLock {
             if let multiplex = self._instrument as? MultiplexInstrument {
                 return multiplex.firstInstrument(where: predicate)

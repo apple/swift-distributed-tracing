@@ -40,7 +40,7 @@ This project uses the context progagation type defined independently in:
     + [Extracting & injecting Baggage](#extracting--injecting-baggage)
     + [Tracing your library](#tracing-your-library)
 * In-Depth Guide for: **Instrument developers**
-    + [Creating an `Instrument`](#instrument-developers--creating-an-instrument)
+    + [Creating an `InstrumentProtocol`](#instrument-developers--creating-an-instrument)
     + [Creating a `Tracer`](#creating-a--tracer-)
 * [Contributing](#contributing)
 
@@ -119,7 +119,7 @@ To your main target, add a dependency on `Tracing` library and the instrument yo
 ),
 ```
 
-Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A `Tracer` is a type of `Instrument` and can be offered used to globally bootstrap the tracing system, like this:
+Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A `Tracer` is a type of `InstrumentProtocol` and can be offered used to globally bootstrap the tracing system, like this:
 
 
 ```swift
@@ -295,7 +295,7 @@ To your main target, add a dependency on the `Instrumentation library` and the i
 
 Instead of providing each instrumented library with a specific instrument explicitly, you *bootstrap* the
 `InstrumentationSystem` which acts as a singleton that libraries/frameworks access when calling out to the configured
-`Instrument`:
+`InstrumentProtocol`:
 
 ```swift
 InstrumentationSystem.bootstrap(FancyInstrument())
@@ -316,7 +316,7 @@ This is because tracing systems may attempt to emit metrics about their status e
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
-It is important to note that `InstrumentationSystem.bootstrap(_: Instrument)` must only be called once. In case you
+It is important to note that `InstrumentationSystem.bootstrap(_: InstrumentProtocol)` must only be called once. In case you
 want to bootstrap the system to use multiple instruments, you group them in a `MultiplexInstrument` first, which you
 then pass along to the `bootstrap` method like this:
 
@@ -444,7 +444,7 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
 The above trace is achieved by starting and ending spans in all the mentioned functions, for example, like this:
 
 ```swift
-let tracer: Tracer
+let tracer: any TracerProtocol
 
 func makeDinner(context: LoggingContext) async throws -> Meal {
   tracer.withSpan(operationName: "makeDinner", context) {
@@ -481,7 +481,7 @@ func get(url: String, context: LoggingContext) {
 }
 ```
 
-On the receiving side, an HTTP server should use the following `Instrument` API to extract the HTTP headers of the given
+On the receiving side, an HTTP server should use the following `InstrumentProtocol` API to extract the HTTP headers of the given
 `HTTPRequest` into:
 
 ```swift
@@ -538,10 +538,10 @@ func get(url: String, context: LoggingContext) {
 
 ## Instrument developers: Creating an instrument
 
-Creating an instrument means adopting the `Instrument` protocol (or `Tracer` in case you develop a tracer).
-`Instrument` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
+Creating an instrument means adopting the `InstrumentProtocol` protocol (or `TracerProtocol` in case you develop a tracer).
+`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `TracerProtocol` protocol.
 
-`Instrument` has two requirements:
+`InstrumentProtocol` has two requirements:
 
 1. A method to inject values inside a `LoggingContext` into a generic carrier (e.g. HTTP headers)
 2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `LoggingContext`
@@ -552,11 +552,11 @@ act on the provided information or to add additional information to be carried a
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
 how to retrieve values from the `LoggingContext` and how to set values on it.
 
-### Creating a `Tracer`
+### Creating a Tracer
 
 When creating a tracer you need to create two types:
 
-1. Your tracer conforming to `Tracer`
+1. Your tracer conforming to `TracerProtocol`
 2. A span class conforming to `Span`
 
 > The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.
