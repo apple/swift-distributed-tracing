@@ -54,7 +54,7 @@ public protocol TracerProtocol: LegacyTracerProtocol {
     ///   - line: The file line where the span was started.
     func startSpan(
         _ operationName: String,
-        baggage: Baggage,
+        baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
         at time: DispatchWallTime,
         function: String,

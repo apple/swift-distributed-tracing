@@ -99,8 +99,8 @@ extension NoOpTracer: TracerProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Self.Span {
-        NoOpSpan(baggage: baggage)
+    ) -> NoOpSpan {
+        NoOpSpan(baggage: baggage())
     }
 }
 #endif

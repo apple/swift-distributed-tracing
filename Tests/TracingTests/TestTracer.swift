@@ -78,7 +78,7 @@ extension TestTracer: TracerProtocol {
         let span = TestSpan(
             operationName: operationName,
             startTime: time,
-            baggage: baggage,
+            baggage: baggage(),
             kind: kind,
             onEnd: onEndSpan
         )

@@ -336,7 +336,7 @@ extension DynamicTracepointTestTracer: TracerProtocol {
     typealias Span = TracepointSpan
 
     func startSpan(_ operationName: String,
-                   baggage: InstrumentationBaggage.Baggage,
+                   baggage: @autoclosure () -> Baggage,
                    ofKind kind: Tracing.SpanKind,
                    at time: DispatchWallTime,
                    function: String,
@@ -351,7 +351,7 @@ extension DynamicTracepointTestTracer: TracerProtocol {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: time,
-            baggage: baggage,
+            baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
