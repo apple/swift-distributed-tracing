@@ -93,8 +93,6 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes["meaning.of.life"]?.toSpanAttribute(), SpanAttribute.int(42))
         XCTAssertEqual(attributes["alive"]?.toSpanAttribute(), SpanAttribute.bool(false))
 
-        // using swift 5.2, we can improve upon that by using type-safe, keypath-based subscripts:
-        #if swift(>=5.2)
         // An import like: `import TracingOpenTelemetrySupport` can enable type-safe well defined attributes,
         // e.g. as defined in https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace/semantic_conventions
         attributes.name = "kappa"
@@ -104,12 +102,10 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes.name, SpanAttribute.string("kappa"))
         XCTAssertEqual(attributes.name, "kappa")
         XCTAssertEqual(attributes.sampleHttp.statusCode, 200)
-        #endif
     }
 
     func testSpanAttributesCustomValue() {
-        #if swift(>=5.2)
-        var attributes: SpanAttributes = [:]
+        let attributes: SpanAttributes = [:]
 
         // normally we can use just the span attribute values, and it is not type safe or guided in any way:
         attributes.sampleHttp.customType = CustomAttributeValue()
@@ -117,7 +113,6 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes["http.custom_value"]?.toSpanAttribute(), SpanAttribute.stringConvertible(CustomAttributeValue()))
         XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
         XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
-        #endif
     }
 
     func testSpanAttributesAreIterable() {

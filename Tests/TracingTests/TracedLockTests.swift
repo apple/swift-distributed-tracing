@@ -68,7 +68,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any SpanProtocol {
+    ) -> any Span {
         TracedLockPrintlnSpan(
             operationName: operationName,
             startTime: time,
@@ -97,7 +97,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
         Extract: Extractor,
         Carrier == Extract.Carrier {}
 
-    final class TracedLockPrintlnSpan: SpanProtocol {
+    final class TracedLockPrintlnSpan: Span {
         private let kind: SpanKind
 
         private var status: SpanStatus?

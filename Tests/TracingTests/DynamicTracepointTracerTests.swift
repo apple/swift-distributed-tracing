@@ -164,7 +164,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     }
 
     private(set) var spans: [TracepointSpan] = []
-    var onEndSpan: (SpanProtocol) -> Void = { _ in
+    var onEndSpan: (Span) -> Void = { _ in
     }
 
     func startAnySpan(
@@ -175,7 +175,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any SpanProtocol {
+    ) -> any Span {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return TracepointSpan.notRecording(file: fileID, line: line)
@@ -255,7 +255,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
 
 extension DynamicTracepointTestTracer {
     /// Only intended to be used in single-threaded testing.
-    final class TracepointSpan: Tracing.SpanProtocol {
+    final class TracepointSpan: Tracing.Span {
         private let kind: SpanKind
 
         private var status: SpanStatus?
@@ -333,7 +333,7 @@ extension DynamicTracepointTestTracer {
 
 #if compiler(>=5.7.0)
 extension DynamicTracepointTestTracer: TracerProtocol {
-    typealias Span = TracepointSpan
+    typealias TracerSpan = TracepointSpan
 
     func startSpan(_ operationName: String,
                    baggage: @autoclosure () -> Baggage,
