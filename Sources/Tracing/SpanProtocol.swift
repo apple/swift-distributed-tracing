@@ -25,8 +25,10 @@ import struct Dispatch.DispatchWallTime
 ///
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
+/// ###
+///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: AnyObject, _SwiftTracingSendableSpan {
+public protocol Span: _SwiftTracingSendableSpan {
     /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
     var baggage: Baggage { get }
 
@@ -45,7 +47,10 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     ///   - 2.1) "Route Not Found" -> Record error
     ///   - 2.2) "Route Found" -> Rename to route (`/users/1` becomes `/users/:userID`)
     /// - 3) End span
-    var operationName: String { get set }
+    var operationName: String {
+        get
+        nonmutating set
+    }
 
     /// Set the status.
     ///
@@ -65,7 +70,10 @@ public protocol Span: AnyObject, _SwiftTracingSendableSpan {
     func recordError(_ error: Error, attributes: SpanAttributes)
 
     /// The attributes describing this `Span`.
-    var attributes: SpanAttributes { get set }
+    var attributes: SpanAttributes {
+        get
+        nonmutating set
+    }
 
     /// Returns true if this `Span` is recording information like events, attributes, status, etc.
     var isRecording: Bool { get }
@@ -114,7 +122,7 @@ extension Span {
     ///
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
-    public func addLink(_ other: Span, attributes: SpanAttributes = [:]) {
+    public func addLink(_ other: Self, attributes: SpanAttributes = [:]) {
         self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
     }
 }
@@ -183,10 +191,16 @@ public protocol SpanAttributeNamespace {
 
     var attributes: SpanAttributes { get set }
 
-    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible { get set }
+    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible {
+        get
+        set
+    }
 
     subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace { get }
+        where Namespace: SpanAttributeNamespace
+    {
+        get
+    }
 }
 
 public protocol NestedSpanAttributesProtocol {
@@ -217,14 +231,17 @@ extension SpanAttributeNamespace {
             let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
             let spanAttribute = self.attributes[key.name]?.toSpanAttribute()
             switch spanAttribute {
-            case .int(let int):
-                switch T.self {
-                case is Int.Type: return (Int(exactly: int) as! T)
-                case is Int8.Type: return (Int8(exactly: int) as! T)
-                case is Int16.Type: return (Int16(exactly: int) as! T)
-                case is Int32.Type: return (Int32(exactly: int) as! T)
-                case is Int64.Type: return (int as! T)
-                default: return nil
+            case .int32(let value):
+                if T.self == Int.self {
+                    return (Int(exactly: value) as! T)
+                } else {
+                    return value as? T
+                }
+            case .int64(let value):
+                if T.self == Int.self {
+                    return (Int(exactly: value) as! T)
+                } else {
+                    return value as? T
                 }
             default:
                 if let value = spanAttribute?.anyValue {
@@ -255,8 +272,11 @@ extension SpanAttributeNamespace {
 public enum SpanAttribute: Equatable {
     public typealias Key = SpanAttributeKey
 
-    case int(Int64)
-    case intArray([Int64])
+    case int32(Int32)
+    case int64(Int64)
+
+    case int32Array([Int32])
+    case int64Array([Int64])
 
     case double(Double)
     case doubleArray([Double])
@@ -267,32 +287,14 @@ public enum SpanAttribute: Equatable {
     case string(String)
     case stringArray([String])
 
-    #if swift(>=5.6)
+    case __DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM
+
     case stringConvertible(CustomStringConvertible & Sendable)
     case stringConvertibleArray([CustomStringConvertible & Sendable])
-    #else
-    case stringConvertible(CustomStringConvertible)
-    case stringConvertibleArray([CustomStringConvertible])
-    #endif
 
-    #if swift(>=5.2)
-    // older swifts get confused and can't resolve if we mean the `case int(Int64)` or any of those overloads
-    public static func int(_ value: Int) -> SpanAttribute {
-        .int(Int64(value))
+    public static func int(_ value: Int64) -> SpanAttribute {
+        .int64(value)
     }
-
-    public static func int(_ value: Int8) -> SpanAttribute {
-        .int(Int64(value))
-    }
-
-    public static func int(_ value: Int16) -> SpanAttribute {
-        .int(Int64(value))
-    }
-
-    public static func int(_ value: Int32) -> SpanAttribute {
-        .int(Int64(value))
-    }
-    #endif
 
     /// This is a "magic value" that is used to enable the KeyPath based accessors to specific attributes.
     internal static var _namespace: SpanAttribute {
@@ -301,9 +303,13 @@ public enum SpanAttribute: Equatable {
 
     internal var anyValue: Any {
         switch self {
-        case .int(let value):
+        case .int32(let value):
             return value
-        case .intArray(let value):
+        case .int64(let value):
+            return value
+        case .int32Array(let value):
+            return value
+        case .int64Array(let value):
             return value
         case .double(let value):
             return value
@@ -321,13 +327,17 @@ public enum SpanAttribute: Equatable {
             return value
         case .stringConvertibleArray(let value):
             return value
+        case .__DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM:
+            fatalError("Cannot have values of __DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM")
         }
     }
 
     public static func == (lhs: SpanAttribute, rhs: SpanAttribute) -> Bool {
         switch (lhs, rhs) {
-        case (.int(let l), .int(let r)): return l == r
-        case (.intArray(let l), .intArray(let r)): return l == r
+        case (.int32(let l), .int32(let r)): return l == r
+        case (.int64(let l), .int64(let r)): return l == r
+        case (.int32Array(let l), .int32Array(let r)): return l == r
+        case (.int64Array(let l), .int64Array(let r)): return l == r
         case (.double(let l), .double(let r)): return l == r
         case (.doubleArray(let l), .doubleArray(let r)): return l == r
         case (.bool(let l), .bool(let r)): return l == r
@@ -336,16 +346,7 @@ public enum SpanAttribute: Equatable {
         case (.stringArray(let l), .stringArray(let r)): return l == r
         case (.stringConvertible(let l), .stringConvertible(let r)): return "\(l)" == "\(r)"
         case (.stringConvertibleArray(let l), .stringConvertibleArray(let r)): return "\(l)" == "\(r)"
-        case (.int, _),
-             (.intArray, _),
-             (.double, _),
-             (.doubleArray, _),
-             (.bool, _),
-             (.boolArray, _),
-             (.string, _),
-             (.stringArray, _),
-             (.stringConvertible, _),
-             (.stringConvertibleArray, _):
+        default:
             return false
         }
     }
@@ -369,31 +370,19 @@ public protocol SpanAttributeConvertible {
 
 extension Array where Element == Int {
     public func toSpanAttribute() -> SpanAttribute {
-        .intArray(self.map(Int64.init))
-    }
-}
-
-extension Array where Element == Int8 {
-    public func toSpanAttribute() -> SpanAttribute {
-        .intArray(self.map(Int64.init))
-    }
-}
-
-extension Array where Element == Int16 {
-    public func toSpanAttribute() -> SpanAttribute {
-        .intArray(self.map(Int64.init))
-    }
-}
-
-extension Array where Element == Int32 {
-    public func toSpanAttribute() -> SpanAttribute {
-        .intArray(self.map(Int64.init))
+        if MemoryLayout<Int>.stride == 8 {
+            return .int64Array(self.map(Int64.init))
+        } else if MemoryLayout<Int>.stride == 4 {
+            return .int32Array(self.map(Int32.init))
+        } else {
+            fatalError("Not supported Int width: \(MemoryLayout<Int>.stride)")
+        }
     }
 }
 
 extension Array where Element == Int64 {
     public func toSpanAttribute() -> SpanAttribute {
-        .intArray(self)
+        .int64Array(self)
     }
 }
 
@@ -406,33 +395,19 @@ extension Array where Element == Double {
 // fallback implementation
 extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        if let value = self as? [Int] {
-            return .intArray(value.map(Int64.init))
-        } else if let value = self as? [Int8] {
-            return .intArray(value.map(Int64.init))
-        } else if let value = self as? [Int16] {
-            return .intArray(value.map(Int64.init))
-        } else if let value = self as? [Int32] {
-            return .intArray(value.map(Int64.init))
+        if let value = self as? [Int32] {
+            return .int32Array(value)
         } else if let value = self as? [Int64] {
-            return .intArray(value)
+            return .int64Array(value)
         } else if let value = self as? [Double] {
             return .doubleArray(value)
         } else if let value = self as? [Bool] {
             return .boolArray(value)
         } else if let value = self as? [String] {
             return .stringArray(value)
-        }
-        #if swift(>=5.6.0)
-        if let value = self as? [CustomStringConvertible & Sendable] {
+        } else if let value = self as? [CustomStringConvertible & Sendable] {
             return .stringConvertibleArray(value)
         }
-        #else
-        if let value = self as? [CustomStringConvertible] {
-            return .stringConvertibleArray(value)
-        }
-        #endif
-
         fatalError("Not supported SpanAttribute array type: \(type(of: self))")
     }
 }
@@ -469,31 +444,19 @@ extension SpanAttribute: ExpressibleByIntegerLiteral {
 
 extension Int: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .int(Int64(self))
-    }
-}
-
-extension Int8: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        .int(Int64(self))
-    }
-}
-
-extension Int16: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        .int(Int64(self))
-    }
-}
-
-extension Int32: SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
-        .int(Int64(self))
+        if MemoryLayout<Int>.stride == 8 {
+            return .int64(Int64(self))
+        } else if MemoryLayout<Int>.stride == 4 {
+            return .int32(Int32(exactly: self)!)
+        } else {
+            fatalError("Not supported int width: \(MemoryLayout<Int>.stride)")
+        }
     }
 }
 
 extension Int64: SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
-        .int(self)
+        .int64(self)
     }
 }
 
@@ -536,18 +499,11 @@ extension SpanAttribute: ExpressibleByBooleanLiteral {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: SpanAttributes: Namespaces
 
-#if swift(>=5.2)
 /// A container of ``SpanAttribute``s.
 @dynamicMemberLookup
 public struct SpanAttributes: Equatable {
     private var _attributes = [String: SpanAttribute]()
 }
-
-#else
-public struct SpanAttributes: Equatable {
-    private var _attributes = [String: SpanAttribute]()
-}
-#endif
 
 extension SpanAttributes {
     /// Create a set of attributes by wrapping the given dictionary.
@@ -695,22 +651,18 @@ public struct SpanLink {
     public let attributes: SpanAttributes
 
     /// Create a new `SpanLink`.
+    ///
     /// - Parameters:
     ///   - baggage: The `Baggage` identifying the targeted ``Span``.
     ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
-    public init(baggage: Baggage, attributes: SpanAttributes = [:]) {
+    public init(baggage: Baggage, attributes: SpanAttributes) {
         self.baggage = baggage
         self.attributes = attributes
     }
 }
 
-#if compiler(>=5.6)
 @preconcurrency public protocol _SwiftTracingSendableSpan: Sendable {}
-#else
-public protocol _SwiftTracingSendableSpan {}
-#endif
 
-#if compiler(>=5.6)
 extension SpanAttributes: Sendable {}
 extension SpanAttribute: Sendable {} // @unchecked because some payloads are CustomStringConvertible
 extension SpanStatus: Sendable {}
@@ -718,4 +670,3 @@ extension SpanEvent: Sendable {}
 extension SpanKind: Sendable {}
 extension SpanStatus.Code: Sendable {}
 extension SpanLink: Sendable {}
-#endif

@@ -187,7 +187,5 @@ final class TestSpan: Span {
     }
 }
 
-#if compiler(>=5.6.0)
 extension TestTracer: @unchecked Sendable {} // only intended for single threaded testing
 extension TestSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif

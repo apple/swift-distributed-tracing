@@ -164,7 +164,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     }
 
     private(set) var spans: [TracepointSpan] = []
-    var onEndSpan: (Span) -> Void = { _ in
+    var onEndSpan: (any Span) -> Void = { _ in
     }
 
     func startAnySpan(

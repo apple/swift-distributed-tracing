@@ -47,7 +47,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
         // no-op
     }
 
-    public final class NoOpSpan: Span {
+    public struct NoOpSpan: Span {
         public let baggage: Baggage
         public var isRecording: Bool {
             false
@@ -57,7 +57,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             get {
                 "noop"
             }
-            set {
+            nonmutating set {
                 // ignore
             }
         }
@@ -78,7 +78,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             get {
                 [:]
             }
-            set {
+            nonmutating set {
                 // ignore
             }
         }
