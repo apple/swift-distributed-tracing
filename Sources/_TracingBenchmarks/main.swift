@@ -37,6 +37,6 @@ private func registerBenchmark(_ name: String, _ function: @escaping (Int) -> Vo
     registerBenchmark(BenchmarkInfo(name: name, runFunction: function, tags: tags))
 }
 
-// registerBenchmark(SpanAttributesDSLBenchmarks)
+registerBenchmark(SpanAttributesDSLBenchmarks)
 
 main()

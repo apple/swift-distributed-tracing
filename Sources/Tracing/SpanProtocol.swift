@@ -25,7 +25,12 @@ import struct Dispatch.DispatchWallTime
 ///
 /// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
 ///
-/// ###
+/// ### Reference semantics
+/// A `Span` always exhibits reference semantics. Even if a span were to be implemented using a struct (or enum),
+/// it must exhibit reference semantics. In other words, passing around a `Span` object and mutating it from multiple
+/// places must mutate the same underlying storage, and must do so safely (i.e. take locks or use other synchronization
+/// mechanisms to protect the mutations). This is because conceptually a span is not a value, and refers to a specific
+/// resource that must be started, accumulate all possible information from the span's duration, and ended exactly once.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: _SwiftTracingSendableSpan {
