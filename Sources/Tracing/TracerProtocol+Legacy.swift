@@ -18,7 +18,7 @@ import Dispatch
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol LegacyTracerProtocol: InstrumentProtocol {
-    /// Start a new span returning an existential ``SpanProtocol`` reference.
+    /// Start a new span returning an existential ``Span`` reference.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
     /// is recommended instead.
@@ -55,7 +55,7 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any SpanProtocol
+    ) -> any Span
 
     /// Export all ended spans to the configured backend that have not yet been exported.
     ///
@@ -71,7 +71,7 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 extension LegacyTracerProtocol {
-    /// Start a new span returning an existential ``SpanProtocol`` reference.
+    /// Start a new span returning an existential ``Span`` reference.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
     /// is recommended instead.
@@ -108,7 +108,7 @@ extension LegacyTracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> any SpanProtocol {
+    ) -> any Span {
         self.startAnySpan(
             operationName,
             baggage: baggage(),
@@ -120,7 +120,7 @@ extension LegacyTracerProtocol {
         )
     }
 
-    /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
+    /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
@@ -161,7 +161,7 @@ extension LegacyTracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) throws -> T
+        _ operation: (any Span) throws -> T
     ) rethrows -> T {
         let span = self.startAnySpan(operationName, baggage: baggage(), ofKind: kind, at: time, function: function, file: fileID, line: line)
         defer { span.end() }
@@ -175,7 +175,7 @@ extension LegacyTracerProtocol {
         }
     }
 
-    /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
+    /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
@@ -216,7 +216,7 @@ extension LegacyTracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) async throws -> T
+        _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startAnySpan(operationName, baggage: baggage(), ofKind: kind, at: time, function: function, file: fileID, line: line)
         defer { span.end() }
@@ -236,7 +236,7 @@ extension LegacyTracerProtocol {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension TracerProtocol {
-    /// Start a new span returning an existential ``SpanProtocol`` reference.
+    /// Start a new span returning an existential ``Span`` reference.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
     /// is recommended instead.
@@ -273,7 +273,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> any SpanProtocol {
+    ) -> any Span {
         self.startSpan(
             operationName,
             baggage: baggage(),
@@ -285,7 +285,7 @@ extension TracerProtocol {
         )
     }
 
-    /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
+    /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
@@ -326,7 +326,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) throws -> T
+        _ operation: (any Span) throws -> T
     ) rethrows -> T {
         try self.withSpan(
             operationName,
@@ -341,7 +341,7 @@ extension TracerProtocol {
         }
     }
 
-    /// Start a new ``SpanProtocol`` and automatically end when the `operation` completes,
+    /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
     /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
@@ -384,7 +384,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) async throws -> T
+        _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,
@@ -408,7 +408,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) async throws -> T
+        _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,

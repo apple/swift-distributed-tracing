@@ -31,7 +31,7 @@ final class TestTracer: LegacyTracerProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any SpanProtocol {
+    ) -> any Span {
         let span = TestSpan(
             operationName: operationName,
             startTime: time,
@@ -119,7 +119,7 @@ extension Baggage {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class TestSpan: SpanProtocol {
+final class TestSpan: Span {
     private let kind: SpanKind
 
     private var status: SpanStatus?
@@ -187,7 +187,5 @@ final class TestSpan: SpanProtocol {
     }
 }
 
-#if compiler(>=5.6.0)
 extension TestTracer: @unchecked Sendable {} // only intended for single threaded testing
 extension TestSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif

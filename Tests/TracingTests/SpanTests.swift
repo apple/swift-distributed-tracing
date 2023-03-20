@@ -44,7 +44,7 @@ final class SpanTests: XCTestCase {
 
     func testSpanAttributeIsExpressibleByIntegerLiteral() {
         let intAttribute: SpanAttribute = 42
-        guard case .int(let intValue) = intAttribute else {
+        guard case .int64(let intValue) = intAttribute else {
             XCTFail("Expected int attribute, got \(intAttribute).")
             return
         }
@@ -93,8 +93,6 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes["meaning.of.life"]?.toSpanAttribute(), SpanAttribute.int(42))
         XCTAssertEqual(attributes["alive"]?.toSpanAttribute(), SpanAttribute.bool(false))
 
-        // using swift 5.2, we can improve upon that by using type-safe, keypath-based subscripts:
-        #if swift(>=5.2)
         // An import like: `import TracingOpenTelemetrySupport` can enable type-safe well defined attributes,
         // e.g. as defined in https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace/semantic_conventions
         attributes.name = "kappa"
@@ -103,12 +101,12 @@ final class SpanTests: XCTestCase {
 
         XCTAssertEqual(attributes.name, SpanAttribute.string("kappa"))
         XCTAssertEqual(attributes.name, "kappa")
+        print("attributes", attributes)
         XCTAssertEqual(attributes.sampleHttp.statusCode, 200)
-        #endif
+        XCTAssertEqual(attributes.sampleHttp.codesArray, [1, 2, 3])
     }
 
     func testSpanAttributesCustomValue() {
-        #if swift(>=5.2)
         var attributes: SpanAttributes = [:]
 
         // normally we can use just the span attribute values, and it is not type safe or guided in any way:
@@ -117,7 +115,6 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes["http.custom_value"]?.toSpanAttribute(), SpanAttribute.stringConvertible(CustomAttributeValue()))
         XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
         XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
-        #endif
     }
 
     func testSpanAttributesAreIterable() {
@@ -132,7 +129,7 @@ final class SpanTests: XCTestCase {
             dictionary[name] = attribute
         }
 
-        guard case .some(.int) = dictionary["0"], case .some(.bool) = dictionary["1"], case .some(.string) = dictionary["2"] else {
+        guard case .some(.int64) = dictionary["0"], case .some(.bool) = dictionary["1"], case .some(.string) = dictionary["2"] else {
             XCTFail("Expected all attributes to be copied to the dictionary.")
             return
         }
@@ -179,11 +176,7 @@ final class SpanTests: XCTestCase {
         )
 
         var attributes = SpanAttributes()
-        #if swift(>=5.2)
         attributes.sampleHttp.statusCode = 418
-        #else
-        attributes["http.status_code"] = 418
-        #endif
         child.addLink(parent, attributes: attributes)
 
         XCTAssertEqual(child.links.count, 1)
@@ -191,7 +184,7 @@ final class SpanTests: XCTestCase {
         #if swift(>=5.2)
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
         #endif
-        guard case .some(.int(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
+        guard case .some(.int64(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
             XCTFail("Expected int value for http.status_code")
             return
         }
@@ -208,7 +201,6 @@ extension SpanAttribute {
     }
 }
 
-#if swift(>=5.2)
 extension SpanAttributes {
     public var sampleHttp: HTTPAttributes {
         get {
@@ -244,7 +236,7 @@ public struct HTTPAttributes: SpanAttributeNamespace {
     }
 }
 
-public struct CustomAttributeValue: Equatable, _CustomAttributeValueSendable, CustomStringConvertible, SpanAttributeConvertible {
+public struct CustomAttributeValue: Equatable, Sendable, CustomStringConvertible, SpanAttributeConvertible {
     public func toSpanAttribute() -> SpanAttribute {
         .stringConvertible(self)
     }
@@ -253,13 +245,6 @@ public struct CustomAttributeValue: Equatable, _CustomAttributeValueSendable, Cu
         "CustomAttributeValue()"
     }
 }
-#endif
-
-#if swift(>=5.6.0)
-typealias _CustomAttributeValueSendable = Sendable
-#else
-typealias _CustomAttributeValueSendable = Any
-#endif
 
 private struct TestBaggageContextKey: BaggageKey {
     typealias Value = String

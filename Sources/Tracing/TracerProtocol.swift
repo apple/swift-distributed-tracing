@@ -22,11 +22,11 @@ import Dispatch
 #if swift(>=5.7.0)
 /// A tracer capable of creating new trace spans.
 ///
-/// A tracer is a special kind of instrument with the added ability to start a ``SpanProtocol``.
+/// A tracer is a special kind of instrument with the added ability to start a ``Span``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol TracerProtocol: LegacyTracerProtocol {
     /// The concrete type of span this tracer will be producing/
-    associatedtype Span: SpanProtocol
+    associatedtype TracerSpan: Span
 
     /// Start a new ``Span`` with the given `Baggage`.
     ///
@@ -60,7 +60,7 @@ public protocol TracerProtocol: LegacyTracerProtocol {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> Self.Span
+    ) -> TracerSpan
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
@@ -97,7 +97,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> Self.Span {
+    ) -> TracerSpan {
         self.startSpan(
             operationName,
             baggage: baggage(),
@@ -124,7 +124,7 @@ extension TracerProtocol {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Warning: You MUST NOT ``SpanProtocol/end()`` the span explicitly, because at the end of the `withSpan`
+    /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
@@ -146,7 +146,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (Self.Span) throws -> T
+        _ operation: (TracerSpan) throws -> T
     ) rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -177,7 +177,7 @@ extension TracerProtocol {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Warning: You MUST NOT ``SpanProtocol/end()`` the span explicitly, because at the end of the `withSpan`
+    /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
@@ -200,7 +200,7 @@ extension TracerProtocol {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (Self.Span) async throws -> T
+        _ operation: (TracerSpan) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,

@@ -58,7 +58,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> any SpanProtocol {
+    ) -> any Span {
         // Effectively these end up calling the same method, however
         // we try to not use the deprecated methods ourselves anyway
         #if swift(>=5.7.0)
@@ -90,7 +90,7 @@ extension Tracer {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Warning: You MUST NOT ``SpanProtocol/end()`` the span explicitly, because at the end of the `withSpan`
+    /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
@@ -111,7 +111,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) throws -> T
+        _ operation: (any Span) throws -> T
     ) rethrows -> T {
         #if swift(>=5.7.0)
         try InstrumentationSystem.legacyTracer.withAnySpan(
@@ -145,7 +145,7 @@ extension Tracer {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Warning: You MUST NOT ``SpanProtocol/end()`` the span explicitly, because at the end of the `withSpan`
+    /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
@@ -170,7 +170,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) async throws -> T
+        _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await InstrumentationSystem.legacyTracer.withAnySpan(
             operationName,
@@ -194,7 +194,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any SpanProtocol) async throws -> T
+        _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await InstrumentationSystem.legacyTracer.withAnySpan(
             operationName,

@@ -123,11 +123,11 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) -> String {
+        func operation(span: any Span) -> String {
             "world"
         }
 
-        let value = tracer.withAnySpan("hello") { (span: SpanProtocol) -> String in
+        let value = tracer.withAnySpan("hello") { (span: any Span) -> String in
             XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
             return operation(span: span)
         }
@@ -152,7 +152,7 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) throws -> String {
+        func operation(span: any Span) throws -> String {
             throw ExampleSpanError()
         }
 
@@ -182,12 +182,12 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) async throws -> String {
+        func operation(span: any Span) async throws -> String {
             "world"
         }
 
         try self.testAsync {
-            let value = try await tracer.withAnySpan("hello") { (span: SpanProtocol) -> String in
+            let value = try await tracer.withAnySpan("hello") { (span: any Span) -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 return try await operation(span: span)
             }
@@ -212,14 +212,14 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) async -> String {
+        func operation(span: any Span) async -> String {
             "world"
         }
 
         self.testAsync {
             var fromNonAsyncWorld = Baggage.topLevel
             fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withAnySpan("hello", baggage: fromNonAsyncWorld) { (span: SpanProtocol) -> String in
+            let value = await tracer.withAnySpan("hello", baggage: fromNonAsyncWorld) { (span: any Span) -> String in
                 XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
                 XCTAssertEqual(span.baggage.traceID, fromNonAsyncWorld.traceID)
                 return await operation(span: span)
@@ -244,7 +244,7 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) async throws -> String {
+        func operation(span: any Span) async throws -> String {
             throw ExampleSpanError()
         }
 
@@ -274,7 +274,7 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) async throws -> String {
+        func operation(span: any Span) async throws -> String {
             throw ExampleSpanError()
         }
 
@@ -304,7 +304,7 @@ final class TracerTests: XCTestCase {
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
 
-        func operation(span: SpanProtocol) throws -> String {
+        func operation(span: any Span) throws -> String {
             throw ExampleSpanError()
         }
 

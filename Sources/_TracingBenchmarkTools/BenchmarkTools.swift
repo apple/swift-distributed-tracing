@@ -179,7 +179,7 @@ public func Random() -> Int64 {
     lfsrRandomGenerator.randInt()
 }
 
-@inlinable // FIXME(inline-always)
+@inlinable
 @inline(__always)
 public func CheckResults(
     _ resultsMatch: Bool,

@@ -18,7 +18,7 @@ import Dispatch
 
 /// Tracer that ignores all operations, used when no tracing is required.
 public struct NoOpTracer: LegacyTracerProtocol {
-    public typealias Span = NoOpSpan
+    public typealias TracerSpan = NoOpSpan
 
     public init() {}
 
@@ -28,7 +28,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
                              at time: DispatchWallTime,
                              function: String,
                              file fileID: String,
-                             line: UInt) -> any SpanProtocol
+                             line: UInt) -> any Span
     {
         NoOpSpan(baggage: baggage())
     }
@@ -47,7 +47,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
         // no-op
     }
 
-    public final class NoOpSpan: SpanProtocol {
+    public struct NoOpSpan: Span {
         public let baggage: Baggage
         public var isRecording: Bool {
             false
@@ -57,7 +57,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             get {
                 "noop"
             }
-            set {
+            nonmutating set {
                 // ignore
             }
         }
@@ -78,7 +78,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             get {
                 [:]
             }
-            set {
+            nonmutating set {
                 // ignore
             }
         }
