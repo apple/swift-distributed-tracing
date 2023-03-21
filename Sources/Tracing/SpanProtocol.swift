@@ -537,6 +537,16 @@ extension SpanAttributes {
         }
     }
 
+    /// Similar to `subscript(_:)` however returns the stored `SpanAttribute` rather than going through `SpanAttributeConvertible`.
+    public func get(_ name: String) -> SpanAttribute? {
+        self._attributes[name]
+    }
+
+    /// Similar to `subscript(_:)` however accepts a `SpanAttribute` rather than going through `SpanAttributeConvertible`.
+    public mutating func set(_ name: String, value: SpanAttribute?) {
+        self._attributes[name] = value
+    }
+
     /// - Parameter callback: The function to call for each attribute.
     public func forEach(_ callback: (String, SpanAttribute) -> Void) {
         self._attributes.forEach {
