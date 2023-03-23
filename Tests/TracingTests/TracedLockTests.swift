@@ -60,11 +60,12 @@ enum TaskIDKey: BaggageKey {
 
 /// Only intended to be used in single-threaded testing.
 private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
         function: String,
         file fileID: String,
         line: UInt
@@ -102,8 +103,8 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         private var status: SpanStatus?
 
-        private let startTime: DispatchWallTime
-        private(set) var endTime: DispatchWallTime?
+        private let startTimeMillis: Int64
+        private(set) var endTimeMillis: Int64?
 
         var operationName: String
         let baggage: Baggage
@@ -126,16 +127,16 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         init(
             operationName: String,
-            startTime: DispatchWallTime,
+            startTime: some TracerInstantProtocol,
             kind: SpanKind,
             baggage: Baggage
         ) {
             self.operationName = operationName
-            self.startTime = startTime
+            self.startTimeMillis = startTime.millisSinceEpoch
             self.baggage = baggage
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTime): start")
+            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start")
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -153,8 +154,8 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         func recordError(_ error: Error, attributes: SpanAttributes) {}
 
-        func end(at time: DispatchWallTime) {
-            self.endTime = time
+        func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock) {
+            self.endTimeMillis = time.millisSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
     }
@@ -162,11 +163,12 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension TracedLockPrintlnTracer: TracerProtocol {
-    func startSpan(
+    func startSpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt

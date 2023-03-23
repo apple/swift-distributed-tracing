@@ -351,7 +351,25 @@ final class TracerTests: XCTestCase {
         #endif
     }
 
-    #if swift(>=5.5) && canImport(_Concurrency)
+    #if swift(>=5.7.0)
+//    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
+    /// - Parameter operation: The operation to test.
+    func testAsync(_ operation: @escaping () async throws -> Void) rethrows {
+        let group = DispatchGroup()
+        group.enter()
+        Task.detached {
+            do {
+                try await operation()
+            } catch {
+                throw error
+            }
+            group.leave()
+        }
+        group.wait()
+    }
+
+    #elseif swift(>=5.5) && canImport(_Concurrency)
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
     /// - Parameter operation: The operation to test.

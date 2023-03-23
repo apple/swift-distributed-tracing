@@ -24,7 +24,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func test_adhoc_enableBySourceLoc() {
-        #if swift(>=5.5)
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -72,7 +71,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
-        #endif
     }
 
     func test_adhoc_enableByFunction() {
@@ -167,11 +165,12 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     var onEndSpan: (any Span) -> Void = { _ in
     }
 
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -184,6 +183,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: time,
+            clock: clock,
             baggage: baggage(),
             kind: kind,
             file: fileID,
@@ -260,8 +260,8 @@ extension DynamicTracepointTestTracer {
 
         private var status: SpanStatus?
 
-        private let startTime: DispatchWallTime
-        private(set) var endTime: DispatchWallTime?
+        private let startTime: Int64
+        private(set) var endTime: Int64?
 
         public var operationName: String
         private(set) var baggage: Baggage
@@ -272,7 +272,8 @@ extension DynamicTracepointTestTracer {
         static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
             let span = TracepointSpan(
                 operationName: "",
-                startTime: .now(),
+                startTime: TracerClock.now,
+                clock: TracerClock(),
                 baggage: .topLevel,
                 kind: .internal,
                 file: fileID,
@@ -283,16 +284,17 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init(operationName: String,
-             startTime: DispatchWallTime,
-             baggage: Baggage,
-             kind: SpanKind,
-             file fileID: String,
-             line: UInt,
-             onEnd: @escaping (TracepointSpan) -> Void)
+        init<Clock: TracerClockProtocol>(operationName: String,
+                                         startTime: Clock.Instant = Clock.now,
+                                         clock: Clock = TracerClock(),
+                                         baggage: Baggage,
+                                         kind: SpanKind,
+                                         file fileID: String,
+                                         line: UInt,
+                                         onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
-            self.startTime = startTime
+            self.startTime = startTime.millisSinceEpoch
             self.baggage = baggage
             self.onEnd = onEnd
             self.kind = kind
@@ -324,8 +326,8 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func end(at time: DispatchWallTime) {
-            self.endTime = time
+        func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock) {
+            self.endTime = time.millisSinceEpoch
             self.onEnd(self)
         }
     }
@@ -335,13 +337,14 @@ extension DynamicTracepointTestTracer {
 extension DynamicTracepointTestTracer: TracerProtocol {
     typealias TracerSpan = TracepointSpan
 
-    func startSpan(_ operationName: String,
-                   baggage: @autoclosure () -> Baggage,
-                   ofKind kind: Tracing.SpanKind,
-                   at time: DispatchWallTime,
-                   function: String,
-                   file fileID: String,
-                   line: UInt) -> TracepointSpan
+    func startSpan<Clock: TracerClockProtocol>(_ operationName: String,
+                                               baggage: @autoclosure () -> Baggage,
+                                               ofKind kind: Tracing.SpanKind,
+                                               at time: Clock.Instant,
+                                               clock: Clock,
+                                               function: String,
+                                               file fileID: String,
+                                               line: UInt) -> TracepointSpan
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
@@ -351,6 +354,7 @@ extension DynamicTracepointTestTracer: TracerProtocol {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: time,
+            clock: clock,
             baggage: baggage(),
             kind: kind,
             file: fileID,
@@ -363,7 +367,5 @@ extension DynamicTracepointTestTracer: TracerProtocol {
 }
 #endif
 
-#if compiler(>=5.6.0)
 extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing
 extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif

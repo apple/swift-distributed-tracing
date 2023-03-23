@@ -161,7 +161,7 @@ final class SpanTests: XCTestCase {
 
         let parent = TestSpan(
             operationName: "client",
-            startTime: .now(),
+            startTime: TracerClock.now,
             baggage: parentBaggage,
             kind: .client,
             onEnd: { _ in }
@@ -169,7 +169,7 @@ final class SpanTests: XCTestCase {
         let childBaggage = Baggage.topLevel
         let child = TestSpan(
             operationName: "server",
-            startTime: .now(),
+            startTime: TracerClock.now,
             baggage: childBaggage,
             kind: .server,
             onEnd: { _ in }
@@ -195,7 +195,7 @@ final class SpanTests: XCTestCase {
 
         let parent = TestSpan(
             operationName: "client",
-            startTime: .now(),
+            startTime: TracerClock.now,
             baggage: parentBaggage,
             kind: .client,
             onEnd: { _ in }
@@ -203,7 +203,7 @@ final class SpanTests: XCTestCase {
         let childBaggage = Baggage.topLevel
         let child = TestSpan(
             operationName: "server",
-            startTime: .now(),
+            startTime: TracerClock.now,
             baggage: childBaggage,
             kind: .server,
             onEnd: { _ in }

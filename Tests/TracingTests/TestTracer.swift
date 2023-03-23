@@ -23,11 +23,12 @@ final class TestTracer: LegacyTracerProtocol {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -66,11 +67,12 @@ final class TestTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension TestTracer: TracerProtocol {
-    func startSpan(
+    func startSpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -124,8 +126,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    private let startTime: DispatchWallTime
-    private(set) var endTime: DispatchWallTime?
+    private let startTime: Int64
+    private(set) var endTime: Int64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -152,13 +154,13 @@ final class TestSpan: Span {
 
     init(
         operationName: String,
-        startTime: DispatchWallTime,
+        startTime: some TracerInstantProtocol,
         baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (TestSpan) -> Void
     ) {
         self.operationName = operationName
-        self.startTime = startTime
+        self.startTime = startTime.millisSinceEpoch
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -181,8 +183,8 @@ final class TestSpan: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end(at time: DispatchWallTime) {
-        self.endTime = time
+    func end<Clock: TracerClockProtocol>(at time: Clock.Instant = Clock.now, clock: Clock = TracerClock()) {
+        self.endTime = time.millisSinceEpoch
         self.onEnd(self)
     }
 }

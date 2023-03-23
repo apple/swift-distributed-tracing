@@ -41,7 +41,12 @@ let package = Package(
             name: "Tracing",
             dependencies: [
                 .target(name: "Instrumentation"),
+                .target(name: "CTracingTimeSupport"),
             ]
+        ),
+        .target(
+            name: "CTracingTimeSupport",
+            dependencies: []
         ),
         .testTarget(
             name: "TracingTests",

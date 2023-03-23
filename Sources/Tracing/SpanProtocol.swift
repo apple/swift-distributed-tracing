@@ -101,7 +101,7 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end(at time: DispatchWallTime)
+    func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock)
 }
 
 extension Span {
@@ -120,7 +120,7 @@ extension Span {
     /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
-        self.end(at: .now())
+        self.end(at: TracerClock.now, clock: TracerClock())
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.

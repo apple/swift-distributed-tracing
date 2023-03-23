@@ -47,11 +47,12 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        at time: Clock.Instant,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -104,7 +105,7 @@ extension LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: TracerClock.Instant = TracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
@@ -113,7 +114,30 @@ extension LegacyTracerProtocol {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            at: time,
+            at: TracerClock.now,
+            clock: TracerClock(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+    }
+
+    public func startAnySpan<Clock: TracerClockProtocol>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line
+    ) -> any Span {
+        self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: clock.now,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -157,13 +181,54 @@ extension LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: TracerClock.Instant = TracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
         _ operation: (any Span) throws -> T
     ) rethrows -> T {
-        let span = self.startAnySpan(operationName, baggage: baggage(), ofKind: kind, at: time, function: function, file: fileID, line: line)
+        let span = self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: time,
+            clock: TracerClock(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try Baggage.$current.withValue(span.baggage) {
+                try operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+
+    public func withAnySpan<T, Clock: TracerClockProtocol>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Span) throws -> T
+    ) rethrows -> T {
+        let span = self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: time,
+            clock: clock,
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try Baggage.$current.withValue(span.baggage) {
@@ -212,13 +277,54 @@ extension LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: TracerClock.Instant = TracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
         _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
-        let span = self.startAnySpan(operationName, baggage: baggage(), ofKind: kind, at: time, function: function, file: fileID, line: line)
+        let span = self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: time,
+            clock: TracerClock(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await Baggage.$current.withValue(span.baggage) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+
+    public func withAnySpan<T, Clock: TracerClockProtocol>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: time,
+            clock: clock,
+            function: function,
+            file: fileID,
+            line: line
+        )
         defer { span.end() }
         do {
             return try await Baggage.$current.withValue(span.baggage) {
@@ -234,7 +340,7 @@ extension LegacyTracerProtocol {
 #if swift(>=5.7.0)
 // Provide compatibility shims of the `...AnySpan` APIs to the 5.7 requiring `TracerProtocol`.
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+// @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
 extension TracerProtocol {
     /// Start a new span returning an existential ``Span`` reference.
     ///
@@ -269,7 +375,56 @@ extension TracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line
+    ) -> any Span {
+        self.startAnySpan(
+            operationName,
+            baggage: baggage(),
+            ofKind: kind,
+            at: TracerClock.now,
+            function: function,
+            file: fileID,
+            line: line
+        )
+    }
+
+    /// Start a new span returning an existential ``Span`` reference.
+    ///
+    /// This API will be deprecated as soon as Swift 5.9 is released, and the Swift 5.7 requiring `TracerProtocol`
+    /// is recommended instead.
+    ///
+    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
+    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// we're about to start a top-level span, or if a span should be started from a different,
+    /// stored away previously,
+    ///
+    /// - Note: Legacy API, prefer using ``startSpan(_:baggage:ofKind:at:
+    ///
+    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:operation:)`` to start
+    ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
+    ///   Use `startSpan` iff you need to pass the span manually to a different
+    ///   location in your source code to end it.
+    ///
+    /// - Warning: You must `end()` the span when it the measured operation has completed explicitly,
+    ///   otherwise the span object will potentially never be released nor reported.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - time: The time at which to start the new ``Span``.
+    ///   - function: The function name in which the span was started
+    ///   - fileID: The `fileID` where the span was started.
+    ///   - line: The file line where the span was started.
+    public func startAnySpan<Clock: TracerClockProtocol>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
@@ -279,6 +434,7 @@ extension TracerProtocol {
             baggage: baggage(),
             ofKind: kind,
             at: time,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -318,11 +474,12 @@ extension TracerProtocol {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    public func withAnySpan<T>(
+    public func withAnySpan<T, Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -333,6 +490,7 @@ extension TracerProtocol {
             baggage: baggage(),
             ofKind: kind,
             at: time,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -375,22 +533,23 @@ extension TracerProtocol {
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
     #if swift(>=5.7.0)
-    @_unsafeInheritExecutor
-    public func withAnySpan<T>(
+    public func withAnySpan<T, Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: Clock.Instant = Clock.now,
+        clock: Clock = TracerClock(),
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) async throws -> T
+        @_inheritActorContext @_implicitSelfCapture _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,
             baggage: baggage(),
             ofKind: kind,
             at: time,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -404,11 +563,11 @@ extension TracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
+        at time: some TracerInstantProtocol,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) async throws -> T
+        @_inheritActorContext @_implicitSelfCapture _ operation: (any Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,
