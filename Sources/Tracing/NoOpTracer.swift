@@ -26,7 +26,6 @@ public struct NoOpTracer: LegacyTracerProtocol {
     public func startAnySpan<Clock: TracerClockProtocol>(_ operationName: String,
                                                          baggage: @autoclosure () -> Baggage,
                                                          ofKind kind: SpanKind,
-                                                         at time: Clock.Instant,
                                                          clock: Clock,
                                                          function: String,
                                                          file fileID: String,
@@ -85,7 +84,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             }
         }
 
-        public func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock) {
+        public func end<Clock: TracerClockProtocol>(clock: Clock) {
             // ignore
         }
     }
@@ -97,7 +96,6 @@ extension NoOpTracer: TracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant,
         clock: Clock,
         function: String,
         file fileID: String,

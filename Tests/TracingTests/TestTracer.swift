@@ -27,7 +27,6 @@ final class TestTracer: LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant,
         clock: Clock,
         function: String,
         file fileID: String,
@@ -35,10 +34,10 @@ final class TestTracer: LegacyTracerProtocol {
     ) -> any Span {
         let span = TestSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -71,7 +70,6 @@ extension TestTracer: TracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant,
         clock: Clock,
         function: String,
         file fileID: String,
@@ -79,10 +77,10 @@ extension TestTracer: TracerProtocol {
     ) -> TestSpan {
         let span = TestSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -126,8 +124,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    private let startTime: Int64
-    private(set) var endTime: Int64?
+    public let startTime: UInt64
+    public private(set) var endTime: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -183,8 +181,8 @@ final class TestSpan: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Clock: TracerClockProtocol>(at time: Clock.Instant = Clock.now, clock: Clock = TracerClock()) {
-        self.endTime = time.millisSinceEpoch
+    func end<Clock: TracerClockProtocol>(clock: Clock = TracerClock()) {
+        self.endTime = clock.now.millisSinceEpoch
         self.onEnd(self)
     }
 }

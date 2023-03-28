@@ -46,7 +46,6 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - time: The time at which to start the new ``Span``.
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -55,7 +54,6 @@ extension Tracer {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: TracerClock.Instant = TracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
@@ -65,7 +63,6 @@ extension Tracer {
         #if swift(>=5.7.0)
         InstrumentationSystem.tracer.startSpan(
             operationName,
-            at: time,
             clock: TracerClock(),
             function: function,
             file: fileID,
@@ -76,7 +73,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            at: time,
+            at: { $0.now },
             clock: TracerClock(),
             function: function,
             file: fileID,
@@ -114,7 +111,6 @@ extension Tracer {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: Clock.Instant = Clock.now,
         clock: Clock = TracerClock(),
         function: String = #function,
         file fileID: String = #fileID,
@@ -125,7 +121,8 @@ extension Tracer {
         #if swift(>=5.7.0)
         InstrumentationSystem.tracer.startSpan(
             operationName,
-            at: time,
+            baggage: baggage(),
+            ofKind: kind,
             clock: clock,
             function: function,
             file: fileID,
@@ -136,7 +133,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            at: time,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -181,6 +178,7 @@ extension Tracer {
         try InstrumentationSystem.legacyTracer.withAnySpan(
             operationName,
             ofKind: kind,
+            clock: TracerClock(),
             function: function,
             file: fileID,
             line: line
@@ -191,6 +189,42 @@ extension Tracer {
         try InstrumentationSystem.legacyTracer.withAnySpan(
             operationName,
             ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        ) { anySpan in
+            try operation(anySpan)
+        }
+        #endif
+    }
+
+    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+    public static func withSpan<T, Clock: TracerClockProtocol>(
+        _ operationName: String,
+        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        clock: Clock = TracerClock(),
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Span) throws -> T
+    ) rethrows -> T {
+        #if swift(>=5.7.0)
+        try InstrumentationSystem.legacyTracer.withAnySpan(
+            operationName,
+            ofKind: kind,
+            clock: clock,
+            function: function,
+            file: fileID,
+            line: line
+        ) { anySpan in
+            try operation(anySpan)
+        }
+        #else
+        try InstrumentationSystem.legacyTracer.withAnySpan(
+            operationName,
+            ofKind: kind,
+            clock: clock,
             function: function,
             file: fileID,
             line: line
@@ -216,19 +250,17 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - time: The time at which to start the new ``Span``.
+    ///   - clock: The clock to use as time source for the start time of the ``Span``
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=5.7.0)
     public static func withSpan<T>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: TracerClock.Instant = TracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -238,7 +270,6 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            at: time,
             clock: TracerClock(),
             function: function,
             file: fileID,
@@ -247,39 +278,11 @@ extension Tracer {
             try await operation(anySpan)
         }
     }
-    #else // TODO: remove this if/else when we require 5.7
-    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-    public static func withSpan<T>(
-        _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
-        ofKind kind: SpanKind = .internal,
-        at time: TracerClock.Instant = .now,
-        function: String = #function,
-        file fileID: String = #fileID,
-        line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (any Span) async throws -> T
-    ) async rethrows -> T {
-        try await InstrumentationSystem.legacyTracer.withAnySpan(
-            operationName,
-            baggage: baggage(),
-            ofKind: kind,
-            at: time,
-            clock: TracerClock(),
-            function: function,
-            file: fileID,
-            line: line
-        ) { anySpan in
-            try await operation(anySpan)
-        }
-    }
-    #endif
 
-    #if swift(>=5.7.0)
     public static func withSpan<T, Clock: TracerClockProtocol>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        at time: Clock.Instant = Clock.now,
         clock: Clock = TracerClock(),
         function: String = #function,
         file fileID: String = #fileID,
@@ -290,7 +293,6 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            at: time,
             clock: clock,
             function: function,
             file: fileID,
@@ -299,29 +301,4 @@ extension Tracer {
             try await operation(anySpan)
         }
     }
-    #else // TODO: remove this if/else when we require 5.7
-    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-    public static func withSpan<T>(
-        _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
-        ofKind kind: SpanKind = .internal,
-        at time: DispatchWallTime = .now(),
-        function: String = #function,
-        file fileID: String = #fileID,
-        line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (any Span) async throws -> T
-    ) async rethrows -> T {
-        try await InstrumentationSystem.legacyTracer.withAnySpan(
-            operationName,
-            baggage: baggage(),
-            ofKind: kind,
-            at: time,
-            function: function,
-            file: fileID,
-            line: line
-        ) { anySpan in
-            try await operation(anySpan)
-        }
-    }
-    #endif
 }

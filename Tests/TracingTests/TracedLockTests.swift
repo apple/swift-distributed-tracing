@@ -64,7 +64,6 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant = Clock.now,
         clock: Clock = TracerClock(),
         function: String,
         file fileID: String,
@@ -72,7 +71,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
     ) -> any Span {
         TracedLockPrintlnSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             kind: kind,
             baggage: baggage()
         )
@@ -103,8 +102,8 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         private var status: SpanStatus?
 
-        private let startTimeMillis: Int64
-        private(set) var endTimeMillis: Int64?
+        private let startTimeMillis: UInt64
+        private(set) var endTimeMillis: UInt64?
 
         var operationName: String
         let baggage: Baggage
@@ -154,7 +153,8 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         func recordError(_ error: Error, attributes: SpanAttributes) {}
 
-        func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock) {
+        func end<Clock: TracerClockProtocol>(clock: Clock) {
+            let time = clock.now
             self.endTimeMillis = time.millisSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
@@ -167,7 +167,6 @@ extension TracedLockPrintlnTracer: TracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant,
         clock: Clock,
         function: String,
         file fileID: String,
@@ -175,7 +174,7 @@ extension TracedLockPrintlnTracer: TracerProtocol {
     ) -> TracedLockPrintlnSpan {
         TracedLockPrintlnSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             kind: kind,
             baggage: baggage()
         )

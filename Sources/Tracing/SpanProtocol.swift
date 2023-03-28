@@ -101,7 +101,7 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// - Parameter time: The `DispatchWallTime` at which the span ended.
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock)
+    func end<Clock: TracerClockProtocol>(clock: Clock)
 }
 
 extension Span {
@@ -120,7 +120,7 @@ extension Span {
     /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
-        self.end(at: TracerClock.now, clock: TracerClock())
+        self.end(clock: TracerClock())
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
@@ -154,17 +154,20 @@ public struct SpanEvent: Equatable {
     public var attributes: SpanAttributes
 
     /// The `DispatchWallTime` at which this event occurred.
-    public let time: DispatchWallTime
+    public let time: UInt64
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
     ///   - time: The `DispatchWallTime` at which this event occurred. Defaults to `.now()`.
-    public init(name: String, attributes: SpanAttributes = [:], at time: DispatchWallTime = .now()) {
+    public init<Clock: TracerClockProtocol>(name: String,
+                                            attributes: SpanAttributes = [:],
+                                            clock: Clock = TracerClock())
+    {
         self.name = name
         self.attributes = attributes
-        self.time = time
+        self.time = clock.now.millisSinceEpoch
     }
 }
 

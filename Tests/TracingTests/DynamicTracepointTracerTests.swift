@@ -169,7 +169,6 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: Clock.Instant,
         clock: Clock,
         function: String,
         file fileID: String,
@@ -182,13 +181,12 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
 
         let span = TracepointSpan(
             operationName: operationName,
-            startTime: time,
-            clock: clock,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -260,8 +258,8 @@ extension DynamicTracepointTestTracer {
 
         private var status: SpanStatus?
 
-        private let startTime: Int64
-        private(set) var endTime: Int64?
+        private let startTime: UInt64
+        private(set) var endTime: UInt64?
 
         public var operationName: String
         private(set) var baggage: Baggage
@@ -272,8 +270,7 @@ extension DynamicTracepointTestTracer {
         static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
             let span = TracepointSpan(
                 operationName: "",
-                startTime: TracerClock.now,
-                clock: TracerClock(),
+                startTime: TracerClock().now,
                 baggage: .topLevel,
                 kind: .internal,
                 file: fileID,
@@ -284,14 +281,13 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init<Clock: TracerClockProtocol>(operationName: String,
-                                         startTime: Clock.Instant = Clock.now,
-                                         clock: Clock = TracerClock(),
-                                         baggage: Baggage,
-                                         kind: SpanKind,
-                                         file fileID: String,
-                                         line: UInt,
-                                         onEnd: @escaping (TracepointSpan) -> Void)
+        init(operationName: String,
+             startTime: some TracerInstantProtocol,
+             baggage: Baggage,
+             kind: SpanKind,
+             file fileID: String,
+             line: UInt,
+             onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
             self.startTime = startTime.millisSinceEpoch
@@ -326,8 +322,8 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func end<Clock: TracerClockProtocol>(at time: Clock.Instant, clock: Clock) {
-            self.endTime = time.millisSinceEpoch
+        func end<Clock: TracerClockProtocol>(clock: Clock) {
+            self.endTime = clock.now.millisSinceEpoch
             self.onEnd(self)
         }
     }
@@ -340,7 +336,6 @@ extension DynamicTracepointTestTracer: TracerProtocol {
     func startSpan<Clock: TracerClockProtocol>(_ operationName: String,
                                                baggage: @autoclosure () -> Baggage,
                                                ofKind kind: Tracing.SpanKind,
-                                               at time: Clock.Instant,
                                                clock: Clock,
                                                function: String,
                                                file fileID: String,
@@ -353,13 +348,12 @@ extension DynamicTracepointTestTracer: TracerProtocol {
 
         let span = TracepointSpan(
             operationName: operationName,
-            startTime: time,
-            clock: clock,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
