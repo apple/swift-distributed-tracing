@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import CTracingTimeSupport
 import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
