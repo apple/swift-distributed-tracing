@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -60,11 +60,11 @@ enum TaskIDKey: BaggageKey {
 
 /// Only intended to be used in single-threaded testing.
 private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
-    func startAnySpan<Clock: TracerClockProtocol>(
+    func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock = TracerClock(),
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -124,9 +124,9 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         private(set) var isRecording = false
 
-        init(
+        init<Instant: TracerInstantProtocol>(
             operationName: String,
-            startTime: some TracerInstantProtocol,
+            startTime: Instant,
             kind: SpanKind,
             baggage: Baggage
         ) {
@@ -153,7 +153,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         func recordError(_ error: Error, attributes: SpanAttributes) {}
 
-        func end<Clock: TracerClockProtocol>(clock: Clock) {
+        func end<Clock: TracerClock>(clock: Clock) {
             let time = clock.now
             self.endTimeMillis = time.millisSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
@@ -163,7 +163,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension TracedLockPrintlnTracer: TracerProtocol {
-    func startSpan<Clock: TracerClockProtocol>(
+    func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,

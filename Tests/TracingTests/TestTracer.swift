@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -23,7 +23,7 @@ final class TestTracer: LegacyTracerProtocol {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
-    func startAnySpan<Clock: TracerClockProtocol>(
+    func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
@@ -66,7 +66,7 @@ final class TestTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension TestTracer: TracerProtocol {
-    func startSpan<Clock: TracerClockProtocol>(
+    func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
@@ -150,9 +150,9 @@ final class TestSpan: Span {
 
     let onEnd: (TestSpan) -> Void
 
-    init(
+    init<Instant: TracerInstantProtocol>(
         operationName: String,
-        startTime: some TracerInstantProtocol,
+        startTime: Instant,
         baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (TestSpan) -> Void
@@ -181,7 +181,7 @@ final class TestSpan: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Clock: TracerClockProtocol>(clock: Clock = TracerClock()) {
+    func end<Clock: TracerClock>(clock: Clock) {
         self.endTime = clock.now.millisSinceEpoch
         self.onEnd(self)
     }

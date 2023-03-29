@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -165,7 +165,7 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     var onEndSpan: (any Span) -> Void = { _ in
     }
 
-    func startAnySpan<Clock: TracerClockProtocol>(
+    func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
@@ -270,7 +270,7 @@ extension DynamicTracepointTestTracer {
         static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
             let span = TracepointSpan(
                 operationName: "",
-                startTime: TracerClock().now,
+                startTime: DefaultTracerClock().now,
                 baggage: .topLevel,
                 kind: .internal,
                 file: fileID,
@@ -281,13 +281,13 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init(operationName: String,
-             startTime: some TracerInstantProtocol,
-             baggage: Baggage,
-             kind: SpanKind,
-             file fileID: String,
-             line: UInt,
-             onEnd: @escaping (TracepointSpan) -> Void)
+        init<Instant: TracerInstantProtocol>(operationName: String,
+                                             startTime: Instant,
+                                             baggage: Baggage,
+                                             kind: SpanKind,
+                                             file fileID: String,
+                                             line: UInt,
+                                             onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
             self.startTime = startTime.millisSinceEpoch
@@ -322,7 +322,7 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func end<Clock: TracerClockProtocol>(clock: Clock) {
+        func end<Clock: TracerClock>(clock: Clock) {
             self.endTime = clock.now.millisSinceEpoch
             self.onEnd(self)
         }
@@ -333,13 +333,13 @@ extension DynamicTracepointTestTracer {
 extension DynamicTracepointTestTracer: TracerProtocol {
     typealias TracerSpan = TracepointSpan
 
-    func startSpan<Clock: TracerClockProtocol>(_ operationName: String,
-                                               baggage: @autoclosure () -> Baggage,
-                                               ofKind kind: Tracing.SpanKind,
-                                               clock: Clock,
-                                               function: String,
-                                               file fileID: String,
-                                               line: UInt) -> TracepointSpan
+    func startSpan<Clock: TracerClock>(_ operationName: String,
+                                       baggage: @autoclosure () -> Baggage,
+                                       ofKind kind: Tracing.SpanKind,
+                                       clock: Clock,
+                                       function: String,
+                                       file fileID: String,
+                                       line: UInt) -> TracepointSpan
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {

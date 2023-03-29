@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -24,7 +24,7 @@ final class TracerTimeTests: XCTestCase {
     }
 
     func testTracerTime() {
-        let t = TracerClock.now
+        let t = DefaultTracerClock.now
         let d = Date()
         XCTAssertEqual(
             Double(t.millisSinceEpoch) / 1000, // seconds
@@ -42,12 +42,17 @@ final class TracerTimeTests: XCTestCase {
 
         let mockClock = MockClock()
         mockClock.setTime(13)
+        #if swift(>=5.7.0)
         let span: TestSpan = tracer.startSpan("start", clock: mockClock)
         XCTAssertEqual(span.startTime, 13)
+        #else
+        let span: TestSpan = tracer.startAnySpan("start", clock: mockClock) as! TestSpan
+        XCTAssertEqual(span.startTime, 13)
+        #endif
     }
 }
 
-final class MockClock: TracerClockProtocol {
+final class MockClock: TracerClock {
     var _now: UInt64 = 0
 
     init() {}

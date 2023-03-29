@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -52,19 +52,19 @@ public protocol TracerInstantProtocol: SwiftDistributedTracingInstantProtocol {
 /// It does not have to allow sleeping, nor is it interchangeable with other notions of clocks (e.g. such as monotonic time etc).
 ///
 /// If the standard library, or foundation, or someone else were to implement an UTCClock or UNIXTimestampClock,
-/// they can be made to conform to `TracerClockProtocol`.
+/// they can be made to conform to `TracerClock`.
 ///
 /// The primary purpose of this clock protocol is to enable mocking the "now" time when starting and ending spans,
 /// especially when the system is already using some notion of simulated or mocked time, such that traces are
 /// expressed using the same notion of time.
-public protocol TracerClockProtocol {
+public protocol TracerClock {
     associatedtype Instant: TracerInstantProtocol
 
     var now: Self.Instant { get }
 }
 
 /// A basic "timestamp clock" implementation that is able to five the current time as an unix timestamp.
-public struct TracerClock: TracerClockProtocol {
+public struct DefaultTracerClock: TracerClock {
     public typealias Instant = Timestamp
     internal typealias TimeInterval = Double
 
@@ -94,7 +94,7 @@ public struct TracerClock: TracerClockProtocol {
     }
 
     public static var now: Self.Instant {
-        TracerClock().now
+        DefaultTracerClock().now
     }
 
     public var now: Self.Instant {

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -23,13 +23,13 @@ public struct NoOpTracer: LegacyTracerProtocol {
 
     public init() {}
 
-    public func startAnySpan<Clock: TracerClockProtocol>(_ operationName: String,
-                                                         baggage: @autoclosure () -> Baggage,
-                                                         ofKind kind: SpanKind,
-                                                         clock: Clock,
-                                                         function: String,
-                                                         file fileID: String,
-                                                         line: UInt) -> any Span
+    public func startAnySpan<Clock: TracerClock>(_ operationName: String,
+                                                 baggage: @autoclosure () -> Baggage,
+                                                 ofKind kind: SpanKind,
+                                                 clock: Clock,
+                                                 function: String,
+                                                 file fileID: String,
+                                                 line: UInt) -> any Span
     {
         NoOpSpan(baggage: baggage())
     }
@@ -84,7 +84,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
             }
         }
 
-        public func end<Clock: TracerClockProtocol>(clock: Clock) {
+        public func end<Clock: TracerClock>(clock: Clock) {
             // ignore
         }
     }
@@ -92,7 +92,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension NoOpTracer: TracerProtocol {
-    public func startSpan<Clock: TracerClockProtocol>(
+    public func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,

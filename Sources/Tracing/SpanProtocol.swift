@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -12,11 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.6.0)
-@preconcurrency import struct Dispatch.DispatchWallTime
-#else
-import struct Dispatch.DispatchWallTime
-#endif
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
@@ -98,10 +93,11 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter time: The `DispatchWallTime` at which the span ended.
+    /// Parameters:
+    ///   - clock: The clock to use as time source for the start time of the ``Span``
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end<Clock: TracerClockProtocol>(clock: Clock)
+    func end<Clock: TracerClock>(clock: Clock)
 }
 
 extension Span {
@@ -115,12 +111,10 @@ extension Span {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter time: The `DispatchWallTime` at which the span ended.
-    ///
-    /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    /// - SeeAlso: ``end(clock:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
-        self.end(clock: TracerClock())
+        self.end(clock: DefaultTracerClock())
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
@@ -160,14 +154,22 @@ public struct SpanEvent: Equatable {
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
-    ///   - time: The `DispatchWallTime` at which this event occurred. Defaults to `.now()`.
-    public init<Clock: TracerClockProtocol>(name: String,
-                                            attributes: SpanAttributes = [:],
-                                            clock: Clock = TracerClock())
+    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    public init<Clock: TracerClock>(name: String,
+                                    clock: Clock,
+                                    attributes: SpanAttributes = [:])
     {
         self.name = name
         self.attributes = attributes
         self.time = clock.now.millisSinceEpoch
+    }
+
+    public init(name: String,
+                attributes: SpanAttributes = [:])
+    {
+        self.name = name
+        self.attributes = attributes
+        self.time = DefaultTracerClock.now.millisSinceEpoch
     }
 }
 
