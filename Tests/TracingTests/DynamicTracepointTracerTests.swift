@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -24,7 +24,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func test_adhoc_enableBySourceLoc() {
-        #if swift(>=5.5)
         let tracer = DynamicTracepointTestTracer()
 
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -72,7 +71,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
         XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
         XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
-        #endif
     }
 
     func test_adhoc_enableByFunction() {
@@ -167,11 +165,11 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
     var onEndSpan: (any Span) -> Void = { _ in
     }
 
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
@@ -183,12 +181,12 @@ final class DynamicTracepointTestTracer: LegacyTracerProtocol {
 
         let span = TracepointSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -260,8 +258,8 @@ extension DynamicTracepointTestTracer {
 
         private var status: SpanStatus?
 
-        private let startTime: DispatchWallTime
-        private(set) var endTime: DispatchWallTime?
+        private let startTime: UInt64
+        private(set) var endTime: UInt64?
 
         public var operationName: String
         private(set) var baggage: Baggage
@@ -272,7 +270,7 @@ extension DynamicTracepointTestTracer {
         static func notRecording(file fileID: String, line: UInt) -> TracepointSpan {
             let span = TracepointSpan(
                 operationName: "",
-                startTime: .now(),
+                startTime: DefaultTracerClock().now,
                 baggage: .topLevel,
                 kind: .internal,
                 file: fileID,
@@ -283,16 +281,16 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init(operationName: String,
-             startTime: DispatchWallTime,
-             baggage: Baggage,
-             kind: SpanKind,
-             file fileID: String,
-             line: UInt,
-             onEnd: @escaping (TracepointSpan) -> Void)
+        init<Instant: TracerInstantProtocol>(operationName: String,
+                                             startTime: Instant,
+                                             baggage: Baggage,
+                                             kind: SpanKind,
+                                             file fileID: String,
+                                             line: UInt,
+                                             onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
-            self.startTime = startTime
+            self.startTime = startTime.millisecondsSinceEpoch
             self.baggage = baggage
             self.onEnd = onEnd
             self.kind = kind
@@ -324,8 +322,8 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func end(at time: DispatchWallTime) {
-            self.endTime = time
+        func end<Clock: TracerClock>(clock: Clock) {
+            self.endTime = clock.now.millisecondsSinceEpoch
             self.onEnd(self)
         }
     }
@@ -335,13 +333,13 @@ extension DynamicTracepointTestTracer {
 extension DynamicTracepointTestTracer: TracerProtocol {
     typealias TracerSpan = TracepointSpan
 
-    func startSpan(_ operationName: String,
-                   baggage: @autoclosure () -> Baggage,
-                   ofKind kind: Tracing.SpanKind,
-                   at time: DispatchWallTime,
-                   function: String,
-                   file fileID: String,
-                   line: UInt) -> TracepointSpan
+    func startSpan<Clock: TracerClock>(_ operationName: String,
+                                       baggage: @autoclosure () -> Baggage,
+                                       ofKind kind: Tracing.SpanKind,
+                                       clock: Clock,
+                                       function: String,
+                                       file fileID: String,
+                                       line: UInt) -> TracepointSpan
     {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
@@ -350,12 +348,12 @@ extension DynamicTracepointTestTracer: TracerProtocol {
 
         let span = TracepointSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
             file: fileID,
             line: line,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -363,7 +361,5 @@ extension DynamicTracepointTestTracer: TracerProtocol {
 }
 #endif
 
-#if compiler(>=5.6.0)
 extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing
 extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif

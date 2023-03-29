@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2022 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -12,11 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if swift(>=5.6.0)
-@preconcurrency import struct Dispatch.DispatchWallTime
-#else
-import struct Dispatch.DispatchWallTime
-#endif
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
@@ -98,10 +93,11 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter time: The `DispatchWallTime` at which the span ended.
+    /// Parameters:
+    ///   - clock: The clock to use as time source for the start time of the ``Span``
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end(at time: DispatchWallTime)
+    func end<Clock: TracerClock>(clock: Clock)
 }
 
 extension Span {
@@ -115,12 +111,10 @@ extension Span {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - Parameter time: The `DispatchWallTime` at which the span ended.
-    ///
-    /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    /// - SeeAlso: ``end(clock:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
-        self.end(at: .now())
+        self.end(clock: DefaultTracerClock())
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
@@ -153,18 +147,31 @@ public struct SpanEvent: Equatable {
     /// One or more ``SpanAttribute``s with the same restrictions as defined for ``Span`` attributes.
     public var attributes: SpanAttributes
 
-    /// The `DispatchWallTime` at which this event occurred.
-    public let time: DispatchWallTime
+    /// The timestamp at which this event occurred.
+    ///
+    /// It should be expressed as the number of milliseconds since UNIX Epoch (January 1st 1970).
+    public let millisecondsSinceEpoch: UInt64
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
-    ///   - time: The `DispatchWallTime` at which this event occurred. Defaults to `.now()`.
-    public init(name: String, attributes: SpanAttributes = [:], at time: DispatchWallTime = .now()) {
+    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    public init<Clock: TracerClock>(name: String,
+                                    clock: Clock,
+                                    attributes: SpanAttributes = [:])
+    {
         self.name = name
         self.attributes = attributes
-        self.time = time
+        self.millisecondsSinceEpoch = clock.now.millisecondsSinceEpoch
+    }
+
+    public init(name: String,
+                attributes: SpanAttributes = [:])
+    {
+        self.name = name
+        self.attributes = attributes
+        self.millisecondsSinceEpoch = DefaultTracerClock.now.millisecondsSinceEpoch
     }
 }
 

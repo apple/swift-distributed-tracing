@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -161,7 +161,7 @@ final class SpanTests: XCTestCase {
 
         let parent = TestSpan(
             operationName: "client",
-            startTime: .now(),
+            startTime: DefaultTracerClock.now,
             baggage: parentBaggage,
             kind: .client,
             onEnd: { _ in }
@@ -169,7 +169,7 @@ final class SpanTests: XCTestCase {
         let childBaggage = Baggage.topLevel
         let child = TestSpan(
             operationName: "server",
-            startTime: .now(),
+            startTime: DefaultTracerClock.now,
             baggage: childBaggage,
             kind: .server,
             onEnd: { _ in }
@@ -195,7 +195,7 @@ final class SpanTests: XCTestCase {
 
         let parent = TestSpan(
             operationName: "client",
-            startTime: .now(),
+            startTime: DefaultTracerClock.now,
             baggage: parentBaggage,
             kind: .client,
             onEnd: { _ in }
@@ -203,7 +203,7 @@ final class SpanTests: XCTestCase {
         let childBaggage = Baggage.topLevel
         let child = TestSpan(
             operationName: "server",
-            startTime: .now(),
+            startTime: DefaultTracerClock.now,
             baggage: childBaggage,
             kind: .server,
             onEnd: { _ in }

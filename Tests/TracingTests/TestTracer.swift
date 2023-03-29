@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2021 Apple Inc. and the Swift Distributed Tracing project
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 // authors
 // Licensed under Apache License v2.0
 //
@@ -23,21 +23,21 @@ final class TestTracer: LegacyTracerProtocol {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
-    func startAnySpan(
+    func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
     ) -> any Span {
         let span = TestSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -66,21 +66,21 @@ final class TestTracer: LegacyTracerProtocol {
 
 #if swift(>=5.7.0)
 extension TestTracer: TracerProtocol {
-    func startSpan(
+    func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        at time: DispatchWallTime,
+        clock: Clock,
         function: String,
         file fileID: String,
         line: UInt
     ) -> TestSpan {
         let span = TestSpan(
             operationName: operationName,
-            startTime: time,
+            startTime: clock.now,
             baggage: baggage(),
             kind: kind,
-            onEnd: onEndSpan
+            onEnd: self.onEndSpan
         )
         self.spans.append(span)
         return span
@@ -124,8 +124,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    private let startTime: DispatchWallTime
-    private(set) var endTime: DispatchWallTime?
+    public let startTime: UInt64
+    public private(set) var endTime: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -150,15 +150,15 @@ final class TestSpan: Span {
 
     let onEnd: (TestSpan) -> Void
 
-    init(
+    init<Instant: TracerInstantProtocol>(
         operationName: String,
-        startTime: DispatchWallTime,
+        startTime: Instant,
         baggage: Baggage,
         kind: SpanKind,
         onEnd: @escaping (TestSpan) -> Void
     ) {
         self.operationName = operationName
-        self.startTime = startTime
+        self.startTime = startTime.millisecondsSinceEpoch
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -181,8 +181,8 @@ final class TestSpan: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end(at time: DispatchWallTime) {
-        self.endTime = time
+    func end<Clock: TracerClock>(clock: Clock) {
+        self.endTime = clock.now.millisecondsSinceEpoch
         self.onEnd(self)
     }
 }
