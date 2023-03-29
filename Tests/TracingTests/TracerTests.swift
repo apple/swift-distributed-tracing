@@ -351,6 +351,21 @@ final class TracerTests: XCTestCase {
         #endif
     }
 
+    func testWithSpanSignatures() {
+        let tracer = TestTracer()
+        let clock = DefaultTracerClock()
+
+        #if swift(>=5.7.0)
+        tracer.withSpan("") { _ in }
+        tracer.withSpan("", clock: clock) { _ in }
+        tracer.withSpan("", baggage: .topLevel) { _ in }
+        #endif
+
+        tracer.withAnySpan("") { _ in }
+        tracer.withAnySpan("", clock: clock) { _ in }
+        tracer.withAnySpan("", baggage: .topLevel) { _ in }
+    }
+
     #if swift(>=5.7.0)
 //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
