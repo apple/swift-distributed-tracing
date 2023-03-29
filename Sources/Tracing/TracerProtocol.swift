@@ -110,6 +110,21 @@ extension TracerProtocol {
     }
 }
 
+extension TracerProtocol {
+    // default implementation of the `LegacyTracerProtocol`
+    public func startAnySpan<Clock>(
+        _ operationName: String,
+        baggage: @autoclosure () -> InstrumentationBaggage.Baggage,
+        ofKind kind: Tracing.SpanKind,
+        clock: Clock,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> Tracing.Span where Clock: Tracing.TracerClock {
+        self.startSpan(operationName, baggage: baggage(), ofKind: kind, clock: clock, function: function, file: fileID, line: line)
+    }
+}
+
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
