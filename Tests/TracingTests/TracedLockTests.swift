@@ -131,7 +131,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
             baggage: Baggage
         ) {
             self.operationName = operationName
-            self.startTimeMillis = startTime.millisSinceEpoch
+            self.startTimeMillis = startTime.millisecondsSinceEpoch
             self.baggage = baggage
             self.kind = kind
 
@@ -155,7 +155,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 
         func end<Clock: TracerClock>(clock: Clock) {
             let time = clock.now
-            self.endTimeMillis = time.millisSinceEpoch
+            self.endTimeMillis = time.millisecondsSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
     }

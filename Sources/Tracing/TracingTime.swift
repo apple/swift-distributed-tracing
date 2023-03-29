@@ -36,14 +36,12 @@ extension SwiftDistributedTracingDurationProtocol {
     }
 }
 
-public protocol SwiftDistributedTracingInstantProtocol: Comparable, Hashable, Sendable {
-    // associatedtype Duration: SwiftDistributedTracingDurationProtocol
-}
+public protocol SwiftDistributedTracingInstantProtocol: Comparable, Hashable, Sendable {}
 
 public protocol TracerInstantProtocol: SwiftDistributedTracingInstantProtocol {
     /// Representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970)
     @inlinable
-    var millisSinceEpoch: UInt64 { get }
+    var millisecondsSinceEpoch: UInt64 { get }
 }
 
 /// A specialized clock protocol for purposes of tracing.
@@ -74,22 +72,22 @@ public struct DefaultTracerClock: TracerClock {
 
     public struct Timestamp: TracerInstantProtocol {
         /// Milliseconds since January 1st, 1970, also known as "unix epoch".
-        public var millisSinceEpoch: UInt64
+        public var millisecondsSinceEpoch: UInt64
 
-        internal init(millisSinceEpoch: UInt64) {
-            self.millisSinceEpoch = millisSinceEpoch
+        internal init(millisecondsSinceEpoch: UInt64) {
+            self.millisecondsSinceEpoch = millisecondsSinceEpoch
         }
 
         public static func < (lhs: Instant, rhs: Instant) -> Bool {
-            lhs.millisSinceEpoch < rhs.millisSinceEpoch
+            lhs.millisecondsSinceEpoch < rhs.millisecondsSinceEpoch
         }
 
         public static func == (lhs: Instant, rhs: Instant) -> Bool {
-            lhs.millisSinceEpoch == rhs.millisSinceEpoch
+            lhs.millisecondsSinceEpoch == rhs.millisecondsSinceEpoch
         }
 
         public func hash(into hasher: inout Hasher) {
-            self.millisSinceEpoch.hash(into: &hasher)
+            self.millisecondsSinceEpoch.hash(into: &hasher)
         }
     }
 
@@ -106,7 +104,7 @@ public struct DefaultTracerClock: TracerClock {
         let nowNanos = UInt64(ts.tv_sec) &* 1_000_000_000 &+ UInt64(ts.tv_nsec)
         let nowMillis = UInt64(nowNanos / 1_000_000) // nanos to millis
 
-        return Instant(millisSinceEpoch: nowMillis)
+        return Instant(millisecondsSinceEpoch: nowMillis)
     }
 }
 

@@ -147,8 +147,10 @@ public struct SpanEvent: Equatable {
     /// One or more ``SpanAttribute``s with the same restrictions as defined for ``Span`` attributes.
     public var attributes: SpanAttributes
 
-    /// The `DispatchWallTime` at which this event occurred.
-    public let time: UInt64
+    /// The timestamp at which this event occurred.
+    ///
+    /// It should be expressed as the number of milliseconds since UNIX Epoch (January 1st 1970).
+    public let millisecondsSinceEpoch: UInt64
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
@@ -161,7 +163,7 @@ public struct SpanEvent: Equatable {
     {
         self.name = name
         self.attributes = attributes
-        self.time = clock.now.millisSinceEpoch
+        self.millisecondsSinceEpoch = clock.now.millisecondsSinceEpoch
     }
 
     public init(name: String,
@@ -169,7 +171,7 @@ public struct SpanEvent: Equatable {
     {
         self.name = name
         self.attributes = attributes
-        self.time = DefaultTracerClock.now.millisSinceEpoch
+        self.millisecondsSinceEpoch = DefaultTracerClock.now.millisecondsSinceEpoch
     }
 }
 

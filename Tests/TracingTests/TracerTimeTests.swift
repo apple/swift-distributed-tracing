@@ -27,7 +27,7 @@ final class TracerTimeTests: XCTestCase {
         let t = DefaultTracerClock.now
         let d = Date()
         XCTAssertEqual(
-            Double(t.millisSinceEpoch) / 1000, // seconds
+            Double(t.millisecondsSinceEpoch) / 1000, // seconds
             d.timeIntervalSince1970, // seconds
             accuracy: 10
         )
@@ -62,13 +62,13 @@ final class MockClock: TracerClock {
     }
 
     struct Instant: TracerInstantProtocol {
-        var millisSinceEpoch: UInt64
+        var millisecondsSinceEpoch: UInt64
         static func < (lhs: MockClock.Instant, rhs: MockClock.Instant) -> Bool {
-            lhs.millisSinceEpoch < rhs.millisSinceEpoch
+            lhs.millisecondsSinceEpoch < rhs.millisecondsSinceEpoch
         }
     }
 
     var now: Instant {
-        Instant(millisSinceEpoch: self._now)
+        Instant(millisecondsSinceEpoch: self._now)
     }
 }

@@ -158,7 +158,7 @@ final class TestSpan: Span {
         onEnd: @escaping (TestSpan) -> Void
     ) {
         self.operationName = operationName
-        self.startTime = startTime.millisSinceEpoch
+        self.startTime = startTime.millisecondsSinceEpoch
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -182,7 +182,7 @@ final class TestSpan: Span {
     }
 
     func end<Clock: TracerClock>(clock: Clock) {
-        self.endTime = clock.now.millisSinceEpoch
+        self.endTime = clock.now.millisecondsSinceEpoch
         self.onEnd(self)
     }
 }

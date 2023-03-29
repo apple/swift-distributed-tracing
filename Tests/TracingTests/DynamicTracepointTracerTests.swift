@@ -290,7 +290,7 @@ extension DynamicTracepointTestTracer {
                                              onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
-            self.startTime = startTime.millisSinceEpoch
+            self.startTime = startTime.millisecondsSinceEpoch
             self.baggage = baggage
             self.onEnd = onEnd
             self.kind = kind
@@ -323,7 +323,7 @@ extension DynamicTracepointTestTracer {
         }
 
         func end<Clock: TracerClock>(clock: Clock) {
-            self.endTime = clock.now.millisSinceEpoch
+            self.endTime = clock.now.millisecondsSinceEpoch
             self.onEnd(self)
         }
     }
