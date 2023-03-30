@@ -19,7 +19,7 @@ import InstrumentationBaggage
 import Tracing
 
 /// Only intended to be used in single-threaded testing.
-final class TestTracer: LegacyTracerProtocol {
+final class TestTracer: LegacyTracer {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
@@ -65,7 +65,7 @@ final class TestTracer: LegacyTracerProtocol {
 }
 
 #if swift(>=5.7.0)
-extension TestTracer: TracerProtocol {
+extension TestTracer: Tracer {
     func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,

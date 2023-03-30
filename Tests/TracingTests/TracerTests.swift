@@ -280,7 +280,7 @@ final class TracerTests: XCTestCase {
 
         self.testAsync {
             do {
-                _ = try await Tracer.withSpan("hello", operation)
+                _ = try await withSpan("hello", operation)
             } catch {
                 XCTAssertTrue(spanEnded)
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
@@ -310,7 +310,7 @@ final class TracerTests: XCTestCase {
 
         self.testAsync {
             do {
-                _ = try Tracer.withSpan("hello", operation)
+                _ = try withSpan("hello", operation)
             } catch {
                 XCTAssertTrue(spanEnded)
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())

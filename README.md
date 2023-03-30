@@ -444,7 +444,7 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
 The above trace is achieved by starting and ending spans in all the mentioned functions, for example, like this:
 
 ```swift
-let tracer: any TracerProtocol
+let tracer: any Tracer
 
 func makeDinner(context: LoggingContext) async throws -> Meal {
   tracer.withSpan(operationName: "makeDinner", context) {
@@ -538,8 +538,8 @@ func get(url: String, context: LoggingContext) {
 
 ## Instrument developers: Creating an instrument
 
-Creating an instrument means adopting the `InstrumentProtocol` protocol (or `TracerProtocol` in case you develop a tracer).
-`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `TracerProtocol` protocol.
+Creating an instrument means adopting the `InstrumentProtocol` protocol (or `Tracer` in case you develop a tracer).
+`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
 
 `InstrumentProtocol` has two requirements:
 
@@ -556,7 +556,7 @@ how to retrieve values from the `LoggingContext` and how to set values on it.
 
 When creating a tracer you need to create two types:
 
-1. Your tracer conforming to `TracerProtocol`
+1. Your tracer conforming to `Tracer`
 2. A span class conforming to `Span`
 
 > The `Span` conforms to the standard rules defined in [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span), so if unsure about usage patterns, you can refer to this specification and examples referring to it.

@@ -22,9 +22,9 @@ extension InstrumentationSystem {
     /// tracing instrument as passed to the multiplex instrument. If none is found, a ``NoOpTracer`` is returned.
     ///
     /// - Returns: A ``Tracer`` if the system was bootstrapped with one, and ``NoOpTracer`` otherwise.
-    public static var tracer: any TracerProtocol {
-        let found: (any TracerProtocol)? =
-            (self._findInstrument(where: { $0 is (any TracerProtocol) }) as? (any TracerProtocol))
+    public static var tracer: any Tracer {
+        let found: (any Tracer)? =
+            (self._findInstrument(where: { $0 is (any Tracer) }) as? (any Tracer))
         return found ?? NoOpTracer()
     }
     #endif
@@ -35,9 +35,9 @@ extension InstrumentationSystem {
     /// tracing instrument as passed to the multiplex instrument. If none is found, a ``NoOpTracer`` is returned.
     ///
     /// - Returns: A ``Tracer`` if the system was bootstrapped with one, and ``NoOpTracer`` otherwise.
-    public static var legacyTracer: any LegacyTracerProtocol {
-        let found: (any LegacyTracerProtocol)? =
-            (self._findInstrument(where: { $0 is (any LegacyTracerProtocol) }) as? (any LegacyTracerProtocol))
+    public static var legacyTracer: any LegacyTracer {
+        let found: (any LegacyTracer)? =
+            (self._findInstrument(where: { $0 is (any LegacyTracer) }) as? (any LegacyTracer))
         return found ?? NoOpTracer()
     }
 }

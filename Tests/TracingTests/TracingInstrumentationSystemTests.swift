@@ -17,12 +17,12 @@ import Tracing
 import XCTest
 
 extension InstrumentationSystem {
-    public static func _legacyTracer<T>(of tracerType: T.Type) -> T? where T: LegacyTracerProtocol {
+    public static func _legacyTracer<T>(of tracerType: T.Type) -> T? where T: LegacyTracer {
         self._findInstrument(where: { $0 is T }) as? T
     }
 
     #if swift(>=5.7.0)
-    public static func _tracer<T>(of tracerType: T.Type) -> T? where T: TracerProtocol {
+    public static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
         self._findInstrument(where: { $0 is T }) as? T
     }
     #endif

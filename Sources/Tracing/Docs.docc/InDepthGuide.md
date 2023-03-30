@@ -188,7 +188,7 @@ Spans form hierarchies with their parent spans, and end up being visualized usin
 The above trace is achieved by starting and ending spans in all the mentioned functions, for example, like this:
 
 ```swift
-let tracer: any TracerProtocol
+let tracer: any Tracer
 
 func makeDinner(context: LoggingContext) async throws -> Meal {
   tracer.withSpan(operationName: "makeDinner", context) {
