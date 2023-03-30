@@ -40,7 +40,7 @@ This project uses the context progagation type defined independently in:
     + [Extracting & injecting Baggage](#extracting--injecting-baggage)
     + [Tracing your library](#tracing-your-library)
 * In-Depth Guide for: **Instrument developers**
-    + [Creating an `InstrumentProtocol`](#instrument-developers--creating-an-instrument)
+    + [Creating an `Instrument`](#instrument-developers--creating-an-instrument)
     + [Creating a `Tracer`](#creating-a--tracer-)
 * [Contributing](#contributing)
 
@@ -119,7 +119,7 @@ To your main target, add a dependency on `Tracing` library and the instrument yo
 ),
 ```
 
-Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A `Tracer` is a type of `InstrumentProtocol` and can be offered used to globally bootstrap the tracing system, like this:
+Then (in an application, libraries should _never_ invoke `bootstrap`), you will want to bootstrap the specific tracer you want to use in your application. A `Tracer` is a type of `Instrument` and can be offered used to globally bootstrap the tracing system, like this:
 
 
 ```swift
@@ -295,7 +295,7 @@ To your main target, add a dependency on the `Instrumentation library` and the i
 
 Instead of providing each instrumented library with a specific instrument explicitly, you *bootstrap* the
 `InstrumentationSystem` which acts as a singleton that libraries/frameworks access when calling out to the configured
-`InstrumentProtocol`:
+`Instrument`:
 
 ```swift
 InstrumentationSystem.bootstrap(FancyInstrument())
@@ -316,7 +316,7 @@ This is because tracing systems may attempt to emit metrics about their status e
 
 #### Bootstrapping multiple instruments using MultiplexInstrument
 
-It is important to note that `InstrumentationSystem.bootstrap(_: InstrumentProtocol)` must only be called once. In case you
+It is important to note that `InstrumentationSystem.bootstrap(_: Instrument)` must only be called once. In case you
 want to bootstrap the system to use multiple instruments, you group them in a `MultiplexInstrument` first, which you
 then pass along to the `bootstrap` method like this:
 
@@ -481,7 +481,7 @@ func get(url: String, context: LoggingContext) {
 }
 ```
 
-On the receiving side, an HTTP server should use the following `InstrumentProtocol` API to extract the HTTP headers of the given
+On the receiving side, an HTTP server should use the following `Instrument` API to extract the HTTP headers of the given
 `HTTPRequest` into:
 
 ```swift
@@ -538,10 +538,10 @@ func get(url: String, context: LoggingContext) {
 
 ## Instrument developers: Creating an instrument
 
-Creating an instrument means adopting the `InstrumentProtocol` protocol (or `Tracer` in case you develop a tracer).
-`InstrumentProtocol` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
+Creating an instrument means adopting the `Instrument` protocol (or `Tracer` in case you develop a tracer).
+`Instrument` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
 
-`InstrumentProtocol` has two requirements:
+`Instrument` has two requirements:
 
 1. A method to inject values inside a `LoggingContext` into a generic carrier (e.g. HTTP headers)
 2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `LoggingContext`

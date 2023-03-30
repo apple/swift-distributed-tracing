@@ -17,7 +17,7 @@ import InstrumentationBaggage
 import XCTest
 
 extension InstrumentationSystem {
-    public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: InstrumentProtocol {
+    public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
         self._findInstrument(where: { $0 is I }) as? I
     }
 }
@@ -48,7 +48,7 @@ final class InstrumentationSystemTests: XCTestCase {
     }
 }
 
-private final class FakeTracer: InstrumentProtocol {
+private final class FakeTracer: Instrument {
     func inject<Carrier, Inject>(
         _ baggage: Baggage,
         into carrier: inout Carrier,
@@ -68,7 +68,7 @@ private final class FakeTracer: InstrumentProtocol {
         Carrier == Extract.Carrier {}
 }
 
-private final class FakeInstrument: InstrumentProtocol {
+private final class FakeInstrument: Instrument {
     func inject<Carrier, Inject>(
         _ baggage: Baggage,
         into carrier: inout Carrier,

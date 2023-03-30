@@ -17,7 +17,7 @@ import Dispatch
 @_exported import InstrumentationBaggage
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public protocol LegacyTracer: InstrumentProtocol {
+public protocol LegacyTracer: Instrument {
     /// Start a new span returning an existential ``Span`` reference.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.

@@ -20,7 +20,7 @@ import XCTest
 #if swift(>=5.7.0)
 // Specifically make sure we don't have to implement startAnySpan
 
-final class SampleSwift57Tracer: TracerProtocol {
+final class SampleSwift57Tracer: Tracer {
     private(set) var spans = [SampleSwift57Span]()
     var onEndSpan: (SampleSwift57Span) -> Void = { _ in }
 

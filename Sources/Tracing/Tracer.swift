@@ -81,7 +81,6 @@ public func startSpan<Clock: TracerClock>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
@@ -128,9 +127,9 @@ public func startSpan(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
+///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
@@ -174,9 +173,9 @@ public func startSpan(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
@@ -207,6 +206,28 @@ public func withSpan<T, Clock: TracerClock>(
     }
 }
 
+/// Start a new ``Span`` and automatically end when the `operation` completes,
+/// including recording the `error` in case the operation throws.
+///
+/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
+/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// we're about to start a top-level span, or if a span should be started from a different,
+/// stored away previously,
+///
+/// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
+///   operation closure returning the span will be closed automatically.
+///
+/// - Parameters:
+///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - kind: The ``SpanKind`` of the new ``Span``.
+///   - function: The function name in which the span was started
+///   - fileID: The `fileID` where the span was started.
+///   - line: The file line where the span was started.
+///   - operation: The operation that this span should be measuring
+/// - Returns: the value returned by `operation`
+/// - Throws: the error the `operation` has thrown (if any)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public func withSpan<T>(
     _ operationName: String,
@@ -231,6 +252,30 @@ public func withSpan<T>(
 }
 
 #if swift(>=5.7.0)
+
+/// Start a new ``Span`` and automatically end when the `operation` completes,
+/// including recording the `error` in case the operation throws.
+///
+/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
+/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// we're about to start a top-level span, or if a span should be started from a different,
+/// stored away previously,
+///
+/// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
+///   operation closure returning the span will be closed automatically.
+///
+/// - Parameters:
+///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - kind: The ``SpanKind`` of the new ``Span``.
+///   - function: The function name in which the span was started
+///   - fileID: The `fileID` where the span was started.
+///   - line: The file line where the span was started.
+///   - operation: The operation that this span should be measuring
+/// - Returns: the value returned by `operation`
+/// - Throws: the error the `operation` has thrown (if any)
 public func withSpan<T>(
     _ operationName: String,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
@@ -271,9 +316,9 @@ public func withSpan<T>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
@@ -320,7 +365,6 @@ public func withSpan<T, Clock: TracerClock>(
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - clock: The clock to use as time source for the start time of the ``Span``
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
