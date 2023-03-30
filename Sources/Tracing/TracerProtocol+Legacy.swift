@@ -54,7 +54,7 @@ public protocol LegacyTracer: Instrument {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any Span
+    ) -> any Tracing.Span
 
     /// Export all ended spans to the configured backend that have not yet been exported.
     ///
@@ -108,7 +108,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> any Span {
+    ) -> any Tracing.Span {
         self.startAnySpan(
             operationName,
             baggage: baggage(),
@@ -155,7 +155,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> any Span {
+    ) -> any Tracing.Span {
         self.startAnySpan(
             operationName,
             baggage: baggage(),
@@ -200,7 +200,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) throws -> T
+        _ operation: (any Tracing.Span) throws -> T
     ) rethrows -> T {
         let span = self.startAnySpan(
             operationName,
@@ -253,7 +253,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) throws -> T
+        _ operation: (any Tracing.Span) throws -> T
     ) rethrows -> T {
         try self.withAnySpan(
             operationName,
@@ -301,7 +301,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) async throws -> T
+        _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startAnySpan(
             operationName,
@@ -354,7 +354,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) async throws -> T
+        _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startAnySpan(
             operationName,
@@ -469,7 +469,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (any Span) throws -> T
+        _ operation: (any Tracing.Span) throws -> T
     ) rethrows -> T {
         try self.withSpan(
             operationName,
@@ -524,7 +524,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (any Span) async throws -> T
+        @_inheritActorContext @_implicitSelfCapture _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,

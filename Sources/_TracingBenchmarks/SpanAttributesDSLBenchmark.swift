@@ -69,7 +69,7 @@ public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
     ),
 ]
 
-private var span: (any Span)!
+private var span: (any Tracing.Span)!
 
 private func setUp() {
     span = InstrumentationSystem.legacyTracer.startAnySpan("something", baggage: .topLevel)

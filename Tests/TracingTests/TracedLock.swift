@@ -21,7 +21,7 @@ final class TracedLock {
     let name: String
     let underlyingLock: NSLock
 
-    var activeSpan: (any Span)?
+    var activeSpan: (any Tracing.Span)?
 
     init(name: String) {
         self.name = name

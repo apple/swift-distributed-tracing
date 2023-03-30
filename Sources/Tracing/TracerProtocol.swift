@@ -26,7 +26,7 @@
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol Tracer: LegacyTracer {
     /// The concrete type of span this tracer will be producing/
-    associatedtype TracerSpan: Span
+    associatedtype Span: Tracing.Span
 
     /// Start a new ``Span`` with the given `Baggage`.
     ///
@@ -60,7 +60,7 @@ public protocol Tracer: LegacyTracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> TracerSpan
+    ) -> Self.Span
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
@@ -97,7 +97,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
-    ) -> TracerSpan {
+    ) -> Self.Span {
         self.startSpan(
             operationName,
             baggage: baggage(),
@@ -145,7 +145,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (TracerSpan) throws -> T
+        _ operation: (Self.Span) throws -> T
     ) rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -197,7 +197,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        _ operation: (TracerSpan) throws -> T
+        _ operation: (Self.Span) throws -> T
     ) rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -249,7 +249,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (TracerSpan) async throws -> T
+        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -302,7 +302,7 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (TracerSpan) async throws -> T
+        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
