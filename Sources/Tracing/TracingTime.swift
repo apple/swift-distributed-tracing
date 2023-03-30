@@ -40,7 +40,6 @@ public protocol SwiftDistributedTracingInstantProtocol: Comparable, Hashable, Se
 
 public protocol TracerInstantProtocol: SwiftDistributedTracingInstantProtocol {
     /// Representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970)
-    @inlinable
     var millisecondsSinceEpoch: UInt64 { get }
 }
 
@@ -64,7 +63,6 @@ public protocol TracerClock {
 /// A basic "timestamp clock" implementation that is able to five the current time as an unix timestamp.
 public struct DefaultTracerClock: TracerClock {
     public typealias Instant = Timestamp
-    internal typealias TimeInterval = Double
 
     public init() {
         // empty
@@ -107,78 +105,3 @@ public struct DefaultTracerClock: TracerClock {
         return Instant(millisecondsSinceEpoch: nowMillis)
     }
 }
-
-#if swift(>=5.7.0)
-@available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-extension Duration {
-    typealias Value = Int64
-
-    var nanoseconds: Value {
-        let (seconds, attoseconds) = self.components
-        let sNanos = seconds * Value(1_000_000_000)
-        let asNanos = attoseconds / Value(1_000_000_000)
-        let (totalNanos, overflow) = sNanos.addingReportingOverflow(asNanos)
-        return overflow ? .max : totalNanos
-    }
-
-    /// The microseconds representation of the `TimeAmount`.
-    var microseconds: Value {
-        self.nanoseconds / TimeUnit.microseconds.rawValue
-    }
-
-    /// The milliseconds representation of the `TimeAmount`.
-    var milliseconds: Value {
-        self.nanoseconds / TimeUnit.milliseconds.rawValue
-    }
-
-    /// The seconds representation of the `TimeAmount`.
-    var seconds: Value {
-        self.nanoseconds / TimeUnit.seconds.rawValue
-    }
-
-    var isEffectivelyInfinite: Bool {
-        self.nanoseconds == .max
-    }
-}
-
-@available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-extension Duration {
-    private func chooseUnit(_ ns: Value) -> TimeUnit {
-        if ns / TimeUnit.seconds.rawValue > 0 {
-            return TimeUnit.seconds
-        } else if ns / TimeUnit.milliseconds.rawValue > 0 {
-            return TimeUnit.milliseconds
-        } else if ns / TimeUnit.microseconds.rawValue > 0 {
-            return TimeUnit.microseconds
-        } else {
-            return TimeUnit.nanoseconds
-        }
-    }
-
-    /// Represents number of nanoseconds within given time unit
-    enum TimeUnit: Value {
-        case seconds = 1_000_000_000
-        case milliseconds = 1_000_000
-        case microseconds = 1000
-        case nanoseconds = 1
-
-        var abbreviated: String {
-            switch self {
-            case .nanoseconds: return "ns"
-            case .microseconds: return "μs"
-            case .milliseconds: return "ms"
-            case .seconds: return "s"
-            }
-        }
-
-        func duration(_ duration: Int) -> Duration {
-            switch self {
-            case .nanoseconds: return .nanoseconds(Value(duration))
-            case .microseconds: return .microseconds(Value(duration))
-            case .milliseconds: return .milliseconds(Value(duration))
-            case .seconds: return .seconds(Value(duration))
-            }
-        }
-    }
-}
-#endif
