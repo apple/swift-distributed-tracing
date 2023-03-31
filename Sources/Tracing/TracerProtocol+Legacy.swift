@@ -409,15 +409,15 @@ extension TracerProtocol {
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
-    public func startAnySpan(
+    public func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
-        clock: some TracerClock = DefaultTracerClock(),
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
-        ofKind kind: SpanKind = .internal,
-        function: String = #function,
-        file fileID: String = #fileID,
-        line: UInt = #line
-    ) -> any Span {
+        baggage: @autoclosure () -> InstrumentationBaggage.Baggage,
+        ofKind kind: Tracing.SpanKind,
+        clock: Clock,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> Tracing.Span {
         self.startSpan(
             operationName,
             baggage: baggage(),
