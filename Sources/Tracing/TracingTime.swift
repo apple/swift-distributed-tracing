@@ -21,12 +21,12 @@ import Darwin
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-public protocol TracerInstantProtocol: Comparable, Hashable, Sendable {
+public protocol TracerInstant: Comparable, Hashable, Sendable {
     /// Representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970)
     var nanosecondsSinceEpoch: UInt64 { get }
 }
 
-extension TracerInstantProtocol {
+extension TracerInstant {
     /// Representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970)
     @inlinable
     public var millisecondsSinceEpoch: UInt64 {
@@ -46,7 +46,7 @@ extension TracerInstantProtocol {
 /// especially when the system is already using some notion of simulated or mocked time, such that traces are
 /// expressed using the same notion of time.
 public protocol TracerClock {
-    associatedtype Instant: TracerInstantProtocol
+    associatedtype Instant: TracerInstant
 
     var now: Self.Instant { get }
 }
@@ -59,7 +59,7 @@ public struct DefaultTracerClock: TracerClock {
         // empty
     }
 
-    public struct Timestamp: TracerInstantProtocol {
+    public struct Timestamp: TracerInstant {
         public let nanosecondsSinceEpoch: UInt64
 
         public init(nanosecondsSinceEpoch: UInt64) {

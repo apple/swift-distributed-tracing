@@ -61,7 +61,7 @@ final class MockClock: TracerClock {
         self._now = time
     }
 
-    struct Instant: TracerInstantProtocol {
+    struct Instant: TracerInstant {
         var nanosecondsSinceEpoch: UInt64
         static func < (lhs: MockClock.Instant, rhs: MockClock.Instant) -> Bool {
             lhs.nanosecondsSinceEpoch < rhs.nanosecondsSinceEpoch

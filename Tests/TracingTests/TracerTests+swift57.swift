@@ -91,7 +91,7 @@ final class SampleSwift57Span: Span {
 
     let onEnd: (SampleSwift57Span) -> Void
 
-    init<Instant: TracerInstantProtocol>(
+    init<Instant: TracerInstant>(
         operationName: String,
         startTime: Instant,
         baggage: Baggage,

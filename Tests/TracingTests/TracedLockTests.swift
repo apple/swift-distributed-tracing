@@ -124,7 +124,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 
         private(set) var isRecording = false
 
-        init<Instant: TracerInstantProtocol>(
+        init<Instant: TracerInstant>(
             operationName: String,
             startTime: Instant,
             kind: SpanKind,

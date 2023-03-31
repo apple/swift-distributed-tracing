@@ -150,7 +150,7 @@ final class TestSpan: Span {
 
     let onEnd: (TestSpan) -> Void
 
-    init<Instant: TracerInstantProtocol>(
+    init<Instant: TracerInstant>(
         operationName: String,
         startTime: Instant,
         baggage: Baggage,

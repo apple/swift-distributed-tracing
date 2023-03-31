@@ -281,13 +281,13 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init<Instant: TracerInstantProtocol>(operationName: String,
-                                             startTime: Instant,
-                                             baggage: Baggage,
-                                             kind: SpanKind,
-                                             file fileID: String,
-                                             line: UInt,
-                                             onEnd: @escaping (TracepointSpan) -> Void)
+        init<Instant: TracerInstant>(operationName: String,
+                                     startTime: Instant,
+                                     baggage: Baggage,
+                                     kind: SpanKind,
+                                     file fileID: String,
+                                     line: UInt,
+                                     onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
             self.startTimestampNanosSinceEpoch = startTime.nanosecondsSinceEpoch
