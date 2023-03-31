@@ -124,8 +124,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    public let startTime: UInt64
-    public private(set) var endTime: UInt64?
+    public let startTimestampNanosSinceEpoch: UInt64
+    public private(set) var endTimestampNanosSinceEpoch: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -158,7 +158,7 @@ final class TestSpan: Span {
         onEnd: @escaping (TestSpan) -> Void
     ) {
         self.operationName = operationName
-        self.startTime = startTime.millisecondsSinceEpoch
+        self.startTimestampNanosSinceEpoch = startTime.nanosecondsSinceEpoch
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -182,7 +182,7 @@ final class TestSpan: Span {
     }
 
     func end<Clock: TracerClock>(clock: Clock) {
-        self.endTime = clock.now.millisecondsSinceEpoch
+        self.endTimestampNanosSinceEpoch = clock.now.nanosecondsSinceEpoch
         self.onEnd(self)
     }
 }

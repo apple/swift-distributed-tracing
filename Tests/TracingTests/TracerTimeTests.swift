@@ -44,7 +44,7 @@ final class TracerTimeTests: XCTestCase {
         mockClock.setTime(13)
         #if swift(>=5.7.0)
         let span: TestSpan = tracer.startSpan("start", clock: mockClock)
-        XCTAssertEqual(span.startTime, 13)
+        XCTAssertEqual(span.startTimestampNanosSinceEpoch, 13)
         #else
         let span: TestSpan = tracer.startAnySpan("start", clock: mockClock) as! TestSpan
         XCTAssertEqual(span.startTime, 13)
@@ -62,13 +62,13 @@ final class MockClock: TracerClock {
     }
 
     struct Instant: TracerInstantProtocol {
-        var millisecondsSinceEpoch: UInt64
+        var nanosecondsSinceEpoch: UInt64
         static func < (lhs: MockClock.Instant, rhs: MockClock.Instant) -> Bool {
-            lhs.millisecondsSinceEpoch < rhs.millisecondsSinceEpoch
+            lhs.nanosecondsSinceEpoch < rhs.nanosecondsSinceEpoch
         }
     }
 
     var now: Instant {
-        Instant(millisecondsSinceEpoch: self._now)
+        Instant(nanosecondsSinceEpoch: self._now)
     }
 }

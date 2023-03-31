@@ -21,26 +21,17 @@ import Darwin
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
-public protocol SwiftDistributedTracingDurationProtocol: Comparable, AdditiveArithmetic, Sendable {
-    static func / (_ lhs: Self, _ rhs: Int) -> Self
-    static func /= (_ lhs: inout Self, _ rhs: Int)
-    static func * (_ lhs: Self, _ rhs: Int) -> Self
-    static func *= (_ lhs: inout Self, _ rhs: Int)
-
-    static func / (_ lhs: Self, _ rhs: Self) -> Double
+public protocol TracerInstantProtocol: Comparable, Hashable, Sendable {
+    /// Representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970)
+    var nanosecondsSinceEpoch: UInt64 { get }
 }
 
-extension SwiftDistributedTracingDurationProtocol {
-    public static func /= (_ lhs: inout Self, _ rhs: Int) {
-        lhs = lhs / rhs
-    }
-}
-
-public protocol SwiftDistributedTracingInstantProtocol: Comparable, Hashable, Sendable {}
-
-public protocol TracerInstantProtocol: SwiftDistributedTracingInstantProtocol {
+extension TracerInstantProtocol {
     /// Representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970)
-    var millisecondsSinceEpoch: UInt64 { get }
+    @inlinable
+    public var millisecondsSinceEpoch: UInt64 {
+        self.nanosecondsSinceEpoch / 1_000_000
+    }
 }
 
 /// A specialized clock protocol for purposes of tracing.
@@ -69,23 +60,22 @@ public struct DefaultTracerClock: TracerClock {
     }
 
     public struct Timestamp: TracerInstantProtocol {
-        /// Milliseconds since January 1st, 1970, also known as "unix epoch".
-        public var millisecondsSinceEpoch: UInt64
+        public let nanosecondsSinceEpoch: UInt64
 
-        internal init(millisecondsSinceEpoch: UInt64) {
-            self.millisecondsSinceEpoch = millisecondsSinceEpoch
+        public init(nanosecondsSinceEpoch: UInt64) {
+            self.nanosecondsSinceEpoch = nanosecondsSinceEpoch
         }
 
         public static func < (lhs: Instant, rhs: Instant) -> Bool {
-            lhs.millisecondsSinceEpoch < rhs.millisecondsSinceEpoch
+            lhs.nanosecondsSinceEpoch < rhs.nanosecondsSinceEpoch
         }
 
         public static func == (lhs: Instant, rhs: Instant) -> Bool {
-            lhs.millisecondsSinceEpoch == rhs.millisecondsSinceEpoch
+            lhs.nanosecondsSinceEpoch == rhs.nanosecondsSinceEpoch
         }
 
         public func hash(into hasher: inout Hasher) {
-            self.millisecondsSinceEpoch.hash(into: &hasher)
+            self.nanosecondsSinceEpoch.hash(into: &hasher)
         }
     }
 
@@ -100,8 +90,7 @@ public struct DefaultTracerClock: TracerClock {
         /// and the odds that this code will still be running 530 years from now is very, very low,
         /// so as a practical matter this will never overflow.
         let nowNanos = UInt64(ts.tv_sec) &* 1_000_000_000 &+ UInt64(ts.tv_nsec)
-        let nowMillis = UInt64(nowNanos / 1_000_000) // nanos to millis
 
-        return Instant(millisecondsSinceEpoch: nowMillis)
+        return Instant(nanosecondsSinceEpoch: nowNanos)
     }
 }
