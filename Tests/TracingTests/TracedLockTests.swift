@@ -59,7 +59,7 @@ enum TaskIDKey: BaggageKey {
 // MARK: PrintLn Tracer
 
 /// Only intended to be used in single-threaded testing.
-private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
+private final class TracedLockPrintlnTracer: LegacyTracer {
     func startAnySpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
@@ -162,7 +162,7 @@ private final class TracedLockPrintlnTracer: LegacyTracerProtocol {
 }
 
 #if swift(>=5.7.0)
-extension TracedLockPrintlnTracer: TracerProtocol {
+extension TracedLockPrintlnTracer: Tracer {
     func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,

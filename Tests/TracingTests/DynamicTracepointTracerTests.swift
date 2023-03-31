@@ -128,7 +128,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
 }
 
 /// Only intended to be used in single-threaded testing.
-final class DynamicTracepointTestTracer: LegacyTracerProtocol {
+final class DynamicTracepointTestTracer: LegacyTracer {
     private(set) var activeTracepoints: Set<TracepointID> = []
 
     struct TracepointID: Hashable {
@@ -330,7 +330,7 @@ extension DynamicTracepointTestTracer {
 }
 
 #if compiler(>=5.7.0)
-extension DynamicTracepointTestTracer: TracerProtocol {
+extension DynamicTracepointTestTracer: Tracer {
     typealias TracerSpan = TracepointSpan
 
     func startSpan<Clock: TracerClock>(_ operationName: String,

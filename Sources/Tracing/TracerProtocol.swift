@@ -24,7 +24,7 @@
 ///
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public protocol TracerProtocol: LegacyTracerProtocol {
+public protocol Tracer: LegacyTracer {
     /// The concrete type of span this tracer will be producing/
     associatedtype TracerSpan: Span
 
@@ -64,7 +64,7 @@ public protocol TracerProtocol: LegacyTracerProtocol {
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-extension TracerProtocol {
+extension Tracer {
     /// Start a new ``Span`` with the given `Baggage`.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
@@ -113,7 +113,7 @@ extension TracerProtocol {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
-extension TracerProtocol {
+extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///

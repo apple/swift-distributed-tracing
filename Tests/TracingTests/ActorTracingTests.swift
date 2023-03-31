@@ -30,7 +30,7 @@ actor Foo {
     var bar = 0
     func foo() async {
         var num = 0
-        await Tracer.withSpan(#function) { _ in
+        await withSpan(#function) { _ in
             bar += 1
             await work()
             num += 1

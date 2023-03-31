@@ -18,7 +18,7 @@ import Dispatch
 
 /// Tracer that ignores all operations, used when no tracing is required.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public struct NoOpTracer: LegacyTracerProtocol {
+public struct NoOpTracer: LegacyTracer {
     public typealias TracerSpan = NoOpSpan
 
     public init() {}
@@ -91,7 +91,7 @@ public struct NoOpTracer: LegacyTracerProtocol {
 }
 
 #if swift(>=5.7.0)
-extension NoOpTracer: TracerProtocol {
+extension NoOpTracer: Tracer {
     public func startSpan<Clock: TracerClock>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,

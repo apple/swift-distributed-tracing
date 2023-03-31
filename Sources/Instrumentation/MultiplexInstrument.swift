@@ -14,27 +14,27 @@
 
 import InstrumentationBaggage
 
-/// A pseudo-``InstrumentProtocol`` that may be used to instrument using multiple other ``InstrumentProtocol``s across a
+/// A pseudo-``Instrument`` that may be used to instrument using multiple other ``Instrument``s across a
 /// common `Baggage`.
 public struct MultiplexInstrument {
-    private var instruments: [InstrumentProtocol]
+    private var instruments: [Instrument]
 
     /// Create a ``MultiplexInstrument``.
     ///
-    /// - Parameter instruments: An array of ``InstrumentProtocol``s, each of which will be used to ``InstrumentProtocol/inject(_:into:using:)`` or ``InstrumentProtocol/extract(_:into:using:)``
+    /// - Parameter instruments: An array of ``Instrument``s, each of which will be used to ``Instrument/inject(_:into:using:)`` or ``Instrument/extract(_:into:using:)``
     /// through the same `Baggage`.
-    public init(_ instruments: [InstrumentProtocol]) {
+    public init(_ instruments: [Instrument]) {
         self.instruments = instruments
     }
 }
 
 extension MultiplexInstrument {
-    func firstInstrument(where predicate: (InstrumentProtocol) -> Bool) -> InstrumentProtocol? {
+    func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         self.instruments.first(where: predicate)
     }
 }
 
-extension MultiplexInstrument: InstrumentProtocol {
+extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Carrier == Inject.Carrier
     {

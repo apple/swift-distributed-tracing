@@ -17,10 +17,10 @@ import Dispatch
 @_exported import InstrumentationBaggage
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public protocol LegacyTracerProtocol: InstrumentProtocol {
+public protocol LegacyTracer: Instrument {
     /// Start a new span returning an existential ``Span`` reference.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -69,12 +69,12 @@ public protocol LegacyTracerProtocol: InstrumentProtocol {
 // MARK: Legacy implementations for Swift 5.7
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-extension LegacyTracerProtocol {
+extension LegacyTracer {
     // ==== startSpan ---------------------------------------------------------
 
     /// Start a new span returning an existential ``Span`` reference.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -122,7 +122,7 @@ extension LegacyTracerProtocol {
 
     /// Start a new span returning an existential ``Span`` reference.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
@@ -225,7 +225,7 @@ extension LegacyTracerProtocol {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -272,7 +272,7 @@ extension LegacyTracerProtocol {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -326,7 +326,7 @@ extension LegacyTracerProtocol {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -378,12 +378,12 @@ extension LegacyTracerProtocol {
 }
 
 #if swift(>=5.7.0)
-// Provide compatibility shims of the `...AnySpan` APIs to the 5.7 requiring `TracerProtocol`.
+// Provide compatibility shims of the `...AnySpan` APIs to the 5.7 requiring `Tracer`.
 
-extension TracerProtocol {
+extension Tracer {
     /// Start a new span returning an existential ``Span`` reference.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -432,7 +432,7 @@ extension TracerProtocol {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
@@ -487,7 +487,7 @@ extension TracerProtocol {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// - Warning: This method will be deprecated in favor of `TracerProtocol/withSpan` as soon as this project is able to require Swift 5.7.
+    /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
     /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
