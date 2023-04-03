@@ -258,8 +258,8 @@ extension DynamicTracepointTestTracer {
 
         private var status: SpanStatus?
 
-        private let startTime: UInt64
-        private(set) var endTime: UInt64?
+        private let startTimestampNanosSinceEpoch: UInt64
+        private(set) var endTimestampNanosSinceEpoch: UInt64?
 
         public var operationName: String
         private(set) var baggage: Baggage
@@ -281,16 +281,16 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init<Instant: TracerInstantProtocol>(operationName: String,
-                                             startTime: Instant,
-                                             baggage: Baggage,
-                                             kind: SpanKind,
-                                             file fileID: String,
-                                             line: UInt,
-                                             onEnd: @escaping (TracepointSpan) -> Void)
+        init<Instant: TracerInstant>(operationName: String,
+                                     startTime: Instant,
+                                     baggage: Baggage,
+                                     kind: SpanKind,
+                                     file fileID: String,
+                                     line: UInt,
+                                     onEnd: @escaping (TracepointSpan) -> Void)
         {
             self.operationName = operationName
-            self.startTime = startTime.millisecondsSinceEpoch
+            self.startTimestampNanosSinceEpoch = startTime.nanosecondsSinceEpoch
             self.baggage = baggage
             self.onEnd = onEnd
             self.kind = kind
@@ -323,7 +323,7 @@ extension DynamicTracepointTestTracer {
         }
 
         func end<Clock: TracerClock>(clock: Clock) {
-            self.endTime = clock.now.millisecondsSinceEpoch
+            self.endTimestampNanosSinceEpoch = clock.now.nanosecondsSinceEpoch
             self.onEnd(self)
         }
     }
