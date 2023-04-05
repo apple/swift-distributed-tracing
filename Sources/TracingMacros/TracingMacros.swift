@@ -137,8 +137,8 @@ public struct TracedMacro: PeerMacro {
             funcDecl
               .with(
                   \.identifier,
-//                   "_\(funcDecl.identifier)"
-                  "hello"
+                   "_\(funcDecl.identifier)"
+//                  "hello"
               )
                 .with(
                     \.signature,
@@ -165,11 +165,13 @@ public struct TracedMacro: PeerMacro {
 //                                                                """)),
                                 CodeBlockItemSyntax(item: .expr("""
 
-                                                                await InstrumentationSystem.tracer.withSpan(#function, { _ in await \(call) })
+                                                                return await InstrumentationSystem.tracer.withSpan(#function, { _ in await \(call) })
 
                                                                 """)),
 //                          CodeBlockItemSyntax(item: .expr("""
+//
 //                                                          await \(call);
+//
 //                                                          """)),
 //                          CodeBlockItemSyntax(item: .expr("""
 //                                                          span.end()

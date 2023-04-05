@@ -20,8 +20,8 @@ import XCTest
 
 final class TracedTests: XCTestCase {
 
-    @traced func _hello() async -> String { "Hello" }
-//    @traced func hello() async -> String { "Hello" }
+//    @traced func _hello() async -> String { "Hello" }
+    @traced func hello() async -> String { "Hello" }
 
     override class func tearDown() {
         super.tearDown()
@@ -35,11 +35,12 @@ final class TracedTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(NoOpTracer())
         }
 
-        await hello()
+        await _hello()
 
         XCTAssertEqual(tracer.spans.count, 1)
         for span in tracer.spans {
             XCTAssertEqual(span.operationName, "_hello()")
         }
+        print("\(#function): span = \(tracer.spans.first)")
     }
 }
