@@ -137,7 +137,7 @@ public struct TracedMacro: PeerMacro {
             funcDecl
               .with(
                   \.identifier,
-                  "_hello"
+                  "_\(funcDecl.identifier)"
               )
                 .with(
                     \.signature,
@@ -164,7 +164,7 @@ public struct TracedMacro: PeerMacro {
                                                                 """))
                             ]
                         ),
-                        rightBrace: .rightBraceToken(leadingTrivia: .newline)
+                        rightBrace: .rightBraceToken(leadingTrivia: .space)
                     )
                 )
                 .with(\.attributes, newAttributeList)
