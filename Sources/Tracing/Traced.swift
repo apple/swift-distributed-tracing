@@ -21,6 +21,10 @@ import Dispatch
 public macro stringify<T>(_ value: T) -> (T, String) =
     #externalMacro(module: "TracingMacros", type: "StringifyMacro")
 
-@attached(peer, names: prefixed(_))
+//@attached(peer, names: prefixed(_))
+//public macro traced() =
+//    #externalMacro(module: "TracingMacros", type: "TracedMacro")
+//
+@attached(peer, names: arbitrary)
 public macro traced() =
     #externalMacro(module: "TracingMacros", type: "TracedMacro")

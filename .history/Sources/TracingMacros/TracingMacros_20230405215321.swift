@@ -39,11 +39,7 @@ public struct StringifyMacro: ExpressionMacro {
     }
 }
 
-enum TracedMacroError: Error {
-    case message(String)
-}
-
-public struct TracedMacro: PeerMacro {
+public struct AddCompletionHandler: PeerMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -52,49 +48,47 @@ public struct TracedMacro: PeerMacro {
         // Only on functions at the moment. We could handle initializers as well
         // with a bit of work.
         guard let funcDecl = declaration.as(FunctionDeclSyntax.self) else {
-            throw TracedMacroError.message("@traced only works on functions")
+            throw CustomError.message("@addCompletionHandler only works on functions")
         }
 
-        // FIXME: change this
+        // This only makes sense for async functions.
         if funcDecl.signature.effectSpecifiers?.asyncSpecifier == nil {
-            throw TracedMacroError.message(
-                "@traced requires an async function"
+            throw CustomError.message(
+                "@addCompletionHandler requires an async function"
             )
         }
 
         // Form the completion handler parameter.
         let resultType: TypeSyntax? = funcDecl.signature.output?.returnType.with(\.leadingTrivia, []).with(\.trailingTrivia, [])
 
-//        let completionHandlerParam =
-//            FunctionParameterSyntax(
-//                firstName: .identifier("completionHandler"),
-//                colon: .colonToken(trailingTrivia: .space),
-//                type: "@escaping (\(resultType ?? "")) -> Void" as TypeSyntax
-//            )
+        let completionHandlerParam =
+            FunctionParameterSyntax(
+                firstName: .identifier("completionHandler"),
+                colon: .colonToken(trailingTrivia: .space),
+                type: "@escaping (\(resultType ?? "")) -> Void" as TypeSyntax
+            )
 
         // Add the completion handler parameter to the parameter list.
         let parameterList = funcDecl.signature.input.parameterList
         let newParameterList: FunctionParameterListSyntax
         if let lastParam = parameterList.last {
             // We need to add a trailing comma to the preceding list.
-            newParameterList = parameterList
-//                .removingLast()
-//                .appending(
-//                    lastParam.with(
-//                        \.trailingComma,
-//                        .commaToken(trailingTrivia: .space)
-//                    )
-//                )
-//                .appending(completionHandlerParam)
+            newParameterList = parameterList.removingLast()
+                .appending(
+                    lastParam.with(
+                        \.trailingComma,
+                        .commaToken(trailingTrivia: .space)
+                    )
+                )
+                .appending(completionHandlerParam)
         } else {
-            newParameterList = parameterList
-//                .appending(completionHandlerParam)
+            newParameterList = parameterList.appending(completionHandlerParam)
         }
 
         let callArguments: [String] = try parameterList.map { param in
             guard let argName = param.secondName ?? param.firstName else {
-                throw TracedMacroError.message(
-                    "@traced argument must have a name"
+                throw CustomError.message(
+                    "@addCompletionHandler argument must have a name"
                 )
             }
 
@@ -108,18 +102,18 @@ public struct TracedMacro: PeerMacro {
         let call: ExprSyntax =
             "\(funcDecl.identifier)(\(raw: callArguments.joined(separator: ", ")))"
 
-//        // FIXME: We should make CodeBlockSyntax ExpressibleByStringInterpolation,
-//        // so that the full body could go here.
-//        let newBody: ExprSyntax =
-//            """
-//
-//              await Tracer.withSpan(#function) { __span in
-//                await \(call)
-//              }
-//
-//            """
+        // FIXME: We should make CodeBlockSyntax ExpressibleByStringInterpolation,
+        // so that the full body could go here.
+        let newBody: ExprSyntax =
+            """
 
-        // Drop the @traced attribute from the new declaration.
+              Task {
+                completionHandler(await \(call))
+              }
+
+            """
+
+        // Drop the @addCompletionHandler attribute from the new declaration.
         let newAttributeList = AttributeListSyntax(
             funcDecl.attributes?.filter {
                 guard case let .attribute(attribute) = $0,
@@ -135,46 +129,26 @@ public struct TracedMacro: PeerMacro {
 
         let newFunc =
             funcDecl
-              .with(
-                  \.identifier,
-//                   "_\(funcDecl.identifier)"
-                  "hello"
-              )
                 .with(
                     \.signature,
                     funcDecl.signature
-//                        .with(
-//                            \.effectSpecifiers,
-//                            funcDecl.signature.effectSpecifiers?.with(\.asyncSpecifier, nil)  // drop async
-//                        )
-//                        .with(\.output, nil)  // drop result type
-//                        .with(
-//                            \.input,  // add completion handler parameter
-//                            funcDecl.signature.input.with(\.parameterList, newParameterList)
-//                                .with(\.trailingTrivia, [])
-//                        )
+                        .with(
+                            \.effectSpecifiers,
+                            funcDecl.signature.effectSpecifiers?.with(\.asyncSpecifier, nil)  // drop async
+                        )
+                        .with(\.output, nil)  // drop result type
+                        .with(
+                            \.input,  // add completion handler parameter
+                            funcDecl.signature.input.with(\.parameterList, newParameterList)
+                                .with(\.trailingTrivia, [])
+                        )
                 )
                 .with(
                     \.body,
                     CodeBlockSyntax(
-                        leftBrace: .leftBraceToken(leadingTrivia: .space, trailingTrivia: .space),
+                        leftBrace: .leftBraceToken(leadingTrivia: .space),
                         statements: CodeBlockItemListSyntax(
-                            [
-//                                CodeBlockItemSyntax(item: .expr("""
-//                                                                let span = InstrumentationSystem.tracer.startSpan("HI");
-//                                                                """)),
-                                CodeBlockItemSyntax(item: .expr("""
-
-                                                                await InstrumentationSystem.tracer.withSpan(#function, { _ in await \(call) })
-
-                                                                """)),
-//                          CodeBlockItemSyntax(item: .expr("""
-//                                                          await \(call);
-//                                                          """)),
-//                          CodeBlockItemSyntax(item: .expr("""
-//                                                          span.end()
-//                                                          """)),
-                            ]
+                            [CodeBlockItemSyntax(item: .expr(newBody))]
                         ),
                         rightBrace: .rightBraceToken(leadingTrivia: .newline)
                     )
@@ -182,8 +156,14 @@ public struct TracedMacro: PeerMacro {
                 .with(\.attributes, newAttributeList)
                 .with(\.leadingTrivia, .newlines(2))
 
-      print("emitted: \(DeclSyntax(newFunc))")
-
         return [DeclSyntax(newFunc)]
     }
 }
+
+@main
+struct StringifyPlugin: CompilerPlugin {
+    let providingMacros: [Macro.Type] = [
+        StringifyMacro.self,
+        TracedMacro.self,
+    ]
+ }

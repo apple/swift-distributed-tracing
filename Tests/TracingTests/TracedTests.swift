@@ -17,12 +17,12 @@ import InstrumentationBaggage
 import Tracing
 import XCTest
 
-@traced
-func hello() async -> String {
-    "Hello"
-}
 
 final class TracedTests: XCTestCase {
+
+    @traced func _hello() async -> String { "Hello" }
+//    @traced func hello() async -> String { "Hello" }
+
     override class func tearDown() {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
@@ -39,7 +39,7 @@ final class TracedTests: XCTestCase {
 
         XCTAssertEqual(tracer.spans.count, 1)
         for span in tracer.spans {
-            XCTAssertEqual(span.operationName, "hello()")
+            XCTAssertEqual(span.operationName, "_hello()")
         }
     }
 }

@@ -45,6 +45,10 @@ let package = Package(
                 .target(name: "Instrumentation"),
                 "TracingMacros",
             ]
+//            ,
+//            swiftSettings: [
+//              .unsafeFlags(["-Xfrontend", "-validate-tbd-against-ir=none"])
+//            ]
         ),
         .macro(
             name: "TracingMacros",
@@ -58,6 +62,10 @@ let package = Package(
             dependencies: [
                 .target(name: "Tracing"),
             ]
+//            ,
+//            swiftSettings: [
+//              .unsafeFlags(["-Xfrontend", "-validate-tbd-against-ir=none"])
+//            ]
         ),
 
         // ==== --------------------------------------------------------------------------------------------------------
