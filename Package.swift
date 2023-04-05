@@ -1,5 +1,6 @@
-// swift-tools-version:5.6
+// swift-tools-version: 999.0
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "swift-distributed-tracing",
@@ -16,6 +17,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.4.1")),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", branch: "main"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -41,6 +43,14 @@ let package = Package(
             name: "Tracing",
             dependencies: [
                 .target(name: "Instrumentation"),
+                "TracingMacros",
+            ]
+        ),
+        .macro(
+            name: "TracingMacros",
+            dependencies: [
+              .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+              .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
         .testTarget(
