@@ -149,8 +149,13 @@ public struct SpanEvent: Equatable {
 
     /// The timestamp at which this event occurred.
     ///
-    /// It should be expressed as the number of milliseconds since UNIX Epoch (January 1st 1970).
-    public let millisecondsSinceEpoch: UInt64
+    /// It should be expressed as the number of nanoseconds since UNIX Epoch (January 1st 1970).
+    public let nanosecondsSinceEpoch: UInt64
+
+    /// Representation of the timestamp this event occured as the number of milliseconds since UNIX Epoch (January 1st 1970).
+    public var millisecondsSinceEpoch: UInt64 {
+        self.nanosecondsSinceEpoch / 1_000_000
+    }
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
@@ -163,7 +168,7 @@ public struct SpanEvent: Equatable {
     {
         self.name = name
         self.attributes = attributes
-        self.millisecondsSinceEpoch = clock.now.millisecondsSinceEpoch
+        self.nanosecondsSinceEpoch = clock.now.nanosecondsSinceEpoch
     }
 
     public init(name: String,
@@ -171,7 +176,7 @@ public struct SpanEvent: Equatable {
     {
         self.name = name
         self.attributes = attributes
-        self.millisecondsSinceEpoch = DefaultTracerClock.now.millisecondsSinceEpoch
+        self.nanosecondsSinceEpoch = DefaultTracerClock.now.nanosecondsSinceEpoch
     }
 }
 
