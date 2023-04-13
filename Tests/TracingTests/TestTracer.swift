@@ -23,18 +23,18 @@ final class TestTracer: LegacyTracer {
     private(set) var spans = [TestSpan]()
     var onEndSpan: (TestSpan) -> Void = { _ in }
 
-    func startAnySpan<Clock: TracerClock>(
+    func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
     ) -> any Span {
         let span = TestSpan(
             operationName: operationName,
-            startTime: clock.now,
+            startTime: instant(),
             baggage: baggage(),
             kind: kind,
             onEnd: self.onEndSpan
@@ -66,18 +66,18 @@ final class TestTracer: LegacyTracer {
 
 #if swift(>=5.7.0)
 extension TestTracer: Tracer {
-    func startSpan<Clock: TracerClock>(
+    func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
     ) -> TestSpan {
         let span = TestSpan(
             operationName: operationName,
-            startTime: clock.now,
+            startTime: instant(),
             baggage: baggage(),
             kind: kind,
             onEnd: self.onEndSpan
@@ -177,12 +177,12 @@ final class TestSpan: Span {
         self.events.append(event)
     }
 
-    func recordError(_ error: Error, attributes: SpanAttributes) {
+    func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Clock: TracerClock>(clock: Clock) {
-        self.endTimestampNanosSinceEpoch = clock.now.nanosecondsSinceEpoch
+    func end<Instant: TracerInstant>(at instant: Instant) {
+        self.endTimestampNanosSinceEpoch = instant.nanosecondsSinceEpoch
         self.onEnd(self)
     }
 }

@@ -357,12 +357,12 @@ final class TracerTests: XCTestCase {
 
         #if swift(>=5.7.0)
         tracer.withSpan("") { _ in }
-        tracer.withSpan("", clock: clock) { _ in }
+        tracer.withSpan("", at: clock.now) { _ in }
         tracer.withSpan("", baggage: .topLevel) { _ in }
         #endif
 
         tracer.withAnySpan("") { _ in }
-        tracer.withAnySpan("", clock: clock) { _ in }
+        tracer.withAnySpan("", at: clock.now) { _ in }
         tracer.withAnySpan("", baggage: .topLevel) { _ in }
     }
 
