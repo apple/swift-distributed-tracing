@@ -23,13 +23,13 @@ public struct NoOpTracer: LegacyTracer {
 
     public init() {}
 
-    public func startAnySpan<Clock: TracerClock>(_ operationName: String,
-                                                 baggage: @autoclosure () -> Baggage,
-                                                 ofKind kind: SpanKind,
-                                                 clock: Clock,
-                                                 function: String,
-                                                 file fileID: String,
-                                                 line: UInt) -> any Span
+    public func startAnySpan<Instant: TracerInstant>(_ operationName: String,
+                                                     baggage: @autoclosure () -> Baggage,
+                                                     ofKind kind: SpanKind,
+                                                     at instant: @autoclosure () -> Instant,
+                                                     function: String,
+                                                     file fileID: String,
+                                                     line: UInt) -> any Span
     {
         NoOpSpan(baggage: baggage())
     }
@@ -73,7 +73,7 @@ public struct NoOpTracer: LegacyTracer {
 
         public func addEvent(_ event: SpanEvent) {}
 
-        public func recordError(_ error: Error, attributes: SpanAttributes) {}
+        public func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {}
 
         public var attributes: SpanAttributes {
             get {
@@ -84,7 +84,7 @@ public struct NoOpTracer: LegacyTracer {
             }
         }
 
-        public func end<Clock: TracerClock>(clock: Clock) {
+        public func end<Instant: TracerInstant>(at instant: Instant) {
             // ignore
         }
     }
@@ -92,11 +92,11 @@ public struct NoOpTracer: LegacyTracer {
 
 #if swift(>=5.7.0)
 extension NoOpTracer: Tracer {
-    public func startSpan<Clock: TracerClock>(
+    public func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt

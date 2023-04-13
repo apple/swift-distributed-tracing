@@ -48,15 +48,15 @@ public protocol Tracer: LegacyTracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
-    func startSpan<Clock: TracerClock>(
+    func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
@@ -85,7 +85,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -93,7 +93,7 @@ extension Tracer {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        clock: some TracerClock = DefaultTracerClock(),
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line
@@ -102,7 +102,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            clock: clock,
+            at: instant(),
             function: function,
             file: fileID,
             line: line
@@ -130,7 +130,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -141,7 +141,7 @@ extension Tracer {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        clock: some TracerClock = DefaultTracerClock(),
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -151,7 +151,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            clock: clock,
+            at: instant(),
             function: function,
             file: fileID,
             line: line
@@ -183,7 +183,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -203,7 +203,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            clock: DefaultTracerClock(),
+            at: DefaultTracerClock.now,
             function: function,
             file: fileID,
             line: line
@@ -235,7 +235,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -255,7 +255,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            clock: DefaultTracerClock(),
+            at: DefaultTracerClock.now,
             function: function,
             file: fileID,
             line: line
@@ -287,7 +287,7 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -298,7 +298,7 @@ extension Tracer {
         _ operationName: String,
         baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        clock: some TracerClock = DefaultTracerClock(),
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -308,7 +308,7 @@ extension Tracer {
             operationName,
             baggage: baggage(),
             ofKind: kind,
-            clock: clock,
+            at: instant(),
             function: function,
             file: fileID,
             line: line

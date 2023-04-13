@@ -28,7 +28,7 @@ final class SpanTests: XCTestCase {
         let clock = MockClock()
         clock.setTime(42_000_000)
 
-        let event = SpanEvent(name: "test", clock: clock)
+        let event = SpanEvent(name: "test", at: clock.now)
 
         XCTAssertEqual(event.name, "test")
         XCTAssertEqual(event.nanosecondsSinceEpoch, 42_000_000)

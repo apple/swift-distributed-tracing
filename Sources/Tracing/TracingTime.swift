@@ -45,14 +45,7 @@ extension TracerInstant {
 /// The primary purpose of this clock protocol is to enable mocking the "now" time when starting and ending spans,
 /// especially when the system is already using some notion of simulated or mocked time, such that traces are
 /// expressed using the same notion of time.
-public protocol TracerClock {
-    associatedtype Instant: TracerInstant
-
-    var now: Self.Instant { get }
-}
-
-/// A basic "timestamp clock" implementation that is able to five the current time as an unix timestamp.
-public struct DefaultTracerClock: TracerClock {
+public struct DefaultTracerClock {
     public typealias Instant = Timestamp
 
     public init() {
