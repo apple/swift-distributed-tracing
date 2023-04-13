@@ -122,8 +122,8 @@ final class SampleSwift57Span: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Instant: TracerInstant>(at instant: Instant) {
-        self.endTimeNanoseconds = instant.nanosecondsSinceEpoch
+    func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
+        self.endTimeNanoseconds = instant().nanosecondsSinceEpoch
         self.onEnd(self)
     }
 }

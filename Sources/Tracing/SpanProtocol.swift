@@ -100,7 +100,7 @@ public protocol Span: _SwiftTracingSendableSpan {
     ///   - instant: the time instant at which the span ended
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end<Instant: TracerInstant>(at instant: Instant)
+    func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant)
 }
 
 extension Span {

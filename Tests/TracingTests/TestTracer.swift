@@ -181,8 +181,8 @@ final class TestSpan: Span {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Instant: TracerInstant>(at instant: Instant) {
-        self.endTimestampNanosSinceEpoch = instant.nanosecondsSinceEpoch
+    func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
+        self.endTimestampNanosSinceEpoch = instant().nanosecondsSinceEpoch
         self.onEnd(self)
     }
 }
