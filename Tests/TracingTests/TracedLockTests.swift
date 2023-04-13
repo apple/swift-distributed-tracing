@@ -153,8 +153,8 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 
         func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {}
 
-        func end<Instant: TracerInstant>(at instant: Instant) {
-            let time = instant
+        func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
+            let time = instant()
             self.endTimeMillis = time.millisecondsSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }

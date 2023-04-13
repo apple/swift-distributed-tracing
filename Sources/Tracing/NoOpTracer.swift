@@ -84,7 +84,7 @@ public struct NoOpTracer: LegacyTracer {
             }
         }
 
-        public func end<Instant: TracerInstant>(at instant: Instant) {
+        public func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
             // ignore
         }
     }
