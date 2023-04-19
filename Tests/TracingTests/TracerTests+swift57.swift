@@ -24,18 +24,18 @@ final class SampleSwift57Tracer: Tracer {
     private(set) var spans = [SampleSwift57Span]()
     var onEndSpan: (SampleSwift57Span) -> Void = { _ in }
 
-    func startSpan<Clock: TracerClock>(
+    func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
     ) -> SampleSwift57Span {
         let span = SampleSwift57Span(
             operationName: operationName,
-            startTime: clock.now,
+            startTime: instant(),
             baggage: baggage(),
             kind: kind,
             onEnd: self.onEndSpan
@@ -65,8 +65,8 @@ final class SampleSwift57Span: Span {
 
     private var status: SpanStatus?
 
-    public let startTime: UInt64
-    public private(set) var endTime: UInt64?
+    public let startTimeNanoseconds: UInt64
+    public private(set) var endTimeNanoseconds: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -99,7 +99,7 @@ final class SampleSwift57Span: Span {
         onEnd: @escaping (SampleSwift57Span) -> Void
     ) {
         self.operationName = operationName
-        self.startTime = startTime.millisecondsSinceEpoch
+        self.startTimeNanoseconds = startTime.nanosecondsSinceEpoch
         self.baggage = baggage
         self.onEnd = onEnd
         self.kind = kind
@@ -118,12 +118,12 @@ final class SampleSwift57Span: Span {
         self.events.append(event)
     }
 
-    func recordError(_ error: Error, attributes: SpanAttributes) {
+    func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
         self.recordedErrors.append((error, attributes))
     }
 
-    func end<Clock: TracerClock>(clock: Clock) {
-        self.endTime = clock.now.millisecondsSinceEpoch
+    func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
+        self.endTimeNanoseconds = instant().nanosecondsSinceEpoch
         self.onEnd(self)
     }
 }

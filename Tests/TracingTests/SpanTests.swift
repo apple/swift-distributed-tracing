@@ -24,6 +24,17 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(event.name, "test")
     }
 
+    func testSpanEventUsesNanosecondsFromClock() {
+        let clock = MockClock()
+        clock.setTime(42_000_000)
+
+        let event = SpanEvent(name: "test", at: clock.now)
+
+        XCTAssertEqual(event.name, "test")
+        XCTAssertEqual(event.nanosecondsSinceEpoch, 42_000_000)
+        XCTAssertEqual(event.millisecondsSinceEpoch, 42)
+    }
+
     func testSpanAttributeIsExpressibleByStringLiteral() {
         let stringAttribute: SpanAttribute = "test"
         guard case .string(let stringValue) = stringAttribute else {

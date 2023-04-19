@@ -65,9 +65,12 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// Record an error of the given type described by the the given message.
     ///
     /// - Parameters:
-    ///   - error: The error to be recorded.
-    ///   - attributes: Additional attributes describing the error.
-    func recordError(_ error: Error, attributes: SpanAttributes)
+    ///   - error: The error to be recorded
+    ///   - attributes: Additional attributes describing the error
+    ///   - instant: the time instant at which the event occurred
+    func recordError<Instant: TracerInstant>(_ error: Error,
+                                             attributes: SpanAttributes,
+                                             at instant: @autoclosure () -> Instant)
 
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes {
@@ -94,13 +97,22 @@ public protocol Span: _SwiftTracingSendableSpan {
     /// programming mistake to rely on this behavior.
     ///
     /// Parameters:
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
+    ///   - instant: the time instant at which the span ended
     ///
     /// - SeeAlso: `Span.end()` which automatically uses the "current" time.
-    func end<Clock: TracerClock>(clock: Clock)
+    func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant)
 }
 
 extension Span {
+    /// Record an error of the given type, at the current time, described by the the given message
+    ///
+    /// - Parameters:
+    ///   - error: The error to be recorded
+    ///   - attributes: Additional attributes describing the error
+    public func recordError(_ error: Error, attributes: SpanAttributes) {
+        self.recordError(error, attributes: attributes, at: DefaultTracerClock.now)
+    }
+
     /// End this `Span` at the current time.
     ///
     /// ### Rules about ending Spans
@@ -114,7 +126,7 @@ extension Span {
     /// - SeeAlso: ``end(clock:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
-        self.end(clock: DefaultTracerClock())
+        self.end(at: DefaultTracerClock.now)
     }
 
     /// Adds a ``SpanLink`` between this `Span` and the given `Span`.
@@ -149,21 +161,26 @@ public struct SpanEvent: Equatable {
 
     /// The timestamp at which this event occurred.
     ///
-    /// It should be expressed as the number of milliseconds since UNIX Epoch (January 1st 1970).
-    public let millisecondsSinceEpoch: UInt64
+    /// It should be expressed as the number of nanoseconds since UNIX Epoch (January 1st 1970).
+    public let nanosecondsSinceEpoch: UInt64
+
+    /// Representation of the timestamp this event occurred as the number of milliseconds since UNIX Epoch (January 1st 1970).
+    public var millisecondsSinceEpoch: UInt64 {
+        self.nanosecondsSinceEpoch / 1_000_000
+    }
 
     /// Create a new `SpanEvent`.
     /// - Parameters:
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
-    ///   - clock: The clock to use as time source for the start time of the ``Span``
-    public init<Clock: TracerClock>(name: String,
-                                    clock: Clock,
-                                    attributes: SpanAttributes = [:])
+    ///   - instant: the time instant at which the event occurred
+    public init<Instant: TracerInstant>(name: String,
+                                        at instant: @autoclosure () -> Instant,
+                                        attributes: SpanAttributes = [:])
     {
         self.name = name
         self.attributes = attributes
-        self.millisecondsSinceEpoch = clock.now.millisecondsSinceEpoch
+        self.nanosecondsSinceEpoch = instant().nanosecondsSinceEpoch
     }
 
     public init(name: String,
@@ -171,7 +188,7 @@ public struct SpanEvent: Equatable {
     {
         self.name = name
         self.attributes = attributes
-        self.millisecondsSinceEpoch = DefaultTracerClock.now.millisecondsSinceEpoch
+        self.nanosecondsSinceEpoch = DefaultTracerClock.now.nanosecondsSinceEpoch
     }
 }
 

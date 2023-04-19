@@ -60,18 +60,18 @@ enum TaskIDKey: BaggageKey {
 
 /// Only intended to be used in single-threaded testing.
 private final class TracedLockPrintlnTracer: LegacyTracer {
-    func startAnySpan<Clock: TracerClock>(
+    func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
     ) -> any Tracing.Span {
         TracedLockPrintlnSpan(
             operationName: operationName,
-            startTime: clock.now,
+            startTime: instant(),
             kind: kind,
             baggage: baggage()
         )
@@ -151,10 +151,10 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             self.events.append(event)
         }
 
-        func recordError(_ error: Error, attributes: SpanAttributes) {}
+        func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {}
 
-        func end<Clock: TracerClock>(clock: Clock) {
-            let time = clock.now
+        func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
+            let time = instant()
             self.endTimeMillis = time.millisecondsSinceEpoch
             print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
@@ -163,18 +163,18 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 
 #if swift(>=5.7.0)
 extension TracedLockPrintlnTracer: Tracer {
-    func startSpan<Clock: TracerClock>(
+    func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         baggage: @autoclosure () -> Baggage,
         ofKind kind: SpanKind,
-        clock: Clock,
+        at instant: @autoclosure () -> Instant,
         function: String,
         file fileID: String,
         line: UInt
     ) -> TracedLockPrintlnSpan {
         TracedLockPrintlnSpan(
             operationName: operationName,
-            startTime: clock.now,
+            startTime: instant(),
             kind: kind,
             baggage: baggage()
         )

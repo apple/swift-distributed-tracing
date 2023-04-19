@@ -34,16 +34,16 @@ import Dispatch
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public func startSpan<Clock: TracerClock>(
+public func startSpan<Instant: TracerInstant>(
     _ operationName: String,
-    clock: Clock,
+    at instant: @autoclosure () -> Instant,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
@@ -54,7 +54,7 @@ public func startSpan<Clock: TracerClock>(
     // we try to not use the deprecated methods ourselves anyway
     InstrumentationSystem.legacyTracer.startAnySpan(
         operationName,
-        clock: clock,
+        at: instant(),
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -99,7 +99,7 @@ public func startSpan(
     // we try to not use the deprecated methods ourselves anyway
     InstrumentationSystem.legacyTracer.startAnySpan(
         operationName,
-        clock: DefaultTracerClock(),
+        at: DefaultTracerClock.now,
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -129,7 +129,7 @@ public func startSpan(
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
@@ -138,7 +138,7 @@ public func startSpan(
     _ operationName: String,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
-    clock: some TracerClock = DefaultTracerClock(),
+    at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line
@@ -147,7 +147,7 @@ public func startSpan(
     // we try to not use the deprecated methods ourselves anyway
     InstrumentationSystem.tracer.startAnySpan(
         operationName,
-        clock: clock,
+        at: instant(),
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -173,7 +173,7 @@ public func startSpan(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
@@ -183,9 +183,9 @@ public func startSpan(
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public func withSpan<T, Clock: TracerClock>(
+public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
-    clock: Clock,
+    at instant: @autoclosure () -> Instant,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
@@ -195,7 +195,7 @@ public func withSpan<T, Clock: TracerClock>(
 ) rethrows -> T {
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: DefaultTracerClock(),
+        at: DefaultTracerClock.now,
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -240,7 +240,7 @@ public func withSpan<T>(
 ) rethrows -> T {
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: DefaultTracerClock(),
+        at: DefaultTracerClock.now,
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -267,7 +267,7 @@ public func withSpan<T>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
@@ -280,7 +280,7 @@ public func withSpan<T>(
     _ operationName: String,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
-    clock: some TracerClock = DefaultTracerClock(),
+    at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -288,7 +288,7 @@ public func withSpan<T>(
 ) rethrows -> T {
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: clock,
+        at: instant(),
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -316,7 +316,7 @@ public func withSpan<T>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
@@ -326,9 +326,9 @@ public func withSpan<T>(
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
-public func withSpan<T, Clock: TracerClock>(
+public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
-    clock: Clock,
+    at instant: @autoclosure () -> Instant,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
@@ -338,7 +338,7 @@ public func withSpan<T, Clock: TracerClock>(
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: DefaultTracerClock(),
+        at: DefaultTracerClock.now,
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -383,7 +383,7 @@ public func withSpan<T>(
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: DefaultTracerClock(),
+        at: DefaultTracerClock.now,
         baggage: baggage(),
         ofKind: kind,
         function: function,
@@ -411,7 +411,7 @@ public func withSpan<T>(
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - clock: The clock to use as time source for the start time of the ``Span``
+///   - instant: the time instant at which the span started
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
@@ -422,7 +422,7 @@ public func withSpan<T>(
     _ operationName: String,
     baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
-    clock: some TracerClock = DefaultTracerClock(),
+    at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -430,7 +430,7 @@ public func withSpan<T>(
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        clock: clock,
+        at: instant(),
         baggage: baggage(),
         ofKind: kind,
         function: function,
