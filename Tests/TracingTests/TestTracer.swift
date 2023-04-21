@@ -31,7 +31,7 @@ final class TestTracer: LegacyTracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> any Span {
+    ) -> any Tracing.Span {
         let span = TestSpan(
             operationName: operationName,
             startTime: instant(),
