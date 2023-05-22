@@ -8,5 +8,5 @@
 
 ### Manual Span management
 
-- ``startSpan(_:baggage:ofKind:at:function:file:line:)-8kca1``
+- ``startSpan(_:baggage:ofKind:at:function:file:line:)-u1y4``
 - ``Span/end()``

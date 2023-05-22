@@ -259,7 +259,7 @@ This method will only restore the baggage once, after the tracer has had a chanc
 
 While the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
 
-In such situations you can resort to using the ``Tracer/startSpan(_:baggage:ofKind:at:function:file:line:)-8kca1`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
+In such situations you can resort to using the ``startSpan(_:baggage:ofKind:at:function:file:line:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
 
 ```swift
 // Callback heavy APIs may need to store and manage spans manually:
