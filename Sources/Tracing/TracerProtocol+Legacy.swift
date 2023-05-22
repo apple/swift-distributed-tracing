@@ -16,6 +16,14 @@ import Dispatch
 @_exported import Instrumentation
 @_exported import InstrumentationBaggage
 
+/// A tracer protocol intended to support Swift 5.6 specifically.
+///
+/// **This protocol will be deprecated as soon as possible**, and the library will continue recommending Swift 5.7+
+/// in order to make use of new language features that make expressing the tracing API free of existential types when not necessary.
+///
+/// When possible, prefer using ``Tracer`` and ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` APIs,
+/// rather than these `startAnySpan` APIs which unconditionally always return existential Spans even when not necessary
+/// (under Swift 5.7+ type-system enhancement wrt. protocols with associated types)..
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
 public protocol LegacyTracer: Instrument {
     /// Start a new span returning an existential ``Span`` reference.
