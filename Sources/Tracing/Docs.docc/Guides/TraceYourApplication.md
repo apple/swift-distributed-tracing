@@ -16,7 +16,7 @@ A complete [list of swift-distributed-tracing implementations](http://github.com
 is available in this project's README. Select an implementation you'd like to use and follow its bootstrap steps.
 
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
-> in this guide we'll use the community maintained [`opentelemetry-swift`](https://github.com/slashmo/opentelemetry-swift) 
+> in this guide we'll use the community maintained [`otel-swift`](https://github.com/slashmo/otel-swift) 
 > tracer, as an example of how you'd start using tracing in your real applications.
 > 
 > If you'd rather implement your own tracer, refer to <doc:ImplementATracer>.
@@ -44,7 +44,7 @@ tracing system, an HTTP server or client will automatically handle trace propaga
 bootstrap your tracer globally, otherwise you might miss out on its crucial context propagation features.
 
 How the tracer library is initialized will differ from library to library, so refer to the respective implementation's
-documentation. Once you're ready, pass the tracer or instrument to the ``InstrumentationSystem/bootstrap(_:)`` method, 
+documentation. Once you're ready, pass the tracer or instrument to the `InstrumentationSystem/bootstrap(_:)` method, 
 e.g. like this:
 
 ```swift
@@ -67,8 +67,8 @@ You'll notice that the API specifically talks about Instrumentation rather than 
 This is because it is also possible to use various instrumentation systems, e.g. which only take care
 of propagating certain `Baggage` values across process boundaries, without using tracing itself.
 
-In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for ``Instrument``,
-as well as ``TracerProtocol`` implementations.
+In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for `Instrument`,
+as well as ``Tracer`` implementations.
 
 Our guide focuses on tracing through, so let's continue with that in mind.
 
@@ -91,8 +91,11 @@ then don't forget to also configure a swift-lot `MetadataProvider`.
 A typical bootstrap could look something like this:
 
 ```swift
-import OpenTelemetry
-import StatsdMetrics
+import Tracing // API
+import Logging // API
+
+import OpenTelemetry // specific Tracing library
+import StatsdMetrics // specific Metrics library
 
 extension Logger.MetadataProvider {
 
@@ -131,7 +134,10 @@ InstrumentationSystem.bootstrap(otel.tracer())
 If you'd find yourself in need of using multiple instrumentation or tracer implementations you can group them in a `MultiplexInstrument` first, which you then pass along to the `bootstrap` method like this:
 
 ```swift
-InstrumentationSystem.bootstrap(MultiplexInstrument([FancyInstrument(), OtherFancyInstrument()]))
+InstrumentationSystem.bootstrap(MultiplexInstrument([
+  FancyInstrument(),
+  OtherFancyInstrument(),
+]))
 ```
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
@@ -163,7 +169,7 @@ In order to discuss how tracing works, let us first look at a sample trace, befo
 > ```
 >
 > - Zipkin UI URL: http://localhost:9411/ 
-> - Jaeger UI URL: TODO: FIX IT 
+> - Jaeger UI URL: ...
 > 
 > This will run docker containers with the services described above, and expose their ports via localhost, 
 > including the collector to which we now can export our traces from our development machine. 
@@ -190,7 +196,7 @@ You may also notice that all those traces are executing in the same _service_: t
 
 Now, let us take a brief look at the code creating all these spans. 
 
-> Tip: You can refer to the full code by viewing the `main.swift` file in the Dinner sample app.
+> Tip: You can refer to the full code located in `Samples/Dinner/Sources/Onboarding`.
 
 ```swift
 import Tracing 
@@ -221,7 +227,7 @@ func chopVegetables() async throws -> [Vegetable] {
 // ... 
 ```
 
-It seems that the sequential work on the vegetable chopping is not accidental... we cannot do two of those at the same time on a single service. Therfore, let's introduce new services that will handle the vegetable chopping for us! 
+It seems that the sequential work on the vegetable chopping is not accidental... we cannot do two of those at the same time on a single service. Therefore, let's introduce new services that will handle the vegetable chopping for us! 
 
 For example, we could split out the vegetable chopping into a service on its own, and request it (via an HTTP, gRPC, or `distributed actor` call), to chop some vegetables for us. The resulting trace will have the same information, even though a part of it now has been executing on a different host! To further illustrate that, let us re-draw the previous diagram, while adding node designations to each span:
 
@@ -255,19 +261,28 @@ This was just a quick introduction to tracing, but hopefully you are now excited
 
 ### Efficiently working with Spans
 
-We already saw the basic API to spawn a trace span, the ``TracerProtocol/withSpan(_:ofKind:_:)-28ctq`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
+We already saw the basic API to spawn a trace span, the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
 
-Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from it's creation, until the operation closure returns:
+Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from its creation, until the operation closure returns:
 
 ```swift
 withSpan("Working on my novel") { span in 
   write(.novel)
 }
+
+
+try await withSpan("Working on my exceptional novel") { span in
+  try await writeExceptional(.novel)
+}
 ```
 
-This API is available both in synchronous and asynchronous contexts. The closure also is passed a `span` object which is a mutable, but `Sendable ` object that tracer implementations must provide. A `Span` is an in memory representation of the trace span that can be enriched with various information about this execution. For example, if the span represents an HTTP request, one would typically add **span attributes** for `http.method`, `http.path` etc. 
+The `withSpan` is available both in synchronous and asynchronous contexts. The closure also is passed a `span` object which is a reference-semantics type that is mutable and `Sendable` that tracer implementations must provide. 
 
-Throwing out of the operation closure automatically records an error in the `span`
+A `Span` is an in memory representation of the trace span that can be enriched with various information about this execution. For example, if the span represents an HTTP request, one would typically add **span attributes** for `http.method`, `http.path` etc. 
+
+Throwing an error out of the withSpan's operation closure automatically records an error in the `span`, and ends the span.
+
+> Warning: A ``Span`` must not be ended multiple times and doing so is a programmer error.
 
 #### Span Attributes
 
@@ -286,15 +301,15 @@ withSpan("showAttributes") { span in
 
 Once the span is ``Span/end()``-ed the attributes are flushed along with it to the backend tracing system.
 
-However it may be beneficial to use type-safe span attributes instead, so both the String keys and values can be set in a more discoverable, as well as type-safe way.
+> Tip: Some "well known" attributes are pre-defined for you in [swift-distributed-tracing-extras](https://github.com/apple/swift-distributed-tracing-extras). Or you may decide to define a number of type-safe attributes yourself. 
 
-Attributes show up when you click on a specific `Span` in a trave visualization system. For example, like this in Jaeger:
+Attributes show up when you click on a specific ``Span`` in a trace visualization system. For example, like this in Jaeger:
 
 ![Attributes show up under the Span in Jaeger](jaeger-attribute)
 
 Note that some attributes, like for example the information about the process emitting the trace are included in the span automatically. Refer to your tracer's documentation to learn more about how to configure what attributes it should include by default. Common things to include are hostnames, region information or other things which can identify the node in a cluster.
 
-#### Predefined Type-safe Span Attributes
+#### Predefined type-safe Span Attributes
 
 The tracing API provides a way to declare and re-use well known span attributes in a type-safe way. Many of those are defined in `swift-distributed-tracing-extras`, and allow e.g. for setting HTTP values like this:
 
@@ -320,10 +335,11 @@ let package = Package(
       // ...
     ]
 )
-
 ```
 
-In order to gain a whole set of well-typed attributes which are pre-defined by the [OpenTelemetry](http://opentelemetry.io) initiatve. 
+> Note: The extras library is versioned separately from the core tracing package, and at this point has not reached a source-stable 1.0 release yet.
+
+In order to gain a whole set of well-typed attributes which are pre-defined by the [OpenTelemetry](http://opentelemetry.io) initiative. 
 
 For example, like these for HTTP:
 
@@ -408,11 +424,12 @@ withSpan("showEvents") { span in
     return cachedValue
   }
                                
+  span.addEvent("cache-miss")
   return computeValue()
 }
 ```
 
-An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/time`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
+An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/nanosecondsSinceEpoch`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
 
 Events usually show up in a in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
 
@@ -424,16 +441,65 @@ Events usually show up in a in a trace view as points on the timeline (note that
 
 ![An event during the cook span](makeDinner-zipkin-event)
 
-Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for Events (although you could simmulate it with attributes).
+Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
 ### Where (and how) do Baggage and Spans propagate?
-
-
 
 ### Integrations
 
 #### Swift-log integration
 
-> Warning: This integration is currently proposed, but merged in swift-log. Please participate in the proposal review over here: [https://github.com/apple/swift-log/pull/235](https://github.com/apple/swift-log/pull/235)
+Swift-log, the logging package for the server ecosystem, offers native integration with task local values using the `Logger/MetadataProvider`, and its primary application is logging tracing metadata values.
 
-The swift-log integration
+The snippet below shows how one can write a metadata provider and manually extract the baggage and associated metadata value to be included in log statements automatically:
+
+```swift
+import Logging
+import Tracing
+
+// Either manually extract "some specific tracer"'s context or such library would already provide it
+let metadataProvider = Logger.MetadataProvider {
+  guard let baggage = Baggage.current else {
+    return [:]
+  }
+  guard let context = baggage.someSpecificTracerContext else {
+    return [:]
+  }
+  var metadata: Logger.Metadata = [:]
+  metadata["trace-id"] = "\(someSpecificTracerContext.traceID)"
+  metadata["span-id"] = "\(someSpecificTracerContext.spanID)"
+  return metadata
+}
+
+LoggingSystem.bootstrap(
+    StreamLogHandler.standardOutput,
+    metadataProvider: metadataProvider)
+```
+
+Often times writing such provider by hand will not be necessary since the tracer library would be providing one for you. So you'd only need to remember to bootstrap the `LoggingSystem` with the specific tracer's metadata provider:
+
+```
+import Logging
+import Tracing
+import OpenTelemetry // https://github.com/slashmo/swift-otel
+
+LoggingSystem.bootstrap(
+    StreamLogHandler.standardOutput,
+    metadataProvider: .otel) // OTel library's metadata provider
+```
+
+A metadata provider will then be automatically invoked whenever log statements are to be emitted, and therefore e.g. such "bare" log statement:
+
+```swift
+let log = Logger(label: "KitchenService")
+
+withSpan("cooking") { _ in
+  log.info("Cooking a meal")
+}
+```
+
+would include the expected trace metadata:
+
+```bash
+[info] trace_id:... span_id:... Cooking a meal
+```

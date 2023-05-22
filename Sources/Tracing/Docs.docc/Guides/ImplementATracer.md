@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide is aimed at ``Tracer`` and ``Instrument`` protocol implementation authors.
+This guide is aimed at ``Tracer`` and `Instrument` protocol implementation authors.
 
 This guide is for you if you find yourself in need of implementing your own tracing client such as Zipkin, Jaeger, X-Trace, OpenTelemetry or something similar that is custom to your company or distributed system. This guide will also complete your understanding of how distributed tracing systems actually work, so even the casual developer may find this guide useful to read through, even if not implementing your own tracers. 
 
@@ -14,13 +14,13 @@ A tracer is-an instrument as well, and further refines it with the ability to st
 
 ## Creating an instrument
 
-In order to implement an instrument you need to implement the ``Instrument`` protocol.
-``Instrument`` is part of the `Instrumentation` library that `Tracing` depends on and offers the minimal core APIs that allow implementing instrumentation types.
+In order to implement an instrument you need to implement the `Instrument` protocol.
+`Instrument` is part of the `Instrumentation` library that `Tracing` depends on and offers the minimal core APIs that allow implementing instrumentation types.
 
 `Instrument` has two requirements:
 
-1. A ``Instrument/extract(_:into:using:)`` method, which extracts values from a generic carrier (e.g. HTTP headers) and store them into a `Baggage` instance
-2. A ``Istrument/inject(_:into:using:)`` method, which takes values from the `Baggage` to inject them into a generic carrier (e.g. HTTP headers)
+1. A `Instrument/extract(_:into:using:)` method, which extracts values from a generic carrier (e.g. HTTP headers) and store them into a `Baggage` instance
+2. A `Instrument/inject(_:into:using:)` method, which takes values from the `Baggage` to inject them into a generic carrier (e.g. HTTP headers)
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
 act on the provided information or to add additional information to be carried across these boundaries.
@@ -116,59 +116,23 @@ func handler(request: HTTPRequest) async throws {
 > In case your library makes use of the `NIOHTTP1.HTTPHeaders` type we already have an `HTTPHeadersInjector` and
 `HTTPHeadersExtractor` available as part of the `NIOInstrumentation` library.
 
-For your library/framework to be able to carry `FIXME!!!` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
+For your library/framework to be able to carry `Baggage` across asynchronous boundaries, it's crucial that you carry the context throughout your entire call chain in order to avoid dropping metadata.
 
-### Tracing your library
-
-When your library/framework can benefit from tracing, you should make use of it by integrating the `Tracing` library.
-
-In order to work with the tracer [configured by the end-user](#Bootstrapping-the-Instrumentation-System), it adds a property to `InstrumentationSystem` that gives you back a `Tracer`. You can then use that tracer to start `Span`s. In an HTTP client you e.g.
-should start a `Span` when sending the outgoing HTTP request:
-
-```swift
-func get(url: String, context: FIXME!!!) {
-  var request = HTTPRequest(url: url)
-
-  // inject the request headers into the baggage as explained above
-
-  // start a span for the outgoing request
-  let tracer = InstrumentationSystem.tracer
-  var span = tracer.startSpan(named: "HTTP GET", context: context, ofKind: .client)
-
-  // set attributes on the span
-  span.attributes.http.method = "GET"
-  // ...
-
-  self.execute(request).always { _ in
-    // set some more attributes & potentially record an error
-
-    // end the span
-    span.end()
-  }
-}
-```
-
-> ⚠️ Make sure to ALWAYS end spans to ensure that all paths taken by the code will result in ending the span.
-> Make sure that error cases also set the error attribute and end the span.
-
-> In the above example we used the semantic `http.method` attribute that gets exposed via the
-`TracingOpenTelemetrySupport` library.
-
-## Instrument developers: Creating an instrument
+## Creating an instrument
 
 Creating an instrument means adopting the `Instrument` protocol (or `Tracer` in case you develop a tracer).
 `Instrument` is part of the `Instrumentation` library & `Tracing` contains the `Tracer` protocol.
 
 `Instrument` has two requirements:
 
-1. A method to inject values inside a `FIXME!!!` into a generic carrier (e.g. HTTP headers)
-2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `FIXME!!!`
+1. A method to inject values inside a `Baggage` into a generic carrier (e.g. HTTP headers)
+2. A method to extract values from a generic carrier (e.g. HTTP headers) and store them in a `Baggage`
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
 act on the provided information or to add additional information to be carried across these boundaries.
 
 > Check out the [`Baggage` documentation](https://github.com/apple/swift-distributed-tracing-baggage) for more information on
-how to retrieve values from the `FIXME!!!` and how to set values on it.
+how to retrieve values from the `Baggage` and how to set values on it.
 
 ### Creating a `Tracer`
 
@@ -199,7 +163,7 @@ extension Baggage {
   }
 }
 
-var context = DefaultFIXME!!!.topLevel(logger: ...)
+var context = Baggage.topLevel(logger: ...)
 context.baggage.traceID = "4bf92f3577b34da6a3ce929d0e0e4736"
 print(context.baggage.traceID ?? "new trace id")
 ```

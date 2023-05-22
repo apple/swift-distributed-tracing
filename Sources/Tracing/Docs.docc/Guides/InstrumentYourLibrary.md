@@ -4,8 +4,7 @@
 
 This guide is aimed at library and framework developers who wish to instrument their code using distributed tracing.
 
-Doing so within a library may enable automatic trace propagation and is key to propagating trace information across
-distributed nodes, e.g. by instrumenting the HTTP client used by such system.
+Doing so within a library may enable automatic trace propagation and is key to propagating trace information across distributed nodes, e.g. by instrumenting the HTTP client used by such system.
 
 Other examples of libraries which would benefit _the most_ from being instrumented using distributed tracing include:
 
@@ -36,7 +35,7 @@ When a library makes an "outgoing" request or message interaction, it should inv
                         │   Specific Tracer / Instrument   │
                         └──────────────────────────────────┘            
                                            │
-   instrument.inject(baggage: baggage, into: request, using: httpInjector)   
+   instrument.inject(baggage, into: request, using: httpInjector)   
                                            │                           
                                   ┌────────▼──────┐                             
                   ┌───────────────┤  Tracing API  ├────────────┐      ┌────┐
@@ -50,7 +49,7 @@ When a library makes an "outgoing" request or message interaction, it should inv
                   └────────────────────────────────────────────┘      └────┘
 ```
 
-> Note: A library _itself_ cannot really know what information to propagate, since that depends on the used tracing or instrumentation system. The library does however understand its carrier type, and thus can implement the ``Injector`` protocol.
+> Note: A library _itself_ cannot really know what information to propagate, since that depends on the used tracing or instrumentation system. The library does however understand its carrier type, and thus can implement the `Instrumentation/Injector` protocol.
 
 For example, an HTTP client e.g. should inject the current baggage (which could be carrying trace ``Span`` information) into the HTTP headers as follows:
 
@@ -74,7 +73,7 @@ As you can see, the library does not know anything about what tracing system or 
 
 All it has to do is query for the current [task-local](https://developer.apple.com/documentation/swift/tasklocal) `Baggage` value, and if one is present, call on the instrumentation system to inject it into the request.
 
-Since neither the tracing API, nor the specific tracer backend are aware of this library's specific `HTTPRequest` type, we also need to implement an ``Injector`` which takes on the responsibility of adding the metadata into the carrier type (which in our case is the `HTTPRequest`). An injector could for example be implemented like this:
+Since neither the tracing API, nor the specific tracer backend are aware of this library's specific `HTTPRequest` type, we also need to implement an `Instrumentation/Injector` which takes on the responsibility of adding the metadata into the carrier type (which in our case is the `HTTPRequest`). An injector could for example be implemented like this:
 
 ```swift
 struct HTTPRequestInjector: Injector {
@@ -86,7 +85,7 @@ struct HTTPRequestInjector: Injector {
 
 Once the metadata has been injected, the request–including all the additional metadata–is sent over the network.
 
-> Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``TracerProtocol``.
+> Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``Tracer``.
 
 #### Handling inbound requests
 
@@ -132,7 +131,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-Similarly to the outbound side, we need to implement an ``Extractor`` because the tracing libraries don't know about our specific HTTP types, yet we need to have them decide for which values to extract keys.
+Similarly to the outbound side, we need to implement an `Instrumentation/Extractor` because the tracing libraries don't know about our specific HTTP types, yet we need to have them decide for which values to extract keys.
 
 ```swift
 struct HTTPRequestExtract: Instrumentation.Extractor {
@@ -147,18 +146,24 @@ Which exact keys will be asked for depends on the tracer implementation, thus we
 Next, your library should "*restore*" the contextual baggage, this is performed by setting the baggage task-local value around calling into user code, like this:
 
 ```swift
-func handler(request: HTTPRequest) async { 
+func handler(request: HTTPRequest) async {
   // ... 
   InstrumentationSystem.instrument.extract(..., into: &baggage, ...)
   // ... 
 
+  // wrap user code with binding the Baggage task local:
   await Baggage.withValue(baggage) {
     await userCode(request)
   }
+
+  // OR, alternatively start a span here - if your library should be starting spans on behalf of the user:
+  // await startSpan("HTTP \(request.path)" { span in
+  //  await userCode(request)
+  // }
 }
 ```
 
-This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``TracerProtocol`` APIs in order to later "*pick up*" the baggage and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
+This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``Tracer`` APIs in order to later "*pick up*" the baggage and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
 
 > Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the contextual baggage information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
 >
@@ -220,7 +225,7 @@ func handler(request: HTTPRequest) async {
   // 2) restore baggage, using a task-local:
   await Baggage.withValue(baggage) {
     // 3) start span, using contextual baggage (which may contain trace-ids already):
-    await InstrumentationSystem.tracer.withSpan("\(request.path)") { span in 
+    await withSpan("\(request.path)") { span in 
       // 3.1) Set useful attributes:on the span:
       span.attributes["http.method"] = request.method
       // ... 
@@ -233,7 +238,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the baggage again. In order to avoid this duplicate work, it is beneficial to use the ``TracerProtocol/withSpan(_:baggage:ofKind:_:)-1w7i6`` overload, which also accepts a `Baggage` as parameter, rather than picking it up from the task-local value:
+This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the baggage again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` overload, which also accepts a `Baggage` as parameter, rather than picking it up from the task-local value:
 
 ```swift
 // BETTER
@@ -242,7 +247,7 @@ func handler(request: HTTPRequest) async {
   InstrumentationSystem.instrument.extract(..., into: &baggage, ...)
 
   // 2) start span, passing the freshly extracted baggage explicitly:
-  await InstrumentationSystem.tracer.withSpan("\(request.path)", baggage: baggage) { span in 
+  await withSpan("\(request.path)", baggage: baggage) { span in 
     // ... 
   }
 }
@@ -252,16 +257,16 @@ This method will only restore the baggage once, after the tracer has had a chanc
 
 #### Manual Span Lifetime Management
 
-While the ``TracerProtocol/withSpan(_:ofKind:_:)-11n3y`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
+While the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
 
-In such situations you can resort to using the ``TracerProtocol/startSpan(_:baggage:ofKind:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
+In such situations you can resort to using the ``Tracer/startSpan(_:baggage:ofKind:at:function:file:line:)-8kca1`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
 
 ```swift
 // Callback heavy APIs may need to store and manage spans manually:
 var span: Span? 
 
 func startHandling(request: HTTPRequest) {
-  self.span = InstrumentationSystem.tracer.startSpan("\(request.path)")
+  self.span = startSpan("\(request.path)")
   
   userCode.handle(request)
 }
@@ -274,16 +279,16 @@ func finishHandling(request: HTTPRequest, response: HTTPResponse) {
 
 It is very important to _always_ end spans that are started, as attached resources may keep accumulating and lead to memory leaks or worse issues in tracing backends depending on their implementation.
 
-The manual way of managing spans also means that error paths need to be treated with increased attention. This is something that `withSpan` APIs handle automatically, but we cannot rely on `withSpan` detecting an error thrown out of its body closure anymore when using the `startSpan`/`end` APIs.
+The manual way of managing spans also means that error paths need to be treated with increased attention. This is something that `withSpan` APIs handle automatically, but we cannot rely on `withSpan` detecting an error thrown out of its body closure anymore when using the `startSpan`/`Span.end` APIs.
 
-When an error is thrown, or if the span should be considered errored for some reason, you should invoke the ``Span/recordError(_:)`` method and pass an ``Error`` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
+When an error is thrown, or if the span should be considered errored for some reason, you should invoke the ``Span/recordError(_:)`` method and pass an `Swift.Error` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
 
 ```swift
-var span: Span
+var span: any Span
 
 func onError(error: Error) {
-  span.recordError(error) // record the error
-  span.end() // and end the span
+  span.recordError(error) // record the error, and...
+  span.end() // end the span
 }
 ```
 
@@ -298,8 +303,8 @@ It is worth noting that double-ending a span should be considered a programmer e
 Note also since a `Span` contains an instrumentation `Baggage`, you can also pass the span's baggage to any APIs which may need it, or even restore the baggage e.g. for loggers to pick it up while emitting log statements:
 
 ```swift
-class StatefulHandler {
-    var span: Span
+final class StatefulHandler {
+    var span: any Span
 
     func startHandling(request: HTTPRequest) {
         self.span = InstrumentationSystem.tracer.startSpan("\(request.path)")
@@ -313,19 +318,28 @@ class StatefulHandler {
 
             // since the baggage was restored here, the startSpan will pick it up,
             // and the "event-id" span will be a child of the "request.path" span we started before.
-            InstrumentationSystem.tracer.startSpan("event-\(event.id)") {
+            withSpan("event-\(event.id)") { span in // new child span (child of self.span)
                 // ... handle the event ...
             }
         }
     }
 }
-
 ```
+
+It is also possible to pass the baggage explicitly to `withSpan` or `startSpan`:
+
+```swift
+withSpan("event-\(event.id)", baggage: span.baggage) { span in
+  // ... 
+}
+```
+
+which is equivalent to surrounding thr withSpan with a binding of the baggage. The passed baggage (with the values updated by the tracer), will then be set for the duration of the `withSpan` operation, just like usual.
 
 ### Global vs. "Stored" Tracers and Instruments
 
-Tracing functions similarily to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using ``InstrumentationSystem/tracer`` gets the "right" tracer at runtime.
+Tracing functions similarly to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using `InstrumentationSystem/tracer` gets the "right" tracer at runtime.
 
-You may be tempted to allow users _configuring_ a tracer as part of your applications intialization. Generally we advice against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
+You may be tempted to allow users _configuring_ a tracer as part of your applications initialization. Generally we advice against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
 
 On the other hand, it may be valuable for testing scenarios to be able to set a tracer on a specific instance of your library. Therefore, if you really want to offer a configurable `Instrument` or `Tracer` then we suggest defaulting this setting to `nil`, and if it is `nil`, reaching to the global `InstrumentationSystem/instrument` or `InstrumentationSystem/tracer` - this way it is possible to override a tracer for testing on a per-instance basis, but the default mode of operation that end-users expect from libraries remains working.
