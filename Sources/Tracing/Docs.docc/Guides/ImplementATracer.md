@@ -4,7 +4,7 @@
 
 This guide is aimed at ``Tracer`` and `Instrument` protocol implementation authors.
 
-This guide is for you if you find yourself in need of implementing your own tracing client such as Zipkin, Jaeger, X-Trace, OpenTelemetry or something similar that is custom to your company or distributed system. This guide will also complete your understanding of how distributed tracing systems actually work, so even the casual developer may find this guide useful to read through, even if not implementing your own tracers. 
+This guide is for you if you find yourself in need of implementing your own tracing client such as Zipkin, Jaeger, X-Trace, OpenTelemetry or something similar that is custom to your company or distributed system. It will also complete your understanding of how distributed tracing systems actually work, so even the casual developer may find this guide useful to read through, even if not implementing your own tracers. 
 
 ## Do you need an Instrument or a Tracer?
 
@@ -19,8 +19,8 @@ In order to implement an instrument you need to implement the `Instrument` proto
 
 `Instrument` has two requirements:
 
-1. A `Instrument/extract(_:into:using:)` method, which extracts values from a generic carrier (e.g. HTTP headers) and store them into a `Baggage` instance
-2. A `Instrument/inject(_:into:using:)` method, which takes values from the `Baggage` to inject them into a generic carrier (e.g. HTTP headers)
+1. An `Instrument/extract(_:into:using:)` method, which extracts values from a generic carrier (e.g. HTTP headers) and store them into a `Baggage` instance
+2. An `Instrument/inject(_:into:using:)` method, which takes values from the `Baggage` to inject them into a generic carrier (e.g. HTTP headers)
 
 The two methods will be called by instrumented libraries/frameworks at asynchronous boundaries, giving you a chance to
 act on the provided information or to add additional information to be carried across these boundaries.

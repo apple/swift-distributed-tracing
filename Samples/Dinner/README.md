@@ -1,6 +1,6 @@
 ## Tracing Dinner Sample App
 
-In order to try this sample app, and visualize traces it produces, you should first run docker-compose in order
+In order to try this sample app, and visualize traces it produces, you should first run `docker-compose` in order
 to launch a docker containers which host a Zipkin UI and collector:
 
 ```
