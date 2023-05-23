@@ -83,7 +83,7 @@ struct HTTPRequestInjector: Injector {
 }
 ```
 
-Once the metadata has been injected, the request–including all the additional metadata–is sent over the network.
+Once the metadata has been injected, the request--including all the additional metadata--is sent over the network.
 
 > Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``Tracer``.
 
