@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "onboarding",
     platforms: [
-        .macOS("14.0.0"),
+        .macOS("13.0.0"),
     ],
     products: [
         .executable(name: "onboarding", targets: ["Onboarding"]),

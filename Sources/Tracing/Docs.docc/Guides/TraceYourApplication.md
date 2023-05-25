@@ -168,9 +168,6 @@ In order to discuss how tracing works, let us first look at a sample trace, befo
 > # Attaching to docker_jaeger_1, docker_zipkin_1, docker_otel-collector_1
 > ```
 >
-> - Zipkin UI URL: http://localhost:9411/ 
-> - Jaeger UI URL: ...
-> 
 > This will run docker containers with the services described above, and expose their ports via localhost, 
 > including the collector to which we now can export our traces from our development machine. 
 >

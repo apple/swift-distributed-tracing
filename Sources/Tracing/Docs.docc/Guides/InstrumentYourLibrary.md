@@ -338,7 +338,7 @@ which is equivalent to surrounding thr withSpan with a binding of the baggage. T
 
 ### Global vs. "Stored" Tracers and Instruments
 
-Tracing functions similarly to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using `InstrumentationSystem/tracer` gets the "right" tracer at runtime.
+Tracing works similarly to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using `InstrumentationSystem/tracer` gets the "right" tracer at runtime.
 
 You may be tempted to allow users _configuring_ a tracer as part of your applications initialization. Generally we advice against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
 
