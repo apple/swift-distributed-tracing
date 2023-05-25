@@ -15,10 +15,13 @@
 @_exported import InstrumentationBaggage
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
-/// with it. A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
+/// with it.
+///
+/// A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
 /// in which case this span should be considered as "child" of the previous span.
 ///
-/// Creating a `Span` is delegated to a ``Tracer`` and end users should never create them directly.
+/// Spans are created by invoking the `withSpan`` method which delegates to the currently configured bootstrapped
+/// tracer.By default the task-local "current" `Baggage` is used to perform this association.
 ///
 /// ### Reference semantics
 /// A `Span` always exhibits reference semantics. Even if a span were to be implemented using a struct (or enum),
@@ -52,12 +55,20 @@ public protocol Span: _SwiftTracingSendableSpan {
         nonmutating set
     }
 
-    /// Set the status.
+    /// Set the status of the span.
     ///
     /// - Parameter status: The status of this `Span`.
     func setStatus(_ status: SpanStatus)
 
-    /// Add a ``SpanEvent`` in place.
+    /// Add a ``SpanEvent`` to this span.
+    ///
+    /// Span events are similar to log statements in logging systems, in the sense
+    /// that they can carry a name of some event that has happened as well as an associated timestamp.
+    ///
+    /// Events can be used to complement a span with "interesting" point-in-time information.
+    /// For example if code executing a span has been cancelled it might be useful interesting
+    /// to emit an event representing this task cancellation, which then (presumably) leads
+    /// to an quicker termination of the task.
     ///
     /// - Parameter event: The ``SpanEvent`` to add to this `Span`.
     func addEvent(_ event: SpanEvent)
@@ -629,7 +640,9 @@ extension SpanAttributes: ExpressibleByDictionaryLiteral {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Status
 
-/// Represents the status of a finished Span. It's composed of a status code in conjunction with an optional descriptive message.
+/// Represents the status of a finished Span.
+///
+/// It's composed of a status code in conjunction with an optional descriptive message.
 public struct SpanStatus: Equatable {
     public let code: Code
     public let message: String?

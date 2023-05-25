@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Instrumentation
+@testable import Instrumentation
 import InstrumentationBaggage
 import Tracing
 import XCTest
@@ -87,6 +87,20 @@ final class SpanTests: XCTestCase {
         s.attributes["hi"] = [true, false]
         s.attributes["hi"] = ["one", "two"]
         s.attributes["hi"] = [1, 2, 34]
+    }
+
+    func testSpanAttributeSetEntireCollection() {
+        InstrumentationSystem.bootstrapInternal(TestTracer())
+        defer {
+            InstrumentationSystem.bootstrapInternal(NoOpTracer())
+        }
+
+        let s = InstrumentationSystem.legacyTracer.startAnySpan("", baggage: .topLevel)
+        var attrs = s.attributes
+        attrs["one"] = 42
+        attrs["two"] = [1, 2, 34]
+        s.attributes = attrs
+        XCTAssertEqual(s.attributes["one"]?.toSpanAttribute(), SpanAttribute.int(42))
     }
 
     func testSpanAttributesUX() {

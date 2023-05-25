@@ -3,7 +3,7 @@
 ##
 ## This source file is part of the Swift Distributed Tracing open source project
 ##
-## Copyright (c) 2022 Apple Inc. and the Swift Distributed Tracing project
+## Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
 ## authors
 ## Licensed under Apache License v2.0
 ##
@@ -12,7 +12,6 @@
 ## SPDX-License-Identifier: Apache-2.0
 ##
 ##===----------------------------------------------------------------------===##
-
 ##===----------------------------------------------------------------------===##
 ##
 ## This source file is part of the Swift Distributed Actors open source project
@@ -27,4 +26,4 @@
 ##
 ##===----------------------------------------------------------------------===##
 
-swift package --disable-sandbox preview-documentation --target $1
+xcrun swift package --disable-sandbox preview-documentation --target Tracing

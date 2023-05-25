@@ -36,7 +36,7 @@ public protocol Tracer: LegacyTracer {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:operation:)`` to start
+    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
@@ -73,7 +73,7 @@ extension Tracer {
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:operation:)`` to start
+    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
