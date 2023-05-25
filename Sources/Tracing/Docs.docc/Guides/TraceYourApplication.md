@@ -16,7 +16,7 @@ A complete [list of swift-distributed-tracing implementations](http://github.com
 is available in this project's README. Select an implementation you'd like to use and follow its bootstrap steps.
 
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
-> in this guide we'll use the community maintained [`otel-swift`](https://github.com/slashmo/otel-swift) 
+> in this guide we'll use the community maintained [`swift-otel`](https://github.com/slashmo/swift-otel) 
 > tracer, as an example of how you'd start using tracing in your real applications.
 > 
 > If you'd rather implement your own tracer, refer to <doc:ImplementATracer>.
