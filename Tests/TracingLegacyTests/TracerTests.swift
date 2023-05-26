@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import Tracing
 import XCTest
 
@@ -39,22 +39,22 @@ final class TracerTests: XCTestCase {
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.baggage.traceID, "test")
+            XCTAssertEqual(span.context.traceID, "test")
         }
     }
 
     func testContextPropagationWithNoOpSpan() {
         let httpServer = FakeHTTPServer { _, _, client -> FakeHTTPResponse in
-            var baggage = Baggage.topLevel
-            baggage.traceID = "test"
-            client.performRequest(baggage, request: FakeHTTPRequest(path: "/test", headers: []))
+            var context = ServiceContext.topLevel
+            context.traceID = "test"
+            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
             return FakeHTTPResponse(status: 418)
         }
 
         httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
 
-        XCTAssertEqual(httpServer.client.baggages.count, 1)
-        XCTAssertEqual(httpServer.client.baggages.first?.traceID, "test")
+        XCTAssertEqual(httpServer.client.contexts.count, 1)
+        XCTAssertEqual(httpServer.client.contexts.first?.traceID, "test")
     }
 
     func testWithSpan_success() {
@@ -73,11 +73,11 @@ final class TracerTests: XCTestCase {
         }
 
         #if swift(>=5.7.0)
-        let value = tracer.withSpan("hello", baggage: .topLevel) { _ in
+        let value = tracer.withSpan("hello", context: .topLevel) { _ in
             "yes"
         }
         #else
-        let value = tracer.withAnySpan("hello", baggage: .topLevel) { _ in
+        let value = tracer.withAnySpan("hello", context: .topLevel) { _ in
             "yes"
         }
         #endif
@@ -97,7 +97,7 @@ final class TracerTests: XCTestCase {
         tracer.onEndSpan = { _ in spanEnded = true }
 
         do {
-            _ = try tracer.withAnySpan("hello", baggage: .topLevel) { _ in
+            _ = try tracer.withAnySpan("hello", context: .topLevel) { _ in
                 throw ExampleSpanError()
             }
         } catch {
@@ -128,7 +128,7 @@ final class TracerTests: XCTestCase {
         }
 
         let value = tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
-            XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
+            XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
             return operation(span: span)
         }
 
@@ -188,7 +188,7 @@ final class TracerTests: XCTestCase {
 
         try self.testAsync {
             let value = try await tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
-                XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
+                XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
                 return try await operation(span: span)
             }
 
@@ -217,11 +217,11 @@ final class TracerTests: XCTestCase {
         }
 
         self.testAsync {
-            var fromNonAsyncWorld = Baggage.topLevel
+            var fromNonAsyncWorld = ServiceContext.topLevel
             fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withAnySpan("hello", baggage: fromNonAsyncWorld) { (span: any Tracing.Span) -> String in
-                XCTAssertEqual(span.baggage.traceID, Baggage.current?.traceID)
-                XCTAssertEqual(span.baggage.traceID, fromNonAsyncWorld.traceID)
+            let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) { (span: any Tracing.Span) -> String in
+                XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
+                XCTAssertEqual(span.context.traceID, fromNonAsyncWorld.traceID)
                 return await operation(span: span)
             }
 
@@ -358,12 +358,12 @@ final class TracerTests: XCTestCase {
         #if swift(>=5.7.0)
         tracer.withSpan("") { _ in }
         tracer.withSpan("", at: clock.now) { _ in }
-        tracer.withSpan("", baggage: .topLevel) { _ in }
+        tracer.withSpan("", context: .topLevel) { _ in }
         #endif
 
         tracer.withAnySpan("") { _ in }
         tracer.withAnySpan("", at: clock.now) { _ in }
-        tracer.withAnySpan("", baggage: .topLevel) { _ in }
+        tracer.withAnySpan("", context: .topLevel) { _ in }
     }
 
     #if swift(>=5.7.0)
@@ -432,7 +432,7 @@ struct FakeHTTPResponse {
 }
 
 struct FakeHTTPServer {
-    typealias Handler = (Baggage, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (ServiceContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
 
     private let catchAllHandler: Handler
     let client: FakeHTTPClient
@@ -443,16 +443,16 @@ struct FakeHTTPServer {
     }
 
     func receive(_ request: FakeHTTPRequest) {
-        var baggage = Baggage.topLevel
-        InstrumentationSystem.instrument.extract(request.headers, into: &baggage, using: HTTPHeadersExtractor())
+        var context = ServiceContext.topLevel
+        InstrumentationSystem.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
 
         #if swift(>=5.7.0)
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        let span = InstrumentationSystem.tracer.startSpan("GET \(request.path)", context: context)
         #else
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
         #endif
 
-        let response = self.catchAllHandler(span.baggage, request, self.client)
+        let response = self.catchAllHandler(span.context, request, self.client)
         span.attributes["http.status"] = response.status
 
         span.end()
@@ -462,17 +462,17 @@ struct FakeHTTPServer {
 // MARK: - Fake HTTP Client
 
 final class FakeHTTPClient {
-    private(set) var baggages = [Baggage]()
+    private(set) var contexts = [ServiceContext]()
 
-    func performRequest(_ baggage: Baggage, request: FakeHTTPRequest) {
+    func performRequest(_ context: ServiceContext, request: FakeHTTPRequest) {
         var request = request
         #if swift(>=5.7.0)
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
         #else
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", baggage: baggage)
+        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
         #endif
-        self.baggages.append(span.baggage)
-        InstrumentationSystem.instrument.inject(baggage, into: &request.headers, using: HTTPHeadersInjector())
+        self.contexts.append(span.context)
+        InstrumentationSystem.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
         span.end()
     }
 }

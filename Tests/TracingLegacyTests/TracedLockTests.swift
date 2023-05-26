@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import Tracing
 import XCTest
 
@@ -31,11 +31,11 @@ final class TracedLockTests: XCTestCase {
 
         func launchTask(_ name: String) {
             DispatchQueue.global().async {
-                var baggage = Baggage.topLevel
-                baggage[TaskIDKey.self] = name
+                var context = ServiceContext.topLevel
+                context[TaskIDKey.self] = name
 
-                lock.lock(baggage: baggage)
-                lock.unlock(baggage: baggage)
+                lock.lock(context: context)
+                lock.unlock(context: context)
             }
         }
         launchTask("one")
@@ -50,7 +50,7 @@ final class TracedLockTests: XCTestCase {
 // ==== ------------------------------------------------------------------------
 // MARK: test keys
 
-enum TaskIDKey: BaggageKey {
+enum TaskIDKey: ServiceContextKey {
     typealias Value = String
     static let name: String? = "LockedOperationNameKey"
 }
@@ -62,7 +62,7 @@ enum TaskIDKey: BaggageKey {
 private final class TracedLockPrintlnTracer: LegacyTracer {
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage,
+        context: @autoclosure () -> ServiceContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -73,14 +73,14 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             operationName: operationName,
             startTime: instant(),
             kind: kind,
-            baggage: baggage()
+            context: context()
         )
     }
 
     public func forceFlush() {}
 
     func inject<Carrier, Inject>(
-        _ baggage: Baggage,
+        _ context: ServiceContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
@@ -90,7 +90,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into baggage: inout Baggage,
+        into context: inout ServiceContext,
         using extractor: Extract
     )
         where
@@ -106,7 +106,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         private(set) var endTimeMillis: UInt64?
 
         var operationName: String
-        let baggage: Baggage
+        let context: ServiceContext
 
         private var links = [SpanLink]()
 
@@ -128,14 +128,14 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             operationName: String,
             startTime: Instant,
             kind: SpanKind,
-            baggage: Baggage
+            context: ServiceContext
         ) {
             self.operationName = operationName
             self.startTimeMillis = startTime.millisecondsSinceEpoch
-            self.baggage = baggage
+            self.context = context
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start")
+            print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start")
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -156,7 +156,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
             let time = instant()
             self.endTimeMillis = time.millisecondsSinceEpoch
-            print("     span [\(self.operationName): \(self.baggage[TaskIDKey.self] ?? "no-name")] @ \(time): end")
+            print("     span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(time): end")
         }
     }
 }
@@ -165,7 +165,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 extension TracedLockPrintlnTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage,
+        context: @autoclosure () -> ServiceContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -176,7 +176,7 @@ extension TracedLockPrintlnTracer: Tracer {
             operationName: operationName,
             startTime: instant(),
             kind: kind,
-            baggage: baggage()
+            context: context()
         )
     }
 }

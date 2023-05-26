@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import Tracing
 import XCTest
 
@@ -67,10 +67,10 @@ final class DynamicTracepointTracerTests: XCTestCase {
         #endif
 
         for span in tracer.spans {
-            XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
+        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
     func test_adhoc_enableByFunction() {
@@ -92,10 +92,10 @@ final class DynamicTracepointTracerTests: XCTestCase {
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.baggage.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].baggage.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].baggage.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
+        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
     func logic(fakeLine: UInt) {
@@ -167,7 +167,7 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage,
+        context: @autoclosure () -> ServiceContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -182,7 +182,7 @@ final class DynamicTracepointTestTracer: LegacyTracer {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: instant(),
-            baggage: baggage(),
+            context: context(),
             kind: kind,
             file: fileID,
             line: line,
@@ -200,12 +200,12 @@ final class DynamicTracepointTestTracer: LegacyTracer {
         }
 
         // else, perhaps there is already an active span, if so, attach to it
-        guard let baggage = Baggage.current else { // TODO: we could make this such that we only ever once pick-up 🧳
+        guard let context = ServiceContext.current else {
             return false
         }
 
-        guard baggage.traceID != nil else {
-            // no span is active, return the baggage though
+        guard context.traceID != nil else {
+            // no span is active, return the context though
             return false
         }
 
@@ -238,13 +238,13 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
-        baggage.traceID = traceID
+        context.traceID = traceID
     }
 
-    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject) where Inject: Injector, Inject.Carrier == Carrier {
-        guard let traceID = baggage.traceID else {
+    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject) where Inject: Injector, Inject.Carrier == Carrier {
+        guard let traceID = context.traceID else {
             return
         }
         injector.inject(traceID, forKey: "trace-id", into: &carrier)
@@ -262,7 +262,7 @@ extension DynamicTracepointTestTracer {
         private(set) var endTimestampNanosSinceEpoch: UInt64?
 
         public var operationName: String
-        private(set) var baggage: Baggage
+        private(set) var context: ServiceContext
         private(set) var isRecording: Bool = false
 
         let onEnd: (TracepointSpan) -> Void
@@ -271,7 +271,7 @@ extension DynamicTracepointTestTracer {
             let span = TracepointSpan(
                 operationName: "",
                 startTime: DefaultTracerClock().now,
-                baggage: .topLevel,
+                context: .topLevel,
                 kind: .internal,
                 file: fileID,
                 line: line,
@@ -283,7 +283,7 @@ extension DynamicTracepointTestTracer {
 
         init<Instant: TracerInstant>(operationName: String,
                                      startTime: Instant,
-                                     baggage: Baggage,
+                                     context: ServiceContext,
                                      kind: SpanKind,
                                      file fileID: String,
                                      line: UInt,
@@ -291,17 +291,17 @@ extension DynamicTracepointTestTracer {
         {
             self.operationName = operationName
             self.startTimestampNanosSinceEpoch = startTime.nanosecondsSinceEpoch
-            self.baggage = baggage
+            self.context = context
             self.onEnd = onEnd
             self.kind = kind
 
             // inherit or make a new traceID:
-            if baggage.traceID == nil {
-                self.baggage.traceID = "trace-id-fake-\(fileID)-\(line)"
+            if context.traceID == nil {
+                self.context.traceID = "trace-id-fake-\(fileID)-\(line)"
             }
 
             // always make up a new spanID:
-            self.baggage.spanID = "span-id-fake-\(fileID)-\(line)"
+            self.context.spanID = "span-id-fake-\(fileID)-\(line)"
         }
 
         var attributes: Tracing.SpanAttributes = [:]
@@ -334,7 +334,7 @@ extension DynamicTracepointTestTracer: Tracer {
     typealias Span = TracepointSpan
 
     func startSpan<Instant: TracerInstant>(_ operationName: String,
-                                           baggage: @autoclosure () -> Baggage,
+                                           context: @autoclosure () -> ServiceContext,
                                            ofKind kind: Tracing.SpanKind,
                                            at instant: @autoclosure () -> Instant,
                                            function: String,
@@ -349,7 +349,7 @@ extension DynamicTracepointTestTracer: Tracer {
         let span = TracepointSpan(
             operationName: operationName,
             startTime: instant(),
-            baggage: baggage(),
+            context: context(),
             kind: kind,
             file: fileID,
             line: line,

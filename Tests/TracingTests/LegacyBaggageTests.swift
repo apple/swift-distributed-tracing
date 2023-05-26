@@ -13,7 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
+import InstrumentationBaggage // legacy module, kept for easier migrations
 import Tracing
 import XCTest
 
@@ -24,16 +25,8 @@ final class ActorTracingTests: XCTestCase {
     }
 }
 
-func work() async {}
-
-actor Foo {
-    var bar = 0
-    func foo() async {
-        var num = 0
-        await withSpan(#function) { _ in
-            bar += 1
-            await work()
-            num += 1
-        }
-    }
+func test() {
+    // Testing that the baggage type is just a typealias
+    let baggage = Baggage.topLevel // import InstrumentationBaggage
+    let span = startSpan("something", context: baggage)
 }

@@ -12,17 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 
 /// A pseudo-``Instrument`` that may be used to instrument using multiple other ``Instrument``s across a
-/// common `Baggage`.
+/// common `ServiceContext`.
 public struct MultiplexInstrument {
     private var instruments: [Instrument]
 
     /// Create a ``MultiplexInstrument``.
     ///
     /// - Parameter instruments: An array of ``Instrument``s, each of which will be used to ``Instrument/inject(_:into:using:)`` or ``Instrument/extract(_:into:using:)``
-    /// through the same `Baggage`.
+    /// through the same `ServiceContext`.
     public init(_ instruments: [Instrument]) {
         self.instruments = instruments
     }
@@ -35,15 +35,15 @@ extension MultiplexInstrument {
 }
 
 extension MultiplexInstrument: Instrument {
-    public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+    public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Carrier == Inject.Carrier
     {
-        self.instruments.forEach { $0.inject(baggage, into: &carrier, using: injector) }
+        self.instruments.forEach { $0.inject(context, into: &carrier, using: injector) }
     }
 
-    public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+    public func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
         where Extract: Extractor, Carrier == Extract.Carrier
     {
-        self.instruments.forEach { $0.extract(carrier, into: &baggage, using: extractor) }
+        self.instruments.forEach { $0.extract(carrier, into: &context, using: extractor) }
     }
 }

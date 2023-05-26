@@ -24,7 +24,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 import Logging
 import NIO
 import OpenTelemetry
@@ -36,9 +35,9 @@ import Tracing
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 
 LoggingSystem.bootstrap { label in
-  var handler = StreamLogHandler.standardOutput(label: label)
-  handler.logLevel = .trace
-  return handler
+    var handler = StreamLogHandler.standardOutput(label: label)
+    handler.logLevel = .trace
+    return handler
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------

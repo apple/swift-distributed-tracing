@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Instrumentation
-@_exported import InstrumentationBaggage
+@_exported import ServiceContextModule
 
 // ==== -----------------------------------------------------------------------
 // MARK: Tracer protocol
@@ -23,20 +23,20 @@
 /// A tracer capable of creating new trace spans.
 ///
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public protocol Tracer: LegacyTracer {
     /// The concrete type of span this tracer will be producing/
     associatedtype Span: Tracing.Span
 
-    /// Start a new ``Span`` with the given `Baggage`.
+    /// Start a new ``Span`` with the given `ServiceContext`.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
+    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
@@ -46,7 +46,7 @@ public protocol Tracer: LegacyTracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -54,7 +54,7 @@ public protocol Tracer: LegacyTracer {
     ///   - line: The file line where the span was started.
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage,
+        context: @autoclosure () -> ServiceContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -63,17 +63,17 @@ public protocol Tracer: LegacyTracer {
     ) -> Self.Span
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 extension Tracer {
-    /// Start a new ``Span`` with the given `Baggage`.
+    /// Start a new ``Span`` with the given `ServiceContext`.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
+    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
@@ -83,7 +83,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -91,7 +91,7 @@ extension Tracer {
     ///   - line: The file line where the span was started.
     public func startSpan(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -100,7 +100,7 @@ extension Tracer {
     ) -> Self.Span {
         self.startSpan(
             operationName,
-            baggage: baggage(),
+            context: context(),
             ofKind: kind,
             at: instant(),
             function: function,
@@ -117,9 +117,9 @@ extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
@@ -128,7 +128,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -139,7 +139,7 @@ extension Tracer {
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -149,7 +149,7 @@ extension Tracer {
     ) rethrows -> T {
         let span = self.startSpan(
             operationName,
-            baggage: baggage(),
+            context: context(),
             ofKind: kind,
             at: instant(),
             function: function,
@@ -158,7 +158,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try Baggage.$current.withValue(span.baggage) {
+            return try ServiceContext.$current.withValue(span.context) {
                 try operation(span)
             }
         } catch {
@@ -170,9 +170,9 @@ extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
@@ -181,7 +181,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -192,7 +192,7 @@ extension Tracer {
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         function: String = #function,
         file fileID: String = #fileID,
@@ -201,7 +201,7 @@ extension Tracer {
     ) rethrows -> T {
         let span = self.startSpan(
             operationName,
-            baggage: baggage(),
+            context: context(),
             ofKind: kind,
             at: DefaultTracerClock.now,
             function: function,
@@ -210,7 +210,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try Baggage.$current.withValue(span.baggage) {
+            return try ServiceContext.$current.withValue(span.context) {
                 try operation(span)
             }
         } catch {
@@ -222,9 +222,9 @@ extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
@@ -233,7 +233,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -244,7 +244,7 @@ extension Tracer {
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         function: String = #function,
         file fileID: String = #fileID,
@@ -253,7 +253,7 @@ extension Tracer {
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
-            baggage: baggage(),
+            context: context(),
             ofKind: kind,
             at: DefaultTracerClock.now,
             function: function,
@@ -262,7 +262,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await Baggage.$current.withValue(span.baggage) {
+            return try await ServiceContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {
@@ -274,9 +274,9 @@ extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
-    /// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-    /// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-    /// to pick up the task-local baggage is prevented. This can be useful when we know that
+    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// It is also possible to pass a specific `context` explicitly, in which case attempting
+    /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
@@ -285,7 +285,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -296,7 +296,7 @@ extension Tracer {
     /// - Throws: the error the `operation` has thrown (if any)
     public func withSpan<T>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -306,7 +306,7 @@ extension Tracer {
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
-            baggage: baggage(),
+            context: context(),
             ofKind: kind,
             at: instant(),
             function: function,
@@ -315,7 +315,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await Baggage.$current.withValue(span.baggage) {
+            return try await ServiceContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {

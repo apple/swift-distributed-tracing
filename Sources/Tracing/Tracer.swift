@@ -14,17 +14,17 @@
 
 import Dispatch
 @_exported import Instrumentation
-@_exported import InstrumentationBaggage
+@_exported import ServiceContextModule
 
 /// Start a new ``Span`` using the global bootstrapped tracer reimplementation.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
-/// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
+/// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` to start
 ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
 ///   Use `startSpan` iff you need to pass the span manually to a different
 ///   location in your source code to end it.
@@ -35,16 +35,16 @@ import Dispatch
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - instant: the time instant at which the span started
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func startSpan<Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -55,7 +55,7 @@ public func startSpan<Instant: TracerInstant>(
     InstrumentationSystem.legacyTracer.startAnySpan(
         operationName,
         at: instant(),
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -65,13 +65,13 @@ public func startSpan<Instant: TracerInstant>(
 
 /// Start a new ``Span`` using the global bootstrapped tracer reimplementation.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
-/// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
+/// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` to start
 ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
 ///   Use `startSpan` iff you need to pass the span manually to a different
 ///   location in your source code to end it.
@@ -81,15 +81,15 @@ public func startSpan<Instant: TracerInstant>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func startSpan(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -100,7 +100,7 @@ public func startSpan(
     InstrumentationSystem.legacyTracer.startAnySpan(
         operationName,
         at: DefaultTracerClock.now,
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -111,13 +111,13 @@ public func startSpan(
 #if swift(>=5.7.0)
 /// Start a new ``Span`` using the global bootstrapped tracer reimplementation.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
-/// - Note: Prefer ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` to start
+/// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` to start
 ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
 ///   Use `startSpan` iff you need to pass the span manually to a different
 ///   location in your source code to end it.
@@ -127,16 +127,16 @@ public func startSpan(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - instant: the time instant at which the span started
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func startSpan(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
@@ -148,7 +148,7 @@ public func startSpan(
     InstrumentationSystem.tracer.startAnySpan(
         operationName,
         at: instant(),
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -162,9 +162,9 @@ public func startSpan(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -174,7 +174,7 @@ public func startSpan(
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - instant: the time instant at which the span started
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
@@ -182,11 +182,11 @@ public func startSpan(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -196,7 +196,7 @@ public func withSpan<T, Instant: TracerInstant>(
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: DefaultTracerClock.now,
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -209,9 +209,9 @@ public func withSpan<T, Instant: TracerInstant>(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -220,7 +220,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
@@ -228,10 +228,10 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -241,7 +241,7 @@ public func withSpan<T>(
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: DefaultTracerClock.now,
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -256,9 +256,9 @@ public func withSpan<T>(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -268,7 +268,7 @@ public func withSpan<T>(
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - instant: the time instant at which the span started
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
@@ -278,7 +278,7 @@ public func withSpan<T>(
 /// - Throws: the error the `operation` has thrown (if any)
 public func withSpan<T>(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
@@ -289,7 +289,7 @@ public func withSpan<T>(
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: instant(),
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -305,9 +305,9 @@ public func withSpan<T>(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -317,7 +317,7 @@ public func withSpan<T>(
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - instant: the time instant at which the span started
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
@@ -325,11 +325,11 @@ public func withSpan<T>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -339,7 +339,7 @@ public func withSpan<T, Instant: TracerInstant>(
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: DefaultTracerClock.now,
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -352,9 +352,9 @@ public func withSpan<T, Instant: TracerInstant>(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -363,7 +363,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
@@ -371,10 +371,10 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     function: String = #function,
     file fileID: String = #fileID,
@@ -384,7 +384,7 @@ public func withSpan<T>(
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: DefaultTracerClock.now,
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,
@@ -398,9 +398,9 @@ public func withSpan<T>(
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
-/// The current task-local `Baggage` is picked up and provided to the underlying tracer.
-/// It is also possible to pass a specific `baggage` explicitly, in which case attempting
-/// to pick up the task-local baggage is prevented. This can be useful when we know that
+/// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+/// It is also possible to pass a specific `context` explicitly, in which case attempting
+/// to pick up the task-local context is prevented. This can be useful when we know that
 /// we're about to start a top-level span, or if a span should be started from a different,
 /// stored away previously,
 ///
@@ -409,7 +409,7 @@ public func withSpan<T>(
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-///   - baggage: The `Baggage` providing information on where to start the new ``Span``.
+///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - instant: the time instant at which the span started
 ///   - function: The function name in which the span was started
@@ -420,7 +420,7 @@ public func withSpan<T>(
 /// - Throws: the error the `operation` has thrown (if any)
 public func withSpan<T>(
     _ operationName: String,
-    baggage: @autoclosure () -> Baggage = .current ?? .topLevel,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
     function: String = #function,
@@ -431,7 +431,7 @@ public func withSpan<T>(
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
         at: instant(),
-        baggage: baggage(),
+        context: context(),
         ofKind: kind,
         function: function,
         file: fileID,

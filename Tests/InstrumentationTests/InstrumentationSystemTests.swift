@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import XCTest
 
 extension InstrumentationSystem {
@@ -50,7 +50,7 @@ final class InstrumentationSystemTests: XCTestCase {
 
 private final class FakeTracer: Instrument {
     func inject<Carrier, Inject>(
-        _ baggage: Baggage,
+        _ context: ServiceContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
@@ -60,7 +60,7 @@ private final class FakeTracer: Instrument {
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into baggage: inout Baggage,
+        into context: inout ServiceContext,
         using extractor: Extract
     )
         where
@@ -70,7 +70,7 @@ private final class FakeTracer: Instrument {
 
 private final class FakeInstrument: Instrument {
     func inject<Carrier, Inject>(
-        _ baggage: Baggage,
+        _ context: ServiceContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
@@ -80,7 +80,7 @@ private final class FakeInstrument: Instrument {
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into baggage: inout Baggage,
+        into context: inout ServiceContext,
         using extractor: Extract
     )
         where

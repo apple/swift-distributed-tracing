@@ -65,7 +65,7 @@ InstrumentationSystem.bootstrap(otel.tracer())
 
 You'll notice that the API specifically talks about Instrumentation rather than just Tracing.
 This is because it is also possible to use various instrumentation systems, e.g. which only take care
-of propagating certain `Baggage` values across process boundaries, without using tracing itself.
+of propagating certain `ServiceContext` values across process boundaries, without using tracing itself.
 
 In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for `Instrument`,
 as well as ``Tracer`` implementations.
@@ -100,8 +100,8 @@ import StatsdMetrics // specific Metrics library
 extension Logger.MetadataProvider {
 
     // Include the following OpenTelemetry tracer specific metadata in log statements:
-    static let otel = Logger.MetadataProvider { baggage in
-        guard let spanContext = baggage?.spanContext else { return nil }
+    static let otel = Logger.MetadataProvider { context in
+        guard let spanContext = context?.spanContext else { return nil }
         return [
           "trace-id": "\(spanContext.traceID)",
           "span-id": "\(spanContext.spanID)",
@@ -258,7 +258,7 @@ This was just a quick introduction to tracing, but hopefully you are now excited
 
 ### Efficiently working with Spans
 
-We already saw the basic API to spawn a trace span, the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
+We already saw the basic API to spawn a trace span, the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
 
 Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from its creation, until the operation closure returns:
 
@@ -440,15 +440,13 @@ Events usually show up in a in a trace view as points on the timeline (note that
 
 Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
-### Where (and how) do Baggage and Spans propagate?
-
 ### Integrations
 
 #### Swift-log integration
 
 Swift-log, the logging package for the server ecosystem, offers native integration with task local values using the `Logger/MetadataProvider`, and its primary application is logging tracing metadata values.
 
-The snippet below shows how one can write a metadata provider and manually extract the baggage and associated metadata value to be included in log statements automatically:
+The snippet below shows how one can write a metadata provider and manually extract the context and associated metadata value to be included in log statements automatically:
 
 ```swift
 import Logging
@@ -456,15 +454,15 @@ import Tracing
 
 // Either manually extract "some specific tracer"'s context or such library would already provide it
 let metadataProvider = Logger.MetadataProvider {
-  guard let baggage = Baggage.current else {
+  guard let context = ServiceContext.current else {
     return [:]
   }
-  guard let context = baggage.someSpecificTracerContext else {
+  guard let specificContext = context.someSpecificTracerContext else {
     return [:]
   }
   var metadata: Logger.Metadata = [:]
-  metadata["trace-id"] = "\(someSpecificTracerContext.traceID)"
-  metadata["span-id"] = "\(someSpecificTracerContext.spanID)"
+  metadata["trace-id"] = "\(specificContext.traceID)"
+  metadata["span-id"] = "\(specificContext.spanID)"
   return metadata
 }
 

@@ -4,9 +4,9 @@
 
 ### Creating Spans
 
-- ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b``
 
 ### Manual Span management
 
-- ``startSpan(_:baggage:ofKind:at:function:file:line:)-u1y4``
+- ``startSpan(_:context:ofKind:at:function:file:line:)-u1y4``
 - ``Span/end()``

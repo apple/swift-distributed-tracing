@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import Tracing
 import XCTest
 
@@ -81,7 +81,7 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let s = InstrumentationSystem.legacyTracer.startAnySpan("", baggage: .topLevel)
+        let s = InstrumentationSystem.legacyTracer.startAnySpan("", context: .topLevel)
         s.attributes["hi"] = [42, 21]
         s.attributes["hi"] = [42.10, 21.0]
         s.attributes["hi"] = [true, false]
@@ -95,7 +95,7 @@ final class SpanTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(NoOpTracer())
         }
 
-        let s = InstrumentationSystem.legacyTracer.startAnySpan("", baggage: .topLevel)
+        let s = InstrumentationSystem.legacyTracer.startAnySpan("", context: .topLevel)
         var attrs = s.attributes
         attrs["one"] = 42
         attrs["two"] = [1, 2, 34]
@@ -181,21 +181,21 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanParentConvenience() {
-        var parentBaggage = Baggage.topLevel
+        var parentBaggage = ServiceContext.topLevel
         parentBaggage[TestBaggageContextKey.self] = "test"
 
         let parent = TestSpan(
             operationName: "client",
             startTime: DefaultTracerClock.now,
-            baggage: parentBaggage,
+            context: parentBaggage,
             kind: .client,
             onEnd: { _ in }
         )
-        let childBaggage = Baggage.topLevel
+        let childBaggage = ServiceContext.topLevel
         let child = TestSpan(
             operationName: "server",
             startTime: DefaultTracerClock.now,
-            baggage: childBaggage,
+            context: childBaggage,
             kind: .server,
             onEnd: { _ in }
         )
@@ -205,7 +205,7 @@ final class SpanTests: XCTestCase {
         child.addLink(parent, attributes: attributes)
 
         XCTAssertEqual(child.links.count, 1)
-        XCTAssertEqual(child.links[0].baggage[TestBaggageContextKey.self], "test")
+        XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
         guard case .some(.int64(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
             XCTFail("Expected int value for http.status_code")
@@ -215,21 +215,21 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeSetterGetter() {
-        var parentBaggage = Baggage.topLevel
+        var parentBaggage = ServiceContext.topLevel
         parentBaggage[TestBaggageContextKey.self] = "test"
 
         let parent = TestSpan(
             operationName: "client",
             startTime: DefaultTracerClock.now,
-            baggage: parentBaggage,
+            context: parentBaggage,
             kind: .client,
             onEnd: { _ in }
         )
-        let childBaggage = Baggage.topLevel
+        let childBaggage = ServiceContext.topLevel
         let child = TestSpan(
             operationName: "server",
             startTime: DefaultTracerClock.now,
-            baggage: childBaggage,
+            context: childBaggage,
             kind: .server,
             onEnd: { _ in }
         )
@@ -239,7 +239,7 @@ final class SpanTests: XCTestCase {
         child.addLink(parent, attributes: attributes)
 
         XCTAssertEqual(child.links.count, 1)
-        XCTAssertEqual(child.links[0].baggage[TestBaggageContextKey.self], "test")
+        XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
         guard case .some(.int32(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
             XCTFail("Expected int value for http.status_code")
@@ -304,6 +304,6 @@ public struct CustomAttributeValue: Equatable, Sendable, CustomStringConvertible
     }
 }
 
-private struct TestBaggageContextKey: BaggageKey {
+private struct TestBaggageContextKey: ServiceContextKey {
     typealias Value = String
 }

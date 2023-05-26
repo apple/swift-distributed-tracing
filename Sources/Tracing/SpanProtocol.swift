@@ -12,16 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import InstrumentationBaggage
+@_exported import ServiceContextModule
 
 /// A `Span` represents an interval from the start of an operation to its end, along with additional metadata included
 /// with it.
 ///
-/// A `Span` can be created from a `Baggage` or `LoggingContext` which MAY contain existing span identifiers,
+/// A `Span` can be created from a `ServiceContext` or `LoggingContext` which MAY contain existing span identifiers,
 /// in which case this span should be considered as "child" of the previous span.
 ///
 /// Spans are created by invoking the `withSpan`` method which delegates to the currently configured bootstrapped
-/// tracer.By default the task-local "current" `Baggage` is used to perform this association.
+/// tracer.By default the task-local "current" `ServiceContext` is used to perform this association.
 ///
 /// ### Reference semantics
 /// A `Span` always exhibits reference semantics. Even if a span were to be implemented using a struct (or enum),
@@ -32,8 +32,8 @@
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: _SwiftTracingSendableSpan {
-    /// The read-only `Baggage` of this `Span`, set when starting this `Span`.
-    var baggage: Baggage { get }
+    /// The read-only `ServiceContext` of this `Span`, set when starting this `Span`.
+    var context: ServiceContext { get }
 
     /// Returns the name of the operation this span represents.
     ///
@@ -145,7 +145,7 @@ extension Span {
     /// - Parameter other: The `Span` to link to.
     /// - Parameter attributes: The ``SpanAttributes`` describing this link. Defaults to no attributes.
     public func addLink(_ other: Self, attributes: SpanAttributes = [:]) {
-        self.addLink(SpanLink(baggage: other.baggage, attributes: attributes))
+        self.addLink(SpanLink(context: other.context, attributes: attributes))
     }
 }
 
@@ -246,7 +246,7 @@ public protocol SpanAttributeNamespace {
 public protocol NestedSpanAttributesProtocol {
     init()
 
-    /// :nodoc: INTERNAL API
+    /// INTERNAL API
     /// Magic value allowing the dynamicMember lookup inside SpanAttributeNamespaces to work.
     ///
     /// There is no need of ever implementing this function explicitly, the default implementation is good enough.
@@ -556,7 +556,7 @@ extension SpanAttributes {
     /// Accesses the ``SpanAttribute`` with the given name for reading and writing.
     ///
     /// Please be cautious to not abuse this APIs power to read attributes to "smuggle" values between calls.
-    /// Only `Baggage` is intended to carry information in a readable fashion between functions / processes / nodes.
+    /// Only `ServiceContext` is intended to carry information in a readable fashion between functions / processes / nodes.
     /// The API does allow reading in order to support the subscript-based dynamic member lookup implementation of
     /// attributes which allows accessing them as `span.attributes.http.statusCode`, forcing us to expose a get operation on the attributes,
     /// due to the lack of set-only subscripts.
@@ -696,8 +696,8 @@ public enum SpanKind {
 /// The other ``Span``s information is stored in `context` and `attributes` may be used to
 /// further describe the link.
 public struct SpanLink {
-    /// A `Baggage` containing identifying information about the link target ``Span``.
-    public let baggage: Baggage
+    /// A `ServiceContext` containing identifying information about the link target ``Span``.
+    public let context: ServiceContext
 
     /// ``SpanAttributes`` further describing the connection between the ``Span``s.
     public let attributes: SpanAttributes
@@ -705,10 +705,10 @@ public struct SpanLink {
     /// Create a new `SpanLink`.
     ///
     /// - Parameters:
-    ///   - baggage: The `Baggage` identifying the targeted ``Span``.
+    ///   - context: The `ServiceContext` identifying the targeted ``Span``.
     ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
-    public init(baggage: Baggage, attributes: SpanAttributes) {
-        self.baggage = baggage
+    public init(context: ServiceContext, attributes: SpanAttributes) {
+        self.context = context
         self.attributes = attributes
     }
 }
