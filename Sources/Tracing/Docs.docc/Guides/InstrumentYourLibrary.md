@@ -15,16 +15,16 @@ Other examples of libraries which would benefit _the most_ from being instrument
 - any other library which can emit meaningful span information about tasks it is performing.
 
 The most important libraries to instrument are "edge" libraries, which serve to connect between systems, because
-it is them who must inject and extract contextual baggage metadata to enable distributed trace ``Span`` propagation.
+it is them who must inject and extract context metadata to enable distributed trace ``Span`` propagation.
 
 Following those, any database or other complex library which may be able to emit useful information about its internals are
 also good candidates to being instrumented. Note that libraries may do so optionally, or hide the "verboseness" of such traces
 behind options, or only attach information if a ``Span`` is already active etc. Please review your library's documentation to learn
 more about it has integrated tracing support.
 
-### Propagating baggage metadata
+### Propagating context metadata
 
-When crossing boundaries between processes, such as making or receiving an HTTP request, the library responsible for doing so should invoke instrumentation in order to inject or extract the contextual baggage metadata into/from the "carrier" type (such as the `HTTPResponse`) type.
+When crossing boundaries between processes, such as making or receiving an HTTP request, the library responsible for doing so should invoke instrumentation in order to inject or extract the context metadata into/from the "carrier" type (such as the `HTTPResponse`) type.
 
 #### Handling outbound requests
 
@@ -35,7 +35,7 @@ When a library makes an "outgoing" request or message interaction, it should inv
                         │   Specific Tracer / Instrument   │
                         └──────────────────────────────────┘            
                                            │
-   instrument.inject(baggage, into: request, using: httpInjector)   
+   instrument.inject(context, into: request, using: httpInjector)   
                                            │                           
                                   ┌────────▼──────┐                             
                   ┌───────────────┤  Tracing API  ├────────────┐      ┌────┐
@@ -51,15 +51,15 @@ When a library makes an "outgoing" request or message interaction, it should inv
 
 > Note: A library _itself_ cannot really know what information to propagate, since that depends on the used tracing or instrumentation system. The library does however understand its carrier type, and thus can implement the `Instrumentation/Injector` protocol.
 
-For example, an HTTP client e.g. should inject the current baggage (which could be carrying trace ``Span`` information) into the HTTP headers as follows:
+For example, an HTTP client e.g. should inject the current context (which could be carrying trace ``Span`` information) into the HTTP headers as follows:
 
 ```swift
 func get(url: String) -> HTTPResponse {
   var request = HTTPRequest(url: url)
   
-  if let baggage = Baggage.current {
+  if let context = ServiceContext.current {
     InstrumentationSystem.instrument.inject(
-      baggage,
+      context,
       into: &request,
       using: HTTPRequestInjector()
     )
@@ -71,7 +71,7 @@ func get(url: String) -> HTTPResponse {
 
 As you can see, the library does not know anything about what tracing system or instrumentation is installed, because it cannot know that ahead of time. 
 
-All it has to do is query for the current [task-local](https://developer.apple.com/documentation/swift/tasklocal) `Baggage` value, and if one is present, call on the instrumentation system to inject it into the request.
+All it has to do is query for the current [task-local](https://developer.apple.com/documentation/swift/tasklocal) `ServiceContext` value, and if one is present, call on the instrumentation system to inject it into the request.
 
 Since neither the tracing API, nor the specific tracer backend are aware of this library's specific `HTTPRequest` type, we also need to implement an `Instrumentation/Injector` which takes on the responsibility of adding the metadata into the carrier type (which in our case is the `HTTPRequest`). An injector could for example be implemented like this:
 
@@ -85,11 +85,11 @@ struct HTTPRequestInjector: Injector {
 
 Once the metadata has been injected, the request--including all the additional metadata--is sent over the network.
 
-> Note: The actual logic of deciding what baggage values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``Tracer``.
+> Note: The actual logic of deciding what context values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``Tracer``.
 
 #### Handling inbound requests
 
-On the receiving side, an HTTP server needs to perform the inverse operation, as it receives the request from the network and forms an `HTTPRequest` object. Before it is passed it to user-code, it must extract any trace metadata from the request headers into the `Baggage`. 
+On the receiving side, an HTTP server needs to perform the inverse operation, as it receives the request from the network and forms an `HTTPRequest` object. Before it is passed it to user-code, it must extract any trace metadata from the request headers into the `ServiceContext`. 
 
 ```
                    ┌──────────────────────────────────┐
@@ -97,7 +97,7 @@ On the receiving side, an HTTP server needs to perform the inverse operation, as
                    └──────────────────────────────────┘
                                       ▲
                                       │
-      instrument.extract(request, into: &baggage, using: httpExtractor)       
+      instrument.extract(request, into: &context, using: httpExtractor)       
                                       │                                  
                                ┌──────▼──────┐                           
 ┌────┐          ┌──────────────┤ Tracing API ├────────────┐              
@@ -112,18 +112,18 @@ On the receiving side, an HTTP server needs to perform the inverse operation, as
 └────
 ```
 
-This is very similar to what we were doing on the outbound side, but the roles of baggage and request are somewhat reversed: we're extracting values from the carrier into the baggage. The code performing this task could look something like this:
+This is very similar to what we were doing on the outbound side, but the roles of context and request are somewhat reversed: we're extracting values from the carrier into the context. The code performing this task could look something like this:
 
 ```swift
 func handler(request: HTTPRequest) async {
   // we are beginning a new "top level" context - the beginning of a request - 
-  // and thus start from a fresh, empty, top-level baggage:
-  var baggage = Baggage.topLevel
+  // and thus start from a fresh, empty, top-level context:
+  var context = ServiceContext.topLevel
 
-  // populate the baggage by extracting interesting metadata from the incoming request:
+  // populate the context by extracting interesting metadata from the incoming request:
   InstrumentationSystem.instrument.extract(
     request,
-    into: &baggage,
+    into: &context,
     using: HTTPRequestExtractor()
   )
 
@@ -143,16 +143,16 @@ struct HTTPRequestExtract: Instrumentation.Extractor {
 
 Which exact keys will be asked for depends on the tracer implementation, thus we don't present this part of the implementation in part of the guide. For example, a tracer most likely would look for, and extract, values for keys such as `trace-id` and `span-id`. Note though that the exact semantics and keys used by various tracers differ, which is why we have to leave the decision of what to extract up to tracer implementations.
 
-Next, your library should "*restore*" the contextual baggage, this is performed by setting the baggage task-local value around calling into user code, like this:
+Next, your library should "*restore*" the context, this is performed by setting the context task-local value around calling into user code, like this:
 
 ```swift
 func handler(request: HTTPRequest) async {
   // ... 
-  InstrumentationSystem.instrument.extract(..., into: &baggage, ...)
+  InstrumentationSystem.instrument.extract(..., into: &context, ...)
   // ... 
 
-  // wrap user code with binding the Baggage task local:
-  await Baggage.withValue(baggage) {
+  // wrap user code with binding the ServiceContext task local:
+  await ServiceContext.withValue(context) {
     await userCode(request)
   }
 
@@ -163,13 +163,13 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This sets the task-local value `Baggage.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``Tracer`` APIs in order to later "*pick up*" the baggage and e.g. include it in log statements, or start new trace spans using the information stored in the baggage.
+This sets the task-local value `ServiceContext.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``Tracer`` APIs in order to later "*pick up*" the context and e.g. include it in log statements, or start new trace spans using the information stored in the context.
 
-> Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the contextual baggage information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
+> Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the context information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
 >
 > `12:43:32 info [trace-id=463a...13ad] Logging during handling of a request!`
 
-If your library makes multiple calls to user-code as part of handling the same request, you may consider if restoring the baggage around all of these callbacks is beneficial. For example, if a library had callbacks such as:
+If your library makes multiple calls to user-code as part of handling the same request, you may consider if restoring the context around all of these callbacks is beneficial. For example, if a library had callbacks such as:
 
 ```swift
 /// Example library protocol, offering multiple callbacks, all semantically part of the same request handling.
@@ -183,83 +183,83 @@ protocol SampleHTTPHandler {
 }
 ```
 
-You may want to restore the baggage once around both those calls, or if that is not possible, restore it every time when calling back into user code, e.g. like this:
+You may want to restore the context once around both those calls, or if that is not possible, restore it every time when calling back into user code, e.g. like this:
 
 ```swift
 actor MySampleServer { 
   
-  var baggage: Baggage = .topLevel
-  var userCode: SampleHTTPHandler
+  var context: ServiceContext = .topLevel
+  var userHandler: SampleHTTPHandler
 
   func onHeaders(headers: HTTPHeaders) async {
-    await Baggage.withValue(self.baggage) { 
+    await ServiceContext.withValue(self.context) { 
       await userHandler.requestHeaders(headers)
     }
   }
   
   func onBodyPart(part: ByteBuffer) async { 
-    await Baggage.withValue(self.baggage) { 
+    await ServiceContext.withValue(self.context) { 
       await userHandler.requestHeaders(headers)
     }
   }
 }
 ```
 
-While this code is very simple for illustration purposes, and it may seem surprising why there are two separate places where we need to call into user-code separately, in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of callbacks. Always consider if and when to restore baggage such that it makes sense for the end user.
+While this code is very simple for illustration purposes, and it may seem surprising why there are two separate places where we need to call into user-code separately, in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of callbacks. Always consider if and when to restore context such that it makes sense for the end user.
 
 ### Starting Trace Spans in Your Library
 
-The above steps are enough if you wanted to provide contextual baggage propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the baggage is set.
+The above steps are enough if you wanted to provide context propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the context is set.
 
 Many libraries also have the opportunity to start trace spans themselfes, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the `HTTPServer` can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
 
-Let us revisit the previous sample `HTTPServer` which restored baggage around invoking the user-code, and further extend it to start a span including basic information about the `HTTPRequest` being handled:
+Let us revisit the previous sample `HTTPServer` which restored context around invoking the user-code, and further extend it to start a span including basic information about the `HTTPRequest` being handled:
 
 ```swift
 // SUB-OPTIMAL EXAMPLE:
 func handler(request: HTTPRequest) async { 
-  // 1) extract trace information into baggage...
-  InstrumentationSystem.instrument.extract(..., into: &baggage, ...)
+  // 1) extract trace information into context...
+  InstrumentationSystem.instrument.extract(..., into: &context, ...)
   // ...
   
-  // 2) restore baggage, using a task-local:
-  await Baggage.withValue(baggage) {
-    // 3) start span, using contextual baggage (which may contain trace-ids already):
+  // 2) restore context, using a task-local:
+  await ServiceContext.withValue(context) {
+    // 3) start span, using context (which may contain trace-ids already):
     await withSpan("\(request.path)") { span in 
       // 3.1) Set useful attributes:on the span:
       span.attributes["http.method"] = request.method
       // ... 
       // See also: Open Telemetry typed attributes in swift-distributed-tracing-extras
                                                                     
-      // 4) user code will have the apropriate Span baggage restored:
+      // 4) user code will have the apropriate Span context restored:
       await userCode(request)
     }
   }
 }
 ```
 
-This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the baggage again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` overload, which also accepts a `Baggage` as parameter, rather than picking it up from the task-local value:
+This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the context again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` overload, which also accepts a `ServiceContext` as parameter, rather than picking it up from the task-local value:
 
 ```swift
 // BETTER
 func handler(request: HTTPRequest) async { 
-  // 1) extract trace information into baggage: 
-  InstrumentationSystem.instrument.extract(..., into: &baggage, ...)
+  // 1) extract trace information into context: 
+  InstrumentationSystem.instrument.extract(..., into: &context, ...)
 
-  // 2) start span, passing the freshly extracted baggage explicitly:
-  await withSpan("\(request.path)", baggage: baggage) { span in 
+  // 2) start span, passing the freshly extracted context explicitly:
+  await withSpan("\(request.path)", context: context) { span in 
     // ... 
   }
 }
 ```
 
-This method will only restore the baggage once, after the tracer has had a chance to decide if this execution will be traced, and if so, setting its own trace and span identifiers. This way only one task-local access (set) is performed in this version of the code, which is preferable to the set/read/set that was performed previously.
+This method will only restore the context once, after the tracer has had a chance to decide if this execution will be traced, and if so, setting its own trace and span identifiers. This way only one task-local access (set) is performed in this version of the code, which is preferable to the set/read/set that was performed previously.
 
 #### Manual Span Lifetime Management
 
-While the ``withSpan(_:baggage:ofKind:at:function:file:line:_:)-4o2b`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
+While the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
 
-In such situations you can resort to using the ``startSpan(_:baggage:ofKind:at:function:file:line:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
+In such situations you can resort to using the ``startSpan(_:context:ofKind:at:function:file:line:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
 
 ```swift
 // Callback heavy APIs may need to store and manage spans manually:
@@ -298,9 +298,9 @@ It is worth noting that double-ending a span should be considered a programmer e
 >
 > Please also take care to never `end()` a span that was created using `withSpan()`  APIs, because `withSpan` will automatically end the span when the closure returns.
 
-#### Storing and restoring baggage across callbacks 
+#### Storing and restoring context across callbacks 
 
-Note also since a `Span` contains an instrumentation `Baggage`, you can also pass the span's baggage to any APIs which may need it, or even restore the baggage e.g. for loggers to pick it up while emitting log statements:
+Note also since a `Span` contains a `ServiceContext`, you can also pass the span's context to any APIs which may need it, or even restore the context e.g. for loggers to pick it up while emitting log statements:
 
 ```swift
 final class StatefulHandler {
@@ -312,11 +312,11 @@ final class StatefulHandler {
 
     // callback, form other task, so we don't have the task-local information here anymore
     func onSomethingHappening(event: SomeEvent) {
-        Baggage.withValue(span.baggage) { // restore task-local baggage
-            // which allows the baggage to be used by loggers and tracers as usual again: 
+        ServiceContext.withValue(span.context) { // restore task-local context
+            // which allows the context to be used by loggers and tracers as usual again: 
             log.info("Event happened: \(event)")
 
-            // since the baggage was restored here, the startSpan will pick it up,
+            // since the context was restored here, the startSpan will pick it up,
             // and the "event-id" span will be a child of the "request.path" span we started before.
             withSpan("event-\(event.id)") { span in // new child span (child of self.span)
                 // ... handle the event ...
@@ -326,15 +326,15 @@ final class StatefulHandler {
 }
 ```
 
-It is also possible to pass the baggage explicitly to `withSpan` or `startSpan`:
+It is also possible to pass the context explicitly to `withSpan` or `startSpan`:
 
 ```swift
-withSpan("event-\(event.id)", baggage: span.baggage) { span in
+withSpan("event-\(event.id)", context: span.context) { span in
   // ... 
 }
 ```
 
-which is equivalent to surrounding thr withSpan with a binding of the baggage. The passed baggage (with the values updated by the tracer), will then be set for the duration of the `withSpan` operation, just like usual.
+which is equivalent to surrounding the `withSpan` call with a binding of the context. The passed context (with the values updated by the tracer), will then be set for the duration of the `withSpan` operation, just like usual.
 
 ### Global vs. "Stored" Tracers and Instruments
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import XCTest
 
 final class InstrumentTests: XCTestCase {
@@ -23,14 +23,14 @@ final class InstrumentTests: XCTestCase {
             SecondFakeTracer(),
         ])
 
-        var baggage = Baggage.topLevel
-        instrument.extract([String: String](), into: &baggage, using: DictionaryExtractor())
+        var context = ServiceContext.topLevel
+        instrument.extract([String: String](), into: &context, using: DictionaryExtractor())
 
-        XCTAssertEqual(baggage[FirstFakeTracer.TraceIDKey.self], FirstFakeTracer.defaultTraceID)
-        XCTAssertEqual(baggage[SecondFakeTracer.TraceIDKey.self], SecondFakeTracer.defaultTraceID)
+        XCTAssertEqual(context[FirstFakeTracer.TraceIDKey.self], FirstFakeTracer.defaultTraceID)
+        XCTAssertEqual(context[SecondFakeTracer.TraceIDKey.self], SecondFakeTracer.defaultTraceID)
 
         var subsequentRequestHeaders = ["Accept": "application/json"]
-        instrument.inject(baggage, into: &subsequentRequestHeaders, using: DictionaryInjector())
+        instrument.inject(context, into: &subsequentRequestHeaders, using: DictionaryInjector())
 
         XCTAssertEqual(subsequentRequestHeaders, [
             "Accept": "application/json",
@@ -53,7 +53,7 @@ private struct DictionaryExtractor: Extractor {
 }
 
 private final class FirstFakeTracer: Instrument {
-    enum TraceIDKey: BaggageKey {
+    enum TraceIDKey: ServiceContextKey {
         typealias Value = String
 
         static let name: String? = "FirstFakeTraceID"
@@ -62,23 +62,23 @@ private final class FirstFakeTracer: Instrument {
     static let headerName = "first-fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Carrier == Inject.Carrier
     {
-        guard let traceID = baggage[TraceIDKey.self] else { return }
+        guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
         where Extract: Extractor, Carrier == Extract.Carrier
     {
         let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
-        baggage[TraceIDKey.self] = traceID
+        context[TraceIDKey.self] = traceID
     }
 }
 
 private final class SecondFakeTracer: Instrument {
-    enum TraceIDKey: BaggageKey {
+    enum TraceIDKey: ServiceContextKey {
         typealias Value = String
 
         static let name: String? = "SecondFakeTraceID"
@@ -88,24 +88,24 @@ private final class SecondFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(
-        _ baggage: Baggage, into carrier: inout Carrier, using injector: Inject
+        _ context: ServiceContext, into carrier: inout Carrier, using injector: Inject
     )
         where
         Inject: Injector,
         Carrier == Inject.Carrier
     {
-        guard let traceID = baggage[TraceIDKey.self] else { return }
+        guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: SecondFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extract>(
-        _ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract
+        _ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract
     )
         where
         Extract: Extractor,
         Carrier == Extract.Carrier
     {
         let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
-        baggage[TraceIDKey.self] = traceID
+        context[TraceIDKey.self] = traceID
     }
 }

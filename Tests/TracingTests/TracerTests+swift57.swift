@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Instrumentation
-import InstrumentationBaggage
+import ServiceContextModule
 import Tracing
 import XCTest
 
@@ -26,7 +26,7 @@ final class SampleSwift57Tracer: Tracer {
 
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        baggage: @autoclosure () -> Baggage,
+        context: @autoclosure () -> ServiceContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -36,7 +36,7 @@ final class SampleSwift57Tracer: Tracer {
         let span = SampleSwift57Span(
             operationName: operationName,
             startTime: instant(),
-            baggage: baggage(),
+            context: context(),
             kind: kind,
             onEnd: self.onEndSpan
         )
@@ -46,13 +46,13 @@ final class SampleSwift57Tracer: Tracer {
 
     public func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
         where
         Extract: Extractor,
         Carrier == Extract.Carrier
     {}
 
-    func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
         where
         Inject: Injector,
         Carrier == Inject.Carrier
@@ -71,7 +71,7 @@ final class SampleSwift57Span: Span {
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
     var operationName: String
-    let baggage: Baggage
+    let context: ServiceContext
 
     private(set) var events = [SpanEvent]() {
         didSet {
@@ -94,13 +94,13 @@ final class SampleSwift57Span: Span {
     init<Instant: TracerInstant>(
         operationName: String,
         startTime: Instant,
-        baggage: Baggage,
+        context: ServiceContext,
         kind: SpanKind,
         onEnd: @escaping (SampleSwift57Span) -> Void
     ) {
         self.operationName = operationName
         self.startTimeNanoseconds = startTime.nanosecondsSinceEpoch
-        self.baggage = baggage
+        self.context = context
         self.onEnd = onEnd
         self.kind = kind
     }

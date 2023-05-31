@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 
 /// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
 /// It is set up just once in a given program to select the desired ``Instrument`` implementation.
@@ -22,7 +22,7 @@ import InstrumentationBaggage
 ///
 /// # Access the Instrument
 /// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     private static let lock = ReadWriteLock()
     private static var _instrument: Instrument = NoOpInstrument()
@@ -62,9 +62,9 @@ public enum InstrumentationSystem {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal Baggage
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 extension InstrumentationSystem {
-    /// :nodoc: INTERNAL API: Do Not Use
+    /// INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         self.lock.withReaderLock {
             if let multiplex = self._instrument as? MultiplexInstrument {

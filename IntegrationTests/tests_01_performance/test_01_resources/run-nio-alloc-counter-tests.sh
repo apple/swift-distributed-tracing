@@ -53,7 +53,7 @@ fi
 
 "$here/../../allocation-counter-tests-framework/run-allocation-counter.sh" \
     -p "$here/../../.." \
-    -m Baggage \
+    -m ServiceContext \
     -m Instrumentation \
     -m NIOInstrumentation \
     -s "$here/shared.swift" \

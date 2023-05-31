@@ -19,7 +19,7 @@ import Darwin
 #endif
 
 @_exported import Instrumentation
-@_exported import InstrumentationBaggage
+@_exported import ServiceContextModule
 
 public protocol TracerInstant: Comparable, Hashable, Sendable {
     /// Representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970)

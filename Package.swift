@@ -14,7 +14,8 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-distributed-tracing-baggage.git", .upToNextMinor(from: "0.4.1")),
+        //        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-service-context.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
@@ -24,7 +25,7 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
+                .product(name: "ServiceContextModule", package: "swift-service-context"),
             ]
         ),
         .testTarget(
@@ -56,7 +57,7 @@ let package = Package(
         .executableTarget(
             name: "_TracingBenchmarks",
             dependencies: [
-                .product(name: "InstrumentationBaggage", package: "swift-distributed-tracing-baggage"),
+                .product(name: "ServiceContextModule", package: "swift-service-context"),
                 .target(name: "Tracing"),
                 .target(name: "_TracingBenchmarkTools"),
             ]

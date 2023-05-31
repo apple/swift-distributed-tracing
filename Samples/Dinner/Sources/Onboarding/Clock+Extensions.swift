@@ -25,5 +25,5 @@
 //===----------------------------------------------------------------------===//
 
 func sleep(for duration: ContinuousClock.Duration) async {
-  try? await Task.sleep(until: ContinuousClock.now + duration, clock: .continuous)
+    try? await Task.sleep(until: ContinuousClock.now + duration, clock: .continuous)
 }

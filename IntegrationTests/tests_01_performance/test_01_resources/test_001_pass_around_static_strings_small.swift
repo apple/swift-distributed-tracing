@@ -26,7 +26,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 
 func run(identifier: String) {
     measure(identifier: identifier) {

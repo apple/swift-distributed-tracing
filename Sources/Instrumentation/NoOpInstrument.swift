@@ -12,19 +12,19 @@
 //
 //===----------------------------------------------------------------------===//
 
-import InstrumentationBaggage
+import ServiceContextModule
 
 /// A "no op" implementation of an ``Instrument``.
 public struct NoOpInstrument: Instrument {
     public init() {}
 
-    public func inject<Carrier, Inject>(_ baggage: Baggage, into carrier: inout Carrier, using injector: Inject)
+    public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
         where Inject: Injector, Carrier == Inject.Carrier
     {
         // no-op
     }
 
-    public func extract<Carrier, Extract>(_ carrier: Carrier, into baggage: inout Baggage, using extractor: Extract)
+    public func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
         where Extract: Extractor, Carrier == Extract.Carrier
     {
         // no-op

@@ -27,7 +27,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import InstrumentationBaggage
+import ServiceContextModule
 
 @inline(never)
 func take1(context: BaggageContext) -> Int {

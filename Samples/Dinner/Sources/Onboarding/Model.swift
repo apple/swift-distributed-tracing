@@ -24,12 +24,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 struct Meal: Sendable {}
 struct Meat: Sendable {}
 struct Oven: Sendable {}
 enum Vegetable: Sendable {
-  case potato
-  case carrot
+    case potato
+    case carrot
 }
-
