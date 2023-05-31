@@ -50,13 +50,6 @@ let package = Package(
                 .target(name: "Tracing"),
             ]
         ),
-        .testTarget(
-            name: "TracingLegacyTests",
-            dependencies: [
-                .target(name: "Tracing"),
-                .product(name: "InstrumentationBaggage", package: "swift-service-context"),
-            ]
-        ),
 
         // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Performance / Benchmarks
