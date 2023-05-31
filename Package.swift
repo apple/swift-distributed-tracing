@@ -14,8 +14,7 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        //        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-service-context.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
