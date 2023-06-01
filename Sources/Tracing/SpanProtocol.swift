@@ -327,7 +327,7 @@ public enum SpanAttribute: Equatable {
     case string(String)
     case stringArray([String])
 
-    case __DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM
+    case __DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM_USE_DEFAULT_INSTEAD
 
     case stringConvertible(CustomStringConvertible & Sendable)
     case stringConvertibleArray([CustomStringConvertible & Sendable])
@@ -367,7 +367,7 @@ public enum SpanAttribute: Equatable {
             return value
         case .stringConvertibleArray(let value):
             return value
-        case .__DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM:
+        case .__DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM_USE_DEFAULT_INSTEAD:
             fatalError("Cannot have values of __DO_NOT_SWITCH_EXHAUSTIVELY_OVER_THIS_ENUM")
         }
     }
