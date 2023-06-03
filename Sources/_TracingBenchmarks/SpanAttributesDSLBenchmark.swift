@@ -16,62 +16,61 @@ import _TracingBenchmarkTools
 import Tracing
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
-public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.000_bench_empty",
-        runFunction: { _ in try! DSLBenchmarks.bench_empty(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.001_bench_makeSpan",
-        runFunction: { _ in try! DSLBenchmarks.bench_makeSpan(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.002_bench_startSpan_end",
-        runFunction: { _ in try! DSLBenchmarks.bench_makeSpan(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.00_bench_set_String_raw",
-        runFunction: { _ in try! DSLBenchmarks.bench_set_String_raw(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.01_bench_set_String_dsl",
-        runFunction: { _ in try! DSLBenchmarks.bench_set_String_dsl(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.02_bench_set_Int_raw",
-        runFunction: { _ in try! DSLBenchmarks.bench_set_String_raw(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.03_bench_set_Int_dsl",
-        runFunction: { _ in try! DSLBenchmarks.bench_set_String_dsl(times: 100) },
-        tags: [],
-        setUpFunction: { DSLBenchmarks.setUp() },
-        tearDownFunction: DSLBenchmarks.tearDown
-    ),
-]
-
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 enum DSLBenchmarks {
+    public static let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.000_bench_empty",
+            runFunction: { _ in try! bench_empty(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.001_bench_makeSpan",
+            runFunction: { _ in try! bench_makeSpan(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.002_bench_startSpan_end",
+            runFunction: { _ in try! bench_makeSpan(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.00_bench_set_String_raw",
+            runFunction: { _ in try! bench_set_String_raw(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.01_bench_set_String_dsl",
+            runFunction: { _ in try! bench_set_String_dsl(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.02_bench_set_Int_raw",
+            runFunction: { _ in try! bench_set_String_raw(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.03_bench_set_Int_dsl",
+            runFunction: { _ in try! bench_set_String_dsl(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+    ]
+
     fileprivate static var span: (any Tracing.Span)!
 
     fileprivate static func setUp() {

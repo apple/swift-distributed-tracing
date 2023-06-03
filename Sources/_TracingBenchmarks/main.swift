@@ -38,6 +38,6 @@ private func registerBenchmark(_ name: String, _ function: @escaping (Int) -> Vo
 }
 
 if #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) { // for TaskLocal ServiceContext
-    registerBenchmark(SpanAttributesDSLBenchmarks)
+    registerBenchmark(DSLBenchmarks.SpanAttributesDSLBenchmarks)
     main()
 }
