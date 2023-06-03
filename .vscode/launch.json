@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Debug _TracingBenchmarks",
+            "program": "${workspaceFolder:swift-distributed-tracing}/.build/debug/_TracingBenchmarks",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-distributed-tracing}",
+            "preLaunchTask": "swift: Build Debug _TracingBenchmarks"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Release _TracingBenchmarks",
+            "program": "${workspaceFolder:swift-distributed-tracing}/.build/release/_TracingBenchmarks",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-distributed-tracing}",
+            "preLaunchTask": "swift: Build Release _TracingBenchmarks"
+        }
+    ]
+}

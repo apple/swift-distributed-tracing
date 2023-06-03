@@ -14,6 +14,7 @@
 
 @_exported import Instrumentation
 
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension InstrumentationSystem {
     #if swift(>=5.7.0)
     /// Returns the ``Tracer`` bootstrapped as part of the `InstrumentationSystem`.
