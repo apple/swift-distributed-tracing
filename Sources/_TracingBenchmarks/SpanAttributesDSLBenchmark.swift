@@ -15,142 +15,146 @@
 import _TracingBenchmarkTools
 import Tracing
 
-public let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.000_bench_empty",
-        runFunction: { _ in try! bench_empty(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.001_bench_makeSpan",
-        runFunction: { _ in try! bench_makeSpan(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.002_bench_startSpan_end",
-        runFunction: { _ in try! bench_makeSpan(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+enum DSLBenchmarks {
+    public static let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.000_bench_empty",
+            runFunction: { _ in try! bench_empty(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.001_bench_makeSpan",
+            runFunction: { _ in try! bench_makeSpan(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.002_bench_startSpan_end",
+            runFunction: { _ in try! bench_makeSpan(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
 
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.00_bench_set_String_raw",
-        runFunction: { _ in try! bench_set_String_raw(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.01_bench_set_String_dsl",
-        runFunction: { _ in try! bench_set_String_dsl(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.00_bench_set_String_raw",
+            runFunction: { _ in try! bench_set_String_raw(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.01_bench_set_String_dsl",
+            runFunction: { _ in try! bench_set_String_dsl(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
 
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.02_bench_set_Int_raw",
-        runFunction: { _ in try! bench_set_String_raw(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
-    BenchmarkInfo(
-        name: "SpanAttributesDSLBenchmarks.03_bench_set_Int_dsl",
-        runFunction: { _ in try! bench_set_String_dsl(times: 100) },
-        tags: [],
-        setUpFunction: { setUp() },
-        tearDownFunction: tearDown
-    ),
-]
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.02_bench_set_Int_raw",
+            runFunction: { _ in try! bench_set_String_raw(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+        BenchmarkInfo(
+            name: "SpanAttributesDSLBenchmarks.03_bench_set_Int_dsl",
+            runFunction: { _ in try! bench_set_String_dsl(times: 100) },
+            tags: [],
+            setUpFunction: { setUp() },
+            tearDownFunction: tearDown
+        ),
+    ]
 
-private var span: (any Tracing.Span)!
+    fileprivate static var span: (any Tracing.Span)!
 
-private func setUp() {
-    span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
-}
+    fileprivate static func setUp() {
+        self.span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
+    }
 
-private func tearDown() {
-    span = nil
-}
+    fileprivate static func tearDown() {
+        self.span = nil
+    }
 
-// ==== ----------------------------------------------------------------------------------------------------------------
-// MARK: make span
+    // ==== ----------------------------------------------------------------------------------------------------------------
+    // MARK: make span
 
-func bench_empty(times: Int) throws {}
+    static func bench_empty(times: Int) throws {}
 
-func bench_makeSpan(times: Int) throws {
-    for _ in 0 ..< times {
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
-        _ = span
+    static func bench_makeSpan(times: Int) throws {
+        for _ in 0 ..< times {
+            let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
+            _ = span
+        }
+    }
+
+    static func bench_startSpan_end(times: Int) throws {
+        for _ in 0 ..< times {
+            let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
+            span.end()
+        }
+    }
+
+    // ==== ----------------------------------------------------------------------------------------------------------------
+    // MARK: set String
+
+    static func bench_set_String_raw(times: Int) throws {
+        for _ in 0 ..< times {
+            self.span.attributes["http.method"] = "POST"
+        }
+    }
+
+    static func bench_set_String_dsl(times: Int) throws {
+        for _ in 0 ..< times {
+            self.span.attributes.http.method = "POST"
+        }
+    }
+
+    // ==== ----------------------------------------------------------------------------------------------------------------
+    // MARK: set Int
+
+    static func bench_set_Int_raw(times: Int) throws {
+        for _ in 0 ..< times {
+            self.span.attributes["http.status_code"] = 200
+        }
+    }
+
+    static func bench_set_Int_dsl(times: Int) throws {
+        for _ in 0 ..< times {
+            self.span.attributes.http.statusCode = 200
+        }
+    }
+
+    @dynamicMemberLookup
+    struct HTTPAttributes: SpanAttributeNamespace {
+        var attributes: SpanAttributes
+
+        init(attributes: SpanAttributes) {
+            self.attributes = attributes
+        }
+
+        struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+            init() {}
+
+            var method: Key<String> { "http.method" }
+            var statusCode: Key<Int> { "http.status_code" }
+        }
     }
 }
 
-func bench_startSpan_end(times: Int) throws {
-    for _ in 0 ..< times {
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
-        span.end()
-    }
-}
-
-// ==== ----------------------------------------------------------------------------------------------------------------
-// MARK: set String
-
-func bench_set_String_raw(times: Int) throws {
-    for _ in 0 ..< times {
-        span.attributes["http.method"] = "POST"
-    }
-}
-
-func bench_set_String_dsl(times: Int) throws {
-    for _ in 0 ..< times {
-        span.attributes.http.method = "POST"
-    }
-}
-
-// ==== ----------------------------------------------------------------------------------------------------------------
-// MARK: set Int
-
-func bench_set_Int_raw(times: Int) throws {
-    for _ in 0 ..< times {
-        span.attributes["http.status_code"] = 200
-    }
-}
-
-func bench_set_Int_dsl(times: Int) throws {
-    for _ in 0 ..< times {
-        span.attributes.http.statusCode = 200
-    }
-}
-
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 extension SpanAttributes {
-    var http: HTTPAttributes {
+    var http: DSLBenchmarks.HTTPAttributes {
         get {
             .init(attributes: self)
         }
         set {
             self = newValue.attributes
         }
-    }
-}
-
-@dynamicMemberLookup
-struct HTTPAttributes: SpanAttributeNamespace {
-    var attributes: SpanAttributes
-
-    init(attributes: SpanAttributes) {
-        self.attributes = attributes
-    }
-
-    struct NestedSpanAttributes: NestedSpanAttributesProtocol {
-        init() {}
-
-        var method: Key<String> { "http.method" }
-        var statusCode: Key<Int> { "http.status_code" }
     }
 }

@@ -113,6 +113,7 @@ extension Tracer {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Starting spans: `withSpan`
 
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.

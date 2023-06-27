@@ -388,6 +388,7 @@ extension LegacyTracer {
 #if swift(>=5.7.0)
 // Provide compatibility shims of the `...AnySpan` APIs to the 5.7 requiring `Tracer`.
 
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
     /// Start a new span returning an existential ``Span`` reference.
     ///
