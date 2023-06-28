@@ -40,6 +40,7 @@ As this API package was just released, no projects have yet fully adopted it, th
 | HTTP Servers/Frameworks  | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
+| [Vapor](https://github.com/vapor/vapor) | Tracing | [Support planned](https://github.com/vapor/vapor/issues/3033) |
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 
