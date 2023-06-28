@@ -43,11 +43,12 @@ As this API package was just released, no projects have yet fully adopted it, th
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 
-| Client libraries         |                |                                                       |
-| -----------------------  | -------------- | ----------------------------------------------------- |
-| AsyncHTTPClient          | Tracing        | Pending                                               |
-| Swift gRPC               | Tracing        | Pending                                               |
-| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
+| Client libraries          |                |                                                       |
+| ------------------------- | -------------- | ----------------------------------------------------- |
+| AsyncHTTPClient           | Tracing        | 🟠 Pending                                               |
+| Swift gRPC                | Tracing        | 🟠 Pending                                               |
+| Swift Distributed Cluster | Tracing        | 🟠 Pending                                            |
+| _Your library?_           | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
