@@ -27,8 +27,8 @@ Compatible `Tracer` implementations:
 
 | Library | Status                     | Description |
 | ------- |----------------------------| ----------- |
-| [@slashmo](https://github.com/slashmo) / [**OpenTelemetry** Swift](https://github.com/slashmo/opentelemetry-swift) | Update for 1.0 in progress | Exports spans to OpenTelemetry Collector; **X-Ray** & **Jaeger** propagation available via extensions. |
-| [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | Not updated for 1.0        | ... |
+| [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟡 Update for 1.0 in progress | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
+| [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | 🟠 Not updated for 1.0        | ... |
 | _Your library?_ | ...                        | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
@@ -37,11 +37,19 @@ If you know of any other library please send in a [pull request](https://github.
 
 As this API package was just released, no projects have yet fully adopted it, the following table for not serves as reference to prior work in adopting tracing work. As projects move to adopt tracing completely, the table will be used to track adoption phases of the various libraries.
 
-| Library                  | Integrates     | Status                                                |
+| HTTP Servers/Frameworks  | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
-| AsyncHTTPClient          | Tracing        | Pending                                               |
-| Swift gRPC               | Tracing        | Pending                                               |
+| [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
+| [Vapor](https://github.com/vapor/vapor) | Tracing | [Support planned](https://github.com/vapor/vapor/issues/3033) |
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
+
+
+| Client libraries          |                |                                                       |
+| ------------------------- | -------------- | ----------------------------------------------------- |
+| AsyncHTTPClient           | Tracing        | 🟠 Pending                                               |
+| Swift gRPC                | Tracing        | 🟠 Pending                                               |
+| Swift Distributed Cluster | Tracing        | 🟠 Pending                                            |
+| _Your library?_           | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
