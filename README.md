@@ -37,17 +37,16 @@ If you know of any other library please send in a [pull request](https://github.
 
 As this API package was just released, no projects have yet fully adopted it, the following table for not serves as reference to prior work in adopting tracing work. As projects move to adopt tracing completely, the table will be used to track adoption phases of the various libraries.
 
-| Library                  | Integrates     | Status                                                |
+| HTTP Servers/Frameworks  | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
-| HTTP Servers/Frameworks  | -------------- | ----------------------------------------------------- |
-| -----------------------  | -------------- | ----------------------------------------------------- |
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
-| -----------------------  | -------------- | ----------------------------------------------------- |
-| Client libraries         | -------------- | ----------------------------------------------------- |
+| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
+
+
+| Client libraries         |                |                                                       |
 | -----------------------  | -------------- | ----------------------------------------------------- |
 | AsyncHTTPClient          | Tracing        | Pending                                               |
 | Swift gRPC               | Tracing        | Pending                                               |
-| -----------------------  | -------------- | ----------------------------------------------------- |
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
