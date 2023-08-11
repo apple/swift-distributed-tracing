@@ -24,7 +24,7 @@ assert({
 
 @inline(__always)
 private func registerBenchmark(_ bench: BenchmarkInfo) {
-    registeredBenchmarks.append(bench)
+    internalRegisterBenchmark(bench)
 }
 
 @inline(__always)
@@ -33,7 +33,7 @@ private func registerBenchmark(_ benches: [BenchmarkInfo]) {
 }
 
 @inline(__always)
-private func registerBenchmark(_ name: String, _ function: @escaping (Int) -> Void, _ tags: [BenchmarkCategory]) {
+private func registerBenchmark(_ name: String, _ function: @escaping @Sendable (Int) -> Void, _ tags: [BenchmarkCategory]) {
     registerBenchmark(BenchmarkInfo(name: name, runFunction: function, tags: tags))
 }
 

@@ -17,11 +17,13 @@ import Instrumentation
 import ServiceContextModule
 import Tracing
 
-final class TracedLock {
-    let name: String
-    let underlyingLock: NSLock
+/// Marked as @unchecked Sendable due to the synchronization being
+/// performed manually using locks.
+final class TracedLock: @unchecked Sendable {
+    private let name: String
+    private let underlyingLock: NSLock
 
-    var activeSpan: (any Tracing.Span)?
+    private var activeSpan: (any Tracing.Span)?
 
     init(name: String) {
         self.name = name

@@ -24,41 +24,71 @@ import ServiceContextModule
 /// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
-    private static let lock = ReadWriteLock()
-    private static var _instrument: Instrument = NoOpInstrument()
-    private static var isInitialized = false
+    /// Marked as @unchecked Sendable due to the synchronization being
+    /// performed manually using locks.
+    private final class Storage: @unchecked Sendable {
+        private let lock = ReadWriteLock()
+        private var _instrument: Instrument = NoOpInstrument()
+        private var _isInitialized = false
+
+        func bootstrap(_ instrument: Instrument) {
+            self.lock.withWriterLock {
+                precondition(
+                    !self._isInitialized, """
+                    InstrumentationSystem can only be initialized once per process. Consider using MultiplexInstrument if
+                    you need to use multiple instruments.
+                    """
+                )
+                self._instrument = instrument
+                self._isInitialized = true
+            }
+        }
+
+        func bootstrapInternal(_ instrument: Instrument?) {
+            self.lock.withWriterLock {
+                self._instrument = instrument ?? NoOpInstrument()
+            }
+        }
+
+        var instrument: Instrument {
+            self.lock.withReaderLock { self._instrument }
+        }
+
+        func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+            self.lock.withReaderLock {
+                if let multiplex = self._instrument as? MultiplexInstrument {
+                    return multiplex.firstInstrument(where: predicate)
+                } else if predicate(self._instrument) {
+                    return self._instrument
+                } else {
+                    return nil
+                }
+            }
+        }
+    }
+
+    private static let shared = Storage()
 
     /// Globally select the desired ``Instrument`` implementation.
     ///
     /// - Parameter instrument: The ``Instrument`` you want to share globally within your system.
     /// - Warning: Do not call this method more than once. This will lead to a crash.
     public static func bootstrap(_ instrument: Instrument) {
-        self.lock.withWriterLock {
-            precondition(
-                !self.isInitialized, """
-                InstrumentationSystem can only be initialized once per process. Consider using MultiplexInstrument if
-                you need to use multiple instruments.
-                """
-            )
-            self._instrument = instrument
-            self.isInitialized = true
-        }
+        self.shared.bootstrap(instrument)
     }
 
     /// For testing scenarios one may want to set instruments multiple times, rather than the set-once semantics enforced by ``bootstrap(_:)``.
     ///
     /// - Parameter instrument: the instrument to boostrap the system with, if `nil` the ``NoOpInstrument`` is bootstrapped.
     internal static func bootstrapInternal(_ instrument: Instrument?) {
-        self.lock.withWriterLock {
-            self._instrument = instrument ?? NoOpInstrument()
-        }
+        self.shared.bootstrapInternal(instrument)
     }
 
     /// Returns the globally configured ``Instrument``.
     ///
     /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
     public static var instrument: Instrument {
-        self.lock.withReaderLock { self._instrument }
+        shared.instrument
     }
 }
 
@@ -66,14 +96,6 @@ public enum InstrumentationSystem {
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        self.lock.withReaderLock {
-            if let multiplex = self._instrument as? MultiplexInstrument {
-                return multiplex.firstInstrument(where: predicate)
-            } else if predicate(self._instrument) {
-                return self._instrument
-            } else {
-                return nil
-            }
-        }
+        self.shared._findInstrument(where: predicate)
     }
 }

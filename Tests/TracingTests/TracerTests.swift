@@ -12,10 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
+@testable @_spi(Locking) import Instrumentation
 import ServiceContextModule
 import Tracing
 import XCTest
+#if os(Linux)
+@preconcurrency import Dispatch
+#endif
 
 final class TracerTests: XCTestCase {
     override class func tearDown() {
@@ -179,21 +182,21 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(nil)
         }
 
-        var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
 
-        func operation(span: any Tracing.Span) async throws -> String {
+        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             "world"
         }
 
         try self.testAsync {
             let value = try await tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
                 XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
-                return try await operation(span: span)
+                return try await operation(span)
             }
 
             XCTAssertEqual(value, "world")
-            XCTAssertTrue(spanEnded)
+            XCTAssertTrue(spanEnded.withValue { $0 })
         }
         #endif
     }
@@ -209,10 +212,10 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(nil)
         }
 
-        var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
 
-        func operation(span: any Tracing.Span) async -> String {
+        let operation: @Sendable (any Tracing.Span) async -> String = { _ in
             "world"
         }
 
@@ -222,11 +225,11 @@ final class TracerTests: XCTestCase {
             let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) { (span: any Tracing.Span) -> String in
                 XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
                 XCTAssertEqual(span.context.traceID, fromNonAsyncWorld.traceID)
-                return await operation(span: span)
+                return await operation(span)
             }
 
             XCTAssertEqual(value, "world")
-            XCTAssertTrue(spanEnded)
+            XCTAssertTrue(spanEnded.withValue { $0 })
         }
     }
 
@@ -241,10 +244,10 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(nil)
         }
 
-        var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
 
-        func operation(span: any Tracing.Span) async throws -> String {
+        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
         }
 
@@ -252,7 +255,7 @@ final class TracerTests: XCTestCase {
             do {
                 _ = try await tracer.withAnySpan("hello", operation)
             } catch {
-                XCTAssertTrue(spanEnded)
+                XCTAssertTrue(spanEnded.withValue { $0 })
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
                 return
             }
@@ -271,10 +274,10 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(nil)
         }
 
-        var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
 
-        func operation(span: any Tracing.Span) async throws -> String {
+        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
         }
 
@@ -282,7 +285,7 @@ final class TracerTests: XCTestCase {
             do {
                 _ = try await withSpan("hello", operation)
             } catch {
-                XCTAssertTrue(spanEnded)
+                XCTAssertTrue(spanEnded.withValue { $0 })
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
                 return
             }
@@ -301,18 +304,18 @@ final class TracerTests: XCTestCase {
             InstrumentationSystem.bootstrapInternal(nil)
         }
 
-        var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
 
-        func operation(span: any Tracing.Span) throws -> String {
+        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
         }
 
         self.testAsync {
             do {
-                _ = try withSpan("hello", operation)
+                _ = try await withSpan("hello", operation)
             } catch {
-                XCTAssertTrue(spanEnded)
+                XCTAssertTrue(spanEnded.withValue { $0 })
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
                 return
             }
@@ -370,7 +373,7 @@ final class TracerTests: XCTestCase {
 //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
     /// - Parameter operation: The operation to test.
-    func testAsync(_ operation: @escaping () async throws -> Void) rethrows {
+    func testAsync(_ operation: @Sendable @escaping () async throws -> Void) rethrows {
         let group = DispatchGroup()
         group.enter()
         Task.detached {

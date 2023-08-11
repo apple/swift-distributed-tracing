@@ -18,7 +18,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum BenchmarkCategory: String {
+public enum BenchmarkCategory: String, Sendable {
     // Most benchmarks are assumed to be "stable" and will be regularly tracked at
     // each commit. A handful may be marked unstable if continually tracking them is
     // counterproductive.

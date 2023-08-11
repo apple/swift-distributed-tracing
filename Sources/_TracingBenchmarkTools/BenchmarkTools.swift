@@ -23,6 +23,8 @@ import Glibc
 #else
 import Darwin
 #endif
+import Foundation
+@_spi(Locking) import Instrumentation
 
 extension BenchmarkCategory: CustomStringConvertible {
     public var description: String {
@@ -36,7 +38,7 @@ extension BenchmarkCategory: Comparable {
     }
 }
 
-public struct BenchmarkPlatformSet: OptionSet {
+public struct BenchmarkPlatformSet: OptionSet, Sendable {
     public let rawValue: Int
 
     public init(rawValue: Int) {
@@ -59,12 +61,12 @@ public struct BenchmarkPlatformSet: OptionSet {
     }
 }
 
-public struct BenchmarkInfo {
+public struct BenchmarkInfo: Sendable {
     /// The name of the benchmark that should be displayed by the harness.
     public var name: String
 
     /// Shadow static variable for runFunction.
-    private var _runFunction: (Int) -> Void
+    private var _runFunction: @Sendable (Int) -> Void
 
     /// A function that invokes the specific benchmark routine.
     public var runFunction: ((Int) -> Void)? {
@@ -83,7 +85,7 @@ public struct BenchmarkInfo {
     private var unsupportedPlatforms: BenchmarkPlatformSet
 
     /// Shadow variable for setUpFunction.
-    private var _setUpFunction: (() -> Void)?
+    private var _setUpFunction: (@Sendable () -> Void)?
 
     /// An optional function that if non-null is run before benchmark samples
     /// are timed.
@@ -95,7 +97,7 @@ public struct BenchmarkInfo {
     }
 
     /// Shadow static variable for computed property tearDownFunction.
-    private var _tearDownFunction: (() -> Void)?
+    private var _tearDownFunction: (@Sendable () -> Void)?
 
     /// An optional function that if non-null is run after samples are taken.
     public var tearDownFunction: (() -> Void)? {
@@ -108,9 +110,9 @@ public struct BenchmarkInfo {
     public var legacyFactor: Int?
 
     public init(
-        name: String, runFunction: @escaping (Int) -> Void, tags: [BenchmarkCategory],
-        setUpFunction: (() -> Void)? = nil,
-        tearDownFunction: (() -> Void)? = nil,
+        name: String, runFunction: @escaping @Sendable (Int) -> Void, tags: [BenchmarkCategory],
+        setUpFunction: (@Sendable () -> Void)? = nil,
+        tearDownFunction: (@Sendable () -> Void)? = nil,
         unsupportedPlatforms: BenchmarkPlatformSet = [],
         legacyFactor: Int? = nil
     ) {
@@ -168,16 +170,27 @@ struct LFSR {
     }
 }
 
-var lfsrRandomGenerator = LFSR()
+let lfsrRandomGenerator: LockedValueBox<LFSR> = .init(LFSR())
 
 // Start the generator from the beginning
 public func SRand() {
-    lfsrRandomGenerator = LFSR()
+    lfsrRandomGenerator.withValue { lfsr in
+        lfsr = LFSR()
+    }
 }
 
 public func Random() -> Int64 {
-    lfsrRandomGenerator.randInt()
+    lfsrRandomGenerator.withValue { lfsr in
+        lfsr.randInt()
+    }
 }
+
+// Can't access stdout/stderr directly in strict concurrency checking mode.
+// let lockedStdout = LockedValueBox(stdout)
+// let lockedStderr = LockedValueBox(stderr)
+
+let lockedStdout = LockedValueBox(fdopen(STDOUT_FILENO, "w"))
+let lockedStderr = LockedValueBox(fdopen(STDERR_FILENO, "w"))
 
 @inlinable
 @inline(__always)

@@ -23,14 +23,15 @@ public struct NoOpTracer: LegacyTracer {
 
     public init() {}
 
-    public func startAnySpan<Instant: TracerInstant>(_ operationName: String,
-                                                     context: @autoclosure () -> ServiceContext,
-                                                     ofKind kind: SpanKind,
-                                                     at instant: @autoclosure () -> Instant,
-                                                     function: String,
-                                                     file fileID: String,
-                                                     line: UInt) -> any Tracing.Span
-    {
+    public func startAnySpan<Instant: TracerInstant>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext,
+        ofKind kind: SpanKind,
+        at instant: @autoclosure () -> Instant,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> any Tracing.Span {
         NoOpSpan(context: context())
     }
 

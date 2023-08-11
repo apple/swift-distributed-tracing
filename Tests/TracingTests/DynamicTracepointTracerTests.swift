@@ -281,14 +281,15 @@ extension DynamicTracepointTestTracer {
             return span
         }
 
-        init<Instant: TracerInstant>(operationName: String,
-                                     startTime: Instant,
-                                     context: ServiceContext,
-                                     kind: SpanKind,
-                                     file fileID: String,
-                                     line: UInt,
-                                     onEnd: @escaping (TracepointSpan) -> Void)
-        {
+        init<Instant: TracerInstant>(
+            operationName: String,
+            startTime: Instant,
+            context: ServiceContext,
+            kind: SpanKind,
+            file fileID: String,
+            line: UInt,
+            onEnd: @escaping (TracepointSpan) -> Void
+        ) {
             self.operationName = operationName
             self.startTimestampNanosSinceEpoch = startTime.nanosecondsSinceEpoch
             self.context = context
@@ -333,14 +334,15 @@ extension DynamicTracepointTestTracer {
 extension DynamicTracepointTestTracer: Tracer {
     typealias Span = TracepointSpan
 
-    func startSpan<Instant: TracerInstant>(_ operationName: String,
-                                           context: @autoclosure () -> ServiceContext,
-                                           ofKind kind: Tracing.SpanKind,
-                                           at instant: @autoclosure () -> Instant,
-                                           function: String,
-                                           file fileID: String,
-                                           line: UInt) -> TracepointSpan
-    {
+    func startSpan<Instant: TracerInstant>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext,
+        ofKind kind: Tracing.SpanKind,
+        at instant: @autoclosure () -> Instant,
+        function: String,
+        file fileID: String,
+        line: UInt
+    ) -> TracepointSpan {
         let tracepoint = TracepointID(function: function, fileID: fileID, line: line)
         guard self.shouldRecord(tracepoint: tracepoint) else {
             return TracepointSpan.notRecording(file: fileID, line: line)

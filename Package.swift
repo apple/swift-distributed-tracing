@@ -57,7 +57,9 @@ let package = Package(
         ),
         .target(
             name: "_TracingBenchmarkTools",
-            dependencies: [],
+            dependencies: [
+                .target(name: "Instrumentation"),
+            ],
             exclude: ["README_SWIFT.md"]
         ),
     ]

@@ -25,6 +25,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+@_spi(Locking) import Instrumentation
 
 enum ArgumentError: Error {
     case missingValue(String)
@@ -81,7 +82,7 @@ class ArgumentParser<U> {
     private var arguments: [Argument] = []
     private let programName: String = {
         // Strip full path from the program name.
-        let r = CommandLine.arguments[0].reversed()
+        let r = ProcessInfo.processInfo.arguments[0].reversed()
         let ss = r[r.startIndex ..< (r.firstIndex(of: "/") ?? r.endIndex)]
         return String(ss.reversed())
     }()
@@ -150,10 +151,14 @@ class ArgumentParser<U> {
             try self.arguments.forEach { try $0.apply() } // type-check and store values
             return self.result
         } catch let error as ArgumentError {
-            fputs("error: \(error)\n", stderr)
+            lockedStderr.withValue { stderr in
+                _ = fputs("error: \(error)\n", stderr)
+            }
             exit(1)
         } catch {
-            fflush(stdout)
+            lockedStdout.withValue { stdout in
+                _ = fflush(stdout)
+            }
             fatalError("\(error)")
         }
     }
@@ -173,7 +178,8 @@ class ArgumentParser<U> {
     ///     the supported argument syntax.
     private func parseArgs() throws {
         // For each argument we are passed...
-        for arg in CommandLine.arguments[1 ..< CommandLine.arguments.count] {
+        let arguments = ProcessInfo.processInfo.arguments
+        for arg in arguments[1 ..< arguments.count] {
             // If the argument doesn't match the optional argument pattern. Add
             // it to the positional argument list and continue...
             if !arg.starts(with: "-") {
