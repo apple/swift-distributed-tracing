@@ -12,9 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable @_spi(Locking) import Instrumentation
+@testable import Instrumentation
 import ServiceContextModule
 import Tracing
+import Distributed
 import XCTest
 
 final class ActorTracingTests: XCTestCase {
@@ -27,17 +28,30 @@ final class ActorTracingTests: XCTestCase {
 func work() async {}
 
 actor Foo {
-    let bar: LockedValueBox<Int> = .init(0)
+    var bar = 0
+
     func foo() async {
-        let num: LockedValueBox<Int> = .init(0)
-        await withSpan(#function) { _ in
-            self.bar.withValue { bar in
-                bar += 1
-            }
+        var num = 0
+        await self.withSpanWorkaround(#function) { _ in
+            self.bar += 1
             await work()
-            num.withValue { num in
-                num += 1
-            }
+            num += 1
+        }
+    }
+}
+
+@available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+distributed actor DistributedFoo {
+    typealias ActorSystem = LocalTestingDistributedActorSystem
+
+    var bar = 0
+
+    func foo() async {
+        var num = 0
+        await self.withSpanWorkaround(#function) { _ in
+            self.bar += 1
+            await work()
+            num += 1
         }
     }
 }

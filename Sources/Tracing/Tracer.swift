@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Dispatch
+import Distributed
 @_exported import Instrumentation
 @_exported import ServiceContextModule
 
@@ -382,7 +383,7 @@ public func withSpan<T>(
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
-    _ operation: @Sendable (any Span) async throws -> T
+    _ operation: (any Span) async throws -> T
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
@@ -477,7 +478,7 @@ public func withSpan<T>(
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
-    _ operation: @Sendable (any Span) async throws -> T
+    _ operation: (any Span) async throws -> T
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
@@ -489,6 +490,116 @@ public func withSpan<T>(
         line: line
     ) { anySpan in
         try await operation(anySpan)
+    }
+}
+
+// FIXME: type checker does not understand that AnyActor shall suffice for checking isolation domains,
+//        thus we can't declare the method once, but have to duplicate it for every actor kind:
+//@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+//extension AnyActor {
+//    public func withSpanWorkaround<T>(
+//        _ operationName: String,
+//        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+//        ofKind kind: SpanKind = .internal,
+//        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+//        function: String = #function,
+//        file fileID: String = #fileID,
+//        line: UInt = #line,
+//        _ operation: (any Span) async throws -> T
+//    ) async rethrows -> T {
+//        fatalError("Can't use this, must extend both types separately")
+//    }
+//}
+
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension Actor {
+
+    public func withSpanWorkaround<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Span) async throws -> T
+    ) async rethrows -> T {
+        let span = InstrumentationSystem.legacyTracer.startAnySpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: instant(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+//        // FIXME: can't use withSpan to implement this... must use startSpan and duplicate much code
+//        try await InstrumentationSystem.legacyTracer.withAnySpan(
+//            operationName,
+//            at: instant(),
+//            context: context(),
+//            ofKind: kind,
+//            function: function,
+//            file: fileID,
+//            line: line
+//        ) { anySpan in
+//            try await operation(anySpan)
+//        }
+    }
+}
+
+@available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+extension DistributedActor {
+
+    public func withSpanWorkaround<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Span) async throws -> T
+    ) async rethrows -> T {
+        let span = InstrumentationSystem.legacyTracer.startAnySpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: instant(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+//        // FIXME: can't use withSpan to implement this... must use startSpan and duplicate much code
+//        try await InstrumentationSystem.legacyTracer.withAnySpan(
+//            operationName,
+//            at: instant(),
+//            context: context(),
+//            ofKind: kind,
+//            function: function,
+//            file: fileID,
+//            line: line
+//        ) { anySpan in
+//            try await operation(anySpan)
+//        }
     }
 }
 #endif
