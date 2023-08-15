@@ -79,9 +79,11 @@ public protocol Span: _SwiftTracingSendableSpan {
     ///   - error: The error to be recorded
     ///   - attributes: Additional attributes describing the error
     ///   - instant: the time instant at which the event occurred
-    func recordError<Instant: TracerInstant>(_ error: Error,
-                                             attributes: SpanAttributes,
-                                             at instant: @autoclosure () -> Instant)
+    func recordError<Instant: TracerInstant>(
+        _ error: Error,
+        attributes: SpanAttributes,
+        at instant: @autoclosure () -> Instant
+    )
 
     /// The attributes describing this `Span`.
     var attributes: SpanAttributes {
@@ -185,18 +187,20 @@ public struct SpanEvent: Equatable {
     ///   - name: The human-readable name of this event.
     ///   - attributes: attributes describing this event. Defaults to no attributes.
     ///   - instant: the time instant at which the event occurred
-    public init<Instant: TracerInstant>(name: String,
-                                        at instant: @autoclosure () -> Instant,
-                                        attributes: SpanAttributes = [:])
-    {
+    public init<Instant: TracerInstant>(
+        name: String,
+        at instant: @autoclosure () -> Instant,
+        attributes: SpanAttributes = [:]
+    ) {
         self.name = name
         self.attributes = attributes
         self.nanosecondsSinceEpoch = instant().nanosecondsSinceEpoch
     }
 
-    public init(name: String,
-                attributes: SpanAttributes = [:])
-    {
+    public init(
+        name: String,
+        attributes: SpanAttributes = [:]
+    ) {
         self.name = name
         self.attributes = attributes
         self.nanosecondsSinceEpoch = DefaultTracerClock.now.nanosecondsSinceEpoch

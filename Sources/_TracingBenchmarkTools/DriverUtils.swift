@@ -30,6 +30,7 @@ import Glibc
 import Darwin
 // import LibProc
 #endif
+@_spi(Locking) import Instrumentation
 
 public struct BenchResults {
     typealias T = Int
@@ -63,7 +64,12 @@ public struct BenchResults {
     var median: T { self[0.5] }
 }
 
-public var registeredBenchmarks: [BenchmarkInfo] = []
+let registeredBenchmarks: LockedValueBox<[BenchmarkInfo]> = .init([])
+public func internalRegisterBenchmark(_ benchmark: BenchmarkInfo) {
+    registeredBenchmarks.withValue { benchmarks in
+        benchmarks.append(benchmark)
+    }
+}
 
 enum TestAction {
     case run
@@ -136,8 +142,8 @@ struct TestConfig {
             // We support specifying multiple tags by splitting on comma, i.e.:
             //  --tags=Array,Dictionary
             //  --skip-tags=Array,Set,unstable,skip
-            Set(
-                try tags.split(separator: ",").map(String.init).map {
+            try Set(
+                tags.split(separator: ",").map(String.init).map {
                     try checked({ BenchmarkCategory(rawValue: $0) }, $0)
                 }
             )
@@ -687,7 +693,9 @@ final class TestRunner {
             ).joined(separator: c.delim)
 
             print(benchmarkStats)
-            fflush(stdout)
+            lockedStdout.withValue { stdout in
+                _ = fflush(stdout)
+            }
 
             if results != nil {
                 testCount += 1
@@ -705,7 +713,7 @@ final class TestRunner {
 }
 
 public func main() {
-    let config = TestConfig(registeredBenchmarks)
+    let config = TestConfig(registeredBenchmarks.withValue { $0 })
     switch config.action {
     case .listTests:
         print("#\(config.delim)Test\(config.delim)[Tags]")

@@ -37,7 +37,8 @@ import Glibc
 /// This object provides a lock on top of a single `pthread_mutex_t`. This kind
 /// of lock is safe to use with `libpthread`-based threading models, such as the
 /// one used by NIO.
-internal final class ReadWriteLock {
+@_spi(Locking) /* Use the `package` access modifier once min Swift version is increased. */
+public final class ReadWriteLock {
     private let rwlock: UnsafeMutablePointer<pthread_rwlock_t> = UnsafeMutablePointer.allocate(capacity: 1)
 
     /// Create a new lock.
@@ -90,7 +91,7 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
+    public func withReaderLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockRead()
         defer {
             self.unlock()
@@ -107,11 +108,30 @@ extension ReadWriteLock {
     /// - Parameter body: The block to execute while holding the lock.
     /// - Returns: The value returned by the block.
     @inlinable
-    func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
+    public func withWriterLock<T>(_ body: () throws -> T) rethrows -> T {
         self.lockWrite()
         defer {
             self.unlock()
         }
         return try body()
+    }
+}
+
+/// A wrapper providing locked access to a value.
+///
+/// Marked as @unchecked Sendable due to the synchronization being
+/// performed manually using locks.
+@_spi(Locking) /* Use the `package` access modifier once min Swift version is increased. */
+public final class LockedValueBox<Value: Sendable>: @unchecked Sendable {
+    private let lock = ReadWriteLock()
+    private var value: Value
+    public init(_ value: Value) {
+        self.value = value
+    }
+
+    public func withValue<R>(_ work: (inout Value) throws -> R) rethrows -> R {
+        try self.lock.withWriterLock {
+            try work(&self.value)
+        }
     }
 }
