@@ -162,7 +162,7 @@ extension Span {
 }
 
 extension Span {
-    /// Update Span attributes in a block instead of individually
+    /// Update Span attributes in a block instead of individually.
     ///
     /// Updating a span attribute will involve some type of thread synchronisation
     /// primitive to avoid multiple threads updating the attributes at the same
