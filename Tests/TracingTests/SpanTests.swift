@@ -248,6 +248,23 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(statusCode, 418)
         XCTAssertEqual(attributes.get("http.status_code"), SpanAttribute.int32(418))
     }
+
+    func testSpanUpdateAttributes() {
+        let span = TestSpan(
+            operationName: "client",
+            startTime: DefaultTracerClock.now,
+            context: ServiceContext.topLevel,
+            kind: .client,
+            onEnd: { _ in }
+        )
+        span.updateAttributes { attributes in
+            attributes.set("http.status_code", value: .int32(200))
+            attributes.set("http.method", value: .string("GET"))
+        }
+
+        XCTAssertEqual(span.attributes.get("http.status_code"), .int32(200))
+        XCTAssertEqual(span.attributes.get("http.method"), .string("GET"))
+    }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------

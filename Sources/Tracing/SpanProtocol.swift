@@ -161,6 +161,23 @@ extension Span {
     }
 }
 
+extension Span {
+    /// Update Span attributes in a block instead of individually.
+    ///
+    /// Updating a span attribute will involve some type of thread synchronisation
+    /// primitive to avoid multiple threads updating the attributes at the same
+    /// time. If you update each attributes individually this can cause slowdown.
+    /// This function updates the attributes in one call to avoid hitting the
+    /// thread synchronisation code multiple times.
+    ///
+    /// - Parameter update: closure used to update span attributes
+    public func updateAttributes(_ update: (inout SpanAttributes) -> Void) {
+        var attributes = self.attributes
+        update(&attributes)
+        self.attributes = attributes
+    }
+}
+
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Span Event
 
