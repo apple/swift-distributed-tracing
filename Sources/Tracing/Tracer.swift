@@ -108,7 +108,6 @@ public func startSpan(
     )
 }
 
-#if swift(>=5.7.0)
 /// Start a new ``Span`` using the global bootstrapped tracer reimplementation.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
@@ -155,7 +154,6 @@ public func startSpan(
         line: line
     )
 }
-#endif
 
 // ==== withSpan + sync ---------------------------------------------------
 
@@ -251,8 +249,6 @@ public func withSpan<T>(
     }
 }
 
-#if swift(>=5.7.0)
-
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
@@ -299,7 +295,6 @@ public func withSpan<T>(
         try operation(anySpan)
     }
 }
-#endif
 
 // ==== withSpan + async --------------------------------------------------
 
@@ -395,7 +390,6 @@ public func withSpan<T>(
     }
 }
 
-#if swift(>=5.7.0)
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
 ///
@@ -442,4 +436,3 @@ public func withSpan<T>(
         try await operation(anySpan)
     }
 }
-#endif

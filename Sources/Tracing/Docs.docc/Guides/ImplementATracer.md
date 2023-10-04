@@ -125,7 +125,6 @@ The primary goal and user-facing API of a ``Tracer`` is to create spans.
 While you will need to implement all methods of the tracer protocol, the most important one is `startSpan`:
 
 ```swift
-#if swift(>=5.7.0)
 extension MyTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -147,7 +146,6 @@ extension MyTracer: Tracer {
         return span
     }
 }
-#endif
 ```
 
 If you can require Swift 5.7 prefer doing so, and return the concrete ``Span`` type from the `startSpan` method. 
@@ -170,4 +168,4 @@ public struct MySpan: Tracing.Span {
 It is possible to implement a span as a struct or a class, but a ``Span`` **must exhibit reference type behavior**.
 In other words, adding an attribute to one reference of a span must be visible in other references to it. 
 
-The ability to implement a span using a struct comes in handy when implementing a "Noop" (do nothing) span and avoids heap allocations. Normal spans though generally will be backed by `class` based storage and should flush themselfes to the owning tracer once the span has been ended
+The ability to implement a span using a struct comes in handy when implementing a "Noop" (do nothing) span and avoids heap allocations. Normal spans though generally will be backed by `class` based storage and should flush themselves to the owning tracer once the span has been ended

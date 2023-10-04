@@ -25,6 +25,7 @@ import Dispatch
 /// rather than these `startAnySpan` APIs which unconditionally always return existential Spans even when not necessary
 /// (under Swift 5.7+ type-system enhancement wrt. protocols with associated types)..
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(*, deprecated, renamed: "Tracer")
 public protocol LegacyTracer: Instrument {
     /// Start a new span returning an existential ``Span`` reference.
     ///
@@ -54,6 +55,8 @@ public protocol LegacyTracer: Instrument {
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
+
+    @available(*, deprecated, message: "prefer withSpan")
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext,
@@ -70,6 +73,7 @@ public protocol LegacyTracer: Instrument {
     /// such as when using some FaaS providers that may suspend the process after an invocation, but before the backend exports the completed spans.
     ///
     /// This function should not block indefinitely, implementations should offer a configurable timeout for flush operations.
+    @available(*, deprecated)
     func forceFlush()
 }
 
@@ -108,6 +112,7 @@ extension LegacyTracer {
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
+    @available(*, deprecated, message: "prefer withSpan")
     public func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,

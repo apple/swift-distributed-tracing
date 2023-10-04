@@ -21,11 +21,9 @@ extension InstrumentationSystem {
         self._findInstrument(where: { $0 is T }) as? T
     }
 
-    #if swift(>=5.7.0)
     public static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
         self._findInstrument(where: { $0 is T }) as? T
     }
-    #endif
 
     public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
         self._findInstrument(where: { $0 is I }) as? I
@@ -42,9 +40,7 @@ final class TracingInstrumentationSystemTests: XCTestCase {
         let tracer = TestTracer()
 
         XCTAssertNil(InstrumentationSystem._legacyTracer(of: TestTracer.self))
-        #if swift(>=5.7.0)
         XCTAssertNil(InstrumentationSystem._tracer(of: TestTracer.self))
-        #endif
 
         InstrumentationSystem.bootstrapInternal(tracer)
         XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
@@ -53,10 +49,8 @@ final class TracingInstrumentationSystemTests: XCTestCase {
 
         XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
-        #if swift(>=5.7.0)
         XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracer is TestTracer)
-        #endif
 
         let multiplexInstrument = MultiplexInstrument([tracer])
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
@@ -65,9 +59,7 @@ final class TracingInstrumentationSystemTests: XCTestCase {
 
         XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
-        #if swift(>=5.7.0)
         XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracer is TestTracer)
-        #endif
     }
 }

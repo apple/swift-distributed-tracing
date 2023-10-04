@@ -161,7 +161,6 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
     }
 }
 
-#if swift(>=5.7.0)
 extension TracedLockPrintlnTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -180,7 +179,6 @@ extension TracedLockPrintlnTracer: Tracer {
         )
     }
 }
-#endif
 
 #if compiler(>=5.6.0)
 extension TracedLockPrintlnTracer: Sendable {}

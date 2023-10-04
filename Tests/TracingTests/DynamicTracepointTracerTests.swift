@@ -48,7 +48,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
-        #if swift(>=5.7.0)
         tracer.withSpan("dont") { _ in
             // don't capture this span...
         }
@@ -58,13 +57,8 @@ final class DynamicTracepointTracerTests: XCTestCase {
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
-        #endif
 
-        #if swift(>=5.7.0)
         XCTAssertEqual(tracer.spans.count, 4)
-        #else
-        XCTAssertEqual(tracer.spans.count, 2)
-        #endif
 
         for span in tracer.spans {
             XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
@@ -99,31 +93,17 @@ final class DynamicTracepointTracerTests: XCTestCase {
     }
 
     func logic(fakeLine: UInt) {
-        #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
             // inside
         }
-        #else
-        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-dont", line: fakeLine) { _ in
-            // inside
-        }
-        #endif
     }
 
     func traceMeLogic(fakeLine: UInt) {
-        #if swift(>=5.7)
         InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
             InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
             }
         }
-        #else
-        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes", line: fakeLine) { _ in
-            InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
-                // inside
-            }
-        }
-        #endif
     }
 }
 
@@ -193,7 +173,7 @@ final class DynamicTracepointTestTracer: LegacyTracer {
     }
 
     private func shouldRecord(tracepoint: TracepointID) -> Bool {
-        #if swift(>=5.5) && canImport(_Concurrency)
+        #if canImport(_Concurrency)
         if self.isActive(tracepoint: tracepoint) {
             // this tracepoint was specifically activated!
             return true

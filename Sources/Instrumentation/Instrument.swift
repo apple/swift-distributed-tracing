@@ -15,11 +15,7 @@
 import ServiceContextModule
 
 /// Typealias used to simplify Support of old Swift versions which do not have `Sendable` defined.
-#if swift(>=5.6.0)
 @preconcurrency public protocol _SwiftInstrumentationSendable: Sendable {}
-#else
-public protocol _SwiftInstrumentationSendable {}
-#endif
 
 /// Conforming types are used to extract values from a specific `Carrier`.
 public protocol Extractor: _SwiftInstrumentationSendable {
