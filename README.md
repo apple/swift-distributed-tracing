@@ -27,7 +27,7 @@ Compatible `Tracer` implementations:
 
 | Library | Status                     | Description |
 | ------- |----------------------------| ----------- |
-| [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟡 Update for 1.0 in progress | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
+| [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
 | [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | 🟠 Not updated for 1.0        | ... |
 | _Your library?_ | ...                        | [Get in touch!](https://forums.swift.org/c/server/43) |
 
