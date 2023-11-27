@@ -182,7 +182,5 @@ extension TracedLockPrintlnTracer: Tracer {
 }
 #endif
 
-#if compiler(>=5.6.0)
 extension TracedLockPrintlnTracer: Sendable {}
 extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif

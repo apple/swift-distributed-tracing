@@ -14,15 +14,8 @@
 
 import ServiceContextModule
 
-/// Typealias used to simplify Support of old Swift versions which do not have `Sendable` defined.
-#if swift(>=5.6.0)
-@preconcurrency public protocol _SwiftInstrumentationSendable: Sendable {}
-#else
-public protocol _SwiftInstrumentationSendable {}
-#endif
-
 /// Conforming types are used to extract values from a specific `Carrier`.
-public protocol Extractor: _SwiftInstrumentationSendable {
+public protocol Extractor: Sendable {
     /// The carrier to extract values from.
     associatedtype Carrier
 
@@ -35,7 +28,7 @@ public protocol Extractor: _SwiftInstrumentationSendable {
 }
 
 /// Conforming types are used to inject values into a specific `Carrier`.
-public protocol Injector: _SwiftInstrumentationSendable {
+public protocol Injector: Sendable {
     /// The carrier to inject values into.
     associatedtype Carrier
 
@@ -50,7 +43,7 @@ public protocol Injector: _SwiftInstrumentationSendable {
 
 /// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
 /// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
-public protocol Instrument: _SwiftInstrumentationSendable {
+public protocol Instrument: Sendable {
     /// Extract values from a `Carrier` by using the given extractor and inject them into the given `ServiceContext`.
     /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
     ///
