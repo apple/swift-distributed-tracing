@@ -17,7 +17,7 @@ import ServiceContextModule
 /// Conforming types are used to extract values from a specific `Carrier`.
 public protocol Extractor: Sendable {
     /// The carrier to extract values from.
-    associatedtype Carrier
+    associatedtype Carrier: Sendable
 
     /// Extract the value for the given key from the `Carrier`.
     ///
@@ -30,7 +30,7 @@ public protocol Extractor: Sendable {
 /// Conforming types are used to inject values into a specific `Carrier`.
 public protocol Injector: Sendable {
     /// The carrier to inject values into.
-    associatedtype Carrier
+    associatedtype Carrier: Sendable
 
     /// Inject the given value for the given key into the given `Carrier`.
     ///
