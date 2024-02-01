@@ -129,4 +129,3 @@ final class SampleSwift57Span: Span {
 
 extension SampleSwift57Tracer: @unchecked Sendable {} // only intended for single threaded SampleSwift57ing
 extension SampleSwift57Span: @unchecked Sendable {} // only intended for single threaded SampleSwift57ing
-

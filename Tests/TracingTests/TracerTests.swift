@@ -393,7 +393,6 @@ final class TracerTests: XCTestCase {
         }
         group.wait()
     }
-
 }
 
 struct ExampleSpanError: Error, Equatable {}
