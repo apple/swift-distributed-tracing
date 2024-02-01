@@ -18,8 +18,6 @@
 // ==== -----------------------------------------------------------------------
 // MARK: Tracer protocol
 
-#if swift(>=5.7.0)
-
 /// A tracer capable of creating new trace spans.
 ///
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
@@ -325,5 +323,3 @@ extension Tracer {
         }
     }
 }
-
-#endif // Swift 5.7

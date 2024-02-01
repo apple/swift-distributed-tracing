@@ -629,7 +629,6 @@ extension SpanAttributes {
     }
 }
 
-#if swift(>=5.2)
 extension SpanAttributes {
     /// Enables for type-safe fluent accessors for attributes.
     public subscript<T>(dynamicMember dynamicMember: KeyPath<SpanAttribute, SpanAttributeKey<T>>) -> SpanAttribute? {
@@ -650,7 +649,6 @@ extension SpanAttributes {
         SpanAttribute._namespace[keyPath: dynamicMember]
     }
 }
-#endif
 
 extension SpanAttributes: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (String, SpanAttribute)...) {

@@ -64,7 +64,6 @@ final class TestTracer: LegacyTracer {
     }
 }
 
-#if swift(>=5.7.0)
 extension TestTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -86,7 +85,6 @@ extension TestTracer: Tracer {
         return span
     }
 }
-#endif
 
 extension TestTracer {
     enum TraceIDKey: ServiceContextKey {

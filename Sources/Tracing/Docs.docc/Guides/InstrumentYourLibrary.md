@@ -211,7 +211,7 @@ While this code is very simple for illustration purposes, and it may seem surpri
 
 The above steps are enough if you wanted to provide context propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the context is set.
 
-Many libraries also have the opportunity to start trace spans themselfes, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the `HTTPServer` can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
+Many libraries also have the opportunity to start trace spans themselves, on behalf of users, in pieces of the library that can provide useful insight in the behavior or the library in production. For example, the `HTTPServer` can start spans as soon as it begins handling HTTP requests, and this way provide a parent span to any spans the user-code would be creating itself. 
 
 Let us revisit the previous sample `HTTPServer` which restored context around invoking the user-code, and further extend it to start a span including basic information about the `HTTPRequest` being handled:
 

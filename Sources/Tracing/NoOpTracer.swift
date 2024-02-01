@@ -91,7 +91,6 @@ public struct NoOpTracer: LegacyTracer {
     }
 }
 
-#if swift(>=5.7.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension NoOpTracer: Tracer {
     public func startSpan<Instant: TracerInstant>(
@@ -106,4 +105,3 @@ extension NoOpTracer: Tracer {
         NoOpSpan(context: context())
     }
 }
-#endif

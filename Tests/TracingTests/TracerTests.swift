@@ -75,15 +75,9 @@ final class TracerTests: XCTestCase {
             spanEnded = true
         }
 
-        #if swift(>=5.7.0)
         let value = tracer.withSpan("hello", context: .topLevel) { _ in
             "yes"
         }
-        #else
-        let value = tracer.withAnySpan("hello", context: .topLevel) { _ in
-            "yes"
-        }
-        #endif
 
         XCTAssertEqual(value, "yes")
         XCTAssertTrue(spanEnded)
@@ -112,7 +106,7 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_sync() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
+        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -141,7 +135,7 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_sync_throws() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
+        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -171,7 +165,7 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_async() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
+        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -324,7 +318,7 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_recordErrorWithAttributes() throws {
-        #if swift(>=5.5) && canImport(_Concurrency)
+        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -358,11 +352,9 @@ final class TracerTests: XCTestCase {
         let tracer = TestTracer()
         let clock = DefaultTracerClock()
 
-        #if swift(>=5.7.0)
         tracer.withSpan("") { _ in }
         tracer.withSpan("", at: clock.now) { _ in }
         tracer.withSpan("", context: .topLevel) { _ in }
-        #endif
 
         tracer.withAnySpan("") { _ in }
         tracer.withAnySpan("", at: clock.now) { _ in }
@@ -385,7 +377,6 @@ final class TracerTests: XCTestCase {
         XCTAssertEqual(span.startTimestampNanosSinceEpoch, instant.nanosecondsSinceEpoch)
     }
 
-    #if swift(>=5.7.0)
 //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
     /// - Parameter operation: The operation to test.
@@ -402,25 +393,6 @@ final class TracerTests: XCTestCase {
         }
         group.wait()
     }
-
-    #elseif swift(>=5.5) && canImport(_Concurrency)
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
-    /// - Parameter operation: The operation to test.
-    func testAsync(_ operation: @escaping () async throws -> Void) rethrows {
-        let group = DispatchGroup()
-        group.enter()
-        Task.detached {
-            do {
-                try await operation()
-            } catch {
-                throw error
-            }
-            group.leave()
-        }
-        group.wait()
-    }
-    #endif
 }
 
 struct ExampleSpanError: Error, Equatable {}
@@ -465,11 +437,7 @@ struct FakeHTTPServer {
         var context = ServiceContext.topLevel
         InstrumentationSystem.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
 
-        #if swift(>=5.7.0)
         let span = InstrumentationSystem.tracer.startSpan("GET \(request.path)", context: context)
-        #else
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
-        #endif
 
         let response = self.catchAllHandler(span.context, request, self.client)
         span.attributes["http.status"] = response.status
@@ -485,11 +453,8 @@ final class FakeHTTPClient {
 
     func performRequest(_ context: ServiceContext, request: FakeHTTPRequest) {
         var request = request
-        #if swift(>=5.7.0)
         let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
-        #else
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
-        #endif
+
         self.contexts.append(span.context)
         InstrumentationSystem.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
         span.end()
