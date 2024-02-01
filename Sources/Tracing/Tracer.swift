@@ -195,7 +195,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ) rethrows -> T {
     try InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        at: DefaultTracerClock.now,
+        at: instant(),
         context: context(),
         ofKind: kind,
         function: function,
@@ -339,7 +339,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
         operationName,
-        at: DefaultTracerClock.now,
+        at: instant(),
         context: context(),
         ofKind: kind,
         function: function,
