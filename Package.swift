@@ -43,24 +43,5 @@ let package = Package(
                 .target(name: "Tracing"),
             ]
         ),
-
-        // ==== --------------------------------------------------------------------------------------------------------
-        // MARK: Performance / Benchmarks
-
-        .executableTarget(
-            name: "_TracingBenchmarks",
-            dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
-                .target(name: "Tracing"),
-                .target(name: "_TracingBenchmarkTools"),
-            ]
-        ),
-        .target(
-            name: "_TracingBenchmarkTools",
-            dependencies: [
-                .target(name: "Instrumentation"),
-            ],
-            exclude: ["README_SWIFT.md"]
-        ),
     ]
 )
