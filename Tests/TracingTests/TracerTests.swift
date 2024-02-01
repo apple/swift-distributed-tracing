@@ -369,6 +369,22 @@ final class TracerTests: XCTestCase {
         tracer.withAnySpan("", context: .topLevel) { _ in }
     }
 
+    func testWithSpanShouldNotMissPropagatingInstant() {
+        let tracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(tracer)
+        defer {
+            InstrumentationSystem.bootstrapInternal(nil)
+        }
+
+        let clock = DefaultTracerClock()
+
+        let instant = clock.now
+        withSpan("span", at: instant) { _ in }
+
+        let span = tracer.spans.first!
+        XCTAssertEqual(span.startTimestampNanosSinceEpoch, instant.nanosecondsSinceEpoch)
+    }
+
     #if swift(>=5.7.0)
 //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
