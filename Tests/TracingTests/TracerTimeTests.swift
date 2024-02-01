@@ -42,13 +42,8 @@ final class TracerTimeTests: XCTestCase {
 
         let mockClock = MockClock()
         mockClock.setTime(13)
-        #if swift(>=5.7.0)
         let span: TestSpan = tracer.startSpan("start", at: mockClock.now)
         XCTAssertEqual(span.startTimestampNanosSinceEpoch, 13)
-        #else
-        let span: TestSpan = tracer.startAnySpan("start", at: mockClock.now) as! TestSpan
-        XCTAssertEqual(span.startTimestampNanosSinceEpoch, 13)
-        #endif
     }
 }
 

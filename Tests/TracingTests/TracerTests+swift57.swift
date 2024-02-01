@@ -17,7 +17,6 @@ import ServiceContextModule
 import Tracing
 import XCTest
 
-#if swift(>=5.7.0)
 // Specifically make sure we don't have to implement startAnySpan
 
 final class SampleSwift57Tracer: Tracer {
@@ -130,5 +129,3 @@ final class SampleSwift57Span: Span {
 
 extension SampleSwift57Tracer: @unchecked Sendable {} // only intended for single threaded SampleSwift57ing
 extension SampleSwift57Span: @unchecked Sendable {} // only intended for single threaded SampleSwift57ing
-
-#endif
