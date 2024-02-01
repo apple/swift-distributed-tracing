@@ -31,7 +31,7 @@
 /// resource that must be started, accumulate all possible information from the span's duration, and ended exactly once.
 ///
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
-public protocol Span: _SwiftTracingSendableSpan {
+public protocol Span: Sendable {
     /// The read-only `ServiceContext` of this `Span`, set when starting this `Span`.
     var context: ServiceContext { get }
 
@@ -731,8 +731,6 @@ public struct SpanLink {
         self.attributes = attributes
     }
 }
-
-@preconcurrency public protocol _SwiftTracingSendableSpan: Sendable {}
 
 extension SpanAttributes: Sendable {}
 extension SpanAttribute: Sendable {} // @unchecked because some payloads are CustomStringConvertible
