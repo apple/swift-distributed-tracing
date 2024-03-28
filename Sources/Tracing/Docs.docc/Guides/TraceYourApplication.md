@@ -258,7 +258,7 @@ This was just a quick introduction to tracing, but hopefully you are now excited
 
 ### Efficiently working with Spans
 
-We already saw the basic API to spawn a trace span, the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
+We already saw the basic API to spawn a trace span, the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
 
 Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from its creation, until the operation closure returns:
 
