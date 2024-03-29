@@ -4,9 +4,9 @@
 
 ### Creating Spans
 
-- ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v``
 
 ### Manual Span management
 
-- ``startSpan(_:context:ofKind:at:function:file:line:)-u1y4``
+- ``startSpan(_:context:ofKind:at:function:file:line:)-c9un``
 - ``Span/end()``

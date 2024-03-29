@@ -136,7 +136,7 @@ extension Span {
     /// Implementations SHOULD prevent double-emitting by marking a span as ended internally, however it still is a
     /// programming mistake to rely on this behavior.
     ///
-    /// - SeeAlso: ``end(clock:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
+    /// - SeeAlso: ``end(at:)`` which allows passing in a specific time, e.g. if the operation was ended and recorded somewhere and we need to post-factum record it.
     ///   Generally though prefer using the ``end()`` version of this API in user code and structure your system such that it can be called in the right place and time.
     public func end() {
         self.end(at: DefaultTracerClock.now)
