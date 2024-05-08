@@ -238,7 +238,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the context again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` overload, which also accepts a `ServiceContext` as parameter, rather than picking it up from the task-local value:
+This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the context again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` overload, which also accepts a `ServiceContext` as parameter, rather than picking it up from the task-local value:
 
 ```swift
 // BETTER
@@ -257,7 +257,7 @@ This method will only restore the context once, after the tracer has had a chanc
 
 #### Manual Span Lifetime Management
 
-While the ``withSpan(_:context:ofKind:at:function:file:line:_:)-4o2b`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
+While the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
 
 In such situations you can resort to using the ``startSpan(_:context:ofKind:at:function:file:line:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
 
