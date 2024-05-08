@@ -28,10 +28,14 @@
 
 import AtomicCounter
 import Foundation
-#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+#if canImport(Darwin)
 import Darwin
-#else
+#elseif canImport(Glibc)
 import Glibc
+#elseif canImport(Musl)
+import Musl
+#else
+#error("Unsupported runtime")
 #endif
 
 func waitForThreadsToQuiesce(shouldReachZero: Bool) {
