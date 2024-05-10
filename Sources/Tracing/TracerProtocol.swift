@@ -248,7 +248,8 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
+        isolation: isolated (any Actor)? = #isolation,
+        _ operation: (Self.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
@@ -301,7 +302,8 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
+        isolation: isolated (any Actor)? = #isolation,
+        _ operation: (Self.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startSpan(
             operationName,
