@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.8
 import PackageDescription
 
 let package = Package(
@@ -19,12 +19,26 @@ let package = Package(
             name: "Instrumentation",
             dependencies: [
                 .product(name: "ServiceContextModule", package: "swift-service-context"),
+            ],
+            swiftSettings: [
+              .enableExperimentalFeature("StrictConcurrency"),
+              .unsafeFlags([
+                "-Xfrontend", "-disable-availability-checking"
+//                "-enable-experimental-feature IsolatedAny"
+              ])
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
                 .target(name: "Instrumentation"),
+            ],
+            swiftSettings: [
+              .enableExperimentalFeature("StrictConcurrency"),
+              .unsafeFlags([
+                "-Xfrontend", "-disable-availability-checking"
+//                "-enable-experimental-feature IsolatedAny"
+              ])
             ]
         ),
 
@@ -35,12 +49,26 @@ let package = Package(
             name: "Tracing",
             dependencies: [
                 .target(name: "Instrumentation"),
+            ],
+            swiftSettings: [
+              .enableExperimentalFeature("StrictConcurrency"),
+              .unsafeFlags([
+                "-Xfrontend", "-disable-availability-checking"
+//                "-enable-experimental-feature IsolatedAny"
+              ])
             ]
         ),
         .testTarget(
             name: "TracingTests",
             dependencies: [
                 .target(name: "Tracing"),
+            ],
+            swiftSettings: [
+              .enableExperimentalFeature("StrictConcurrency"),
+              .unsafeFlags([
+                "-Xfrontend", "-disable-availability-checking"
+//                "-enable-experimental-feature IsolatedAny"
+              ])
             ]
         ),
     ]

@@ -330,6 +330,7 @@ public func withSpan<T, Instant: TracerInstant>(
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
+    isolation: isolated (any Actor)? = #isolation,
     _ operation: (any Span) async throws -> T
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
@@ -375,6 +376,7 @@ public func withSpan<T>(
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
+    isolation: isolated (any Actor)? = #isolation,
     _ operation: (any Span) async throws -> T
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
@@ -384,7 +386,8 @@ public func withSpan<T>(
         ofKind: kind,
         function: function,
         file: fileID,
-        line: line
+        line: line,
+        isolation: isolation
     ) { anySpan in
         try await operation(anySpan)
     }
@@ -422,6 +425,7 @@ public func withSpan<T>(
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
+    isolation: isolated (any Actor)? = #isolation,
     _ operation: (any Span) async throws -> T
 ) async rethrows -> T {
     try await InstrumentationSystem.legacyTracer.withAnySpan(
@@ -431,7 +435,8 @@ public func withSpan<T>(
         ofKind: kind,
         function: function,
         file: fileID,
-        line: line
+        line: line,
+        isolation: isolation
     ) { anySpan in
         try await operation(anySpan)
     }

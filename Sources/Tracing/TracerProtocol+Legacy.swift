@@ -306,6 +306,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for #isolation
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -314,6 +315,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
+        isolation: isolated (any Actor)? = #isolation,
         _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startAnySpan(
@@ -360,6 +362,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for #isolation
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -367,6 +370,7 @@ extension LegacyTracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
+        isolation: isolated (any Actor)? = #isolation,
         _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         let span = self.startAnySpan(
@@ -530,6 +534,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for #isolation
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -538,7 +543,8 @@ extension Tracer {
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (any Tracing.Span) async throws -> T
+        isolation: isolated (any Actor)? = #isolation,
+        _ operation: (any Tracing.Span) async throws -> T
     ) async rethrows -> T {
         try await self.withSpan(
             operationName,
@@ -547,7 +553,8 @@ extension Tracer {
             at: instant(),
             function: function,
             file: fileID,
-            line: line
+            line: line,
+            isolation: isolation
         ) { span in
             try await operation(span)
         }
