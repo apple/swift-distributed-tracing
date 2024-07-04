@@ -34,6 +34,7 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
+                .product(name: "ServiceContextModule", package: "swift-service-context"),
                 .target(name: "Instrumentation"),
             ]
         ),
