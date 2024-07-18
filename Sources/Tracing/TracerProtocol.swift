@@ -235,12 +235,44 @@ extension Tracer {
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+#if swift(>=6.0.0)
+    public func withSpan<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        isolation: (any Actor)? = #isolation,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startSpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: DefaultTracerClock.now,
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+#else
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -269,6 +301,7 @@ extension Tracer {
             throw error // rethrow
         }
     }
+#endif
 
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
@@ -287,12 +320,45 @@ extension Tracer {
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+#if swift(>=6.0.0)
+    public func withSpan<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+        isolation: (any Actor)? = #isolation,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startSpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: instant(),
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+#else
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -322,4 +388,5 @@ extension Tracer {
             throw error // rethrow
         }
     }
+#endif
 }

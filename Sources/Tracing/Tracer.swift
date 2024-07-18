@@ -315,18 +315,21 @@ public func withSpan<T>(
 ///   - instant: the time instant at which the span started
 ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
+///   - isolation: Defaulted parameter for inheriting isolation of calling actor
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
+#if swift(>=6.0.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
+    isolation: isolated (any Actor)? = #isolation,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -344,6 +347,31 @@ public func withSpan<T, Instant: TracerInstant>(
         try await operation(anySpan)
     }
 }
+#else
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+public func withSpan<T, Instant: TracerInstant>(
+  _ operationName: String,
+  at instant: @autoclosure () -> Instant,
+  context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+  ofKind kind: SpanKind = .internal,
+  function: String = #function,
+  file fileID: String = #fileID,
+  line: UInt = #line,
+  _ operation: (any Span) async throws -> T
+) async rethrows -> T {
+  try await InstrumentationSystem.legacyTracer.withAnySpan(
+    operationName,
+    at: instant(),
+    context: context(),
+    ofKind: kind,
+    function: function,
+    file: fileID,
+    line: line
+  ) { anySpan in
+    try await operation(anySpan)
+  }
+}
+#endif
 
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
@@ -361,12 +389,38 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
 ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
+///   - isolation: Defaulted parameter for inheriting isolation of calling actor
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
+#if swift(>=6.0.0)
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+public func withSpan<T>(
+    _ operationName: String,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+    ofKind kind: SpanKind = .internal,
+    isolation: isolated (any Actor)? = #isolation,
+    function: String = #function,
+    file fileID: String = #fileID,
+    line: UInt = #line,
+    _ operation: (any Span) async throws -> T
+) async rethrows -> T {
+    try await InstrumentationSystem.legacyTracer.withAnySpan(
+        operationName,
+        at: DefaultTracerClock.now,
+        context: context(),
+        ofKind: kind,
+        function: function,
+        file: fileID,
+        line: line
+    ) { anySpan in
+        try await operation(anySpan)
+    }
+}
+#else
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
@@ -389,6 +443,7 @@ public func withSpan<T>(
         try await operation(anySpan)
     }
 }
+#endif
 
 /// Start a new ``Span`` and automatically end when the `operation` completes,
 /// including recording the `error` in case the operation throws.
@@ -407,12 +462,39 @@ public func withSpan<T>(
 ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
 ///   - instant: the time instant at which the span started
+///   - isolation: Defaulted parameter for inheriting isolation of calling actor
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
+#if swift(>=6.0.0)
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+public func withSpan<T>(
+    _ operationName: String,
+    context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+    ofKind kind: SpanKind = .internal,
+    at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+    isolation: isolated (any Actor)? = #isolation,
+    function: String = #function,
+    file fileID: String = #fileID,
+    line: UInt = #line,
+    _ operation: (any Span) async throws -> T
+) async rethrows -> T {
+    try await InstrumentationSystem.legacyTracer.withAnySpan(
+        operationName,
+        at: instant(),
+        context: context(),
+        ofKind: kind,
+        function: function,
+        file: fileID,
+        line: line
+    ) { anySpan in
+        try await operation(anySpan)
+    }
+}
+#else
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(
     _ operationName: String,
@@ -436,3 +518,4 @@ public func withSpan<T>(
         try await operation(anySpan)
     }
 }
+#endif
