@@ -307,7 +307,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0.0)
+    #if swift(>=6.0)
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -338,7 +338,10 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-    #else
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -368,7 +371,6 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-    #endif
 
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
@@ -395,7 +397,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0.0)
+    #if swift(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -425,7 +427,10 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-    #else
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -454,7 +459,6 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-    #endif
 }
 
 #if swift(>=5.7.0)
@@ -598,7 +602,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0.0)
+    #if swift(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -622,7 +626,10 @@ extension Tracer {
             try await operation(span)
         }
     }
-    #else
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -645,6 +652,5 @@ extension Tracer {
             try await operation(span)
         }
     }
-    #endif
 }
 #endif

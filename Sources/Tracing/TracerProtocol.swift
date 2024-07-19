@@ -242,41 +242,12 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0.0)
+    #if swift(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         isolation: (any Actor)? = #isolation,
-        function: String = #function,
-        file fileID: String = #fileID,
-        line: UInt = #line,
-        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
-    ) async rethrows -> T {
-        let span = self.startSpan(
-            operationName,
-            context: context(),
-            ofKind: kind,
-            at: DefaultTracerClock.now,
-            function: function,
-            file: fileID,
-            line: line
-        )
-        defer { span.end() }
-        do {
-            return try await ServiceContext.$current.withValue(span.context) {
-                try await operation(span)
-            }
-        } catch {
-            span.recordError(error)
-            throw error // rethrow
-        }
-    }
-    #else
-    public func withSpan<T>(
-        _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
-        ofKind kind: SpanKind = .internal,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -303,6 +274,37 @@ extension Tracer {
     }
     #endif
 
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    public func withSpan<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        @_inheritActorContext @_implicitSelfCapture _ operation: (Self.Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startSpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: DefaultTracerClock.now,
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
     ///
@@ -327,7 +329,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0.0)
+    #if swift(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -358,7 +360,10 @@ extension Tracer {
             throw error // rethrow
         }
     }
-    #else
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -388,5 +393,4 @@ extension Tracer {
             throw error // rethrow
         }
     }
-    #endif
 }
