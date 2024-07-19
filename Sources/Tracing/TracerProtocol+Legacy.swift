@@ -300,12 +300,48 @@ extension LegacyTracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    #if swift(>=6.0)
+    public func withAnySpan<T, Instant: TracerInstant>(
+        _ operationName: String,
+        at instant: @autoclosure () -> Instant,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        isolation: isolated(any Actor)? = #isolation,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Tracing.Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startAnySpan(
+            operationName,
+            at: instant(),
+            context: context(),
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -354,12 +390,47 @@ extension LegacyTracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    #if swift(>=6.0)
+    public func withAnySpan<T>(
+        _ operationName: String,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        isolation: (any Actor)? = #isolation,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        _ operation: (any Tracing.Span) async throws -> T
+    ) async rethrows -> T {
+        let span = self.startAnySpan(
+            operationName,
+            at: DefaultTracerClock.now,
+            context: context(),
+            ofKind: kind,
+            function: function,
+            file: fileID,
+            line: line
+        )
+        defer { span.end() }
+        do {
+            return try await ServiceContext.$current.withValue(span.context) {
+                try await operation(span)
+            }
+        } catch {
+            span.recordError(error)
+            throw error // rethrow
+        }
+    }
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -524,12 +595,41 @@ extension Tracer {
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
+    #if swift(>=6.0)
+    public func withAnySpan<T>(
+        _ operationName: String,
+        at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
+        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        ofKind kind: SpanKind = .internal,
+        isolation: (any Actor)? = #isolation,
+        function: String = #function,
+        file fileID: String = #fileID,
+        line: UInt = #line,
+        @_inheritActorContext @_implicitSelfCapture _ operation: (any Tracing.Span) async throws -> T
+    ) async rethrows -> T {
+        try await self.withSpan(
+            operationName,
+            context: context(),
+            ofKind: kind,
+            at: instant(),
+            function: function,
+            file: fileID,
+            line: line
+        ) { span in
+            try await operation(span)
+        }
+    }
+    #endif
+
+    @_disfavoredOverload
+    @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
