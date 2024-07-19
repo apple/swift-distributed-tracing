@@ -28,7 +28,6 @@ Compatible `Tracer` implementations:
 | Library | Status                     | Description |
 | ------- |----------------------------| ----------- |
 | [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
-| [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | 🟠 Not updated for 1.0        | ... |
 | _Your library?_ | ...                        | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
@@ -42,14 +41,6 @@ As this API package was just released, no projects have yet fully adopted it, th
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
 | [Vapor](https://github.com/vapor/vapor) | Tracing | [Support planned](https://github.com/vapor/vapor/issues/3033) |
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
-
-
-| Client libraries          |                |                                                       |
-| ------------------------- | -------------- | ----------------------------------------------------- |
-| AsyncHTTPClient           | Tracing        | 🟠 Pending                                               |
-| Swift gRPC                | Tracing        | 🟠 Pending                                               |
-| Swift Distributed Cluster | Tracing        | 🟠 Pending                                            |
-| _Your library?_           | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
