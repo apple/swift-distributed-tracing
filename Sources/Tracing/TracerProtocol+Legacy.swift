@@ -307,13 +307,13 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-  #if swift(>=6.0.0)
+    #if swift(>=6.0.0)
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        isolation: isolated (any Actor)? = #isolation,
+        isolation: isolated(any Actor)? = #isolation,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -338,7 +338,7 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-  #else
+    #else
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -368,7 +368,7 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-  #endif
+    #endif
 
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
@@ -395,7 +395,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0.0)
+    #if swift(>=6.0.0)
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -425,7 +425,7 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-#else
+    #else
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -454,7 +454,7 @@ extension LegacyTracer {
             throw error // rethrow
         }
     }
-#endif
+    #endif
 }
 
 #if swift(>=5.7.0)
@@ -598,7 +598,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0.0)
+    #if swift(>=6.0.0)
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -622,7 +622,7 @@ extension Tracer {
             try await operation(span)
         }
     }
-#else
+    #else
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -645,6 +645,6 @@ extension Tracer {
             try await operation(span)
         }
     }
-#endif
+    #endif
 }
 #endif

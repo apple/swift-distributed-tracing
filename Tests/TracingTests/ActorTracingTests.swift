@@ -22,6 +22,8 @@ final class ActorTracingTests: XCTestCase {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
     }
+
+    func test() {}
 }
 
 func work() async {}

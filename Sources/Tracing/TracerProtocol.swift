@@ -242,7 +242,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0.0)
+    #if swift(>=6.0.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -272,7 +272,7 @@ extension Tracer {
             throw error // rethrow
         }
     }
-#else
+    #else
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -301,7 +301,7 @@ extension Tracer {
             throw error // rethrow
         }
     }
-#endif
+    #endif
 
     /// Start a new ``Span`` and automatically end when the `operation` completes,
     /// including recording the `error` in case the operation throws.
@@ -327,7 +327,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0.0)
+    #if swift(>=6.0.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -358,7 +358,7 @@ extension Tracer {
             throw error // rethrow
         }
     }
-#else
+    #else
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -388,5 +388,5 @@ extension Tracer {
             throw error // rethrow
         }
     }
-#endif
+    #endif
 }
