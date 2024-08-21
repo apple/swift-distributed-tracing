@@ -307,7 +307,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -397,7 +397,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -602,7 +602,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
