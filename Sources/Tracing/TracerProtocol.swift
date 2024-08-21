@@ -274,8 +274,10 @@ extension Tracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -362,8 +364,10 @@ extension Tracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,

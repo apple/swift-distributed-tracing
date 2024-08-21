@@ -340,8 +340,10 @@ extension LegacyTracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -429,8 +431,10 @@ extension LegacyTracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -628,8 +632,10 @@ extension Tracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
