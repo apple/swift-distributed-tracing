@@ -242,7 +242,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -274,8 +274,10 @@ extension Tracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -329,7 +331,7 @@ extension Tracer {
     ///   - operation: The operation that this span should be measuring
     /// - Returns: the value returned by `operation`
     /// - Throws: the error the `operation` has thrown (if any)
-    #if swift(>=6.0)
+    #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -362,8 +364,10 @@ extension Tracer {
     }
     #endif
 
+    #if compiler(>=6.0)
     @_disfavoredOverload
     @available(*, deprecated, message: "Prefer #isolation version of this API")
+    #endif
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,

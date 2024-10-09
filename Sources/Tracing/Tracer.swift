@@ -322,7 +322,7 @@ public func withSpan<T>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0)
+#if compiler(>=6.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
@@ -349,8 +349,10 @@ public func withSpan<T, Instant: TracerInstant>(
 }
 #endif
 
+#if compiler(>=6.0)
 @_disfavoredOverload
 @available(*, deprecated, message: "Prefer #isolation version of this API")
+#endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
@@ -398,7 +400,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0)
+#if compiler(>=6.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
@@ -424,8 +426,10 @@ public func withSpan<T>(
 }
 #endif
 
+#if compiler(>=6.0)
 @_disfavoredOverload
 @available(*, deprecated, message: "Prefer #isolation version of this API")
+#endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
@@ -473,7 +477,7 @@ public func withSpan<T>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-#if swift(>=6.0)
+#if compiler(>=6.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(
     _ operationName: String,
@@ -500,8 +504,10 @@ public func withSpan<T>(
 }
 #endif
 
+#if compiler(>=6.0)
 @_disfavoredOverload
 @available(*, deprecated, message: "Prefer #isolation version of this API")
+#endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(
     _ operationName: String,
