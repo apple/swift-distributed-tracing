@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -40,7 +40,7 @@ import Dispatch
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func startSpan<Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
@@ -86,7 +86,7 @@ public func startSpan<Instant: TracerInstant>(
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func startSpan(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -132,7 +132,7 @@ public func startSpan(
 ///   - function: The function name in which the span was started
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func startSpan(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -180,7 +180,7 @@ public func startSpan(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
@@ -226,7 +226,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operation: The operation that this span should be measuring
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -323,13 +323,13 @@ public func withSpan<T>(
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
 #if compiler(>=6.0)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
-    isolation: isolated(any Actor)? = #isolation,
+    isolation: isolated (any Actor)? = #isolation,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -350,10 +350,9 @@ public func withSpan<T, Instant: TracerInstant>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload
-@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
     at instant: @autoclosure () -> Instant,
@@ -401,12 +400,12 @@ public func withSpan<T, Instant: TracerInstant>(
 /// - Returns: the value returned by `operation`
 /// - Throws: the error the `operation` has thrown (if any)
 #if compiler(>=6.0)
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
-    isolation: isolated(any Actor)? = #isolation,
+    isolation: isolated (any Actor)? = #isolation,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -427,10 +426,9 @@ public func withSpan<T>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload
-@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -484,7 +482,7 @@ public func withSpan<T>(
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
     ofKind kind: SpanKind = .internal,
     at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
-    isolation: isolated(any Actor)? = #isolation,
+    isolation: isolated (any Actor)? = #isolation,
     function: String = #function,
     file fileID: String = #fileID,
     line: UInt = #line,
@@ -505,8 +503,7 @@ public func withSpan<T>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload
-@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(

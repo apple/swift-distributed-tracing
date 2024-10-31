@@ -49,21 +49,3 @@ If you know of any other library please send in a [pull request](https://github.
 ## Reference Documentation
 
 Please refer to the **[reference documentation](https://swiftpackageindex.com/apple/swift-distributed-tracing/documentation/tracing)** for detailed guides about adopting distributed tracing in your applications, libraries and frameworks.
-
----
-
-## Contributing
-
-Please make sure to run the `./scripts/soundness.sh` script when contributing, it checks formatting and similar things.
-
-You can ensure it always is run and passes before you push by installing a pre-push hook with git:
-
-``` sh
-echo './scripts/soundness.sh' > .git/hooks/pre-push
-```
-
-### Formatting 
-
-We use a specific version of [`nicklockwood/swiftformat`](https://github.com/nicklockwood/swiftformat).
-Please take a look at our [`Dockerfile`](docker/Dockerfile) to see which version is currently being used and install it
-on your machine before running the script.

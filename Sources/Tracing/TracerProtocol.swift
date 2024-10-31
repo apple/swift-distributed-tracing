@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -21,7 +21,7 @@
 /// A tracer capable of creating new trace spans.
 ///
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public protocol Tracer: LegacyTracer {
     /// The concrete type of span this tracer will be producing/
     associatedtype Span: Tracing.Span
@@ -61,7 +61,7 @@ public protocol Tracer: LegacyTracer {
     ) -> Self.Span
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension Tracer {
     /// Start a new ``Span`` with the given `ServiceContext`.
     ///
@@ -162,7 +162,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 
@@ -182,7 +182,6 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
     ///   - fileID: The `fileID` where the span was started.
     ///   - line: The file line where the span was started.
@@ -214,7 +213,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 
@@ -269,14 +268,14 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
     #endif
 
     #if compiler(>=6.0)
-    @_disfavoredOverload
-    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    // swift-format-ignore: Spacing // fights with formatter
+    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withSpan<T>(
         _ operationName: String,
@@ -303,7 +302,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 
@@ -359,14 +358,14 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
     #endif
 
     #if compiler(>=6.0)
-    @_disfavoredOverload
-    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    // swift-format-ignore: Spacing // fights with formatter
+    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withSpan<T>(
         _ operationName: String,
@@ -394,7 +393,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 }

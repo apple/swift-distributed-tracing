@@ -2,20 +2,21 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
 import ServiceContextModule
 import Tracing
 import XCTest
+
+@testable import Instrumentation
 
 final class SpanTests: XCTestCase {
     func testSpanEventIsExpressibleByStringLiteral() {
@@ -118,8 +119,7 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(attributes["meaning.of.life"]?.toSpanAttribute(), SpanAttribute.int(42))
         XCTAssertEqual(attributes["alive"]?.toSpanAttribute(), SpanAttribute.bool(false))
 
-        // An import like: `import TracingOpenTelemetrySupport` can enable type-safe well defined attributes,
-        // e.g. as defined in https://github.com/open-telemetry/opentelemetry-specification/tree/master/specification/trace/semantic_conventions
+        // An import like: `import TracingOpenTelemetrySupport` can enable type-safe well defined attributes
         attributes.name = "kappa"
         attributes.sampleHttp.statusCode = 200
         attributes.sampleHttp.codesArray = [1, 2, 3]
@@ -137,7 +137,10 @@ final class SpanTests: XCTestCase {
         // normally we can use just the span attribute values, and it is not type safe or guided in any way:
         attributes.sampleHttp.customType = CustomAttributeValue()
 
-        XCTAssertEqual(attributes["http.custom_value"]?.toSpanAttribute(), SpanAttribute.stringConvertible(CustomAttributeValue()))
+        XCTAssertEqual(
+            attributes["http.custom_value"]?.toSpanAttribute(),
+            SpanAttribute.stringConvertible(CustomAttributeValue())
+        )
         XCTAssertEqual(String(reflecting: attributes.sampleHttp.customType), "Optional(CustomAttributeValue())")
         XCTAssertEqual(attributes.sampleHttp.customType, CustomAttributeValue())
     }
@@ -150,11 +153,15 @@ final class SpanTests: XCTestCase {
         ]
 
         var dictionary = [String: SpanAttribute]()
+
+        // swift-format-ignore: ReplaceForEachWithForLoop
         attributes.forEach { name, attribute in
             dictionary[name] = attribute
         }
 
-        guard case .some(.int64) = dictionary["0"], case .some(.bool) = dictionary["1"], case .some(.string) = dictionary["2"] else {
+        guard case .some(.int64) = dictionary["0"], case .some(.bool) = dictionary["1"],
+            case .some(.string) = dictionary["2"]
+        else {
             XCTFail("Expected all attributes to be copied to the dictionary.")
             return
         }
@@ -207,7 +214,8 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(child.links.count, 1)
         XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
-        guard case .some(.int64(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
+        guard case .some(.int64(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute()
+        else {
             XCTFail("Expected int value for http.status_code")
             return
         }
@@ -241,7 +249,8 @@ final class SpanTests: XCTestCase {
         XCTAssertEqual(child.links.count, 1)
         XCTAssertEqual(child.links[0].context[TestBaggageContextKey.self], "test")
         XCTAssertEqual(child.links[0].attributes.sampleHttp.statusCode, 418)
-        guard case .some(.int32(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute() else {
+        guard case .some(.int32(let statusCode)) = child.links[0].attributes["http.status_code"]?.toSpanAttribute()
+        else {
             XCTFail("Expected int value for http.status_code")
             return
         }

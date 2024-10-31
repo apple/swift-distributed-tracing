@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -46,7 +46,7 @@ final class TestTracer: LegacyTracer {
     public func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
-        where
+    where
         Extract: Extractor,
         Carrier == Extract.Carrier
     {
@@ -55,7 +55,7 @@ final class TestTracer: LegacyTracer {
     }
 
     func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
-        where
+    where
         Inject: Injector,
         Carrier == Inject.Carrier
     {
@@ -175,7 +175,11 @@ final class TestSpan: Span {
         self.events.append(event)
     }
 
-    func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
+    func recordError<Instant: TracerInstant>(
+        _ error: Error,
+        attributes: SpanAttributes,
+        at instant: @autoclosure () -> Instant
+    ) {
         self.recordedErrors.append((error, attributes))
     }
 
@@ -185,5 +189,5 @@ final class TestSpan: Span {
     }
 }
 
-extension TestTracer: @unchecked Sendable {} // only intended for single threaded testing
-extension TestSpan: @unchecked Sendable {} // only intended for single threaded testing
+extension TestTracer: @unchecked Sendable {}  // only intended for single threaded testing
+extension TestSpan: @unchecked Sendable {}  // only intended for single threaded testing

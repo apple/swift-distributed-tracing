@@ -1,4 +1,4 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
@@ -8,8 +8,7 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0"),
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0")
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -18,13 +17,13 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
+                .product(name: "ServiceContextModule", package: "swift-service-context")
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
-                .target(name: "Instrumentation"),
+                .target(name: "Instrumentation")
             ]
         ),
 
@@ -41,7 +40,7 @@ let package = Package(
         .testTarget(
             name: "TracingTests",
             dependencies: [
-                .target(name: "Tracing"),
+                .target(name: "Tracing")
             ]
         ),
     ]

@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -252,13 +252,14 @@ public protocol SpanAttributeNamespace {
 
     var attributes: SpanAttributes { get set }
 
-    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T? where T: SpanAttributeConvertible {
+    subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
+    where T: SpanAttributeConvertible {
         get
         set
     }
 
     subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace
+    where Namespace: SpanAttributeNamespace
     {
         get
     }
@@ -286,7 +287,7 @@ extension NestedSpanAttributesProtocol {
 
 extension SpanAttributeNamespace {
     public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
-        where T: SpanAttributeConvertible
+    where T: SpanAttributeConvertible
     {
         get {
             let key = NestedSpanAttributes.__namespace[keyPath: dynamicMember]
@@ -319,8 +320,7 @@ extension SpanAttributeNamespace {
     }
 
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace
-    {
+    where Namespace: SpanAttributeNamespace {
         SpanAttribute.int(0)[keyPath: dynamicMember]
     }
 }
@@ -605,8 +605,8 @@ extension SpanAttributes {
 
     /// - Parameter callback: The function to call for each attribute.
     public func forEach(_ callback: (String, SpanAttribute) -> Void) {
-        self._attributes.forEach {
-            callback($0.key, $0.1)
+        for (key, value) in self._attributes {
+            callback(key, value)
         }
     }
 
@@ -644,8 +644,7 @@ extension SpanAttributes {
 
     /// Enables for type-safe nested namespaces for attribute accessors.
     public subscript<Namespace>(dynamicMember dynamicMember: KeyPath<SpanAttribute, Namespace>) -> Namespace
-        where Namespace: SpanAttributeNamespace
-    {
+    where Namespace: SpanAttributeNamespace {
         SpanAttribute._namespace[keyPath: dynamicMember]
     }
 }
@@ -733,7 +732,7 @@ public struct SpanLink {
 }
 
 extension SpanAttributes: Sendable {}
-extension SpanAttribute: Sendable {} // @unchecked because some payloads are CustomStringConvertible
+extension SpanAttribute: Sendable {}  // @unchecked because some payloads are CustomStringConvertible
 extension SpanStatus: Sendable {}
 extension SpanEvent: Sendable {}
 extension SpanKind: Sendable {}

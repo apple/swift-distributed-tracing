@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -24,7 +24,7 @@ import Dispatch
 /// When possible, prefer using ``Tracer`` and ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` APIs,
 /// rather than these `startAnySpan` APIs which unconditionally always return existential Spans even when not necessary
 /// (under Swift 5.7+ type-system enhancement wrt. protocols with associated types)..
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 @available(*, deprecated, renamed: "Tracer")
 public protocol LegacyTracer: Instrument {
     /// Start a new span returning an existential ``Span`` reference.
@@ -80,7 +80,7 @@ public protocol LegacyTracer: Instrument {
 // ==== ------------------------------------------------------------------
 // MARK: Legacy implementations for Swift 5.7
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension LegacyTracer {
     // ==== startSpan ---------------------------------------------------------
 
@@ -231,7 +231,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 
@@ -313,7 +313,7 @@ extension LegacyTracer {
         at instant: @autoclosure () -> Instant,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
-        isolation: isolated(any Actor)? = #isolation,
+        isolation: isolated (any Actor)? = #isolation,
         function: String = #function,
         file fileID: String = #fileID,
         line: UInt = #line,
@@ -335,14 +335,14 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
     #endif
 
     #if compiler(>=6.0)
-    @_disfavoredOverload
-    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    // swift-format-ignore: Spacing // fights with formatter
+    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
@@ -370,7 +370,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 
@@ -426,14 +426,14 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
     #endif
 
     #if compiler(>=6.0)
-    @_disfavoredOverload
-    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    // swift-format-ignore: Spacing // fights with formatter
+    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T>(
         _ operationName: String,
@@ -460,14 +460,12 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
-            throw error // rethrow
+            throw error  // rethrow
         }
     }
 }
 
-#if swift(>=5.7.0)
-// Provide compatibility shims of the `...AnySpan` APIs to the 5.7 requiring `Tracer`.
-
+// Provide compatibility shims of the `...AnySpan` APIs
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
     /// Start a new span returning an existential ``Span`` reference.
@@ -633,8 +631,8 @@ extension Tracer {
     #endif
 
     #if compiler(>=6.0)
-    @_disfavoredOverload
-    @available(*, deprecated, message: "Prefer #isolation version of this API")
+    // swift-format-ignore: Spacing // fights with formatter
+    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T>(
         _ operationName: String,
@@ -659,4 +657,3 @@ extension Tracer {
         }
     }
 }
-#endif

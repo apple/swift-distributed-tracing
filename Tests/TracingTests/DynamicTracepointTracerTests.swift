@@ -2,20 +2,21 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
 import ServiceContextModule
 import Tracing
 import XCTest
+
+@testable import Instrumentation
 
 final class DynamicTracepointTracerTests: XCTestCase {
     override class func tearDown() {
@@ -32,7 +33,7 @@ final class DynamicTracepointTracerTests: XCTestCase {
         }
 
         let fileID = #fileID
-        let fakeLine: UInt = 77 // trick number, see withSpan below.
+        let fakeLine: UInt = 77  // trick number, see withSpan below.
         let fakeNextLine: UInt = fakeLine + 11
         tracer.enableTracepoint(fileID: fileID, line: fakeLine)
         // Imagine this is set via some "ops command", e.g. `<control> <pid, or ssh or something> trace enable Sample.swift:1234`
@@ -120,19 +121,19 @@ final class DynamicTracepointTestTracer: LegacyTracer {
             var match = true
             if let fun = self.function {
                 match = match && fun == tracepoint.function
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
             if let fid = self.fileID {
                 match = match && fid == tracepoint.fileID
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
             if let l = self.line {
                 match = match && l == tracepoint.line
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
@@ -218,12 +219,14 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         context.traceID = traceID
     }
 
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject) where Inject: Injector, Inject.Carrier == Carrier {
+    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    where Inject: Injector, Inject.Carrier == Carrier {
         guard let traceID = context.traceID else {
             return
         }
@@ -295,7 +298,11 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
+        func recordError<Instant: TracerInstant>(
+            _ error: Error,
+            attributes: SpanAttributes,
+            at instant: @autoclosure () -> Instant
+        ) {
             print("")
         }
 
@@ -310,7 +317,6 @@ extension DynamicTracepointTestTracer {
     }
 }
 
-#if compiler(>=5.7.0)
 extension DynamicTracepointTestTracer: Tracer {
     typealias Span = TracepointSpan
 
@@ -341,7 +347,8 @@ extension DynamicTracepointTestTracer: Tracer {
         return span
     }
 }
-#endif
 
-extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing
-extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {} // only intended for single threaded testing
+// only intended for single threaded testing
+extension DynamicTracepointTestTracer: @unchecked Sendable {}
+// only intended for single threaded testing
+extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {}
