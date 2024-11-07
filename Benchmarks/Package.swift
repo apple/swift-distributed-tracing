@@ -1,13 +1,13 @@
 // swift-tools-version: 5.9
 //===----------------------------------------------------------------------===//
 //
-// This source file is part of the SwiftCertificates open source project
+// This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2023 Apple Inc. and the SwiftCertificates project authors
+// Copyright (c) 2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
-// See CONTRIBUTORS.txt for the list of SwiftCertificates project authors
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -18,7 +18,7 @@ import PackageDescription
 let package = Package(
     name: "benchmarks",
     platforms: [
-        .macOS("14"),
+        .macOS("14")
     ],
     dependencies: [
         .package(path: "../"),
@@ -35,6 +35,6 @@ let package = Package(
             plugins: [
                 .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
             ]
-        ),
+        )
     ]
 )

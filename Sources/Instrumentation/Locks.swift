@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -41,7 +41,7 @@ import Musl
 /// This object provides a lock on top of a single `pthread_mutex_t`. This kind
 /// of lock is safe to use with `libpthread`-based threading models, such as the
 /// one used by NIO.
-@_spi(Locking) /* Use the `package` access modifier once min Swift version is increased. */
+@_spi(Locking)  // Use the `package` access modifier once min Swift version is increased.
 public final class ReadWriteLock {
     private let rwlock: UnsafeMutablePointer<pthread_rwlock_t> = UnsafeMutablePointer.allocate(capacity: 1)
 
@@ -125,7 +125,7 @@ extension ReadWriteLock {
 ///
 /// Marked as @unchecked Sendable due to the synchronization being
 /// performed manually using locks.
-@_spi(Locking) /* Use the `package` access modifier once min Swift version is increased. */
+@_spi(Locking)  // Use the `package` access modifier once min Swift version is increased.
 public final class LockedValueBox<Value: Sendable>: @unchecked Sendable {
     private let lock = ReadWriteLock()
     private var value: Value

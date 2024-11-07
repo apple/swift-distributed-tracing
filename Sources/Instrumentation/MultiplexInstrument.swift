@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -36,14 +36,16 @@ extension MultiplexInstrument {
 
 extension MultiplexInstrument: Instrument {
     public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier
-    {
-        self.instruments.forEach { $0.inject(context, into: &carrier, using: injector) }
+    where Inject: Injector, Carrier == Inject.Carrier {
+        for instrument in self.instruments { instrument.inject(context, into: &carrier, using: injector) }
     }
 
-    public func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier
-    {
-        self.instruments.forEach { $0.extract(carrier, into: &context, using: extractor) }
+    public func extract<Carrier, Extract>(
+        _ carrier: Carrier,
+        into context: inout ServiceContext,
+        using extractor: Extract
+    )
+    where Extract: Extractor, Carrier == Extract.Carrier {
+        for instrument in self.instruments { instrument.extract(carrier, into: &context, using: extractor) }
     }
 }

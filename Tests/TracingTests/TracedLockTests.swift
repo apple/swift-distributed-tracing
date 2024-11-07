@@ -2,20 +2,21 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
 import ServiceContextModule
 import Tracing
 import XCTest
+
+@testable import Instrumentation
 
 final class TracedLockTests: XCTestCase {
     override class func tearDown() {
@@ -84,18 +85,20 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         into carrier: inout Carrier,
         using injector: Inject
     )
-        where
+    where
         Inject: Injector,
-        Carrier == Inject.Carrier {}
+        Carrier == Inject.Carrier
+    {}
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into context: inout ServiceContext,
         using extractor: Extract
     )
-        where
+    where
         Extract: Extractor,
-        Carrier == Extract.Carrier {}
+        Carrier == Extract.Carrier
+    {}
 
     final class TracedLockPrintlnSpan: Tracing.Span {
         private let kind: SpanKind
@@ -135,7 +138,9 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             self.context = context
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start")
+            print(
+                "  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start"
+            )
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -151,7 +156,11 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             self.events.append(event)
         }
 
-        func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {}
+        func recordError<Instant: TracerInstant>(
+            _ error: Error,
+            attributes: SpanAttributes,
+            at instant: @autoclosure () -> Instant
+        ) {}
 
         func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
             let time = instant()
@@ -181,4 +190,6 @@ extension TracedLockPrintlnTracer: Tracer {
 }
 
 extension TracedLockPrintlnTracer: Sendable {}
-extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {} // only intended for single threaded testing
+
+// only intended for single threaded testing
+extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {}

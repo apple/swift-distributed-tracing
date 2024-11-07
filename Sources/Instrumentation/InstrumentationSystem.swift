@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -22,7 +22,7 @@ import ServiceContextModule
 ///
 /// # Access the Instrument
 /// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
     /// performed manually using locks.
@@ -34,7 +34,8 @@ public enum InstrumentationSystem {
         func bootstrap(_ instrument: Instrument) {
             self.lock.withWriterLock {
                 precondition(
-                    !self._isInitialized, """
+                    !self._isInitialized,
+                    """
                     InstrumentationSystem can only be initialized once per process. Consider using MultiplexInstrument if
                     you need to use multiple instruments.
                     """
@@ -92,7 +93,7 @@ public enum InstrumentationSystem {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {

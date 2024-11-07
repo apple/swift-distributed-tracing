@@ -2,20 +2,22 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable @_spi(Locking) import Instrumentation
 import ServiceContextModule
 import Tracing
 import XCTest
+
+@testable @_spi(Locking) import Instrumentation
+
 #if os(Linux)
 @preconcurrency import Dispatch
 #endif
@@ -216,7 +218,8 @@ final class TracerTests: XCTestCase {
         self.testAsync {
             var fromNonAsyncWorld = ServiceContext.topLevel
             fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) { (span: any Tracing.Span) -> String in
+            let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) {
+                (span: any Tracing.Span) -> String in
                 XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
                 XCTAssertEqual(span.context.traceID, fromNonAsyncWorld.traceID)
                 return await operation(span)
@@ -377,7 +380,7 @@ final class TracerTests: XCTestCase {
         XCTAssertEqual(span.startTimestampNanosSinceEpoch, instant.nanosecondsSinceEpoch)
     }
 
-//    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
     /// - Parameter operation: The operation to test.
     func testAsync(_ operation: @Sendable @escaping () async throws -> Void) rethrows {

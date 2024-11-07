@@ -2,19 +2,20 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
 import ServiceContextModule
 import XCTest
+
+@testable import Instrumentation
 
 extension InstrumentationSystem {
     public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
@@ -54,18 +55,20 @@ private final class FakeTracer: Instrument {
         into carrier: inout Carrier,
         using injector: Inject
     )
-        where
+    where
         Inject: Injector,
-        Carrier == Inject.Carrier {}
+        Carrier == Inject.Carrier
+    {}
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into context: inout ServiceContext,
         using extractor: Extract
     )
-        where
+    where
         Extract: Extractor,
-        Carrier == Extract.Carrier {}
+        Carrier == Extract.Carrier
+    {}
 }
 
 private final class FakeInstrument: Instrument {
@@ -74,16 +77,18 @@ private final class FakeInstrument: Instrument {
         into carrier: inout Carrier,
         using injector: Inject
     )
-        where
+    where
         Inject: Injector,
-        Carrier == Inject.Carrier {}
+        Carrier == Inject.Carrier
+    {}
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into context: inout ServiceContext,
         using extractor: Extract
     )
-        where
+    where
         Extract: Extractor,
-        Carrier == Extract.Carrier {}
+        Carrier == Extract.Carrier
+    {}
 }

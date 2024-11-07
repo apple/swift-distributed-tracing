@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -52,7 +52,7 @@ public protocol Instrument: Sendable {
     ///   - context: The `ServiceContext` into which these values should be injected.
     ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
-        where Extract: Extractor, Extract.Carrier == Carrier
+    where Extract: Extractor, Extract.Carrier == Carrier
 
     /// Extract values from a `ServiceContext` and inject them into the given `Carrier` using the given ``Injector``.
     ///
@@ -61,5 +61,5 @@ public protocol Instrument: Sendable {
     ///   - carrier: The `Carrier` into which this information will be injected.
     ///   - injector: The ``Injector`` used to inject extracted `ServiceContext` into the given `Carrier`.
     func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Inject.Carrier == Carrier
+    where Inject: Injector, Inject.Carrier == Carrier
 }

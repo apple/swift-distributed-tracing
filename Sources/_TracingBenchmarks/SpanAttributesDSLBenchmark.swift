@@ -2,21 +2,22 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-import _TracingBenchmarkTools
-import Tracing
 @_spi(Locking) import Instrumentation
+import Tracing
+import _TracingBenchmarkTools
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+// swift-format-ignore: DontRepeatTypeInStaticProperties
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 enum DSLBenchmarks {
     public static let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
         BenchmarkInfo(
@@ -76,7 +77,7 @@ enum DSLBenchmarks {
 
     fileprivate static func runTimesWithSpan(_ times: Int, work: (any Tracing.Span) -> Void) {
         self.span.withValue { span in
-            for _ in 0 ..< times {
+            for _ in 0..<times {
                 work(span!)
             }
         }
@@ -100,14 +101,14 @@ enum DSLBenchmarks {
     static func bench_empty(times: Int) throws {}
 
     static func bench_makeSpan(times: Int) throws {
-        for _ in 0 ..< times {
+        for _ in 0..<times {
             let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
             _ = span
         }
     }
 
     static func bench_startSpan_end(times: Int) throws {
-        for _ in 0 ..< times {
+        for _ in 0..<times {
             let span = InstrumentationSystem.legacyTracer.startAnySpan("something", context: .topLevel)
             span.end()
         }
@@ -160,7 +161,7 @@ enum DSLBenchmarks {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension SpanAttributes {
     var http: DSLBenchmarks.HTTPAttributes {
         get {
