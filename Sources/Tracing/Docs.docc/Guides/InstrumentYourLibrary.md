@@ -207,6 +207,37 @@ actor MySampleServer {
 
 While this code is very simple for illustration purposes, and it may seem surprising why there are two separate places where we need to call into user-code separately, in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of callbacks. Always consider if and when to restore context such that it makes sense for the end user.
 
+#### Manual propogation
+
+There are circumstances where `task-local` variables are interrupted during normal execution flow. One common instance is when using
+[`swift-nio`](https://github.com/apple/swift-nio)'s [`EventLoopFuture`](https://swiftpackageindex.com/apple/swift-nio/main/documentation/niocore/eventloopfuture) to chain asynchronous work. In these circumstances, the library can manually propogate the context metadata by taking the context of the parent span, and providing it into the `context` argument of the child span:
+
+```swift
+// 1) start the parent span
+withSpan("parent") { span in
+  let parentContext = span.context
+
+  // 2) start the child span, injecting the parent context
+  withSpan("child", context: parentContext) { span in
+    doSomething()
+  }
+}
+```
+
+Here's an example that uses Swift NIO's EventLoopFuture:
+
+```swift
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let parentSpan = startSpan("parent")
+group.any().makeSucceededVoidFuture().map { _ in
+  withSpan("child", context: parentSpan.context) { span in
+    doSomething()
+  }
+}.always { _ in
+  parentSpan.end()
+}
+```
+
 ### Starting Trace Spans in Your Library
 
 The above steps are enough if you wanted to provide context propagation. It already enables techniques such as **correlation ids** which can be set once, in one system, and then carried through to any downstream services the code makes calls from while the context is set.
