@@ -29,9 +29,36 @@ public struct TracedMacro: BodyMacro {
             throw MacroExpansionErrorMessage("expected a function with a body")
         }
 
+        // Construct a withSpan call matching the invocation of the @Traced macro
+
         let operationName = StringLiteralExprSyntax(content: function.name.text)
         let withSpanCall: ExprSyntax = "withSpan(\(operationName))"
-        let withSpanExpr: ExprSyntax = "\(withSpanCall) { span in \(body.statements) }"
+
+        // We want to explicitly specify the closure effect specifiers in order
+        // to avoid warnings about unused try/await expressions.
+        // We might as well explicitly specify the closure return type to help type inference.
+
+        let asyncClause = function.signature.effectSpecifiers?.asyncSpecifier
+        let returnClause = function.signature.returnClause
+        var throwsClause = function.signature.effectSpecifiers?.throwsClause
+        // You aren't allowed to apply "rethrows" as a closure effect
+        // specifier, so we have to convert this to a "throws" effect
+        if throwsClause?.throwsSpecifier.tokenKind == .keyword(.rethrows) {
+            throwsClause?.throwsSpecifier = .keyword(.throws)
+        }
+        var withSpanExpr: ExprSyntax = """
+        \(withSpanCall) { span \(asyncClause)\(throwsClause)\(returnClause)in \(body.statements) }
+        """
+
+        // Apply a try / await as necessary to adapt the withSpan expression
+
+        if function.signature.effectSpecifiers?.asyncSpecifier != nil {
+            withSpanExpr = "await \(withSpanExpr)"
+        }
+
+        if function.signature.effectSpecifiers?.throwsClause != nil {
+            withSpanExpr = "try \(withSpanExpr)"
+        }
 
         return ["\(withSpanExpr)"]
     }
