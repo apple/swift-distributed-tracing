@@ -214,6 +214,203 @@ final class TracedMacroTests: XCTestCase {
             macros: ["Traced": TracedMacro.self]
         )
     }
+
+    func test_tracedMacro_specifyOperationName() {
+        assertMacroExpansion(
+            """
+            @Traced("example but with a custom operationName")
+            func example(param: Int) {
+                span.attributes["param"] = param
+            }
+            """,
+            expandedSource: """
+            func example(param: Int) {
+                withSpan("example but with a custom operationName") { span in
+                    span.attributes["param"] = param
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            let globalName = "example"
+
+            @Traced(globalName)
+            func example(param: Int) {
+                span.attributes["param"] = param
+            }
+            """,
+            expandedSource: """
+            let globalName = "example"
+            func example(param: Int) {
+                withSpan(globalName) { span in
+                    span.attributes["param"] = param
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
+
+    func test_tracedMacro_specifyContext() {
+        assertMacroExpansion(
+            """
+            @Traced(context: .topLevel)
+            func example() {
+                print("Hello")
+            }
+            """,
+            expandedSource: """
+            func example() {
+                withSpan("example", context: .topLevel) { span in
+                    print("Hello")
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
+
+    func test_tracedMacro_specifyKind() {
+        assertMacroExpansion(
+            """
+            @Traced(ofKind: .client)
+            func example() {
+                print("Hello")
+            }
+            """,
+            expandedSource: """
+            func example() {
+                withSpan("example", ofKind: .client) { span in
+                    print("Hello")
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
+
+    func test_tracedMacro_specifySpanBindingName() {
+        assertMacroExpansion(
+            """
+            @Traced(span: "customSpan")
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            expandedSource: """
+            func example(span: String) throws {
+                try withSpan("example") { customSpan throws in
+                    customSpan.attributes["span"] = span
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            @Traced(span: "_")
+            func example(span: String) {
+                print(span)
+            }
+            """,
+            expandedSource: """
+            func example(span: String) {
+                withSpan("example") { _ in
+                    print(span)
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
+
+    func test_tracedMacro_specifySpanBindingName_invalid() {
+        assertMacroExpansion(
+            """
+            @Traced(span: 1)
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            expandedSource: """
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            diagnostics: [
+                .init(message: "span name must be a simple string literal", line: 1, column: 1),
+            ],
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            @Traced(span: "invalid name")
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+
+            @Traced(span: "123")
+            func example2(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            expandedSource: """
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            func example2(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            diagnostics: [
+                .init(message: "'invalid name' is not a valid parameter name", line: 1, column: 1),
+                .init(message: "'123' is not a valid parameter name", line: 6, column: 1),
+            ],
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            @Traced(span: "Hello \\(1)")
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            expandedSource: """
+            func example(span: String) throws {
+                customSpan.attributes["span"] = span
+            }
+            """,
+            diagnostics: [
+                .init(message: "span name must be a simple string literal", line: 1, column: 1),
+            ],
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
+
+    func test_tracedMacro_multipleMacroParameters() {
+        assertMacroExpansion(
+            """
+            @Traced("custom span name", context: .topLevel, ofKind: .client, span: "customSpan")
+            func example(span: Int) {
+                customSpan.attributes["span"] = span + 1
+            }
+            """,
+            expandedSource: """
+            func example(span: Int) {
+                withSpan("custom span name", context: .topLevel, ofKind: .client) { customSpan in
+                    customSpan.attributes["span"] = span + 1
+                }
+            }
+            """,
+            macros: ["Traced": TracedMacro.self]
+        )
+    }
 }
 
 // MARK: Compile tests
@@ -259,6 +456,11 @@ func asyncRethrowingExample(body: () async throws -> Int) async rethrows -> Int 
 @Traced
 func example(param: Int) {
     span.attributes["param"] = param
+}
+
+@Traced("custom span name", context: .topLevel, ofKind: .client, span: "customSpan")
+func exampleWithParams(span: Int) {
+    customSpan.attributes["span"] = span + 1
 }
 
 #endif
