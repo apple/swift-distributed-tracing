@@ -30,9 +30,28 @@ public struct TracedMacro: BodyMacro {
         }
 
         // Construct a withSpan call matching the invocation of the @Traced macro
+        let (operationName, context, kind, spanName) = try extractArguments(from: node)
 
-        let operationName = StringLiteralExprSyntax(content: function.name.text)
-        let withSpanCall: ExprSyntax = "withSpan(\(operationName))"
+        var withSpanCall = FunctionCallExprSyntax("withSpan()" as ExprSyntax)!
+        withSpanCall.arguments.append(LabeledExprSyntax(
+            expression: operationName ?? ExprSyntax(StringLiteralExprSyntax(content: function.name.text))))
+        func appendComma() {
+            withSpanCall.arguments[withSpanCall.arguments.index(before: withSpanCall.arguments.endIndex)].trailingComma = .commaToken()
+        }
+        if let context {
+            appendComma()
+            withSpanCall.arguments.append(LabeledExprSyntax(label: "context", expression: context))
+        }
+        if let kind {
+            appendComma()
+            withSpanCall.arguments.append(LabeledExprSyntax(label: "ofKind", expression: kind))
+        }
+
+        // Introduce a span identifier in scope
+        var spanIdentifier: TokenSyntax = "span"
+        if let spanName {
+            spanIdentifier = .identifier(spanName)
+        }
 
         // We want to explicitly specify the closure effect specifiers in order
         // to avoid warnings about unused try/await expressions.
@@ -47,7 +66,7 @@ public struct TracedMacro: BodyMacro {
             throwsClause?.throwsSpecifier = .keyword(.throws)
         }
         var withSpanExpr: ExprSyntax = """
-        \(withSpanCall) { span \(asyncClause)\(throwsClause)\(returnClause)in \(body.statements) }
+        \(withSpanCall) { \(spanIdentifier) \(asyncClause)\(throwsClause)\(returnClause)in \(body.statements) }
         """
 
         // Apply a try / await as necessary to adapt the withSpan expression
@@ -62,6 +81,58 @@ public struct TracedMacro: BodyMacro {
 
         return ["\(withSpanExpr)"]
     }
+
+    static func extractArguments(
+        from node: AttributeSyntax
+    ) throws -> (
+        operationName: ExprSyntax?,
+        context: ExprSyntax?,
+        kind: ExprSyntax?,
+        spanName: String?
+    ) {
+        // If there are no arguments, we don't have to do any of these bindings
+        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
+            return (nil, nil, nil, nil)
+        }
+
+        func getArgument(label: String) -> ExprSyntax? {
+            arguments.first(where: { $0.label?.identifier?.name == label })?.expression
+        }
+
+        // The operation name is the first argument if it's unlabeled
+        var operationName: ExprSyntax?
+        if let firstArgument = arguments.first, firstArgument.label == nil {
+            operationName = firstArgument.expression
+        }
+
+        let context = getArgument(label: "context")
+        let kind = getArgument(label: "ofKind")
+        var spanName: String?
+        let spanNameExpr = getArgument(label: "span")
+        if let spanNameExpr {
+            guard let stringLiteral = spanNameExpr.as(StringLiteralExprSyntax.self),
+                  stringLiteral.segments.count == 1,
+                  let segment = stringLiteral.segments.first,
+                  let segmentText = segment.as(StringSegmentSyntax.self)
+            else {
+                throw MacroExpansionErrorMessage("span name must be a simple string literal")
+            }
+            let text = segmentText.content.text
+            let isValidIdentifier = DeclReferenceExprSyntax("\(raw: text)" as ExprSyntax)?.hasError == false
+            let isValidWildcard = text == "_"
+            guard isValidIdentifier || isValidWildcard else {
+                throw MacroExpansionErrorMessage("'\(text)' is not a valid parameter name")
+            }
+            spanName = text
+        }
+        return (
+            operationName: operationName,
+            context: context,
+            kind: kind,
+            spanName: spanName,
+        )
+    }
+
 }
 #endif
 
