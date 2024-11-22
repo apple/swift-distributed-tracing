@@ -1,7 +1,3 @@
-import SwiftSyntaxMacrosTestSupport
-import Tracing
-import TracingMacros
-import TracingMacrosImplementation
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift Distributed Tracing open source project
@@ -15,6 +11,11 @@ import TracingMacrosImplementation
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
+import SwiftSyntaxMacrosTestSupport
+import Tracing
+import TracingMacros
+import TracingMacrosImplementation
 import XCTest
 
 #if compiler(>=6.0)
