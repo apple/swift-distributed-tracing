@@ -1,3 +1,7 @@
+import SwiftSyntaxMacrosTestSupport
+import Tracing
+import TracingMacros
+import TracingMacrosImplementation
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift Distributed Tracing open source project
@@ -12,11 +16,6 @@
 //
 //===----------------------------------------------------------------------===//
 import XCTest
-import SwiftSyntaxMacrosTestSupport
-
-import Tracing
-import TracingMacros
-import TracingMacrosImplementation
 
 #if compiler(>=6.0)
 
@@ -28,10 +27,10 @@ final class TracedMacroTests: XCTestCase {
             func funcWithoutBody()
             """,
             expandedSource: """
-            func funcWithoutBody()
-            """,
+                func funcWithoutBody()
+                """,
             diagnostics: [
-                .init(message: "expected a function with a body", line: 1, column: 1),
+                .init(message: "expected a function with a body", line: 1, column: 1)
             ],
             macros: ["Traced": TracedMacro.self]
         )
@@ -46,12 +45,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func syncNonthrowingExample(param: Int) {
-                withSpan("syncNonthrowingExample") { span in
-                    print(param)
+                func syncNonthrowingExample(param: Int) {
+                    withSpan("syncNonthrowingExample") { span in
+                        print(param)
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -67,14 +66,14 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func syncThrowingExample(param: Int) throws {
-                try withSpan("syncThrowingExample") { span throws in
-                    struct ExampleError: Error {
+                func syncThrowingExample(param: Int) throws {
+                    try withSpan("syncThrowingExample") { span throws in
+                        struct ExampleError: Error {
+                        }
+                        throw ExampleError()
                     }
-                    throw ExampleError()
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -91,15 +90,15 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func syncRethrowingExample(body: () throws -> Int) rethrows -> Int {
-                try withSpan("syncRethrowingExample") { span throws -> Int in
-                    print("Starting")
-                    let result = try body()
-                    print("Ending")
-                    return result
+                func syncRethrowingExample(body: () throws -> Int) rethrows -> Int {
+                    try withSpan("syncRethrowingExample") { span throws -> Int in
+                        print("Starting")
+                        let result = try body()
+                        print("Ending")
+                        return result
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -113,12 +112,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func asyncNonthrowingExample(param: Int) async {
-                await withSpan("asyncNonthrowingExample") { span async in
-                    print(param)
+                func asyncNonthrowingExample(param: Int) async {
+                    await withSpan("asyncNonthrowingExample") { span async in
+                        print(param)
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -133,13 +132,13 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func asyncThrowingExample(param: Int) async throws {
-                try await withSpan("asyncThrowingExample") { span async throws in
-                    try await Task.sleep(for: .seconds(1))
-                    print("Hello")
+                func asyncThrowingExample(param: Int) async throws {
+                    try await withSpan("asyncThrowingExample") { span async throws in
+                        try await Task.sleep(for: .seconds(1))
+                        print("Hello")
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -156,15 +155,15 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func asyncRethrowingExample(body: () async throws -> Int) async rethrows -> Int {
-                try await withSpan("asyncRethrowingExample") { span async throws -> Int in
-                    try? await Task.sleep(for: .seconds(1))
-                    let result = try await body()
-                    span.attributes["result"] = result
-                    return result
+                func asyncRethrowingExample(body: () async throws -> Int) async rethrows -> Int {
+                    try await withSpan("asyncRethrowingExample") { span async throws -> Int in
+                        try? await Task.sleep(for: .seconds(1))
+                        let result = try await body()
+                        span.attributes["result"] = result
+                        return result
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -183,15 +182,15 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func asyncTypedThrowingExample<Err>(body: () async throws(Err) -> Int) async throws(Err) -> Int {
-                try await withSpan("asyncTypedThrowingExample") { span async throws(Err) -> Int in
-                    try? await Task.sleep(for: .seconds(1))
-                    let result = try await body()
-                    span.attributes["result"] = result
-                    return result
+                func asyncTypedThrowingExample<Err>(body: () async throws(Err) -> Int) async throws(Err) -> Int {
+                    try await withSpan("asyncTypedThrowingExample") { span async throws(Err) -> Int in
+                        try? await Task.sleep(for: .seconds(1))
+                        let result = try await body()
+                        span.attributes["result"] = result
+                        return result
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -205,12 +204,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(param: Int) {
-                withSpan("example") { span in
-                    span.attributes["param"] = param
+                func example(param: Int) {
+                    withSpan("example") { span in
+                        span.attributes["param"] = param
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -224,12 +223,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(param: Int) {
-                withSpan("example but with a custom operationName") { span in
-                    span.attributes["param"] = param
+                func example(param: Int) {
+                    withSpan("example but with a custom operationName") { span in
+                        span.attributes["param"] = param
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
 
@@ -243,13 +242,13 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            let globalName = "example"
-            func example(param: Int) {
-                withSpan(globalName) { span in
-                    span.attributes["param"] = param
+                let globalName = "example"
+                func example(param: Int) {
+                    withSpan(globalName) { span in
+                        span.attributes["param"] = param
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -263,12 +262,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example() {
-                withSpan("example", context: .topLevel) { span in
-                    print("Hello")
+                func example() {
+                    withSpan("example", context: .topLevel) { span in
+                        print("Hello")
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -282,12 +281,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example() {
-                withSpan("example", ofKind: .client) { span in
-                    print("Hello")
+                func example() {
+                    withSpan("example", ofKind: .client) { span in
+                        print("Hello")
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -301,12 +300,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: String) throws {
-                try withSpan("example") { customSpan throws in
-                    customSpan.attributes["span"] = span
+                func example(span: String) throws {
+                    try withSpan("example") { customSpan throws in
+                        customSpan.attributes["span"] = span
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
 
@@ -318,12 +317,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: String) {
-                withSpan("example") { _ in
-                    print(span)
+                func example(span: String) {
+                    withSpan("example") { _ in
+                        print(span)
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
@@ -337,12 +336,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: String) throws {
-                customSpan.attributes["span"] = span
-            }
-            """,
+                func example(span: String) throws {
+                    customSpan.attributes["span"] = span
+                }
+                """,
             diagnostics: [
-                .init(message: "span name must be a simple string literal", line: 1, column: 1),
+                .init(message: "span name must be a simple string literal", line: 1, column: 1)
             ],
             macros: ["Traced": TracedMacro.self]
         )
@@ -360,13 +359,13 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: String) throws {
-                customSpan.attributes["span"] = span
-            }
-            func example2(span: String) throws {
-                customSpan.attributes["span"] = span
-            }
-            """,
+                func example(span: String) throws {
+                    customSpan.attributes["span"] = span
+                }
+                func example2(span: String) throws {
+                    customSpan.attributes["span"] = span
+                }
+                """,
             diagnostics: [
                 .init(message: "'invalid name' is not a valid parameter name", line: 1, column: 1),
                 .init(message: "'123' is not a valid parameter name", line: 6, column: 1),
@@ -382,12 +381,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: String) throws {
-                customSpan.attributes["span"] = span
-            }
-            """,
+                func example(span: String) throws {
+                    customSpan.attributes["span"] = span
+                }
+                """,
             diagnostics: [
-                .init(message: "span name must be a simple string literal", line: 1, column: 1),
+                .init(message: "span name must be a simple string literal", line: 1, column: 1)
             ],
             macros: ["Traced": TracedMacro.self]
         )
@@ -402,12 +401,12 @@ final class TracedMacroTests: XCTestCase {
             }
             """,
             expandedSource: """
-            func example(span: Int) {
-                withSpan("custom span name", context: .topLevel, ofKind: .client) { customSpan in
-                    customSpan.attributes["span"] = span + 1
+                func example(span: Int) {
+                    withSpan("custom span name", context: .topLevel, ofKind: .client) { customSpan in
+                        customSpan.attributes["span"] = span + 1
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Traced": TracedMacro.self]
         )
     }
