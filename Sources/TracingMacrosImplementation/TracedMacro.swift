@@ -24,7 +24,7 @@ public struct TracedMacro: BodyMacro {
         in context: some MacroExpansionContext
     ) throws -> [CodeBlockItemSyntax] {
         guard let function = declaration.as(FunctionDeclSyntax.self),
-              let body = function.body
+            let body = function.body
         else {
             throw MacroExpansionErrorMessage("expected a function with a body")
         }
@@ -33,10 +33,14 @@ public struct TracedMacro: BodyMacro {
         let (operationName, context, kind, spanName) = try extractArguments(from: node)
 
         var withSpanCall = FunctionCallExprSyntax("withSpan()" as ExprSyntax)!
-        withSpanCall.arguments.append(LabeledExprSyntax(
-            expression: operationName ?? ExprSyntax(StringLiteralExprSyntax(content: function.name.text))))
+        withSpanCall.arguments.append(
+            LabeledExprSyntax(
+                expression: operationName ?? ExprSyntax(StringLiteralExprSyntax(content: function.name.text))
+            )
+        )
         func appendComma() {
-            withSpanCall.arguments[withSpanCall.arguments.index(before: withSpanCall.arguments.endIndex)].trailingComma = .commaToken()
+            withSpanCall.arguments[withSpanCall.arguments.index(before: withSpanCall.arguments.endIndex)]
+                .trailingComma = .commaToken()
         }
         if let context {
             appendComma()
@@ -66,8 +70,8 @@ public struct TracedMacro: BodyMacro {
             throwsClause?.throwsSpecifier = .keyword(.throws)
         }
         var withSpanExpr: ExprSyntax = """
-        \(withSpanCall) { \(spanIdentifier) \(asyncClause)\(throwsClause)\(returnClause)in \(body.statements) }
-        """
+            \(withSpanCall) { \(spanIdentifier) \(asyncClause)\(throwsClause)\(returnClause)in \(body.statements) }
+            """
 
         // Apply a try / await as necessary to adapt the withSpan expression
 
@@ -111,9 +115,9 @@ public struct TracedMacro: BodyMacro {
         let spanNameExpr = getArgument(label: "span")
         if let spanNameExpr {
             guard let stringLiteral = spanNameExpr.as(StringLiteralExprSyntax.self),
-                  stringLiteral.segments.count == 1,
-                  let segment = stringLiteral.segments.first,
-                  let segmentText = segment.as(StringSegmentSyntax.self)
+                stringLiteral.segments.count == 1,
+                let segment = stringLiteral.segments.first,
+                let segmentText = segment.as(StringSegmentSyntax.self)
             else {
                 throw MacroExpansionErrorMessage("span name must be a simple string literal")
             }
@@ -138,11 +142,11 @@ public struct TracedMacro: BodyMacro {
 
 @main
 struct TracingMacroPlugin: CompilerPlugin {
-#if compiler(>=6.0)
+    #if compiler(>=6.0)
     let providingMacros: [Macro.Type] = [
-        TracedMacro.self,
+        TracedMacro.self
     ]
-#else
+    #else
     let providingMacros: [Macro.Type] = []
-#endif
+    #endif
 }

@@ -1,6 +1,6 @@
 // swift-tools-version:5.9
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
     name: "swift-distributed-tracing",
