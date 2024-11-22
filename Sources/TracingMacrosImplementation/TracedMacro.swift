@@ -129,7 +129,7 @@ public struct TracedMacro: BodyMacro {
             operationName: operationName,
             context: context,
             kind: kind,
-            spanName: spanName,
+            spanName: spanName
         )
     }
 
