@@ -31,13 +31,20 @@ public struct TracedMacro: BodyMacro {
 
         // Construct a withSpan call matching the invocation of the @Traced macro
         let (operationName, context, kind, spanName) = try extractArguments(from: node)
+        let baseNameExpr = ExprSyntax(StringLiteralExprSyntax(content: function.name.text))
 
         var withSpanCall = FunctionCallExprSyntax("withSpan()" as ExprSyntax)!
-        withSpanCall.arguments.append(
-            LabeledExprSyntax(
-                expression: operationName ?? ExprSyntax(StringLiteralExprSyntax(content: function.name.text))
-            )
-        )
+        let operationNameExpr: ExprSyntax
+        if let operationName {
+            if operationName.is(StringLiteralExprSyntax.self) {
+                operationNameExpr = operationName
+            } else {
+                operationNameExpr = "TracedOperationName._getOperationName(\(operationName), baseName: \(baseNameExpr))"
+            }
+        } else {
+            operationNameExpr = baseNameExpr
+        }
+        withSpanCall.arguments.append(LabeledExprSyntax(expression: operationNameExpr))
         func appendComma() {
             withSpanCall.arguments[withSpanCall.arguments.index(before: withSpanCall.arguments.endIndex)]
                 .trailingComma = .commaToken()

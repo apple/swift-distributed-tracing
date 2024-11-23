@@ -18,9 +18,8 @@ import TracingMacros
 import TracingMacrosImplementation
 import XCTest
 
-#if compiler(>=6.0)
-
 final class TracedMacroTests: XCTestCase {
+    #if compiler(>=6.0)
     func test_tracedMacro_requires_body() {
         assertMacroExpansion(
             """
@@ -237,7 +236,7 @@ final class TracedMacroTests: XCTestCase {
             """
             let globalName = "example"
 
-            @Traced(globalName)
+            @Traced(.string(globalName))
             func example(param: Int) {
                 span.attributes["param"] = param
             }
@@ -245,7 +244,41 @@ final class TracedMacroTests: XCTestCase {
             expandedSource: """
                 let globalName = "example"
                 func example(param: Int) {
-                    withSpan(globalName) { span in
+                    withSpan(TracedOperationName._getOperationName(.string(globalName), baseName: "example")) { span in
+                        span.attributes["param"] = param
+                    }
+                }
+                """,
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            @Traced(.baseName)
+            func useBaseName(param: Int) {
+                span.attributes["param"] = param
+            }
+            """,
+            expandedSource: """
+                func useBaseName(param: Int) {
+                    withSpan(TracedOperationName._getOperationName(.baseName, baseName: "useBaseName")) { span in
+                        span.attributes["param"] = param
+                    }
+                }
+                """,
+            macros: ["Traced": TracedMacro.self]
+        )
+
+        assertMacroExpansion(
+            """
+            @Traced(.fullName)
+            func useFullName(param: Int) {
+                span.attributes["param"] = param
+            }
+            """,
+            expandedSource: """
+                func useFullName(param: Int) {
+                    withSpan(TracedOperationName._getOperationName(.fullName, baseName: "useFullName")) { span in
                         span.attributes["param"] = param
                     }
                 }
@@ -411,7 +444,30 @@ final class TracedMacroTests: XCTestCase {
             macros: ["Traced": TracedMacro.self]
         )
     }
+
+    #endif
+
+    func test_operationNameBehavior() {
+        XCTAssertEqual(
+            TracedOperationName._getOperationName("example custom", baseName: "test_operationNameBehavior"),
+            "example custom"
+        )
+        XCTAssertEqual(
+            TracedOperationName._getOperationName(.string("example literal"), baseName: "test_operationNameBehavior"),
+            "example literal"
+        )
+        XCTAssertEqual(
+            TracedOperationName._getOperationName(.baseName, baseName: "test_operationNameBehavior"),
+            "test_operationNameBehavior"
+        )
+        XCTAssertEqual(
+            TracedOperationName._getOperationName(.fullName, baseName: "test_operationNameBehavior"),
+            "test_operationNameBehavior()"
+        )
+    }
 }
+
+#if compiler(>=6.0)
 
 // MARK: Compile tests
 
@@ -455,6 +511,23 @@ func asyncRethrowingExample(body: () async throws -> Int) async rethrows -> Int 
 
 @Traced
 func example(param: Int) {
+    span.attributes["param"] = param
+}
+
+let globalName = "example"
+
+@Traced(.string(globalName))
+func withDynamicOperationName(param: Int) {
+    span.attributes["param"] = param
+}
+
+@Traced(.baseName)
+func useBaseName(param: Int) {
+    span.attributes["param"] = param
+}
+
+@Traced(.fullName)
+func useFullName(param: Int) {
     span.attributes["param"] = param
 }
 
