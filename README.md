@@ -39,7 +39,7 @@ As this API package was just released, no projects have yet fully adopted it, th
 | HTTP Servers/Frameworks  | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
-| [Vapor](https://github.com/vapor/vapor) | Tracing | [Support planned](https://github.com/vapor/vapor/issues/3033) |
+| [Vapor](https://github.com/vapor/vapor) | Tracing | 🟢 Built-in support |
 | _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
