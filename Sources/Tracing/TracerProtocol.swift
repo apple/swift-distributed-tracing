@@ -59,6 +59,14 @@ public protocol Tracer: LegacyTracer {
         file fileID: String,
         line: UInt
     ) -> Self.Span
+
+    /// Retrieve the recording span for the given `ServiceContext`.
+    ///
+    /// - Note: This API does not enable look up of already finished spans.
+    /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all `Tracer`s.
+    /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
+    /// - Returns: The span identified by the given `ServiceContext` in case it's still recording.
+    func recordingSpan(identifiedBy context: ServiceContext) -> Span?
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
@@ -105,6 +113,24 @@ extension Tracer {
             file: fileID,
             line: line
         )
+    }
+
+    /// Default implementation for ``recordingSpan(identifiedBy:)`` which always returns `nil`.
+    /// This default exists in order to facilitate source-compatible introduction of the ``recordingSpan(identifiedBy:)`` protocol requirement.
+    ///
+    /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
+    /// - Returns: `nil`.
+    public func recordingSpan(identifiedBy context: ServiceContext) -> Span? {
+        nil
+    }
+
+    /// Attempt to retrieve the current recording span based on the task-local `ServiceContext`.
+    ///
+    /// - Note: This method should be considered best-effort as it might not (yet) be supported by the application author's `Tracer` of choice.
+    /// - Returns: A span if one can be obtained via the task-local `ServiceContext`.
+    public func currentSpan() -> Span? {
+        guard let context = ServiceContext.current else { return nil }
+        return recordingSpan(identifiedBy: context)
     }
 }
 
