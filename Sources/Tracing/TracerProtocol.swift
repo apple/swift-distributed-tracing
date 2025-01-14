@@ -123,15 +123,6 @@ extension Tracer {
     public func recordingSpan(identifiedBy context: ServiceContext) -> Span? {
         nil
     }
-
-    /// Attempt to retrieve the current recording span based on the task-local `ServiceContext`.
-    ///
-    /// - Note: This method should be considered best-effort as it might not (yet) be supported by the application author's `Tracer` of choice.
-    /// - Returns: A span if one can be obtained via the task-local `ServiceContext`.
-    public func currentSpan() -> Span? {
-        guard let context = ServiceContext.current else { return nil }
-        return recordingSpan(identifiedBy: context)
-    }
 }
 
 // ==== ----------------------------------------------------------------------------------------------------------------
