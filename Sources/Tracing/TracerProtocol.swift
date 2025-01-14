@@ -66,7 +66,7 @@ public protocol Tracer: LegacyTracer {
     /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all `Tracer`s.
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
     /// - Returns: The span identified by the given `ServiceContext` in case it's still recording.
-    func recordingSpan(identifiedBy context: ServiceContext) -> Span?
+    func activeSpan(identifiedBy context: ServiceContext) -> Span?
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
@@ -115,12 +115,12 @@ extension Tracer {
         )
     }
 
-    /// Default implementation for ``recordingSpan(identifiedBy:)`` which always returns `nil`.
-    /// This default exists in order to facilitate source-compatible introduction of the ``recordingSpan(identifiedBy:)`` protocol requirement.
+    /// Default implementation for ``activeSpan(identifiedBy:)`` which always returns `nil`.
+    /// This default exists in order to facilitate source-compatible introduction of the ``activeSpan(identifiedBy:)`` protocol requirement.
     ///
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
     /// - Returns: `nil`.
-    public func recordingSpan(identifiedBy context: ServiceContext) -> Span? {
+    public func activeSpan(identifiedBy context: ServiceContext) -> Span? {
         nil
     }
 }
