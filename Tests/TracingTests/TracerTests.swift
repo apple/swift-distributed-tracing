@@ -18,7 +18,7 @@ import XCTest
 
 @testable @_spi(Locking) import Instrumentation
 
-#if os(Linux)
+#if os(Linux) || os(Android)
 @preconcurrency import Dispatch
 #endif
 
