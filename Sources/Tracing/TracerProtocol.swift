@@ -60,7 +60,7 @@ public protocol Tracer: LegacyTracer {
         line: UInt
     ) -> Self.Span
 
-    /// Retrieve the recording span for the given `ServiceContext`.
+    /// Retrieve the active span for the given `ServiceContext`.
     ///
     /// - Note: This API does not enable look up of already finished spans.
     /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all `Tracer`s.
