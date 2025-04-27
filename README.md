@@ -27,7 +27,7 @@ Compatible `Tracer` implementations:
 
 | Library | Status                     | Description |
 | ------- |----------------------------| ----------- |
-| [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
+| [@swift-otel](https://github.com/swift-otel) / [Swift **OTel**](https://github.com/swift-otel/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
 | _Your library?_ | ...                        | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
