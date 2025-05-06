@@ -35,6 +35,7 @@ let package = Package(
             dependencies: [
                 .product(name: "ServiceContextModule", package: "swift-service-context"),
                 .target(name: "Instrumentation"),
+                .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
             ]
         ),
         .testTarget(
@@ -43,6 +44,16 @@ let package = Package(
                 .target(name: "Tracing")
             ]
         ),
+
+        // ==== --------------------------------------------------------------------------------------------------------
+        // MARK: Wasm Support
+
+        // Provides C shims for compiling to wasm
+        .target(
+            name: "_CWASI",
+            dependencies: []
+        ),
+
     ]
 )
 

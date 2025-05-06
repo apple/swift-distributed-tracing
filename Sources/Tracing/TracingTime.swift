@@ -90,7 +90,11 @@ public struct DefaultTracerClock {
 
     public var now: Self.Instant {
         var ts = timespec()
-        clock_gettime(CLOCK_REALTIME, &ts)
+        #if os(WASI)
+            CWASI_clock_gettime_realtime(&ts)
+        #else
+            clock_gettime(CLOCK_REALTIME, &ts)
+        #endif
         /// We use unsafe arithmetic here because `UInt64.max` nanoseconds is more than 580 years,
         /// and the odds that this code will still be running 530 years from now is very, very low,
         /// so as a practical matter this will never overflow.
