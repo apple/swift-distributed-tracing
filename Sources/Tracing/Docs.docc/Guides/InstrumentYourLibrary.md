@@ -209,7 +209,7 @@ While this code is very simple for illustration purposes, and it may seem surpri
 
 #### Manual propogation
 
-There are circumstances where `task-local` variables are interrupted during normal execution flow. One common instance is when using
+There are circumstances where [task-local variable](https://developer.apple.com/documentation/swift/tasklocal) propagation may be interrupted. One common instance is when using
 [`swift-nio`](https://github.com/apple/swift-nio)'s [`EventLoopFuture`](https://swiftpackageindex.com/apple/swift-nio/main/documentation/niocore/eventloopfuture) to chain asynchronous work. In these circumstances, the library can manually propogate the context metadata by taking the context of the parent span, and providing it into the `context` argument of the child span:
 
 ```swift
