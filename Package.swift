@@ -53,7 +53,6 @@ let package = Package(
             name: "_CWASI",
             dependencies: []
         ),
-
     ]
 )
 

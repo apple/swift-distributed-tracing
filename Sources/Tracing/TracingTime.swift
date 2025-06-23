@@ -24,13 +24,13 @@ import Android
 #elseif canImport(Musl)
 import Musl
 #elseif canImport(WASILibc)
-import WASILibc
+    import WASILibc
 #else
 #error("Unsupported runtime")
 #endif
 
 #if canImport(_CWASI)
-import _CWASI
+    import _CWASI
 #endif
 
 public protocol TracerInstant: Comparable, Hashable, Sendable {
