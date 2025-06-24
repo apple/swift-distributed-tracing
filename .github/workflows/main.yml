@@ -30,3 +30,9 @@ jobs:
     uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
     with:
       build_scheme: swift-distributed-tracing-Package
+
+  wasm-sdk:
+    name: WebAssembly SDK
+    # TODO: Switch to this line after https://github.com/apple/swift-nio/pull/3159/ is merged
+    # uses: apple/swift-nio/.github/workflows/wasm_sdk.yml@main
+    uses: kateinoigakukun/swift-nio/.github/workflows/wasm_sdk.yml@katei/add-wasm-ci
