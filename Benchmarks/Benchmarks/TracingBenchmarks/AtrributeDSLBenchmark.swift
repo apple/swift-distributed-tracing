@@ -33,7 +33,7 @@ let benchmarks = {
     }
 
     Benchmark(
-        "NoopTracing.attribute: set, span.attributes['http.status_code'] = 200",
+        "NoopTracing.attribute. set, span.attributes['http.status_code'] = 200",
         configuration: .init(
             metrics: defaultMetrics,
             timeUnits: .nanoseconds,
@@ -46,7 +46,7 @@ let benchmarks = {
     }
 
     Benchmark(
-        "NoopTracing.attribute: set, span.attributes.http.status_code = 200",
+        "NoopTracing.attribute. set, span.attributes.http.status_code = 200",
         configuration: .init(
             metrics: defaultMetrics,
             timeUnits: .nanoseconds,
