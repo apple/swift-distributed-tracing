@@ -24,13 +24,13 @@ import Android
 #elseif canImport(Musl)
 import Musl
 #elseif canImport(WASILibc)
-    import WASILibc
+import WASILibc
 #else
 #error("Unsupported runtime")
 #endif
 
 #if canImport(_CWASI)
-    import _CWASI
+import _CWASI
 #endif
 
 public protocol TracerInstant: Comparable, Hashable, Sendable {
@@ -91,9 +91,9 @@ public struct DefaultTracerClock {
     public var now: Self.Instant {
         var ts = timespec()
         #if os(WASI)
-            CWASI_clock_gettime_realtime(&ts)
+        CWASI_clock_gettime_realtime(&ts)
         #else
-            clock_gettime(CLOCK_REALTIME, &ts)
+        clock_gettime(CLOCK_REALTIME, &ts)
         #endif
         /// We use unsafe arithmetic here because `UInt64.max` nanoseconds is more than 580 years,
         /// and the odds that this code will still be running 530 years from now is very, very low,
