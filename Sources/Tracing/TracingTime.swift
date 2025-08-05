@@ -29,7 +29,7 @@ import WASILibc
 #error("Unsupported runtime")
 #endif
 
-#if canImport(_CWASI)
+#if os(WASI)
 import _CWASI
 #endif
 
