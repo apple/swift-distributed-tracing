@@ -17,7 +17,7 @@ jobs:
     name: Unit tests
     uses: apple/swift-nio/.github/workflows/unit_tests.yml@main
     with:
-      
+
       # NOTE: Aug 5, 2025. We've determined SPM has bugs for `condition: .when(platforms: [.somePlatform])`
       # that incorrectly ignore the condition and import anyways for unintended platforms.
       #
