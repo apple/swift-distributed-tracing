@@ -34,6 +34,11 @@ import Glibc
 import Android
 #elseif canImport(Musl)
 import Musl
+#elseif canImport(WASILibc)
+import WASILibc
+#if canImport(wasi_pthread)
+import wasi_pthread
+#endif
 #else
 #error("Unsupported runtime")
 #endif
