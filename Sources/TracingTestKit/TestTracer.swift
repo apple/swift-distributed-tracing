@@ -78,11 +78,11 @@ public struct TestTracer: Tracer {
     }
 
     public var numberOfForceFlushes: Int {
-        _numberOfForceFlushes.withValue(\.self)
+        _numberOfForceFlushes.withValue { $0 }
     }
 
     public var finishedSpans: [FinishedTestSpan] {
-        _finishedSpans.withValue(\.self)
+        _finishedSpans.withValue { $0 }
     }
 
     private let _activeSpans = LockedValueBox<[TestSpanContext: TestSpan]>([:])
@@ -113,7 +113,7 @@ public struct TestTracer: Tracer {
     }
 
     public var injections: [Injection] {
-        _injections.withValue(\.self)
+        _injections.withValue { $0 }
     }
 
     public func extract<Carrier, Extract: Extractor>(
@@ -136,7 +136,7 @@ public struct TestTracer: Tracer {
     }
 
     public var extractions: [Extraction] {
-        _extractions.withValue(\.self)
+        _extractions.withValue { $0 }
     }
 
     public struct Injection: Sendable {
