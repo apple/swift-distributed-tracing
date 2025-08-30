@@ -35,12 +35,12 @@ public struct TestSpan: Span {
     }
 
     public var isRecording: Bool {
-        _isRecording.withValue(\.self)
+        _isRecording.withValue { $0 }
     }
 
     public var operationName: String {
         get {
-            _operationName.withValue(\.self)
+            _operationName.withValue { $0 }
         }
         nonmutating set {
             assertIsRecording()
@@ -50,7 +50,7 @@ public struct TestSpan: Span {
 
     public var attributes: SpanAttributes {
         get {
-            _attributes.withValue(\.self)
+            _attributes.withValue { $0 }
         }
         nonmutating set {
             assertIsRecording()
@@ -59,7 +59,7 @@ public struct TestSpan: Span {
     }
 
     public var events: [SpanEvent] {
-        _events.withValue(\.self)
+        _events.withValue { $0 }
     }
 
     public func addEvent(_ event: SpanEvent) {
@@ -68,7 +68,7 @@ public struct TestSpan: Span {
     }
 
     public var links: [SpanLink] {
-        _links.withValue(\.self)
+        _links.withValue { $0 }
     }
 
     public func addLink(_ link: SpanLink) {
@@ -77,7 +77,7 @@ public struct TestSpan: Span {
     }
 
     public var errors: [RecordedError] {
-        _errors.withValue(\.self)
+        _errors.withValue { $0 }
     }
 
     public func recordError(
@@ -92,7 +92,7 @@ public struct TestSpan: Span {
     }
 
     public var status: SpanStatus? {
-        _status.withValue(\.self)
+        _status.withValue { $0 }
     }
 
     public func setStatus(_ status: SpanStatus) {
@@ -138,7 +138,7 @@ public struct TestSpan: Span {
         line: UInt = #line
     ) {
         assert(
-            _isRecording.withValue(\.self) == true,
+            _isRecording.withValue { $0 } == true,
             "Attempted to mutate already ended span.",
             file: file,
             line: line
