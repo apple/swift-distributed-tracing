@@ -272,6 +272,7 @@ struct TestTracerTests {
                 operationName: "stub",
                 context: .topLevel,
                 spanContext: spanContext,
+                kind: .internal,
                 startInstant: startInstant,
                 onEnd: { span in
                     _finishedSpan.withValue { $0 = span }
@@ -449,6 +450,7 @@ extension TestSpan {
             operationName: "stub",
             context: .topLevel,
             spanContext: TestSpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil),
+            kind: .internal,
             startInstant: DefaultTracerClock().now,
             onEnd: { _ in }
         )

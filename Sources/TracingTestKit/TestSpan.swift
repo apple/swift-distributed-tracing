@@ -18,18 +18,21 @@ import Tracing
 public struct TestSpan: Span {
     public let context: ServiceContext
     public let spanContext: TestSpanContext
+    public let kind: SpanKind
     public let startInstant: any TracerInstant
 
     init(
         operationName: String,
         context: ServiceContext,
         spanContext: TestSpanContext,
+        kind: SpanKind,
         startInstant: any TracerInstant,
         onEnd: @escaping @Sendable (FinishedTestSpan) -> Void
     ) {
         self._operationName = LockedValueBox(operationName)
         self.context = context
         self.spanContext = spanContext
+        self.kind = kind
         self.startInstant = startInstant
         self.onEnd = onEnd
     }
@@ -105,6 +108,7 @@ public struct TestSpan: Span {
         let finishedSpan = FinishedTestSpan(
             operationName: operationName,
             context: context,
+            kind: kind,
             spanContext: spanContext,
             startInstant: startInstant,
             endInstant: instant(),
@@ -149,6 +153,7 @@ public struct TestSpan: Span {
 public struct FinishedTestSpan: Sendable {
     public let operationName: String
     public let context: ServiceContext
+    public let kind: SpanKind
     public let spanContext: TestSpanContext
     public let startInstant: any TracerInstant
     public let endInstant: any TracerInstant
