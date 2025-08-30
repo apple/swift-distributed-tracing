@@ -59,6 +59,7 @@ public struct TestTracer: Tracer {
             operationName: operationName,
             context: context,
             spanContext: spanContext,
+            kind: kind,
             startInstant: instant()
         ) { finishedSpan in
             _activeSpans.withValue { $0[spanContext] = nil }
