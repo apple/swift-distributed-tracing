@@ -441,6 +441,12 @@ extension Array where Element == Int {
     }
 }
 
+extension Array where Element == Int32 {
+    public func toSpanAttribute() -> SpanAttribute {
+        .int32Array(self)
+    }
+}
+
 extension Array where Element == Int64 {
     public func toSpanAttribute() -> SpanAttribute {
         .int64Array(self)
@@ -512,6 +518,12 @@ extension Int: SpanAttributeConvertible {
         } else {
             fatalError("Not supported int width: \(MemoryLayout<Int>.stride)")
         }
+    }
+}
+
+extension Int32: SpanAttributeConvertible {
+    public func toSpanAttribute() -> SpanAttribute {
+        .int32(self)
     }
 }
 
