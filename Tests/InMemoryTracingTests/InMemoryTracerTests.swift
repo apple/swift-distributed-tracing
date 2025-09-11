@@ -106,15 +106,15 @@ struct InMemoryTracerTests {
                 spanID: "stub",
                 parentSpanID: "stub"
             )
-            context.testSpanContext = spanContext
+            context.inMemorySpanContext = spanContext
 
             var values = [String: String]()
             tracer.inject(context, into: &values, using: DictionaryInjector())
 
             #expect(values == [InMemoryTracer.traceIDKey: "stub", InMemoryTracer.spanIDKey: "stub"])
 
-            let injection = try #require(tracer.injections.first)
-            #expect(injection.context.testSpanContext == spanContext)
+            let injection = try #require(tracer.performedContextInjections.first)
+            #expect(injection.context.inMemorySpanContext == spanContext)
             #expect(injection.values == values)
         }
 
@@ -128,8 +128,8 @@ struct InMemoryTracerTests {
 
             #expect(values.isEmpty)
 
-            let injection = try #require(tracer.injections.first)
-            #expect(injection.context.testSpanContext == nil)
+            let injection = try #require(tracer.performedContextInjections.first)
+            #expect(injection.context.inMemorySpanContext == nil)
             #expect(injection.values.isEmpty)
         }
 
@@ -141,13 +141,13 @@ struct InMemoryTracerTests {
             let values = [InMemoryTracer.traceIDKey: "stub", InMemoryTracer.spanIDKey: "stub"]
             tracer.extract(values, into: &context, using: DictionaryExtractor())
 
-            let spanContext = try #require(context.testSpanContext)
+            let spanContext = try #require(context.inMemorySpanContext)
 
             #expect(spanContext == InMemorySpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil))
 
-            let extraction = try #require(tracer.extractions.first)
+            let extraction = try #require(tracer.performedContextExtractions.first)
             #expect(extraction.carrier as? [String: String] == values)
-            #expect(extraction.context.testSpanContext == spanContext)
+            #expect(extraction.context.inMemorySpanContext == spanContext)
         }
 
         @Test("Does not extract span context without values but records extraction")
@@ -158,11 +158,11 @@ struct InMemoryTracerTests {
             let values = ["foo": "bar"]
             tracer.extract(values, into: &context, using: DictionaryExtractor())
 
-            #expect(context.testSpanContext == nil)
+            #expect(context.inMemorySpanContext == nil)
 
-            let extraction = try #require(tracer.extractions.first)
+            let extraction = try #require(tracer.performedContextExtractions.first)
             #expect(extraction.carrier as? [String: String] == values)
-            #expect(extraction.context.testSpanContext == nil)
+            #expect(extraction.context.inMemorySpanContext == nil)
         }
     }
 
@@ -212,18 +212,18 @@ struct InMemoryTracerTests {
 
             let spanContext1 = InMemorySpanContext(traceID: "1", spanID: "1", parentSpanID: nil)
             var context1 = ServiceContext.topLevel
-            context1.testSpanContext = spanContext1
+            context1.inMemorySpanContext = spanContext1
             span.addLink(SpanLink(context: context1, attributes: ["foo": "1"]))
             let link1 = try #require(span.links.first)
-            #expect(link1.context.testSpanContext == spanContext1)
+            #expect(link1.context.inMemorySpanContext == spanContext1)
             #expect(link1.attributes == ["foo": "1"])
 
             let spanContext2 = InMemorySpanContext(traceID: "2", spanID: "2", parentSpanID: nil)
             var context2 = ServiceContext.topLevel
-            context2.testSpanContext = spanContext2
+            context2.inMemorySpanContext = spanContext2
             span.addLink(SpanLink(context: context2, attributes: ["foo": "2"]))
             let link2 = try #require(span.links.last)
-            #expect(link2.context.testSpanContext == spanContext2)
+            #expect(link2.context.inMemorySpanContext == spanContext2)
             #expect(link2.attributes == ["foo": "2"])
         }
 
@@ -282,7 +282,7 @@ struct InMemoryTracerTests {
             span.addEvent("foo")
             let otherSpanContext = InMemorySpanContext(traceID: "other", spanID: "other", parentSpanID: nil)
             var otherContext = ServiceContext.topLevel
-            otherContext.testSpanContext = otherSpanContext
+            otherContext.inMemorySpanContext = otherSpanContext
             span.addLink(SpanLink(context: otherContext, attributes: [:]))
             struct TestError: Error {}
             span.recordError(TestError())
