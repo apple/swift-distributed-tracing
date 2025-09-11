@@ -15,19 +15,30 @@
 @_spi(Locking) import Instrumentation
 import Tracing
 
-public struct TestSpan: Span {
+/// A ``Span`` created by the ``InMemoryTracer`` that will be retained in memory when ended.
+/// See ``InMemoryTracer/
+public struct InMemorySpan: Span {
     public let context: ServiceContext
-    public let spanContext: TestSpanContext
+    public let spanContext: InMemorySpanContext
     public let kind: SpanKind
     public let startInstant: any TracerInstant
 
-    init(
+    private let _operationName: LockedValueBox<String>
+    private let _attributes = LockedValueBox<SpanAttributes>([:])
+    private let _events = LockedValueBox<[SpanEvent]>([])
+    private let _links = LockedValueBox<[SpanLink]>([])
+    private let _errors = LockedValueBox<[RecordedError]>([])
+    private let _status = LockedValueBox<SpanStatus?>(nil)
+    private let _isRecording = LockedValueBox<Bool>(true)
+    private let onEnd: @Sendable (FinishedInMemorySpan) -> Void
+
+    public init(
         operationName: String,
         context: ServiceContext,
-        spanContext: TestSpanContext,
+        spanContext: InMemorySpanContext,
         kind: SpanKind,
         startInstant: any TracerInstant,
-        onEnd: @escaping @Sendable (FinishedTestSpan) -> Void
+        onEnd: @escaping @Sendable (FinishedInMemorySpan) -> Void
     ) {
         self._operationName = LockedValueBox(operationName)
         self.context = context
@@ -105,7 +116,7 @@ public struct TestSpan: Span {
 
     public func end(at instant: @autoclosure () -> some TracerInstant) {
         assertIsRecording()
-        let finishedSpan = FinishedTestSpan(
+        let finishedSpan = FinishedInMemorySpan(
             operationName: operationName,
             context: context,
             kind: kind,
@@ -128,15 +139,6 @@ public struct TestSpan: Span {
         public let instant: any TracerInstant
     }
 
-    private let _operationName: LockedValueBox<String>
-    private let _attributes = LockedValueBox<SpanAttributes>([:])
-    private let _events = LockedValueBox<[SpanEvent]>([])
-    private let _links = LockedValueBox<[SpanLink]>([])
-    private let _errors = LockedValueBox<[RecordedError]>([])
-    private let _status = LockedValueBox<SpanStatus?>(nil)
-    private let _isRecording = LockedValueBox<Bool>(true)
-    private let onEnd: @Sendable (FinishedTestSpan) -> Void
-
     private func assertIsRecording(
         file: StaticString = #file,
         line: UInt = #line
@@ -150,16 +152,18 @@ public struct TestSpan: Span {
     }
 }
 
-public struct FinishedTestSpan: Sendable {
-    public let operationName: String
-    public let context: ServiceContext
-    public let kind: SpanKind
-    public let spanContext: TestSpanContext
-    public let startInstant: any TracerInstant
-    public let endInstant: any TracerInstant
-    public let attributes: SpanAttributes
-    public let events: [SpanEvent]
-    public let links: [SpanLink]
-    public let errors: [TestSpan.RecordedError]
-    public let status: SpanStatus?
+/// Represents a finished span (a ``Span`` that `end()` was called on)
+/// that was recorded by the ``InMemoryTracer``.
+public struct FinishedInMemorySpan: Sendable {
+    public var operationName: String
+    public var context: ServiceContext
+    public var kind: SpanKind
+    public var spanContext: InMemorySpanContext
+    public var startInstant: any TracerInstant
+    public var endInstant: any TracerInstant
+    public var attributes: SpanAttributes
+    public var events: [SpanEvent]
+    public var links: [SpanLink]
+    public var errors: [InMemorySpan.RecordedError]
+    public var status: SpanStatus?
 }

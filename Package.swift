@@ -6,7 +6,7 @@ let package = Package(
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
-        .library(name: "TracingTestKit", targets: ["TracingTestKit"]),
+        .library(name: "InMemoryTracing", targets: ["InMemoryTracing"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0")
@@ -46,15 +46,15 @@ let package = Package(
             ]
         ),
         .target(
-            name: "TracingTestKit",
+            name: "InMemoryTracing",
             dependencies: [
                 .target(name: "Tracing")
             ]
         ),
         .testTarget(
-            name: "TracingTestKitTests",
+            name: "InMemoryTracingTests",
             dependencies: [
-                .target(name: "TracingTestKit")
+                .target(name: "InMemoryTracing")
             ]
         ),
 

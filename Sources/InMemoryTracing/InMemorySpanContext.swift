@@ -14,7 +14,7 @@
 
 import ServiceContextModule
 
-public struct TestSpanContext: Sendable, Hashable {
+public struct InMemorySpanContext: Sendable, Hashable {
     public let traceID: String
     public let spanID: String
     public let parentSpanID: String?
@@ -27,16 +27,16 @@ public struct TestSpanContext: Sendable, Hashable {
 }
 
 extension ServiceContext {
-    var testSpanContext: TestSpanContext? {
+    var inMemorySpanContext: InMemorySpanContext? {
         get {
-            self[TestSpanContextKey.self]
+            self[InMemorySpanContextKey.self]
         }
         set {
-            self[TestSpanContextKey.self] = newValue
+            self[InMemorySpanContextKey.self] = newValue
         }
     }
 }
 
-private struct TestSpanContextKey: ServiceContextKey {
-    typealias Value = TestSpanContext
+struct InMemorySpanContextKey: ServiceContextKey {
+    typealias Value = InMemorySpanContext
 }

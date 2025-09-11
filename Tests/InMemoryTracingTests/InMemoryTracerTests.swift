@@ -16,13 +16,13 @@
 @_spi(Locking) import Instrumentation
 import Testing
 import Tracing
-@testable import TracingTestKit
+import InMemoryTracing
 
-@Suite("TestTracer")
-struct TestTracerTests {
+@Suite("InMemoryTracer")
+struct InMemoryTracerTests {
     @Test("Starts root span", arguments: [SpanKind.client, .consumer, .internal, .producer, .server])
     func rootSpan(kind: SpanKind) throws {
-        let tracer = TestTracer()
+        let tracer = InMemoryTracer()
         let clock = DefaultTracerClock()
 
         let startInstant = clock.now
@@ -35,7 +35,7 @@ struct TestTracerTests {
 
         #expect(span.isRecording == true)
         #expect(span.operationName == "root")
-        #expect(span.spanContext == TestSpanContext(traceID: "trace-1", spanID: "span-1", parentSpanID: nil))
+        #expect(span.spanContext == InMemorySpanContext(traceID: "trace-1", spanID: "span-1", parentSpanID: nil))
         #expect(tracer.finishedSpans.isEmpty)
 
         let activeSpan = try #require(tracer.activeSpan(identifiedBy: span.context))
@@ -55,7 +55,7 @@ struct TestTracerTests {
 
     @Test("Starts child span")
     func childSpan() throws {
-        let tracer = TestTracer()
+        let tracer = InMemoryTracer()
         var rootContext = ServiceContext.topLevel
         rootContext[UnrelatedContextKey.self] = 42
 
@@ -65,7 +65,7 @@ struct TestTracerTests {
         let childSpan = tracer.startSpan("child", context: rootSpan.context)
         #expect(childSpan.isRecording == true)
         #expect(childSpan.operationName == "child")
-        #expect(childSpan.spanContext == TestSpanContext(traceID: "trace-1", spanID: "span-2", parentSpanID: "span-1"))
+        #expect(childSpan.spanContext == InMemorySpanContext(traceID: "trace-1", spanID: "span-2", parentSpanID: "span-1"))
         #expect(tracer.finishedSpans.isEmpty)
 
         let activeSpan = try #require(tracer.activeSpan(identifiedBy: childSpan.context))
@@ -86,7 +86,7 @@ struct TestTracerTests {
 
     @Test("Records force flushes")
     func forceFlush() {
-        let tracer = TestTracer()
+        let tracer = InMemoryTracer()
         #expect(tracer.numberOfForceFlushes == 0)
 
         for numberOfForceFlushes in 1...10 {
@@ -99,9 +99,9 @@ struct TestTracerTests {
     struct ContextPropagationTests {
         @Test("Injects span context into carrier and records injection")
         func injectWithSpanContext() throws {
-            let tracer = TestTracer()
+            let tracer = InMemoryTracer()
             var context = ServiceContext.topLevel
-            let spanContext = TestSpanContext(
+            let spanContext = InMemorySpanContext(
                 traceID: "stub",
                 spanID: "stub",
                 parentSpanID: "stub"
@@ -111,7 +111,7 @@ struct TestTracerTests {
             var values = [String: String]()
             tracer.inject(context, into: &values, using: DictionaryInjector())
 
-            #expect(values == [TestTracer.traceIDKey: "stub", TestTracer.spanIDKey: "stub"])
+            #expect(values == [InMemoryTracer.traceIDKey: "stub", InMemoryTracer.spanIDKey: "stub"])
 
             let injection = try #require(tracer.injections.first)
             #expect(injection.context.testSpanContext == spanContext)
@@ -120,7 +120,7 @@ struct TestTracerTests {
 
         @Test("Does not inject context without span context but records attempt")
         func injectWithoutSpanContext() throws {
-            let tracer = TestTracer()
+            let tracer = InMemoryTracer()
             let context = ServiceContext.topLevel
 
             var values = [String: String]()
@@ -135,15 +135,15 @@ struct TestTracerTests {
 
         @Test("Extracts span context from carrier and records extraction")
         func extractWithValues() throws {
-            let tracer = TestTracer()
+            let tracer = InMemoryTracer()
             var context = ServiceContext.topLevel
 
-            let values = [TestTracer.traceIDKey: "stub", TestTracer.spanIDKey: "stub"]
+            let values = [InMemoryTracer.traceIDKey: "stub", InMemoryTracer.spanIDKey: "stub"]
             tracer.extract(values, into: &context, using: DictionaryExtractor())
 
             let spanContext = try #require(context.testSpanContext)
 
-            #expect(spanContext == TestSpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil))
+            #expect(spanContext == InMemorySpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil))
 
             let extraction = try #require(tracer.extractions.first)
             #expect(extraction.carrier as? [String: String] == values)
@@ -152,7 +152,7 @@ struct TestTracerTests {
 
         @Test("Does not extract span context without values but records extraction")
         func extractWithoutValues() throws {
-            let tracer = TestTracer()
+            let tracer = InMemoryTracer()
             var context = ServiceContext.topLevel
 
             let values = ["foo": "bar"]
@@ -170,7 +170,7 @@ struct TestTracerTests {
     struct SpanOperationTests {
         @Test("Update operation name")
         func updateOperationName() {
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.operationName == "stub")
 
             span.operationName = "updated"
@@ -180,7 +180,7 @@ struct TestTracerTests {
 
         @Test("Set attributes")
         func setAttributes() throws {
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.attributes == [:])
 
             span.attributes["x"] = "foo"
@@ -193,7 +193,7 @@ struct TestTracerTests {
         @Test("Add events")
         func addEvents() throws {
             let clock = DefaultTracerClock()
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.events == [])
 
             let event1 = SpanEvent(name: "e1", at: clock.now, attributes: ["foo": "1"])
@@ -207,10 +207,10 @@ struct TestTracerTests {
 
         @Test("Add links")
         func addLinks() throws {
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.links.isEmpty)
 
-            let spanContext1 = TestSpanContext(traceID: "1", spanID: "1", parentSpanID: nil)
+            let spanContext1 = InMemorySpanContext(traceID: "1", spanID: "1", parentSpanID: nil)
             var context1 = ServiceContext.topLevel
             context1.testSpanContext = spanContext1
             span.addLink(SpanLink(context: context1, attributes: ["foo": "1"]))
@@ -218,7 +218,7 @@ struct TestTracerTests {
             #expect(link1.context.testSpanContext == spanContext1)
             #expect(link1.attributes == ["foo": "1"])
 
-            let spanContext2 = TestSpanContext(traceID: "2", spanID: "2", parentSpanID: nil)
+            let spanContext2 = InMemorySpanContext(traceID: "2", spanID: "2", parentSpanID: nil)
             var context2 = ServiceContext.topLevel
             context2.testSpanContext = spanContext2
             span.addLink(SpanLink(context: context2, attributes: ["foo": "2"]))
@@ -230,7 +230,7 @@ struct TestTracerTests {
         @Test("Record errors")
         func recordErrors() throws {
             let clock = DefaultTracerClock()
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.errors.isEmpty)
 
             struct Error1: Error {}
@@ -252,7 +252,7 @@ struct TestTracerTests {
 
         @Test("Set status")
         func setStatus() {
-            let span = TestSpan.stub
+            let span = InMemorySpan.stub
             #expect(span.status == nil)
 
             let status = SpanStatus(code: .ok, message: "42")
@@ -264,11 +264,11 @@ struct TestTracerTests {
         @Test("End")
         func end() throws {
             let clock = DefaultTracerClock()
-            let _finishedSpan = LockedValueBox<FinishedTestSpan?>(nil)
+            let _finishedSpan = LockedValueBox<FinishedInMemorySpan?>(nil)
 
             let startInstant = clock.now
-            let spanContext = TestSpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil)
-            let span = TestSpan(
+            let spanContext = InMemorySpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil)
+            let span = InMemorySpan(
                 operationName: "stub",
                 context: .topLevel,
                 spanContext: spanContext,
@@ -280,7 +280,7 @@ struct TestTracerTests {
             )
             span.attributes["foo"] = "bar"
             span.addEvent("foo")
-            let otherSpanContext = TestSpanContext(traceID: "other", spanID: "other", parentSpanID: nil)
+            let otherSpanContext = InMemorySpanContext(traceID: "other", spanID: "other", parentSpanID: nil)
             var otherContext = ServiceContext.topLevel
             otherContext.testSpanContext = otherSpanContext
             span.addLink(SpanLink(context: otherContext, attributes: [:]))
@@ -310,7 +310,7 @@ struct TestTracerTests {
     struct IDGeneratorTests {
         @Test("Increments trace ID")
         func traceID() {
-            let idGenerator = TestTracer.IDGenerator.incrementing
+            let idGenerator = InMemoryTracer.IDGenerator.incrementing
 
             for i in 1...10 {
                 #expect(idGenerator.nextTraceID() == "trace-\(i)")
@@ -319,7 +319,7 @@ struct TestTracerTests {
 
         @Test("Increments span ID")
         func spanID() {
-            let idGenerator = TestTracer.IDGenerator.incrementing
+            let idGenerator = InMemoryTracer.IDGenerator.incrementing
 
             for i in 1...10 {
                 #expect(idGenerator.nextSpanID() == "span-\(i)")
@@ -331,9 +331,9 @@ struct TestTracerTests {
     struct EndToEndTests {
         @Test("Parent/child span relationship across boundary")
         func parentChild() async throws {
-            let idGenerator = TestTracer.IDGenerator.incrementing
-            let clientTracer = TestTracer(idGenerator: idGenerator)
-            let serverTracer = TestTracer(idGenerator: idGenerator)
+            let idGenerator = InMemoryTracer.IDGenerator.incrementing
+            let clientTracer = InMemoryTracer(idGenerator: idGenerator)
+            let serverTracer = InMemoryTracer(idGenerator: idGenerator)
 
             let clientSpan = clientTracer.startSpan("client", ofKind: .client)
             #expect(clientSpan.spanContext.traceID == "trace-1")
@@ -359,7 +359,7 @@ struct TestTracerTests {
         @Test("Operation name is immutable on ended span")
         func operationName() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.operationName = "✅"
 
                 span.end()
@@ -371,7 +371,7 @@ struct TestTracerTests {
         @Test("Attributes are immutable on ended span")
         func attributes() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.attributes["before"] = "✅"
 
                 span.end()
@@ -383,7 +383,7 @@ struct TestTracerTests {
         @Test("Events are immutable on ended span")
         func events() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.addEvent("✅")
 
                 span.end()
@@ -395,7 +395,7 @@ struct TestTracerTests {
         @Test("Links are immutable on ended span")
         func links() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.addLink(.stub)
 
                 span.end()
@@ -408,7 +408,7 @@ struct TestTracerTests {
         func errors() async {
             await #expect(processExitsWith: .failure) {
                 struct TestError: Error {}
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.recordError(TestError())
 
                 span.end()
@@ -420,7 +420,7 @@ struct TestTracerTests {
         @Test("Status is immutable on ended span")
         func status() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.setStatus(SpanStatus(code: .ok))
 
                 span.end()
@@ -432,7 +432,7 @@ struct TestTracerTests {
         @Test("Span can't be ended repeatedly")
         func end() async {
             await #expect(processExitsWith: .failure) {
-                let span = TestSpan.stub
+                let span = InMemorySpan.stub
                 span.setStatus(SpanStatus(code: .ok))
 
                 span.end()
@@ -444,12 +444,12 @@ struct TestTracerTests {
     #endif
 }
 
-extension TestSpan {
-    fileprivate static var stub: TestSpan {
-        TestSpan(
+extension InMemorySpan {
+    fileprivate static var stub: InMemorySpan {
+        InMemorySpan(
             operationName: "stub",
             context: .topLevel,
-            spanContext: TestSpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil),
+            spanContext: InMemorySpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil),
             kind: .internal,
             startInstant: DefaultTracerClock().now,
             onEnd: { _ in }

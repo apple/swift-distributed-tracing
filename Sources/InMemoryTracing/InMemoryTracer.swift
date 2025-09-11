@@ -15,8 +15,16 @@
 @_spi(Locking) import Instrumentation
 import Tracing
 
-public struct TestTracer: Tracer {
+public struct InMemoryTracer: Tracer {
+
+    public static let traceIDKey = "test-trace-id"
+    public static let spanIDKey = "test-span-id"
+
     public let idGenerator: IDGenerator
+
+    private let _activeSpans = LockedValueBox<[InMemorySpanContext: InMemorySpan]>([:])
+    private let _finishedSpans = LockedValueBox<[FinishedInMemorySpan]>([])
+    private let _numberOfForceFlushes = LockedValueBox<Int>(0)
 
     public init(idGenerator: IDGenerator = .incrementing) {
         self.idGenerator = idGenerator
@@ -32,20 +40,20 @@ public struct TestTracer: Tracer {
         function: String,
         file fileID: String,
         line: UInt
-    ) -> TestSpan where Instant: TracerInstant {
+    ) -> InMemorySpan where Instant: TracerInstant {
         let parentContext = context()
-        let spanContext: TestSpanContext
+        let spanContext: InMemorySpanContext
 
-        if let parentSpanContext = parentContext.testSpanContext {
+        if let parentSpanContext = parentContext.inMemorySpanContext {
             // child span
-            spanContext = TestSpanContext(
+            spanContext = InMemorySpanContext(
                 traceID: parentSpanContext.traceID,
                 spanID: idGenerator.nextSpanID(),
                 parentSpanID: parentSpanContext.spanID
             )
         } else {
             // root span
-            spanContext = TestSpanContext(
+            spanContext = InMemorySpanContext(
                 traceID: idGenerator.nextTraceID(),
                 spanID: idGenerator.nextSpanID(),
                 parentSpanID: nil
@@ -53,9 +61,9 @@ public struct TestTracer: Tracer {
         }
 
         var context = parentContext
-        context.testSpanContext = spanContext
+        context.inMemorySpanContext = spanContext
 
-        let span = TestSpan(
+        let span = InMemorySpan(
             operationName: operationName,
             context: context,
             spanContext: spanContext,
@@ -69,8 +77,8 @@ public struct TestTracer: Tracer {
         return span
     }
 
-    public func activeSpan(identifiedBy context: ServiceContext) -> TestSpan? {
-        guard let spanContext = context.testSpanContext else { return nil }
+    public func activeSpan(identifiedBy context: ServiceContext) -> InMemorySpan? {
+        guard let spanContext = context.inMemorySpanContext else { return nil }
         return _activeSpans.withValue { $0[spanContext] }
     }
 
@@ -82,18 +90,11 @@ public struct TestTracer: Tracer {
         _numberOfForceFlushes.withValue { $0 }
     }
 
-    public var finishedSpans: [FinishedTestSpan] {
+    public var finishedSpans: [FinishedInMemorySpan] {
         _finishedSpans.withValue { $0 }
     }
 
-    private let _activeSpans = LockedValueBox<[TestSpanContext: TestSpan]>([:])
-    private let _finishedSpans = LockedValueBox<[FinishedTestSpan]>([])
-    private let _numberOfForceFlushes = LockedValueBox<Int>(0)
-
     // MARK: - Instrument
-
-    public static let traceIDKey = "test-trace-id"
-    public static let spanIDKey = "test-span-id"
 
     public func inject<Carrier, Inject: Injector>(
         _ context: ServiceContext,
@@ -102,7 +103,7 @@ public struct TestTracer: Tracer {
     ) where Carrier == Inject.Carrier {
         var values = [String: String]()
 
-        if let spanContext = context.testSpanContext {
+        if let spanContext = context.inMemorySpanContext {
             injector.inject(spanContext.traceID, forKey: Self.traceIDKey, into: &carrier)
             values[Self.traceIDKey] = spanContext.traceID
             injector.inject(spanContext.spanID, forKey: Self.spanIDKey, into: &carrier)
@@ -133,7 +134,7 @@ public struct TestTracer: Tracer {
             return
         }
 
-        context.testSpanContext = TestSpanContext(traceID: traceID, spanID: spanID, parentSpanID: nil)
+        context.inMemorySpanContext = InMemorySpanContext(traceID: traceID, spanID: spanID, parentSpanID: nil)
     }
 
     public var extractions: [Extraction] {
@@ -156,7 +157,7 @@ public struct TestTracer: Tracer {
 
 // MARK: - ID Generator
 
-extension TestTracer {
+extension InMemoryTracer {
     public struct IDGenerator: Sendable {
         public let nextTraceID: @Sendable () -> String
         public let nextSpanID: @Sendable () -> String
