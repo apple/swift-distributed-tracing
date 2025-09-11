@@ -65,7 +65,9 @@ struct InMemoryTracerTests {
         let childSpan = tracer.startSpan("child", context: rootSpan.context)
         #expect(childSpan.isRecording == true)
         #expect(childSpan.operationName == "child")
-        #expect(childSpan.spanContext == InMemorySpanContext(traceID: "trace-1", spanID: "span-2", parentSpanID: "span-1"))
+        #expect(
+            childSpan.spanContext == InMemorySpanContext(traceID: "trace-1", spanID: "span-2", parentSpanID: "span-1")
+        )
         #expect(tracer.finishedSpans.isEmpty)
 
         let activeSpan = try #require(tracer.activeSpan(identifiedBy: childSpan.context))
@@ -356,8 +358,8 @@ struct InMemoryTracerTests {
     @Test("Span can't be ended repeatedly")
     func inMemoryDoubleEnd() async {
         let endCounter = LockedValueBox<Int>(0)
-        let span = InMemorySpan.stub { finished in 
-            endCounter.withValue { counter in 
+        let span = InMemorySpan.stub { finished in
+            endCounter.withValue { counter in
                 counter += 1
                 #expect(counter < 2, "Must not end() a span multiple times.")
             }
@@ -369,7 +371,7 @@ struct InMemoryTracerTests {
         span.end()
 
         clock.setTime(222)
-        span.end(at: clock.now) // should not blow up, but also, not update time again
+        span.end(at: clock.now)  // should not blow up, but also, not update time again
 
         #expect(endCounter.withValue { $0 } == 1)
     }
@@ -387,7 +389,7 @@ extension InMemorySpan {
         )
     }
 
-    fileprivate static func stub(onEnd: @Sendable @escaping (FinishedInMemorySpan) -> ()) -> InMemorySpan {
+    fileprivate static func stub(onEnd: @Sendable @escaping (FinishedInMemorySpan) -> Void) -> InMemorySpan {
         InMemorySpan(
             operationName: "stub",
             context: .topLevel,
@@ -415,7 +417,7 @@ private struct UnrelatedContextKey: ServiceContextKey {
     typealias Value = Int
 }
 
-final class MockClock {
+private final class MockClock {
     var _now: UInt64 = 0
 
     init() {}

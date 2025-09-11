@@ -45,6 +45,6 @@ extension ServiceContext {
     }
 }
 
-struct InMemorySpanContextKey: ServiceContextKey {
+private struct InMemorySpanContextKey: ServiceContextKey {
     typealias Value = InMemorySpanContext
 }

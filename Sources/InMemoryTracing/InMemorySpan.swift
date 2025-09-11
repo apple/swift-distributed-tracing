@@ -16,7 +16,7 @@
 import Tracing
 
 /// A ``Span`` created by the ``InMemoryTracer`` that will be retained in memory when ended.
-/// 
+///
 /// - SeeAlso: ``InMemoryTracer``
 public struct InMemorySpan: Span {
     public let context: ServiceContext

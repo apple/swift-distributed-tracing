@@ -341,7 +341,7 @@ extension LegacyTracer {
 
     #if compiler(>=6.0)
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
@@ -432,7 +432,7 @@ extension LegacyTracer {
 
     #if compiler(>=6.0)
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T>(
         _ operationName: String,
@@ -631,7 +631,7 @@ extension Tracer {
 
     #if compiler(>=6.0)
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
     public func withAnySpan<T>(
         _ operationName: String,
