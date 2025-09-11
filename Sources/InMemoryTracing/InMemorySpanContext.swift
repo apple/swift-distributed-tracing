@@ -18,13 +18,13 @@ import ServiceContextModule
 /// Generally used through the `ServiceContext/inMemorySpanContext` task local value.
 public struct InMemorySpanContext: Sendable, Hashable {
     /// Idenfifier of top-level trace of which this span is a part of.
-    public let traceID: String
+    public var traceID: String
 
     /// Identifier of this specific span.
-    public let spanID: String
+    public var spanID: String
 
     // Identifier of the parent of this span, if any.
-    public let parentSpanID: String?
+    public var parentSpanID: String?
 
     public init(traceID: String, spanID: String, parentSpanID: String?) {
         self.traceID = traceID

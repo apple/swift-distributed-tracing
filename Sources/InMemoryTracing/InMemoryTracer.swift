@@ -156,7 +156,7 @@ extension InMemoryTracer {
         _finishedSpans.withValue { $0 = [] }
         _injections.withValue { $0 = [] }
         _extractions.withValue { $0 = [] }
-        if includingActive { 
+        if includingActive {
             _activeSpans.withValue { $0 = [:] }
         }
     }

@@ -16,11 +16,26 @@
 import Tracing
 
 /// A ``Span`` created by the ``InMemoryTracer`` that will be retained in memory when ended.
-///
-/// - SeeAlso: ``InMemoryTracer``
+/// See ``InMemoryTracer/
 public struct InMemorySpan: Span {
+
     public let context: ServiceContext
     public let spanContext: InMemorySpanContext
+
+    /// The ID of the overall trace this span belongs to.
+    public var traceID: String {
+        spanContext.spanID
+    }
+    /// The ID of this concrete span.
+    public var spanID: String {
+        spanContext.spanID
+    }
+    /// The ID of the parent span of this span, if there was any.
+    /// When this is `nil` it means this is the top-level span of this trace.
+    public var parentSpanID: String? {
+        spanContext.parentSpanID
+    }
+
     public let kind: SpanKind
     public let startInstant: any TracerInstant
 
@@ -49,6 +64,8 @@ public struct InMemorySpan: Span {
         self.onEnd = onEnd
     }
 
+    /// The in memory span stops recording (storing mutations performed on the span) when it is ended.
+    /// In other words, a finished span no longer is mutable and will ignore all subsequent attempts to mutate.
     public var isRecording: Bool {
         _isRecording.withValue { $0 }
     }
@@ -120,8 +137,8 @@ public struct InMemorySpan: Span {
         let finishedSpan = FinishedInMemorySpan(
             operationName: operationName,
             context: context,
-            kind: kind,
             spanContext: spanContext,
+            kind: kind,
             startInstant: startInstant,
             endInstant: instant(),
             attributes: attributes,
@@ -145,9 +162,40 @@ public struct InMemorySpan: Span {
 /// that was recorded by the ``InMemoryTracer``.
 public struct FinishedInMemorySpan: Sendable {
     public var operationName: String
+
     public var context: ServiceContext
-    public var kind: SpanKind
     public var spanContext: InMemorySpanContext
+
+    /// The ID of the overall trace this span belongs to.
+    public var traceID: String {
+        get {
+            spanContext.spanID
+        }
+        set {
+            spanContext.spanID = newValue
+        }
+    }
+    /// The ID of this concrete span.
+    public var spanID: String {
+        get {
+            spanContext.spanID
+        }
+        set {
+            spanContext.spanID = newValue
+        }
+    }
+    /// The ID of the parent span of this span, if there was any.
+    /// When this is `nil` it means this is the top-level span of this trace.
+    public var parentSpanID: String? {
+        get {
+            spanContext.parentSpanID
+        }
+        set {
+            spanContext.parentSpanID = newValue
+        }
+    }
+
+    public var kind: SpanKind
     public var startInstant: any TracerInstant
     public var endInstant: any TracerInstant
     public var attributes: SpanAttributes
