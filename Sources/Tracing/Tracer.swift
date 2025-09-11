@@ -349,7 +349,7 @@ public func withSpan<T, Instant: TracerInstant>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
@@ -425,7 +425,7 @@ public func withSpan<T>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T>(
@@ -502,7 +502,7 @@ public func withSpan<T>(
 #endif
 
 #if compiler(>=6.0)
-@_disfavoredOverload@available(*, deprecated, message: "Prefer #isolation version of this API")
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 #endif
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(
