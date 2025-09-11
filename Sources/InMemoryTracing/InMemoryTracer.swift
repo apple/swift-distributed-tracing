@@ -33,12 +33,15 @@ public struct InMemoryTracer: Tracer {
     public let recordInjections: Bool
     public let recordExtractions: Bool
 
-    private let _activeSpans = LockedValueBox<[InMemorySpanContext: InMemorySpan]>([:])
-    private let _finishedSpans = LockedValueBox<[FinishedInMemorySpan]>([])
-    private let _numberOfForceFlushes = LockedValueBox<Int>(0)
+    struct State {
+        var activeSpans: [InMemorySpanContext: InMemorySpan] = [:]
+        var finishedSpans: [FinishedInMemorySpan] = []
+        var numberOfForceFlushes: Int = 0
 
-    private let _injections = LockedValueBox<[Injection]>([])
-    private let _extractions = LockedValueBox<[Extraction]>([])
+        var injections: [Injection] = []
+        var extractions: [Extraction] = []
+    }
+    var _state = LockedValueBox<State>(.init())
 
     /// Create a new ``InMemoryTracer``.
     ///
@@ -98,15 +101,17 @@ extension InMemoryTracer {
             kind: kind,
             startInstant: instant()
         ) { finishedSpan in
-            _activeSpans.withValue { $0[spanContext] = nil }
-            _finishedSpans.withValue { $0.append(finishedSpan) }
+            _state.withValue {
+                $0.activeSpans[spanContext] = nil
+                $0.finishedSpans.append(finishedSpan)
+            }
         }
-        _activeSpans.withValue { $0[spanContext] = span }
+        _state.withValue { $0.activeSpans[spanContext] = span }
         return span
     }
 
     public func forceFlush() {
-        _numberOfForceFlushes.withValue { $0 += 1 }
+        _state.withValue { $0.numberOfForceFlushes += 1 }
     }
 }
 
@@ -116,48 +121,50 @@ extension InMemoryTracer {
 
     /// Array of active spans, i.e. spans which have been started but have not yet finished (by calling `Span/end()`).
     public var activeSpans: [InMemorySpan] {
-        _activeSpans.withValue { active in Array(active.values) }
+        _state.withValue { Array($0.activeSpans.values) }
     }
 
     /// Retrives a specific _active_ span, identified by the specific span, trace, and parent ID's
     /// stored in the `inMemorySpanContext`
     public func activeSpan(identifiedBy context: ServiceContext) -> InMemorySpan? {
         guard let spanContext = context.inMemorySpanContext else { return nil }
-        return _activeSpans.withValue { $0[spanContext] }
+        return _state.withValue { $0.activeSpans[spanContext] }
     }
 
     /// Count of the number of times ``Tracer/forceFlush()`` was called on this tracer.
     public var numberOfForceFlushes: Int {
-        _numberOfForceFlushes.withValue { $0 }
+        _state.withValue { $0.numberOfForceFlushes }
     }
 
     /// Gets, without removing, all the finished spans recorded by this tracer.
     ///
     /// - SeeAlso: `popFinishedSpans()`
     public var finishedSpans: [FinishedInMemorySpan] {
-        _finishedSpans.withValue { $0 }
+        _state.withValue { $0.finishedSpans }
     }
 
     /// Returns, and removes, all finished spans recorded by this tracer.
     public func popFinishedSpans() -> [FinishedInMemorySpan] {
-        _finishedSpans.withValue { spans in
-            defer { spans = [] }
-            return spans
+        _state.withValue { state in
+            defer { state.finishedSpans = [] }
+            return state.finishedSpans
         }
     }
 
     /// Atomically clears any stored finished spans in this tracer.
     public func clearFinishedSpans() {
-        _finishedSpans.withValue { $0 = [] }
+        _state.withValue { $0.finishedSpans = [] }
     }
 
     /// Clears all registered finished spans, as well as injections/extractions performed by this tracer.
     public func clearAll(includingActive: Bool = false) {
-        _finishedSpans.withValue { $0 = [] }
-        _injections.withValue { $0 = [] }
-        _extractions.withValue { $0 = [] }
-        if includingActive {
-            _activeSpans.withValue { $0 = [:] }
+        _state.withValue {
+            $0.finishedSpans = []
+            $0.injections = []
+            $0.extractions = []
+            if includingActive {
+                $0.activeSpans = [:]
+            }
         }
     }
 }
@@ -185,19 +192,19 @@ extension InMemoryTracer {
 
         if recordInjections {
             let injection = Injection(context: context, values: values)
-            _injections.withValue { $0.append(injection) }
+            _state.withValue { $0.injections.append(injection) }
         }
     }
 
     /// Lists all recorded calls to this tracer's ``Instrument/inject(_:into:using:)`` method.
     /// This may be used to inspect what span identifiers are being propagated by this tracer.
     public var performedContextInjections: [Injection] {
-        _injections.withValue { $0 }
+        _state.withValue { $0.injections }
     }
 
     /// Clear the list of recorded context injections (calls to ``Instrument/inject(_:into:using:)``).
     public func clearPerformedContextInjections() {
-        _injections.withValue { $0 = [] }
+        _state.withValue { $0.injections = [] }
     }
 
     /// Represents a recorded call to the InMemoryTracer's ``Instrument/inject(_:into:using:)`` method.
@@ -219,7 +226,7 @@ extension InMemoryTracer {
         defer {
             if self.recordExtractions {
                 let extraction = Extraction(carrier: carrier, context: context)
-                _extractions.withValue { $0.append(extraction) }
+                _state.withValue { $0.extractions.append(extraction) }
             }
         }
 
@@ -235,7 +242,7 @@ extension InMemoryTracer {
     /// Lists all recorded calls to this tracer's ``Instrument/extract(_:into:using:)`` method.
     /// This may be used to inspect what span identifiers were extracted from an incoming carrier object into ``ServiceContext``.
     public var performedContextExtractions: [Extraction] {
-        _extractions.withValue { $0 }
+        _state.withValue { $0.extractions }
     }
 
     /// Represents a recorded call to the InMemoryTracer's ``Instrument/extract(_:into:using:)`` method.

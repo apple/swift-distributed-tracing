@@ -20,7 +20,9 @@ import Tracing
 public struct InMemorySpan: Span {
 
     public let context: ServiceContext
-    public let spanContext: InMemorySpanContext
+    public var spanContext: InMemorySpanContext {
+        context.inMemorySpanContext!
+    }
 
     /// The ID of the overall trace this span belongs to.
     public var traceID: String {
@@ -57,8 +59,9 @@ public struct InMemorySpan: Span {
         onEnd: @escaping @Sendable (FinishedInMemorySpan) -> Void
     ) {
         self._operationName = LockedValueBox(operationName)
+        var context = context
+        context.inMemorySpanContext = spanContext
         self.context = context
-        self.spanContext = spanContext
         self.kind = kind
         self.startInstant = startInstant
         self.onEnd = onEnd
@@ -143,7 +146,6 @@ public struct InMemorySpan: Span {
         let finishedSpan = FinishedInMemorySpan(
             operationName: operationName,
             context: context,
-            spanContext: spanContext,
             kind: kind,
             startInstant: startInstant,
             endInstant: instant(),
@@ -169,7 +171,14 @@ public struct FinishedInMemorySpan: Sendable {
     public var operationName: String
 
     public var context: ServiceContext
-    public var spanContext: InMemorySpanContext
+    public var spanContext: InMemorySpanContext {
+        get {
+            context.inMemorySpanContext!
+        }
+        set {
+            context.inMemorySpanContext = newValue
+        }
+    }
 
     /// The ID of the overall trace this span belongs to.
     public var traceID: String {
