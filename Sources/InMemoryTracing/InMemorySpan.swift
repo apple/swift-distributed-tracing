@@ -133,7 +133,13 @@ public struct InMemorySpan: Span {
     }
 
     public func end(at instant: @autoclosure () -> some TracerInstant) {
-        guard isRecording else { return }
+        let shouldRecord = _isRecording.withValue {
+            let value = $0
+            $0 = false  // from here on after, stop recording
+            return value
+        }
+        guard shouldRecord else { return }
+
         let finishedSpan = FinishedInMemorySpan(
             operationName: operationName,
             context: context,
@@ -147,7 +153,6 @@ public struct InMemorySpan: Span {
             errors: errors,
             status: status
         )
-        _isRecording.withValue { $0 = false }
         onEnd(finishedSpan)
     }
 
