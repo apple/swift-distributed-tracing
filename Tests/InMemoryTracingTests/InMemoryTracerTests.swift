@@ -16,7 +16,7 @@
 @_spi(Locking) import Instrumentation
 import Testing
 import Tracing
-import InMemoryTracing
+@_spi(Testing) import InMemoryTracing
 
 @Suite("InMemoryTracer")
 struct InMemoryTracerTests {
@@ -353,95 +353,26 @@ struct InMemoryTracerTests {
         }
     }
 
-    #if compiler(>=6.2)  // Exit tests require Swift 6.2
-    @Suite("TestSpan can't be mutated after being ended")
-    struct FinishedSpanImmutability {
-        @Test("Operation name is immutable on ended span")
-        func operationName() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.operationName = "✅"
-
-                span.end()
-
-                span.operationName = "💥"
+    @Test("Span can't be ended repeatedly")
+    func inMemoryDoubleEnd() async {
+        let endCounter = LockedValueBox<Int>(0)
+        let span = InMemorySpan.stub { finished in 
+            endCounter.withValue { counter in 
+                counter += 1
+                #expect(counter < 2, "Must not end() a span multiple times.")
             }
         }
+        span.setStatus(SpanStatus(code: .ok))
 
-        @Test("Attributes are immutable on ended span")
-        func attributes() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.attributes["before"] = "✅"
+        let clock = MockClock()
+        clock.setTime(111)
+        span.end()
 
-                span.end()
+        clock.setTime(222)
+        span.end(at: clock.now) // should not blow up, but also, not update time again
 
-                span.attributes["after"] = "💥"
-            }
-        }
-
-        @Test("Events are immutable on ended span")
-        func events() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.addEvent("✅")
-
-                span.end()
-
-                span.addEvent("💥")
-            }
-        }
-
-        @Test("Links are immutable on ended span")
-        func links() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.addLink(.stub)
-
-                span.end()
-
-                span.addLink(.stub)
-            }
-        }
-
-        @Test("Errors are immutable on ended span")
-        func errors() async {
-            await #expect(processExitsWith: .failure) {
-                struct TestError: Error {}
-                let span = InMemorySpan.stub
-                span.recordError(TestError())
-
-                span.end()
-
-                span.recordError(TestError())
-            }
-        }
-
-        @Test("Status is immutable on ended span")
-        func status() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.setStatus(SpanStatus(code: .ok))
-
-                span.end()
-
-                span.setStatus(SpanStatus(code: .error))
-            }
-        }
-
-        @Test("Span can't be ended repeatedly")
-        func end() async {
-            await #expect(processExitsWith: .failure) {
-                let span = InMemorySpan.stub
-                span.setStatus(SpanStatus(code: .ok))
-
-                span.end()
-
-                span.end()
-            }
-        }
+        #expect(endCounter.withValue { $0 } == 1)
     }
-    #endif
 }
 
 extension InMemorySpan {
@@ -453,6 +384,17 @@ extension InMemorySpan {
             kind: .internal,
             startInstant: DefaultTracerClock().now,
             onEnd: { _ in }
+        )
+    }
+
+    fileprivate static func stub(onEnd: @Sendable @escaping (FinishedInMemorySpan) -> ()) -> InMemorySpan {
+        InMemorySpan(
+            operationName: "stub",
+            context: .topLevel,
+            spanContext: InMemorySpanContext(traceID: "stub", spanID: "stub", parentSpanID: nil),
+            kind: .internal,
+            startInstant: DefaultTracerClock().now,
+            onEnd: onEnd
         )
     }
 }
@@ -472,4 +414,26 @@ private struct DictionaryExtractor: Extractor {
 private struct UnrelatedContextKey: ServiceContextKey {
     typealias Value = Int
 }
+
+final class MockClock {
+    var _now: UInt64 = 0
+
+    init() {}
+
+    func setTime(_ time: UInt64) {
+        self._now = time
+    }
+
+    struct Instant: TracerInstant {
+        var nanosecondsSinceEpoch: UInt64
+        static func < (lhs: MockClock.Instant, rhs: MockClock.Instant) -> Bool {
+            lhs.nanosecondsSinceEpoch < rhs.nanosecondsSinceEpoch
+        }
+    }
+
+    var now: Instant {
+        Instant(nanosecondsSinceEpoch: self._now)
+    }
+}
+
 #endif

@@ -16,7 +16,8 @@
 import Tracing
 
 /// A ``Span`` created by the ``InMemoryTracer`` that will be retained in memory when ended.
-/// See ``InMemoryTracer/
+/// 
+/// - SeeAlso: ``InMemoryTracer``
 public struct InMemorySpan: Span {
     public let context: ServiceContext
     public let spanContext: InMemorySpanContext
@@ -57,7 +58,7 @@ public struct InMemorySpan: Span {
             _operationName.withValue { $0 }
         }
         nonmutating set {
-            assertIsRecording()
+            guard isRecording else { return }
             _operationName.withValue { $0 = newValue }
         }
     }
@@ -67,7 +68,7 @@ public struct InMemorySpan: Span {
             _attributes.withValue { $0 }
         }
         nonmutating set {
-            assertIsRecording()
+            guard isRecording else { return }
             _attributes.withValue { $0 = newValue }
         }
     }
@@ -77,7 +78,7 @@ public struct InMemorySpan: Span {
     }
 
     public func addEvent(_ event: SpanEvent) {
-        assertIsRecording()
+        guard isRecording else { return }
         _events.withValue { $0.append(event) }
     }
 
@@ -86,7 +87,7 @@ public struct InMemorySpan: Span {
     }
 
     public func addLink(_ link: SpanLink) {
-        assertIsRecording()
+        guard isRecording else { return }
         _links.withValue { $0.append(link) }
     }
 
@@ -99,7 +100,7 @@ public struct InMemorySpan: Span {
         attributes: SpanAttributes,
         at instant: @autoclosure () -> some TracerInstant
     ) {
-        assertIsRecording()
+        guard isRecording else { return }
         _errors.withValue {
             $0.append(RecordedError(error: error, attributes: attributes, instant: instant()))
         }
@@ -110,12 +111,12 @@ public struct InMemorySpan: Span {
     }
 
     public func setStatus(_ status: SpanStatus) {
-        assertIsRecording()
+        guard isRecording else { return }
         _status.withValue { $0 = status }
     }
 
     public func end(at instant: @autoclosure () -> some TracerInstant) {
-        assertIsRecording()
+        guard isRecording else { return }
         let finishedSpan = FinishedInMemorySpan(
             operationName: operationName,
             context: context,
@@ -137,18 +138,6 @@ public struct InMemorySpan: Span {
         public let error: Error
         public let attributes: SpanAttributes
         public let instant: any TracerInstant
-    }
-
-    private func assertIsRecording(
-        file: StaticString = #file,
-        line: UInt = #line
-    ) {
-        assert(
-            _isRecording.withValue { $0 } == true,
-            "Attempted to mutate already ended span.",
-            file: file,
-            line: line
-        )
     }
 }
 
