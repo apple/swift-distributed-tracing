@@ -14,7 +14,10 @@
 
 import ServiceContextModule
 
-/// Conforming types are used to extract values from a specific `Carrier`.
+/// A type that allows tracing to extract values from an associated carrier.
+///
+/// The assocaited type, `Carrier`, is a service request such as an HTTP request,
+/// that has string values that can be extracted to provide information for a tracing span.
 public protocol Extractor: Sendable {
     /// The carrier to extract values from.
     associatedtype Carrier: Sendable
@@ -22,12 +25,14 @@ public protocol Extractor: Sendable {
     /// Extract the value for the given key from the `Carrier`.
     ///
     /// - Parameters:
-    ///   - key: The key to be extracted.
+    ///   - key: The key to extract.
     ///   - carrier: The `Carrier` to extract from.
     func extract(key: String, from carrier: Carrier) -> String?
 }
 
-/// Conforming types are used to inject values into a specific `Carrier`.
+/// A type that allows you to inject values to an associated carrier.
+///
+/// The associated type, `Carrier`, is often a client or outgoing request into which values are inserted for tracing spans.
 public protocol Injector: Sendable {
     /// The carrier to inject values into.
     associatedtype Carrier: Sendable
@@ -41,10 +46,13 @@ public protocol Injector: Sendable {
     func inject(_ value: String, forKey key: String, into carrier: inout Carrier)
 }
 
-/// Conforming types are usually cross-cutting tools like tracers. They are agnostic of what specific `Carrier` is used
-/// to propagate metadata across boundaries, but instead just specify what values to use for which keys.
+/// A type that represents a cross-cutting tool, such as a tracer, that provides the a means to extract and inject service contexts into an associated carrier.
+///
+/// The types are agnostic of the specific `Carrier` used to propagate metadata across API boundaries.
+/// Instead they specify the values to use for which keys.
 public protocol Instrument: Sendable {
-    /// Extract values from a `Carrier` by using the given extractor and inject them into the given `ServiceContext`.
+    /// Extract values from a carrier, using the given extractor, and inject them into the provided service context.
+    ///
     /// It's quite common for `Instrument`s to come up with new values if they weren't passed along in the given `Carrier`.
     ///
     /// - Parameters:
@@ -54,12 +62,12 @@ public protocol Instrument: Sendable {
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
     where Extract: Extractor, Extract.Carrier == Carrier
 
-    /// Extract values from a `ServiceContext` and inject them into the given `Carrier` using the given ``Injector``.
+    /// Extract values from a service context and inject them into the given carrier using the provided injector.
     ///
     /// - Parameters:
-    ///   - context: The `ServiceContext` from which relevant information will be extracted.
-    ///   - carrier: The `Carrier` into which this information will be injected.
-    ///   - injector: The ``Injector`` used to inject extracted `ServiceContext` into the given `Carrier`.
+    ///   - context: The `ServiceContext` from which relevant information is extracted.
+    ///   - carrier: The `Carrier` into which this information is injected.
+    ///   - injector: The ``Injector`` to use to inject extracted `ServiceContext` into the given `Carrier`.
     func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Inject.Carrier == Carrier
 }

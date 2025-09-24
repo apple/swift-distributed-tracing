@@ -14,14 +14,20 @@
 
 import ServiceContextModule
 
-/// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
+/// A global facility where the default cross-cutting tool can be configured.
+///
 /// It is set up just once in a given program to select the desired ``Instrument`` implementation.
 ///
-/// # Bootstrap multiple Instruments
+/// ###  Bootstrap multiple Instruments
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
-/// # Access the Instrument
-/// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
+/// ## Topics
+///
+/// ### Configuring the Instrument
+/// - ``bootstrap(_:)``
+///
+/// ### Accessing the Instrument
+/// - ``instrument``: Returns whatyou pass to ``bootstrap(_:)`` as an ``Instrument``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
@@ -73,7 +79,8 @@ public enum InstrumentationSystem {
     /// Globally select the desired ``Instrument`` implementation.
     ///
     /// - Parameter instrument: The ``Instrument`` you want to share globally within your system.
-    /// - Warning: Do not call this method more than once. This will lead to a crash.
+    ///
+    /// > Warning: Do not call this method more than once. This will lead to a crash.
     public static func bootstrap(_ instrument: Instrument) {
         self.shared.bootstrap(instrument)
     }
@@ -85,7 +92,7 @@ public enum InstrumentationSystem {
         self.shared.bootstrapInternal(instrument)
     }
 
-    /// Returns the globally configured ``Instrument``.
+    /// Returns the globally configured instrument.
     ///
     /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
     public static var instrument: Instrument {

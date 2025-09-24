@@ -14,7 +14,7 @@
 
 import ServiceContextModule
 
-/// A "no op" implementation of an ``Instrument``.
+/// A "no op" implementation of an Instrument.
 public struct NoOpInstrument: Instrument {
     public init() {}
 
