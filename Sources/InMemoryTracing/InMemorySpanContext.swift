@@ -14,18 +14,24 @@
 
 import ServiceContextModule
 
-/// Encapsulates the `traceID`, `spanID` and `parentSpanID` of an `InMemorySpan`.
+/// A type that encapsulates the trace ID, span ID, and parent span ID of an in-memory span.
+/// 
 /// Generally used through the `ServiceContext/inMemorySpanContext` task local value.
 public struct InMemorySpanContext: Sendable, Hashable {
-    /// Idenfifier of top-level trace of which this span is a part of.
+    /// The idenfifier of top-level trace of which this span is a part of.
     public var traceID: String
 
-    /// Identifier of this specific span.
+    /// The identifier of this span.
     public var spanID: String
 
-    // Identifier of the parent of this span, if any.
+    /// The Identifier of the parent of this span, if any.
     public var parentSpanID: String?
-
+    
+    /// Creates a new in-memory span context.
+    /// - Parameters:
+    ///   - traceID: The trace ID for the context.
+    ///   - spanID: The span ID for the context.
+    ///   - parentSpanID: The context's parent span ID.
     public init(traceID: String, spanID: String, parentSpanID: String?) {
         self.traceID = traceID
         self.spanID = spanID
@@ -34,7 +40,7 @@ public struct InMemorySpanContext: Sendable, Hashable {
 }
 
 extension ServiceContext {
-    /// Task-local value representing the current tracing ``Span`` as set by the ``InMemoryTracer``.
+    /// A task-local value that represents the current tracing span as set by the in-memory tracer.
     public var inMemorySpanContext: InMemorySpanContext? {
         get {
             self[InMemorySpanContextKey.self]

@@ -29,11 +29,7 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 
 ### Boostrapping Tracing
 
-- ``InstrumentationSystem``
-- ``MultiplexInstrument``
-- ``Extractor``
-- ``Injector``
-- ``Instrument``
+- ``Instrumentation``
 - ``TracerInstant``
 - ``LegacyTracer``
 
@@ -69,16 +65,8 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 - ``SpanLink``
 - ``SpanStatus``
 - ``SpanKind``
-- ``TODOLocation``
-
-### Service Context
-
-- ``ServiceContext``
-- ``ServiceContextKey``
-- ``AnyServiceContextKey``
 
 ### Default Tracers
 
 - ``DefaultTracerClock``
-- ``NoOpInstrument``
 - ``NoOpTracer``
