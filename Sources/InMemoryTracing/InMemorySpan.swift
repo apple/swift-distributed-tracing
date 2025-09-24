@@ -19,7 +19,7 @@ import Tracing
 ///
 /// See ``InMemoryTracer``
 public struct InMemorySpan: Span {
-    
+
     /// The service context of the span.
     public let context: ServiceContext
     /// The in-memory span context.
@@ -41,7 +41,7 @@ public struct InMemorySpan: Span {
     public var parentSpanID: String? {
         spanContext.parentSpanID
     }
-    
+
     /// The kind of span
     public let kind: SpanKind
     /// The time instant the span started.
@@ -55,7 +55,7 @@ public struct InMemorySpan: Span {
     private let _status = LockedValueBox<SpanStatus?>(nil)
     private let _isRecording = LockedValueBox<Bool>(true)
     private let onEnd: @Sendable (FinishedInMemorySpan) -> Void
-    
+
     /// Creates a new in-memory span
     /// - Parameters:
     ///   - operationName: The operation name this span represents.
@@ -88,7 +88,7 @@ public struct InMemorySpan: Span {
     public var isRecording: Bool {
         _isRecording.withValue { $0 }
     }
-    
+
     /// The operation name the span represents.
     public var operationName: String {
         get {
@@ -99,7 +99,7 @@ public struct InMemorySpan: Span {
             _operationName.withValue { $0 = newValue }
         }
     }
-    
+
     /// The span attributes.
     public var attributes: SpanAttributes {
         get {
@@ -110,36 +110,36 @@ public struct InMemorySpan: Span {
             _attributes.withValue { $0 = newValue }
         }
     }
-    
+
     /// The events associated with the span.
     public var events: [SpanEvent] {
         _events.withValue { $0 }
     }
-    
+
     /// Adds an event you provide to the span.
     /// - Parameter event: The event to record.
     public func addEvent(_ event: SpanEvent) {
         guard isRecording else { return }
         _events.withValue { $0.append(event) }
     }
-    
+
     /// The span links.
     public var links: [SpanLink] {
         _links.withValue { $0 }
     }
-    
+
     /// Adds a link to the span.
     /// - Parameter link: The link to add.
     public func addLink(_ link: SpanLink) {
         guard isRecording else { return }
         _links.withValue { $0.append(link) }
     }
-    
+
     /// The errors recorded by the span.
     public var errors: [RecordedError] {
         _errors.withValue { $0 }
     }
-    
+
     /// Records an error to the span.
     /// - Parameters:
     ///   - error: The error to record.
@@ -155,19 +155,19 @@ public struct InMemorySpan: Span {
             $0.append(RecordedError(error: error, attributes: attributes, instant: instant()))
         }
     }
-    
+
     /// The status of the span.
     public var status: SpanStatus? {
         _status.withValue { $0 }
     }
-    
+
     /// Updates the status of the span to the value you provide.
     /// - Parameter status: The status to set.
     public func setStatus(_ status: SpanStatus) {
         guard isRecording else { return }
         _status.withValue { $0 = status }
     }
-    
+
     /// Finishes the span.
     /// - Parameter instant: the time instant the span completed.
     public func end(at instant: @autoclosure () -> some TracerInstant) {
@@ -192,7 +192,7 @@ public struct InMemorySpan: Span {
         )
         onEnd(finishedSpan)
     }
-    
+
     /// An error recorded to a span.
     public struct RecordedError: Sendable {
         /// The recorded error.
@@ -208,7 +208,7 @@ public struct InMemorySpan: Span {
 public struct FinishedInMemorySpan: Sendable {
     /// The name of the operation the span represents.
     public var operationName: String
-    
+
     /// The service context of the finished span.
     public var context: ServiceContext
     /// The in-memory span context.
@@ -250,7 +250,7 @@ public struct FinishedInMemorySpan: Sendable {
             spanContext.parentSpanID = newValue
         }
     }
-    
+
     /// The kind of span.
     public var kind: SpanKind
     /// The time instant the span started.

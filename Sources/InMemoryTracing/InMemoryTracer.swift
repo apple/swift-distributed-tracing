@@ -43,7 +43,7 @@ public struct InMemoryTracer: Tracer {
     var _state = LockedValueBox<State>(.init())
 
     /// Create a new ``InMemoryTracer``.
-    /// 
+    ///
     /// - Parameters:
     ///   - idGenerator: strategy for generating trace and span identifiers
     ///   - recordInjections: A Boolean value that indicates whether the tracer records injected values.
@@ -62,7 +62,7 @@ public struct InMemoryTracer: Tracer {
 // MARK: - Tracer
 
 extension InMemoryTracer {
-    
+
     /// Start a new span and automatically ends the span when the operation completes, including recording the error in case the operation throws.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced.
@@ -119,7 +119,7 @@ extension InMemoryTracer {
         _state.withValue { $0.activeSpans[spanContext] = span }
         return span
     }
-    
+
     /// Records a request to flush spans.
     public func forceFlush() {
         _state.withValue { $0.numberOfForceFlushes += 1 }
@@ -189,12 +189,12 @@ extension InMemoryTracer {
 // MARK: - Instrument
 
 extension InMemoryTracer {
-    
+
     /// The trace ID key for the in-memory tracer.
     public static let traceIDKey = "in-memory-trace-id"
     /// The span ID key for the in-memory tracer.
     public static let spanIDKey = "in-memory-span-id"
-    
+
     /// Collects the service context you provide and inserts it into tracing carrier.
     /// - Parameters:
     ///   - context: The service context to add.
@@ -245,7 +245,7 @@ extension InMemoryTracer {
 }
 
 extension InMemoryTracer {
-    
+
     /// Retrieves and returns the service context from the tracing carrier.
     /// - Parameters:
     ///   - carrier: The service implementation from which to extract the service context.
@@ -303,7 +303,7 @@ extension InMemoryTracer {
         public let nextTraceID: @Sendable () -> String
         /// A closure that creates a span ID.
         public let nextSpanID: @Sendable () -> String
-        
+
         /// Creates a new instance of an ID generator using the closures you provide.
         /// - Parameters:
         ///   - nextTraceID: The closure to create the next trace ID.
@@ -315,7 +315,7 @@ extension InMemoryTracer {
             self.nextTraceID = nextTraceID
             self.nextSpanID = nextSpanID
         }
-        
+
         /// An ID generator that provides incrementing IDs using a simple sequential numeric scheme.
         public static var incrementing: IDGenerator {
             let traceID = LockedValueBox<Int>(0)

@@ -20,7 +20,7 @@ public struct MultiplexInstrument {
     private var instruments: [Instrument]
 
     /// Create a multiplex instrument.
-    /// 
+    ///
     /// - Parameter instruments: An array of ``Instrument``, each of which the tracer uses to
     /// ``Instrument/inject(_:into:using:)`` or ``Instrument/extract(_:into:using:)``
     /// through the same `ServiceContext`.
