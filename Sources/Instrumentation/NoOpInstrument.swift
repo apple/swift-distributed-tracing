@@ -17,12 +17,23 @@ import ServiceContextModule
 /// A "no op" implementation of an Instrument.
 public struct NoOpInstrument: Instrument {
     public init() {}
-
+    /// Extract values from a service context and inject them into the given carrier using the provided injector.
+    ///
+    /// - Parameters:
+    ///   - context: The `ServiceContext` from which relevant information is extracted.
+    ///   - carrier: The `Carrier` into which this information is injected.
+    ///   - injector: The ``Injector`` to use to inject extracted `ServiceContext` into the given `Carrier`.
     public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Carrier == Inject.Carrier {
         // no-op
     }
 
+    /// Extract values from a carrier, using the given extractor, and inject them into the provided service context.
+    ///
+    /// - Parameters:
+    ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
+    ///   - context: The `ServiceContext` into which these values should be injected.
+    ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
     public func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into context: inout ServiceContext,

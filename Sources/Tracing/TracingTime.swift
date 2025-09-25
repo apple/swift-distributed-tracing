@@ -35,12 +35,12 @@ import _CWASI
 
 /// A type that represents a point in time down to the nanosecond.
 public protocol TracerInstant: Comparable, Hashable, Sendable {
-    /// Representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970)
+    /// The representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970).
     var nanosecondsSinceEpoch: UInt64 { get }
 }
 
 extension TracerInstant {
-    /// Representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970)
+    /// The representation of this instant as the number of milliseconds since UNIX Epoch (January 1st 1970).
     @inlinable
     public var millisecondsSinceEpoch: UInt64 {
         self.nanosecondsSinceEpoch / 1_000_000
@@ -50,7 +50,7 @@ extension TracerInstant {
 /// A specialized clock protocol for purposes of tracing.
 ///
 /// A tracer clock must ONLY be able to offer the current time in the form of an unix timestamp.
-/// It does not have to allow sleeping, nor is it interchangeable with other notions of clocks (e.g. such as monotonic time etc).
+/// It does not have to allow sleeping, nor is it interchangeable with other notions of clocks (such as monotonic time).
 ///
 /// If the standard library, or foundation, or someone else were to implement an UTCClock or UNIXTimestampClock,
 /// they can be made to conform to `TracerClock`.
@@ -59,36 +59,56 @@ extension TracerInstant {
 /// especially when the system is already using some notion of simulated or mocked time, such that traces are
 /// expressed using the same notion of time.
 public struct DefaultTracerClock {
+    /// The type that represents the a time instant.
     public typealias Instant = Timestamp
 
+    /// Create a default tracer clock
     public init() {
         // empty
     }
 
+    /// An instant point in time
     public struct Timestamp: TracerInstant {
+        /// The representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970).
         public let nanosecondsSinceEpoch: UInt64
 
+        /// Creates a new point in time.
+        /// - Parameter nanosecondsSinceEpoch: the number of nanoseconds since UNIX Epoch (January 1st 1970).
         public init(nanosecondsSinceEpoch: UInt64) {
             self.nanosecondsSinceEpoch = nanosecondsSinceEpoch
         }
 
+        /// A Boolean value that indicates the first timestamp is less than the second.
+        /// - Parameters:
+        ///   - lhs: The first time stamp.
+        ///   - rhs: The second time stamp
+        /// - Returns: `true` if the first time stamp is less than the second; otherwise `false`.
         public static func < (lhs: Instant, rhs: Instant) -> Bool {
             lhs.nanosecondsSinceEpoch < rhs.nanosecondsSinceEpoch
         }
 
+        /// A Boolean value that indicates whether the time stamps are equivalent.
+        /// - Parameters:
+        ///   - lhs: The first time stamp.
+        ///   - rhs: The second time stamp
+        /// - Returns: `true` if the time stamps are equivalent; otherwise `false`.
         public static func == (lhs: Instant, rhs: Instant) -> Bool {
             lhs.nanosecondsSinceEpoch == rhs.nanosecondsSinceEpoch
         }
 
+        /// Hashes the essential components of this value by feeding them into the given hasher.
+        /// - Parameter hasher: The hasher to use when combining the components of this instance.
         public func hash(into hasher: inout Hasher) {
             self.nanosecondsSinceEpoch.hash(into: &hasher)
         }
     }
 
+    /// The current instant in time.
     public static var now: Self.Instant {
         DefaultTracerClock().now
     }
 
+    /// Returns the current instant in time.
     public var now: Self.Instant {
         var ts = timespec()
         #if os(WASI)
