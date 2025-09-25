@@ -27,7 +27,7 @@ import ServiceContextModule
 /// - ``bootstrap(_:)``
 ///
 /// ### Accessing the Instrument
-/// - ``instrument``: Returns whatyou pass to ``bootstrap(_:)`` as an ``Instrument``.
+/// - ``instrument``: Returns the globally bootstrapped instrument, that was passed to ``bootstrap(_:)``. 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
