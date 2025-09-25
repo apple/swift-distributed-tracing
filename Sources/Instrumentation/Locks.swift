@@ -93,10 +93,10 @@ public final class ReadWriteLock {
 }
 
 extension ReadWriteLock {
-    /// Acquire a reader lock for the duration of the given block.
+    /// Acquire the reader lock for the duration of the given block.
     ///
     /// This convenience method should be preferred to `lock` and `unlock` in
-    /// most situations, as it ensures that the lock is released regardless
+    /// most situations, as it ensures that the lock will be released regardless
     /// of how `body` exits.
     ///
     /// - Parameter body: The block to execute while holding the lock.
@@ -110,10 +110,10 @@ extension ReadWriteLock {
         return try body()
     }
 
-    /// Acquire a writer lock for the duration of the given block.
+    /// Acquire the writer lock for the duration of the given block.
     ///
     /// This convenience method should be preferred to `lock` and `unlock` in
-    /// most situations, as it ensures that the lock is released regardless
+    /// most situations, as it ensures that the lock will be released regardless
     /// of how `body` exits.
     ///
     /// - Parameter body: The block to execute while holding the lock.
@@ -128,7 +128,7 @@ extension ReadWriteLock {
     }
 }
 
-/// A wrapper that provides locked access to a value.
+/// A wrapper providing locked access to a value.
 ///
 /// Marked as @unchecked Sendable due to the synchronization being
 /// performed manually using locks.
