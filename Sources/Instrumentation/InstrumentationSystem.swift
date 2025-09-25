@@ -18,16 +18,8 @@ import ServiceContextModule
 ///
 /// It is set up just once in a given program to select the desired ``Instrument`` implementation.
 ///
-/// ###  Bootstrap multiple Instruments
+/// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
-///
-/// ## Topics
-///
-/// ### Configuring the Instrument
-/// - ``bootstrap(_:)``
-///
-/// ### Accessing the Instrument
-/// - ``instrument``: Returns the globally bootstrapped instrument, that was passed to ``bootstrap(_:)``. 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
