@@ -29,7 +29,8 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 
 ### Boostrapping Tracing
 
-- ``Instrumentation``
+- ``Tracing/Instrumentation/InstrumentationSystem``
+- ``Tracing/Tracer``
 - ``TracerInstant``
 - ``LegacyTracer``
 

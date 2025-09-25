@@ -33,6 +33,7 @@ import WASILibc
 import _CWASI
 #endif
 
+/// A type that represents a point in time down to the nanosecond.
 public protocol TracerInstant: Comparable, Hashable, Sendable {
     /// Representation of this instant as the number of nanoseconds since UNIX Epoch (January 1st 1970)
     var nanosecondsSinceEpoch: UInt64 { get }
