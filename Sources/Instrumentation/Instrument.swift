@@ -19,7 +19,7 @@ import ServiceContextModule
 /// The assocaited type, `Carrier`, is a service request such as an HTTP request,
 /// that has string values that can be extracted to provide information for a tracing span.
 ///
-/// Typically the library adopting instrumentation, would provide an implementation of this type, since it is aware of its carrier type. 
+/// Typically the library adopting instrumentation, would provide an implementation of this type, since it is aware of its carrier type.
 /// Which then can be combined with instrumentation or tracing implementations, which are not aware of the concrete carrier, and only provide an ``Instrument`` (or `Tracer`) which makes use of injector/extractor to operate on carrier values.
 public protocol Extractor: Sendable {
     /// The carrier to extract values from.
@@ -37,7 +37,7 @@ public protocol Extractor: Sendable {
 ///
 /// The associated type, `Carrier`, is often a client or outgoing request into which values are inserted for tracing spans.
 
-/// Typically the library adopting instrumentation, would provide an implementation of this type, since it is aware of its carrier type. 
+/// Typically the library adopting instrumentation, would provide an implementation of this type, since it is aware of its carrier type.
 /// Which then can be combined with instrumentation or tracing implementations, which are not aware of the concrete carrier, and only provide an ``Instrument`` (or `Tracer`) which makes use of injector/extractor to operate on carrier values.
 public protocol Injector: Sendable {
     /// The carrier to inject values into.
