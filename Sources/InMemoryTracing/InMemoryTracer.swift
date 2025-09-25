@@ -63,7 +63,7 @@ public struct InMemoryTracer: Tracer {
 
 extension InMemoryTracer {
 
-    /// Start a new span and automatically ends the span when the operation completes, including recording the error in case the operation throws.
+    /// Start a new span and automatically end it when the operation completes, including recording the error when the operation throws.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced.
     ///   - context: The service context that provides information on where to start the new span.
