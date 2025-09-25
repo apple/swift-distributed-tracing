@@ -14,7 +14,7 @@
 
 import ServiceContextModule
 
-/// A type that allows tracing to extract values from an associated carrier.
+/// A type that allows extracting values from an associated carrier.
 ///
 /// The assocaited type, `Carrier`, is a service request such as an HTTP request,
 /// that has string values that can be extracted to provide information for a tracing span.
