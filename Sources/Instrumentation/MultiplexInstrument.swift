@@ -14,7 +14,7 @@
 
 import ServiceContextModule
 
-/// A pseudo instrument to use to instrument using multiple instrumentss across a
+/// A pseudo instrument to use to instrument using multiple instruments across a
 /// common service context.
 public struct MultiplexInstrument {
     private var instruments: [Instrument]
