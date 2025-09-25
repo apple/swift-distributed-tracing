@@ -17,7 +17,7 @@ import Tracing
 
 /// A span created by the in-memory tracer that is retained in memory when the trace ends.
 ///
-/// See ``InMemoryTracer``
+/// An `InMemorySpan` is created by a ``InMemoryTracer``.
 public struct InMemorySpan: Span {
 
     /// The service context of the span.
