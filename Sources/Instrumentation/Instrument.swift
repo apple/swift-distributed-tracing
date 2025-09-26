@@ -56,6 +56,8 @@ public protocol Injector: Sendable {
 ///
 /// The types are agnostic of the specific `Carrier` used to propagate metadata across API boundaries.
 /// Instead they specify the values to use for which keys.
+///
+/// Typically this type is implemented by an instrumentation, or tracing, library, while the injector/extractor types are implemented by a concrete library adopting the instrumentation library. 
 public protocol Instrument: Sendable {
     /// Extract values from a carrier, using the given extractor, and inject them into the provided service context.
     ///
