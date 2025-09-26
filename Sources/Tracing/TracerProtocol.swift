@@ -23,10 +23,10 @@
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public protocol Tracer: LegacyTracer {
-    /// The concrete type of span this tracer will be producing/
+    /// The concrete type of span this tracer produces.
     associatedtype Span: Tracing.Span
 
-    /// Start a new ``Span`` with the given `ServiceContext`.
+    /// Start a new span with the given service context.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -43,13 +43,13 @@ public protocol Tracer: LegacyTracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
+    ///   - instant: The time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext,
@@ -60,10 +60,10 @@ public protocol Tracer: LegacyTracer {
         line: UInt
     ) -> Self.Span
 
-    /// Retrieve the active span for the given `ServiceContext`.
+    /// Retrieve the active span for the given service context.
     ///
-    /// - Note: This API does not enable look up of already finished spans.
-    /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all `Tracer`s.
+    /// - Note: This API does not enable look up of completed spans.
+    /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all Tracers.
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
     /// - Returns: The span identified by the given `ServiceContext` in case it's still recording.
     func activeSpan(identifiedBy context: ServiceContext) -> Span?
@@ -71,7 +71,7 @@ public protocol Tracer: LegacyTracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension Tracer {
-    /// Start a new ``Span`` with the given `ServiceContext`.
+    /// Start a new span with the current, or the explicitly passed, service context.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -88,13 +88,13 @@ extension Tracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
+    ///   - instant: The time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     public func startSpan(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -115,7 +115,8 @@ extension Tracer {
         )
     }
 
-    /// Default implementation for ``activeSpan(identifiedBy:)`` which always returns `nil`.
+    /// Default implementation that always returns `nil`.
+    ///
     /// This default exists in order to facilitate source-compatible introduction of the ``activeSpan(identifiedBy:)`` protocol requirement.
     ///
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
@@ -130,8 +131,8 @@ extension Tracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -143,16 +144,16 @@ extension Tracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: The time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -183,8 +184,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -196,15 +197,15 @@ extension Tracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -234,8 +235,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -247,17 +248,17 @@ extension Tracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: the time instant at which the span started.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
@@ -323,8 +324,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end it when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -334,19 +335,18 @@ extension Tracer {
     ///
     /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
-    ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: the time instant at which the span started.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
@@ -384,6 +384,20 @@ extension Tracer {
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
+    /// Start a new span and automatically end it when the operation completes,
+    /// including recording the error in case the operation throws.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,

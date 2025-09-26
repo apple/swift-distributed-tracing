@@ -15,7 +15,7 @@
 @_exported import Instrumentation
 @_exported import ServiceContextModule
 
-/// A tracer protocol intended to support Swift 5.6 specifically.
+/// A tracer protocol that supports Swift 5.6.
 ///
 /// **This protocol will be deprecated as soon as possible**, and the library will continue recommending Swift 5.7+
 /// in order to make use of new language features that make expressing the tracing API free of existential types when not necessary.
@@ -26,7 +26,7 @@
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 @available(*, deprecated, renamed: "Tracer")
 public protocol LegacyTracer: Instrument {
-    /// Start a new span returning an existential ``Span`` reference.
+    /// Start a new span returning an existential span reference.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -47,14 +47,13 @@ public protocol LegacyTracer: Instrument {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     @available(*, deprecated, message: "prefer withSpan")
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -83,7 +82,7 @@ public protocol LegacyTracer: Instrument {
 extension LegacyTracer {
     // ==== startSpan ---------------------------------------------------------
 
-    /// Start a new span returning an existential ``Span`` reference.
+    /// Start a new span returning an existential span reference.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -104,13 +103,13 @@ extension LegacyTracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     @available(*, deprecated, message: "prefer withSpan")
     public func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -132,7 +131,7 @@ extension LegacyTracer {
         )
     }
 
-    /// Start a new span returning an existential ``Span`` reference.
+    /// Start a new span returning an existential span reference.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -154,12 +153,12 @@ extension LegacyTracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     public func startAnySpan(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -194,16 +193,16 @@ extension LegacyTracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -234,8 +233,8 @@ extension LegacyTracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -249,15 +248,15 @@ extension LegacyTracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -281,8 +280,8 @@ extension LegacyTracer {
 
     // ==== withAnySpan async -------------------------------------------------
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -296,16 +295,16 @@ extension LegacyTracer {
     ///   operation closure returning the span will be closed automatically.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     #if compiler(>=6.0)
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
@@ -343,6 +342,21 @@ extension LegacyTracer {
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
+    ///   - instant: the time instant at which the span started.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -373,8 +387,8 @@ extension LegacyTracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -386,18 +400,17 @@ extension LegacyTracer {
     ///
     /// - Warning: You MUST NOT ``Span/end()`` the span explicitly, because at the end of the `withSpan`
     ///   operation closure returning the span will be closed automatically.
-    ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     #if compiler(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
@@ -434,6 +447,19 @@ extension LegacyTracer {
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -467,7 +493,7 @@ extension LegacyTracer {
 // Provide compatibility shims of the `...AnySpan` APIs
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
-    /// Start a new span returning an existential ``Span`` reference.
+    /// Start a new span returning an existential span reference.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -488,13 +514,13 @@ extension Tracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
     public func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContextModule.ServiceContext,
@@ -515,8 +541,8 @@ extension Tracer {
         )
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -537,16 +563,16 @@ extension Tracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
@@ -570,8 +596,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -592,17 +618,17 @@ extension Tracer {
     ///   otherwise the span object will potentially never be released nor reported.
     ///
     /// - Parameters:
-    ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started
-    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor
-    ///   - function: The function name in which the span was started
-    ///   - fileID: The `fileID` where the span was started.
-    ///   - line: The file line where the span was started.
-    ///   - operation: The operation that this span should be measuring
-    /// - Returns: the value returned by `operation`
-    /// - Throws: the error the `operation` has thrown (if any)
+    ///   - instant: the time instant at which the span started.
+    ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     #if compiler(>=6.0)
     public func withAnySpan<T>(
         _ operationName: String,
@@ -633,6 +659,20 @@ extension Tracer {
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
+    /// Start a new span and automatically end when the operation completes,
+    /// including recording the error in case the operation throws.
+    ///
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
+    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - kind: The ``SpanKind`` of the new ``Span``.
+    ///   - instant: the time instant at which the span started.
+    ///   - function: The function name in which the span started.
+    ///   - fileID: The `fileID` where the span started.
+    ///   - line: The file line where the span started.
+    ///   - operation: The operation that this span measures.
+    /// - Returns: the value returned by `operation`.
+    /// - Throws: the error the `operation` throws (if any).
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
