@@ -71,7 +71,7 @@ public protocol Tracer: LegacyTracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension Tracer {
-    /// Start a new span with the given service context.
+    /// Start a new span with the current, or the explicitly passed, service context.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
