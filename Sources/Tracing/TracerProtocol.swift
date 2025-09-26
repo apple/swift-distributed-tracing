@@ -324,7 +324,7 @@ extension Tracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
+    /// Start a new span and automatically end it when the operation completes,
     /// including recording the error in case the operation throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
