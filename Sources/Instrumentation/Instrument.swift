@@ -37,7 +37,7 @@ public protocol Extractor: Sendable {
 /// A type that allows you to inject values to an associated carrier.
 ///
 /// The associated type, `Carrier`, is often a client or outgoing request into which values are inserted for tracing spans.
-/// 
+///
 /// Typically the library adopting instrumentation provides an implementation of this type, since it is aware of its carrier type.
 /// That type can be combined with instrumentation or tracing implementations, which are not aware of the concrete carrier,
 /// and only provide an ``Instrument`` (or `Tracer`) which makes use of injector/extractor to operate on carrier values.
@@ -59,7 +59,7 @@ public protocol Injector: Sendable {
 /// The types are agnostic of the specific `Carrier` used to propagate metadata across API boundaries.
 /// Instead they specify the values to use for which keys.
 ///
-/// Typically this type is implemented by an instrumentation, or tracing, library, while the injector/extractor types are implemented by a concrete library adopting the instrumentation library. 
+/// Typically this type is implemented by an instrumentation, or tracing, library, while the injector/extractor types are implemented by a concrete library adopting the instrumentation library.
 public protocol Instrument: Sendable {
     /// Extract values from a carrier, using the given extractor, and inject them into the provided service context.
     ///
