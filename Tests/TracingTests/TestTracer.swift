@@ -43,12 +43,6 @@ final class TestTracer: LegacyTracer {
         return span
     }
 
-    /// Export all ended spans to the configured backend that have not yet been exported.
-    ///
-    /// This function should only be called in cases where it is absolutely necessary,
-    /// such as when using some FaaS providers that may suspend the process after an invocation, but before the backend exports the completed spans.
-    ///
-    /// This function should not block indefinitely, implementations should offer a configurable timeout for flush operations.
     public func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
