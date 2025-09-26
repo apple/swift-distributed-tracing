@@ -384,7 +384,7 @@ extension Tracer {
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     #endif
-    /// Start a new span and automatically end when the operation completes,
+    /// Start a new span and automatically end it when the operation completes,
     /// including recording the error in case the operation throws.
     ///
     /// - Parameters:
