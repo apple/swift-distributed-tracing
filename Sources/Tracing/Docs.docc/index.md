@@ -52,6 +52,7 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 - ``startSpan(_:context:ofKind:function:file:line:)``
 - ``startSpan(_:at:context:ofKind:function:file:line:)``
 - ``startSpan(_:context:ofKind:at:function:file:line:)``
+- ``Span/end()``
 
 ### Inspecting Spans
 
