@@ -16,13 +16,13 @@ This project uses the context propagation type defined independently in:
 
 ## Compatibility
 
-This project is designed in a very open and extensible manner, such that various instrumentation and tracing systems can be built on top of it. 
+This project is designed in a very open and extensible manner, such that various instrumentation and tracing systems can be built on top of it.
 
 The purpose of the tracing package is to serve as common API for all tracer and instrumentation implementations. Thanks to this, libraries may only need to be instrumented once, and then be used with any tracer which conforms to this API.
 
 <a name="backends"></a>
 ### Tracing Backends
- 
+
 Compatible `Tracer` implementations:
 
 | Library | Status                     | Description |
@@ -40,7 +40,8 @@ As this API package was just released, no projects have yet fully adopted it, th
 |--------------------------|----------------|-------------------------------------------------------|
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
 | [Vapor](https://github.com/vapor/vapor) | Tracing | 🟢 Built-in support |
-| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
+| [Valkey Swift](https://github.com/valkey-io/valkey-swift) | Tracing | 🟢 Built-in support |
+| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
