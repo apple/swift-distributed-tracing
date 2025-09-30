@@ -149,7 +149,7 @@ public struct NoOpTracer: LegacyTracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension NoOpTracer: Tracer {
-    /// Start a new span using the global bootstrapped tracer reimplementation.
+    /// Start a new span using the global bootstrapped tracer implementation.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
