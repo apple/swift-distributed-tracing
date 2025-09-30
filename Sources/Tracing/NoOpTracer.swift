@@ -25,7 +25,7 @@ public struct NoOpTracer: LegacyTracer {
     /// Creates a no-op tracer.
     public init() {}
 
-    /// Start a new span using the global bootstrapped tracer reimplementation.
+    /// Start a new span using the global bootstrapped tracer implementation.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
