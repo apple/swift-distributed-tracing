@@ -15,17 +15,16 @@
 @_spi(Locking) import Instrumentation
 import Tracing
 
-/// An in-memory implementation of the ``Tracer`` protocol which can be used either in testing,
-/// or in manual collecting and interrogating traces within a process, and acting on them programatically.
+/// An in-memory implementation of the `Tracer` protocol which can be used either in testing,
+/// or in collecting and interrogating traces within a process, and acting on them programatically.
 ///
 /// ### Span lifecycle
 /// This tracer does _not_ automatically remove spans once they end.
-/// Finished spans are retained and available for inspection using the `finishedSpans` property.
-/// Spans which have been started but have not yet been called `Span/end()` on are also available
-/// for inspection using the ``activeSpans`` property.
+/// In-memory tracer retains finished spans and makes them available for inspection through the `finishedSpans` property.
+/// Spans that started but have not yet called `Span/end()` are available for inspection through the ``activeSpans`` property.
 ///
-/// Spans are retained by the `InMemoryTracer` until they are explicitly removed, e.g. by using
-/// ``popFinishedSpans()`` or any of the `clear...` methods (e.g. ``clearFinishedSpans()``)
+/// The `InMemoryTracer` retains spans until they are explicitly removed, for example by using
+/// ``popFinishedSpans()`` or any of the `clear...` methods (such as ``clearFinishedSpans()``)
 public struct InMemoryTracer: Tracer {
 
     public let idGenerator: IDGenerator
@@ -46,8 +45,9 @@ public struct InMemoryTracer: Tracer {
     /// Create a new ``InMemoryTracer``.
     ///
     /// - Parameters:
-    ///   - Parameter idGenerator: strategy for generating trace and span identifiers
-    ///   - Parameter idGenerator: strategy for generating trace and span identifiers
+    ///   - idGenerator: strategy for generating trace and span identifiers
+    ///   - recordInjections: A Boolean value that indicates whether the tracer records injected values.
+    ///   - recordExtractions: A Boolean value that indicates whether the tracer records extracted values.
     public init(
         idGenerator: IDGenerator = .incrementing,
         recordInjections: Bool = true,
@@ -63,6 +63,16 @@ public struct InMemoryTracer: Tracer {
 
 extension InMemoryTracer {
 
+    /// Start a new span and automatically end it when the operation completes, including recording the error when the operation throws.
+    /// - Parameters:
+    ///   - operationName: The name of the operation being traced.
+    ///   - context: The service context that provides information on where to start the new span.
+    ///   - kind: The kind of span.
+    ///   - instant: The time instant at which the span started.
+    ///   - function: The function name in which the span was started.
+    ///   - fileID: The fileID where the span was started.
+    ///   - line: The file line where the span was started.
+    /// - Returns: An in-memory span.
     public func startSpan<Instant>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext,
@@ -110,6 +120,7 @@ extension InMemoryTracer {
         return span
     }
 
+    /// Records a request to flush spans.
     public func forceFlush() {
         _state.withValue { $0.numberOfForceFlushes += 1 }
     }
@@ -119,24 +130,30 @@ extension InMemoryTracer {
 
 extension InMemoryTracer {
 
-    /// Array of active spans, i.e. spans which have been started but have not yet finished (by calling `Span/end()`).
+    /// An array of active spans
+    ///
+    /// For example, spans which have been started but have not yet finished (by calling `Span/end()`).
     public var activeSpans: [InMemorySpan] {
         _state.withValue { Array($0.activeSpans.values) }
     }
 
-    /// Retrives a specific _active_ span, identified by the specific span, trace, and parent ID's
+    /// Retrives a specific _active_ span, identified by the service context you provide.
+    ///
+    /// The service context provides the span, trace, and parent IDs
     /// stored in the `inMemorySpanContext`
     public func activeSpan(identifiedBy context: ServiceContext) -> InMemorySpan? {
         guard let spanContext = context.inMemorySpanContext else { return nil }
         return _state.withValue { $0.activeSpans[spanContext] }
     }
 
-    /// Count of the number of times ``Tracer/forceFlush()`` was called on this tracer.
+    /// The number of times forced flushes were requested.
+    ///
+    /// The number of times that `Tracer/forceFlush()` was called on this tracer.
     public var numberOfForceFlushes: Int {
         _state.withValue { $0.numberOfForceFlushes }
     }
 
-    /// Gets, without removing, all the finished spans recorded by this tracer.
+    /// Retrieves, without removing, all the finished spans recorded by this tracer.
     ///
     /// - SeeAlso: `popFinishedSpans()`
     public var finishedSpans: [FinishedInMemorySpan] {
@@ -151,7 +168,7 @@ extension InMemoryTracer {
         }
     }
 
-    /// Atomically clears any stored finished spans in this tracer.
+    /// Atomically clears the in-memory collection of finished spans in this tracer.
     public func clearFinishedSpans() {
         _state.withValue { $0.finishedSpans = [] }
     }
@@ -173,9 +190,16 @@ extension InMemoryTracer {
 
 extension InMemoryTracer {
 
+    /// The trace ID key for the in-memory tracer.
     public static let traceIDKey = "in-memory-trace-id"
+    /// The span ID key for the in-memory tracer.
     public static let spanIDKey = "in-memory-span-id"
 
+    /// Collects the service context you provide and inserts it into tracing carrier.
+    /// - Parameters:
+    ///   - context: The service context to add.
+    ///   - carrier: The service implementation into which to add the service context.
+    ///   - injector: The type that transfers service context into a carrier.
     public func inject<Carrier, Inject: Injector>(
         _ context: ServiceContext,
         into carrier: inout Carrier,
@@ -196,28 +220,37 @@ extension InMemoryTracer {
         }
     }
 
-    /// Lists all recorded calls to this tracer's ``Instrument/inject(_:into:using:)`` method.
+    /// Lists all recorded calls to this tracer's inject method.
+    ///
+    /// Records calls to`Instrument/inject(_:into:using:)`.
     /// This may be used to inspect what span identifiers are being propagated by this tracer.
     public var performedContextInjections: [Injection] {
         _state.withValue { $0.injections }
     }
 
-    /// Clear the list of recorded context injections (calls to ``Instrument/inject(_:into:using:)``).
+    /// Clear the list of recorded context injections.
+    ///
+    /// Clears the list of calls to `Instrument/inject(_:into:using:)`.
     public func clearPerformedContextInjections() {
         _state.withValue { $0.injections = [] }
     }
 
-    /// Represents a recorded call to the InMemoryTracer's ``Instrument/inject(_:into:using:)`` method.
+    /// A type that represents a recorded call to the In-memory tracer's inject method.
     public struct Injection: Sendable {
         /// The context from which values were being injected.
         public let context: ServiceContext
-        /// The injected values, these will be specifically the trace and span identifiers of the propagated span.
+        /// The injected values;  the trace and span identifiers of the propagated span.
         public let values: [String: String]
     }
 }
 
 extension InMemoryTracer {
 
+    /// Retrieves and returns the service context from the tracing carrier.
+    /// - Parameters:
+    ///   - carrier: The service implementation from which to extract the service context.
+    ///   - context:The service context to update.
+    ///   - extractor: The type that transfers service context from a carrier.
     public func extract<Carrier, Extract: Extractor>(
         _ carrier: Carrier,
         into context: inout ServiceContext,
@@ -239,18 +272,19 @@ extension InMemoryTracer {
         context.inMemorySpanContext = InMemorySpanContext(traceID: traceID, spanID: spanID, parentSpanID: nil)
     }
 
-    /// Lists all recorded calls to this tracer's ``Instrument/extract(_:into:using:)`` method.
-    /// This may be used to inspect what span identifiers were extracted from an incoming carrier object into ``ServiceContext``.
+    /// Lists all recorded calls to this tracer's extract method.
+    ///
+    /// Lists calls to `Instrument/extract(_:into:using:)`.
+    /// This may be used to inspect the span identifiers extracted from an incoming carrier object into `ServiceContext`.
     public var performedContextExtractions: [Extraction] {
         _state.withValue { $0.extractions }
     }
 
-    /// Represents a recorded call to the InMemoryTracer's ``Instrument/extract(_:into:using:)`` method.
+    /// Represents a recorded call to the In-memory tracer's extract method.
     public struct Extraction: Sendable {
-        /// The carrier object from which the context values were extracted from,
-        /// e.g. this frequently is an HTTP request or similar.
+        /// The carrier object from which the context values were extracted from, such as  an HTTP request.
         public let carrier: any Sendable
-        /// The constructed service context, containing the extracted ``ServiceContext/inMemorySpanContext``.
+        /// The constructed service context, containing the extracted in-memory span context.
         public let context: ServiceContext
     }
 }
@@ -259,13 +293,21 @@ extension InMemoryTracer {
 
 extension InMemoryTracer {
 
-    /// Can be used to customize how trace and span IDs are generated by the ``InMemoryTracer``.
+    /// A type that generates trace and span IDs for the in-memory tracer.
+    /// You can customize how trace and span IDs are generated for the ``InMemoryTracer``.
     ///
-    /// Defaults to a simple sequential numeric scheme (`span-1`, `span-2`, `trace-1`, `trace-2` etc).
+    /// The defaul implementation, ``incrementing``, provides a simple sequential numeric scheme,
+    /// for example `span-1`, `span-2`, `trace-1`, `trace-2`, and so on.
     public struct IDGenerator: Sendable {
+        /// A closure that creates a trace ID.
         public let nextTraceID: @Sendable () -> String
+        /// A closure that creates a span ID.
         public let nextSpanID: @Sendable () -> String
 
+        /// Creates a new instance of an ID generator using the closures you provide.
+        /// - Parameters:
+        ///   - nextTraceID: The closure to create the next trace ID.
+        ///   - nextSpanID: The closure to create the next span ID.
         public init(
             nextTraceID: @Sendable @escaping () -> String,
             nextSpanID: @Sendable @escaping () -> String
@@ -274,6 +316,7 @@ extension InMemoryTracer {
             self.nextSpanID = nextSpanID
         }
 
+        /// An ID generator that provides incrementing IDs using a simple sequential numeric scheme.
         public static var incrementing: IDGenerator {
             let traceID = LockedValueBox<Int>(0)
             let spanID = LockedValueBox<Int>(0)
