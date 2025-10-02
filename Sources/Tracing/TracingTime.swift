@@ -25,6 +25,8 @@ import Android
 import Musl
 #elseif canImport(WASILibc)
 import WASILibc
+#elseif os(Windows)
+import WinSDK
 #else
 #error("Unsupported runtime")
 #endif
@@ -110,6 +112,18 @@ public struct DefaultTracerClock {
 
     /// Returns the current instant in time.
     public var now: Self.Instant {
+        #if os(Windows)
+        var fileTime = FILETIME()
+        GetSystemTimePreciseAsFileTime(&fileTime)
+
+        let fileTime64 = (UInt64(fileTime.dwHighDateTime) << 32) | UInt64(fileTime.dwLowDateTime)
+
+        let windowsToUnixEpochIn100ns: UInt64 = 116_444_736_000_000_000
+        let unixTime100ns = fileTime64 &- windowsToUnixEpochIn100ns
+        let nowNanos = unixTime100ns &* 100
+
+        return Instant(nanosecondsSinceEpoch: nowNanos)
+        #else  // not Windows
         var ts = timespec()
         #if os(WASI)
         CWASI_clock_gettime_realtime(&ts)
@@ -122,5 +136,6 @@ public struct DefaultTracerClock {
         let nowNanos = UInt64(ts.tv_sec) &* 1_000_000_000 &+ UInt64(ts.tv_nsec)
 
         return Instant(nanosecondsSinceEpoch: nowNanos)
+        #endif  // Windows
     }
 }
