@@ -35,7 +35,7 @@ If you know of any other library please send in a [pull request](https://github.
 ### Supported Libraries & Frameworks
 
 The following is a, non-complete, list of a few libraries and frameworks which provide built-in support for distributed tracing.
-This list is not complete, however if youd'd like to feature your library in the list below, feel free to open a pull request adding it.
+This list is not complete, however if you'd like to feature your library in the list below, feel free to open a pull request adding it.
 
 
 | HTTP Servers/Frameworks  | Integrates     | Status                                                |
