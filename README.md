@@ -38,8 +38,9 @@ The following is a, non-complete, list of a few libraries and frameworks which p
 This list is not complete, however if you'd like to feature your library in the list below, feel free to open a pull request adding it.
 
 
-| HTTP Servers/Frameworks  | Integrates     | Status                                                |
+| Library / Framework      | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
+| [AsyncHTTPClient](https://github.com/swift-server/async-http-client) 1.29.0+ | Tracing | 🟢 Built-in support |
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
 | [Vapor](https://github.com/vapor/vapor) | Tracing | 🟢 Built-in support |
 | [Valkey Swift](https://github.com/valkey-io/valkey-swift) | Tracing | 🟢 Built-in support |
