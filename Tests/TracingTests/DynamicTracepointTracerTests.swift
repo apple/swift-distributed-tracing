@@ -174,7 +174,6 @@ final class DynamicTracepointTestTracer: LegacyTracer {
     }
 
     private func shouldRecord(tracepoint: TracepointID) -> Bool {
-        #if canImport(_Concurrency)
         if self.isActive(tracepoint: tracepoint) {
             // this tracepoint was specifically activated!
             return true
@@ -193,9 +192,6 @@ final class DynamicTracepointTestTracer: LegacyTracer {
         // there is some active trace already, so we should record as well
         // TODO: this logic may need to become smarter
         return true
-        #else
-        return false
-        #endif
     }
 
     func isActive(tracepoint: TracepointID) -> Bool {
