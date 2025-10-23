@@ -251,7 +251,6 @@ extension Tracer {
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
     ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
-    ///   - instant: the time instant at which the span started.
     ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
     ///   - function: The function name in which the span started.
     ///   - fileID: The `fileID` where the span started.
@@ -259,7 +258,6 @@ extension Tracer {
     ///   - operation: The operation that this span measures.
     /// - Returns: the value returned by `operation`.
     /// - Throws: the error the `operation` throws (if any).
-    #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -289,12 +287,9 @@ extension Tracer {
             throw error  // rethrow
         }
     }
-    #endif
 
-    #if compiler(>=6.0)
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
-    #endif
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -347,7 +342,6 @@ extension Tracer {
     ///   - operation: The operation that this span measures.
     /// - Returns: the value returned by `operation`.
     /// - Throws: the error the `operation` throws (if any).
-    #if compiler(>=6.0)
     public func withSpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -378,12 +372,9 @@ extension Tracer {
             throw error  // rethrow
         }
     }
-    #endif
 
-    #if compiler(>=6.0)
     // swift-format-ignore: Spacing // fights with formatter
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
-    #endif
     /// Start a new span and automatically end it when the operation completes,
     /// including recording the error in case the operation throws.
     ///
