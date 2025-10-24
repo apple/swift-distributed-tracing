@@ -108,7 +108,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_sync() throws {
-        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -133,11 +132,9 @@ final class TracerTests: XCTestCase {
 
         XCTAssertEqual(value, "world")
         XCTAssertTrue(spanEnded)
-        #endif
     }
 
     func testWithSpan_automaticBaggagePropagation_sync_throws() throws {
-        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -163,11 +160,9 @@ final class TracerTests: XCTestCase {
             return
         }
         XCTFail("Should have thrown")
-        #endif
     }
 
     func testWithSpan_automaticBaggagePropagation_async() throws {
-        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -194,7 +189,6 @@ final class TracerTests: XCTestCase {
             XCTAssertEqual(value, "world")
             XCTAssertTrue(spanEnded.withValue { $0 })
         }
-        #endif
     }
 
     func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() throws {
@@ -321,7 +315,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_recordErrorWithAttributes() throws {
-        #if canImport(_Concurrency)
         guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
             throw XCTSkip("Task locals are not supported on this platform.")
         }
@@ -348,7 +341,6 @@ final class TracerTests: XCTestCase {
         XCTAssertEqual(error as! ExampleSpanError, errorToThrow)
         let attrs = endedSpan!.recordedErrors.first!.1
         XCTAssertEqual(attrs, attrsForError)
-        #endif
     }
 
     func testWithSpanSignatures() {
