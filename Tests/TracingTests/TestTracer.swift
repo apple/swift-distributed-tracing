@@ -118,7 +118,7 @@ extension ServiceContext {
 
 /// Only intended to be used in single-threaded testing.
 final class TestSpan: Span {
-    private let kind: SpanKind
+    let kind: SpanKind
 
     private var status: SpanStatus?
 
