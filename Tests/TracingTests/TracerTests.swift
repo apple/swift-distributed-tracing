@@ -54,9 +54,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_success() {
-        guard #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) else {
-            return
-        }
         let tracer = TestTracer()
 
         var spanEnded = false
@@ -91,10 +88,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_sync() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
         let tracer = TestTracer()
 
         var spanEnded = false
@@ -114,10 +107,6 @@ final class TracerTests: XCTestCase {
     }
 
     func testWithSpan_automaticBaggagePropagation_sync_throws() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
         let tracer = TestTracer()
 
         var spanEnded = false
@@ -137,11 +126,7 @@ final class TracerTests: XCTestCase {
         XCTFail("Should have thrown")
     }
 
-    func testWithSpan_automaticBaggagePropagation_async() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
+    func testWithSpan_automaticBaggagePropagation_async() async throws {
         let tracer = TestTracer()
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
@@ -151,22 +136,16 @@ final class TracerTests: XCTestCase {
             "world"
         }
 
-        try self.testAsync {
-            let value = try await tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
-                XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
-                return try await operation(span)
-            }
-
-            XCTAssertEqual(value, "world")
-            XCTAssertTrue(spanEnded.withValue { $0 })
+        let value = try await tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
+            XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
+            return try await operation(span)
         }
+
+        XCTAssertEqual(value, "world")
+        XCTAssertTrue(spanEnded.withValue { $0 })
     }
 
-    func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
+    func testWithSpan_enterFromNonAsyncCode_passBaggage_asyncOperation() async throws {
         let tracer = TestTracer()
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
@@ -176,26 +155,40 @@ final class TracerTests: XCTestCase {
             "world"
         }
 
-        self.testAsync {
-            var fromNonAsyncWorld = ServiceContext.topLevel
-            fromNonAsyncWorld.traceID = "1234-5678"
-            let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) {
-                (span: any Tracing.Span) -> String in
-                XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
-                XCTAssertEqual(span.context.traceID, fromNonAsyncWorld.traceID)
-                return await operation(span)
-            }
+        var fromNonAsyncWorld = ServiceContext.topLevel
+        fromNonAsyncWorld.traceID = "1234-5678"
+        let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) {
+            (span: any Tracing.Span) -> String in
+            XCTAssertEqual(span.context.traceID, ServiceContext.current?.traceID)
+            XCTAssertEqual(span.context.traceID, fromNonAsyncWorld.traceID)
+            return await operation(span)
+        }
 
-            XCTAssertEqual(value, "world")
+        XCTAssertEqual(value, "world")
+        XCTAssertTrue(spanEnded.withValue { $0 })
+    }
+
+    func testWithSpan_automaticBaggagePropagation_async_throws() async throws {
+        let tracer = TestTracer()
+
+        let spanEnded: LockedValueBox<Bool> = .init(false)
+        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
+
+        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
+            throw ExampleSpanError()
+        }
+
+        do {
+            _ = try await tracer.withAnySpan("hello", operation)
+        } catch {
             XCTAssertTrue(spanEnded.withValue { $0 })
+            XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+            return
         }
+        XCTFail("Should have thrown")
     }
 
-    func testWithSpan_automaticBaggagePropagation_async_throws() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_async_throws() async throws {
         let tracer = TestTracer()
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
@@ -205,23 +198,17 @@ final class TracerTests: XCTestCase {
             throw ExampleSpanError()
         }
 
-        self.testAsync {
-            do {
-                _ = try await tracer.withAnySpan("hello", operation)
-            } catch {
-                XCTAssertTrue(spanEnded.withValue { $0 })
-                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
-                return
-            }
-            XCTFail("Should have thrown")
+        do {
+            _ = try await tracer.withSpan("hello", operation)
+        } catch {
+            XCTAssertTrue(spanEnded.withValue { $0 })
+            XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+            return
         }
+        XCTFail("Should have thrown")
     }
 
-    func test_static_Tracer_withSpan_automaticBaggagePropagation_async_throws() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
+    func test_static_Tracer_withSpan_automaticBaggagePropagation_throws() async throws {
         let tracer = TestTracer()
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
@@ -231,49 +218,17 @@ final class TracerTests: XCTestCase {
             throw ExampleSpanError()
         }
 
-        self.testAsync {
-            do {
-                _ = try await tracer.withSpan("hello", operation)
-            } catch {
-                XCTAssertTrue(spanEnded.withValue { $0 })
-                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
-                return
-            }
-            XCTFail("Should have thrown")
+        do {
+            _ = try await tracer.withSpan("hello", operation)
+        } catch {
+            XCTAssertTrue(spanEnded.withValue { $0 })
+            XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
+            return
         }
-    }
-
-    func test_static_Tracer_withSpan_automaticBaggagePropagation_throws() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
-        let tracer = TestTracer()
-
-        let spanEnded: LockedValueBox<Bool> = .init(false)
-        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
-
-        let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
-            throw ExampleSpanError()
-        }
-
-        self.testAsync {
-            do {
-                _ = try await tracer.withSpan("hello", operation)
-            } catch {
-                XCTAssertTrue(spanEnded.withValue { $0 })
-                XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
-                return
-            }
-            XCTFail("Should have thrown")
-        }
+        XCTFail("Should have thrown")
     }
 
     func testWithSpan_recordErrorWithAttributes() throws {
-        guard #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) else {
-            throw XCTSkip("Task locals are not supported on this platform.")
-        }
-
         let tracer = TestTracer()
 
         var endedSpan: TestSpan?
@@ -317,23 +272,6 @@ final class TracerTests: XCTestCase {
 
         let span = tracer.spans.first!
         XCTAssertEqual(span.startTimestampNanosSinceEpoch, instant.nanosecondsSinceEpoch)
-    }
-
-    //    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-    /// Helper method to execute async operations until we can use async tests (currently incompatible with the generated LinuxMain file).
-    /// - Parameter operation: The operation to test.
-    func testAsync(_ operation: @Sendable @escaping () async throws -> Void) rethrows {
-        let group = DispatchGroup()
-        group.enter()
-        Task.detached {
-            do {
-                try await operation()
-            } catch {
-                throw error
-            }
-            group.leave()
-        }
-        group.wait()
     }
 }
 
