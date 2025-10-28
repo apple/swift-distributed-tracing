@@ -12,14 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
 @testable import Instrumentation
 
-final class DynamicTracepointTracerTests: XCTestCase {
-    func test_adhoc_enableBySourceLoc() {
+@Suite("Dynamic Tracepoint Tracer Tests")
+struct DynamicTracepointTracerTests {
+    @Test("Ad-hoc tracepoint enable by source location")
+    func adhoc_enableBySourceLoc() {
         let tracer = DynamicTracepointTestTracer()
 
         let fileID = #fileID
@@ -49,16 +52,17 @@ final class DynamicTracepointTracerTests: XCTestCase {
             }
         }
 
-        XCTAssertEqual(tracer.spans.count, 4)
+        #expect(tracer.spans.count == 4)
 
         for span in tracer.spans {
-            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            #expect(span.context.traceID == "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #expect(tracer.spans[0].context.spanID == "span-id-fake-\(fileID)-\(fakeLine)")
+        #expect(tracer.spans[1].context.spanID == "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
-    func test_adhoc_enableByFunction() {
+    @Test("Ad-hoc tracepoint enable by function")
+    func adhoc_enableByFunction() {
         let tracer = DynamicTracepointTestTracer()
 
         let fileID = #fileID
@@ -70,12 +74,12 @@ final class DynamicTracepointTracerTests: XCTestCase {
         self.logic(fakeLine: 55, tracer: tracer)
         self.traceMeLogic(fakeLine: fakeLine, tracer: tracer)
 
-        XCTAssertEqual(tracer.spans.count, 2)
+        #expect(tracer.spans.count == 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            #expect(span.context.traceID == "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #expect(tracer.spans[0].context.spanID == "span-id-fake-\(fileID)-\(fakeLine)")
+        #expect(tracer.spans[1].context.spanID == "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
     func logic(fakeLine: UInt, tracer: any Tracer) {

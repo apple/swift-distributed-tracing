@@ -12,31 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Testing
 import Tracing
-import XCTest
 
 import struct Foundation.Date
 
 @testable import Instrumentation
 
-final class TracerTimeTests: XCTestCase {
-    func testTracerTime() {
+@Suite("Tracer Time")
+struct TracerTimeTests {
+    @Test("DefaultTracerClock matches Date")
+    func defaultTracerClockMatchesDate() {
         let t = DefaultTracerClock.now
         let d = Date()
-        XCTAssertEqual(
-            Double(t.millisecondsSinceEpoch) / 1000,  // seconds
-            d.timeIntervalSince1970,  // seconds
-            accuracy: 10
+        #expect(
+            abs(Double(t.millisecondsSinceEpoch) / 1000 - d.timeIntervalSince1970) < 10
         )
     }
 
-    func testMockTimeStartSpan() {
+    @Test("Mock time with startSpan")
+    func mockTimeStartSpan() {
         let tracer = TestTracer()
 
         let mockClock = MockClock()
         mockClock.setTime(13)
         let span: TestSpan = tracer.startSpan("start", at: mockClock.now)
-        XCTAssertEqual(span.startTimestampNanosSinceEpoch, 13)
+        #expect(span.startTimestampNanosSinceEpoch == 13)
     }
 }
 

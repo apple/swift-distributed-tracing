@@ -13,14 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
 @testable import Instrumentation
 
 /// This is a compile-time test
-final class ActorTracingTests: XCTestCase {
-    func test() {}
+@Suite("Actor Tracing Compatibility")
+struct ActorTracingTests {
+    @Test("Compiles with actor isolation")
+    func compilesWithActorIsolation() {
+        // This test exists purely to verify that the code compiles
+        // with Swift's strict concurrency checking
+    }
 }
 
 func work() async {}
