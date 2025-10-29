@@ -37,28 +37,28 @@ final class GlobalTracingInstrumentationSystemTests: XCTestCase {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
     }
-    
+
     func testItProvidesAccessToATracer() {
         let tracer = TestTracer()
-        
+
         XCTAssertNil(InstrumentationSystem._legacyTracer(of: TestTracer.self))
         XCTAssertNil(InstrumentationSystem._tracer(of: TestTracer.self))
-        
+
         InstrumentationSystem.bootstrapInternal(tracer)
         XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
         XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
         XCTAssertNil(InstrumentationSystem._instrument(of: NoOpInstrument.self))
-        
+
         XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
         XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.tracer is TestTracer)
-        
+
         let multiplexInstrument = MultiplexInstrument([tracer])
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
         XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
         XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
-        
+
         XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
         XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
         XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
@@ -71,7 +71,7 @@ final class GlobalTracingMethodsTests: XCTestCase {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
     }
-    
+
     func testGlobalTracingMethods() async {
         // Bootstrap with TestTracer to capture spans
         let tracer = TestTracer()
