@@ -82,7 +82,8 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeIsExpressibleByArrayLiteral() {
-        let s = InstrumentationSystem.legacyTracer.startAnySpan("", context: .topLevel)
+        let tracer = TestTracer()
+        let s = tracer.startAnySpan("", context: .topLevel)
         s.attributes["hi"] = [42, 21]
         s.attributes["hi"] = [42.10, 21.0]
         s.attributes["hi"] = [true, false]
@@ -91,12 +92,8 @@ final class SpanTests: XCTestCase {
     }
 
     func testSpanAttributeSetEntireCollection() {
-        InstrumentationSystem.bootstrapInternal(TestTracer())
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
-
-        let s = InstrumentationSystem.legacyTracer.startAnySpan("", context: .topLevel)
+        let tracer = TestTracer()
+        let s = tracer.startAnySpan("", context: .topLevel)
         var attrs = s.attributes
         attrs["one"] = 42
         attrs["two"] = [1, 2, 34]

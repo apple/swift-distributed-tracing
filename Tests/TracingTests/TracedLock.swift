@@ -30,10 +30,10 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock = NSLock()
     }
 
-    func lock(context: ServiceContext) {
+    func lock(context: ServiceContext, tracer: any Tracer) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.legacyTracer.startAnySpan(self.name, context: context)
+        self.activeSpan = tracer.startSpan(self.name, context: context)
     }
 
     func unlock(context: ServiceContext) {
@@ -42,8 +42,8 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock.unlock()
     }
 
-    func withLock(context: ServiceContext, _ closure: () -> Void) {
-        self.lock(context: context)
+    func withLock(context: ServiceContext, tracer: any Tracer, _ closure: () -> Void) {
+        self.lock(context: context, tracer: tracer)
         defer { self.unlock(context: context) }
         closure()
     }

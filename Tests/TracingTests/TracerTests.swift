@@ -23,24 +23,14 @@ import XCTest
 #endif
 
 final class TracerTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
-
     func testContextPropagation() {
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
-
         let httpServer = FakeHTTPServer { context, _, client -> FakeHTTPResponse in
-            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
+            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []), tracer: tracer)
             return FakeHTTPResponse(status: 418)
         }
 
-        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
+        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]), tracer: tracer)
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
@@ -49,14 +39,15 @@ final class TracerTests: XCTestCase {
     }
 
     func testContextPropagationWithNoOpSpan() {
+        let tracer = TestTracer()
         let httpServer = FakeHTTPServer { _, _, client -> FakeHTTPResponse in
             var context = ServiceContext.topLevel
             context.traceID = "test"
-            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []))
+            client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []), tracer: tracer)
             return FakeHTTPResponse(status: 418)
         }
 
-        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]))
+        httpServer.receive(FakeHTTPRequest(path: "/", headers: [("trace-id", "test")]), tracer: tracer)
 
         XCTAssertEqual(httpServer.client.contexts.count, 1)
         XCTAssertEqual(httpServer.client.contexts.first?.traceID, "test")
@@ -67,10 +58,6 @@ final class TracerTests: XCTestCase {
             return
         }
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
 
         var spanEnded = false
         tracer.onEndSpan = { _ in
@@ -87,10 +74,6 @@ final class TracerTests: XCTestCase {
 
     func testWithSpan_throws() {
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
 
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
@@ -113,10 +96,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
@@ -140,10 +119,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         var spanEnded = false
         tracer.onEndSpan = { _ in spanEnded = true }
@@ -168,10 +143,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
         tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
@@ -197,10 +168,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
         tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
@@ -230,10 +197,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
         tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
@@ -260,10 +223,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
         tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
@@ -274,7 +233,7 @@ final class TracerTests: XCTestCase {
 
         self.testAsync {
             do {
-                _ = try await withSpan("hello", operation)
+                _ = try await tracer.withSpan("hello", operation)
             } catch {
                 XCTAssertTrue(spanEnded.withValue { $0 })
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
@@ -290,10 +249,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let spanEnded: LockedValueBox<Bool> = .init(false)
         tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
@@ -304,7 +259,7 @@ final class TracerTests: XCTestCase {
 
         self.testAsync {
             do {
-                _ = try await withSpan("hello", operation)
+                _ = try await tracer.withSpan("hello", operation)
             } catch {
                 XCTAssertTrue(spanEnded.withValue { $0 })
                 XCTAssertEqual(error as? ExampleSpanError, ExampleSpanError())
@@ -320,10 +275,6 @@ final class TracerTests: XCTestCase {
         }
 
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         var endedSpan: TestSpan?
         tracer.onEndSpan = { span in endedSpan = span }
@@ -358,15 +309,11 @@ final class TracerTests: XCTestCase {
 
     func testWithSpanShouldNotMissPropagatingInstant() {
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(nil)
-        }
 
         let clock = DefaultTracerClock()
 
         let instant = clock.now
-        withSpan("span", at: instant) { _ in }
+        tracer.withSpan("span", at: instant) { _ in }
 
         let span = tracer.spans.first!
         XCTAssertEqual(span.startTimestampNanosSinceEpoch, instant.nanosecondsSinceEpoch)
@@ -428,11 +375,11 @@ struct FakeHTTPServer {
         self.client = FakeHTTPClient()
     }
 
-    func receive(_ request: FakeHTTPRequest) {
+    func receive(_ request: FakeHTTPRequest, tracer: any Tracer & Instrument) {
         var context = ServiceContext.topLevel
-        InstrumentationSystem.instrument.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
+        tracer.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
 
-        let span = InstrumentationSystem.tracer.startSpan("GET \(request.path)", context: context)
+        let span = tracer.startSpan("GET \(request.path)", context: context)
 
         let response = self.catchAllHandler(span.context, request, self.client)
         span.attributes["http.status"] = response.status
@@ -446,12 +393,12 @@ struct FakeHTTPServer {
 final class FakeHTTPClient {
     private(set) var contexts = [ServiceContext]()
 
-    func performRequest(_ context: ServiceContext, request: FakeHTTPRequest) {
+    func performRequest(_ context: ServiceContext, request: FakeHTTPRequest, tracer: any LegacyTracer) {
         var request = request
-        let span = InstrumentationSystem.legacyTracer.startAnySpan("GET \(request.path)", context: context)
+        let span = tracer.startAnySpan("GET \(request.path)", context: context)
 
         self.contexts.append(span.context)
-        InstrumentationSystem.instrument.inject(context, into: &request.headers, using: HTTPHeadersInjector())
+        tracer.inject(context, into: &request.headers, using: HTTPHeadersInjector())
         span.end()
     }
 }

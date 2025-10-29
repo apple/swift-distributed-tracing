@@ -20,11 +20,6 @@ import struct Foundation.Date
 @testable import Instrumentation
 
 final class TracerTimeTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
-
     func testTracerTime() {
         let t = DefaultTracerClock.now
         let d = Date()
@@ -37,10 +32,6 @@ final class TracerTimeTests: XCTestCase {
 
     func testMockTimeStartSpan() {
         let tracer = TestTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
 
         let mockClock = MockClock()
         mockClock.setTime(13)
