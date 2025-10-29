@@ -12,67 +12,68 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Testing
 import Tracing
-import XCTest
 
 @testable import Instrumentation
 
 extension InstrumentationSystem {
-    public static func _legacyTracer<T>(of tracerType: T.Type) -> T? where T: LegacyTracer {
+    fileprivate static func _legacyTracer<T>(of tracerType: T.Type) -> T? where T: LegacyTracer {
         self._findInstrument(where: { $0 is T }) as? T
     }
 
-    public static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
+    fileprivate static func _tracer<T>(of tracerType: T.Type) -> T? where T: Tracer {
         self._findInstrument(where: { $0 is T }) as? T
     }
 
-    public static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
+    fileprivate static func _instrument<I>(of instrumentType: I.Type) -> I? where I: Instrument {
         self._findInstrument(where: { $0 is I }) as? I
     }
 }
 
-/// This is the only test relying in the global InstrumentationSystem
-final class GlobalTracingInstrumentationSystemTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
+/// Tests that rely on the global InstrumentationSystem
+/// These tests must be isolated from each other since they mutate global state
+@Suite("Global InstrumentationSystem", .serialized)
+struct GlobalTracingInstrumentationSystemTests {
 
-    func testItProvidesAccessToATracer() {
+    @Test("Provides access to a tracer")
+    func accessToTracer() {
+        // Clean state before test
+        InstrumentationSystem.bootstrapInternal(nil)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
+
         let tracer = TestTracer()
 
-        XCTAssertNil(InstrumentationSystem._legacyTracer(of: TestTracer.self))
-        XCTAssertNil(InstrumentationSystem._tracer(of: TestTracer.self))
+        #expect(InstrumentationSystem._legacyTracer(of: TestTracer.self) == nil)
+        #expect(InstrumentationSystem._tracer(of: TestTracer.self) == nil)
 
         InstrumentationSystem.bootstrapInternal(tracer)
-        XCTAssertFalse(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
-        XCTAssertNil(InstrumentationSystem._instrument(of: NoOpInstrument.self))
+        #expect(InstrumentationSystem.instrument is MultiplexInstrument == false)
+        #expect(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem._instrument(of: NoOpInstrument.self) == nil)
 
-        XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
-        XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracer is TestTracer)
+        #expect(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem.legacyTracer is TestTracer)
+        #expect(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem.tracer is TestTracer)
 
         let multiplexInstrument = MultiplexInstrument([tracer])
         InstrumentationSystem.bootstrapInternal(multiplexInstrument)
-        XCTAssert(InstrumentationSystem.instrument is MultiplexInstrument)
-        XCTAssert(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem.instrument is MultiplexInstrument)
+        #expect(InstrumentationSystem._instrument(of: TestTracer.self) === tracer)
 
-        XCTAssert(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.legacyTracer is TestTracer)
-        XCTAssert(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
-        XCTAssert(InstrumentationSystem.tracer is TestTracer)
+        #expect(InstrumentationSystem._legacyTracer(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem.legacyTracer is TestTracer)
+        #expect(InstrumentationSystem._tracer(of: TestTracer.self) === tracer)
+        #expect(InstrumentationSystem.tracer is TestTracer)
     }
-}
 
-final class GlobalTracingMethodsTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
+    @Test("Global tracing methods preserve arguments")
+    func globalTracingMethods() async throws {
+        // Clean state before test
         InstrumentationSystem.bootstrapInternal(nil)
-    }
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
 
-    func testGlobalTracingMethods() async {
         // Bootstrap with TestTracer to capture spans
         let tracer = TestTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -123,10 +124,10 @@ final class GlobalTracingMethodsTests: XCTestCase {
             context: customContext1,
             ofKind: .consumer
         ) { span -> String in
-            XCTAssertEqual(span.operationName, "withSpan-sync-instant")
+            #expect(span.operationName == "withSpan-sync-instant")
             return "sync-result"
         }
-        XCTAssertEqual(result1, "sync-result")
+        #expect(result1 == "sync-result")
 
         // Test 5: withSpan synchronous without instant
         let result2 = withSpan(
@@ -134,10 +135,10 @@ final class GlobalTracingMethodsTests: XCTestCase {
             context: customContext2,
             ofKind: .internal
         ) { span -> Int in
-            XCTAssertEqual(span.operationName, "withSpan-sync-default")
+            #expect(span.operationName == "withSpan-sync-default")
             return 42
         }
-        XCTAssertEqual(result2, 42)
+        #expect(result2 == 42)
 
         // Test 6: withSpan synchronous with instant (alt parameter order)
         let result3 = withSpan(
@@ -148,7 +149,7 @@ final class GlobalTracingMethodsTests: XCTestCase {
         ) { _ in
             "alt-result"
         }
-        XCTAssertEqual(result3, "alt-result")
+        #expect(result3 == "alt-result")
 
         // Test 7: withSpan async with custom instant and isolation
         let result4 = await withSpan(
@@ -158,10 +159,10 @@ final class GlobalTracingMethodsTests: XCTestCase {
             ofKind: .client,
             isolation: nil
         ) { span -> String in
-            XCTAssertEqual(span.operationName, "withSpan-async-instant-isolation")
+            #expect(span.operationName == "withSpan-async-instant-isolation")
             return "async-result"
         }
-        XCTAssertEqual(result4, "async-result")
+        #expect(result4 == "async-result")
 
         // Test 8: withSpan async without instant but with isolation
         let result5 = await withSpan(
@@ -170,10 +171,10 @@ final class GlobalTracingMethodsTests: XCTestCase {
             ofKind: .producer,
             isolation: nil
         ) { span -> Bool in
-            XCTAssertEqual(span.operationName, "withSpan-async-default-isolation")
+            #expect(span.operationName == "withSpan-async-default-isolation")
             return true
         }
-        XCTAssertEqual(result5, true)
+        #expect(result5 == true)
 
         // Test 9: withSpan async with instant, isolation (alt parameter order)
         let result6 = await withSpan(
@@ -185,66 +186,66 @@ final class GlobalTracingMethodsTests: XCTestCase {
         ) { _ in
             99
         }
-        XCTAssertEqual(result6, 99)
+        #expect(result6 == 99)
 
         // Verify all spans were recorded with correct properties
         let finishedSpans = tracer.spans
-        XCTAssertEqual(finishedSpans.count, 9, "Expected 9 finished spans")
+        #expect(finishedSpans.count == 9)
 
         // Verify span 1: startSpan with custom instant
         let recorded1 = finishedSpans[0]
-        XCTAssertEqual(recorded1.operationName, "startSpan-with-instant")
-        XCTAssertEqual(recorded1.kind, .client)
-        XCTAssertEqual(recorded1.context[TestContextKey.self], "context1")
-        XCTAssertEqual(recorded1.startTimestampNanosSinceEpoch, customInstant1.nanosecondsSinceEpoch)
+        #expect(recorded1.operationName == "startSpan-with-instant")
+        #expect(recorded1.kind == .client)
+        #expect(recorded1.context[TestContextKey.self] == "context1")
+        #expect(recorded1.startTimestampNanosSinceEpoch == customInstant1.nanosecondsSinceEpoch)
 
         // Verify span 2: startSpan without instant
         let recorded2 = finishedSpans[1]
-        XCTAssertEqual(recorded2.operationName, "startSpan-default-instant")
-        XCTAssertEqual(recorded2.kind, .server)
-        XCTAssertEqual(recorded2.context[TestContextKey.self], "context2")
+        #expect(recorded2.operationName == "startSpan-default-instant")
+        #expect(recorded2.kind == .server)
+        #expect(recorded2.context[TestContextKey.self] == "context2")
         // Note: Can't verify exact instant since it used DefaultTracerClock.now
 
         // Verify span 3: startSpan with instant (alt)
         let recorded3 = finishedSpans[2]
-        XCTAssertEqual(recorded3.operationName, "startSpan-instant-alt")
-        XCTAssertEqual(recorded3.kind, .producer)
-        XCTAssertEqual(recorded3.startTimestampNanosSinceEpoch, customInstant2.nanosecondsSinceEpoch)
+        #expect(recorded3.operationName == "startSpan-instant-alt")
+        #expect(recorded3.kind == .producer)
+        #expect(recorded3.startTimestampNanosSinceEpoch == customInstant2.nanosecondsSinceEpoch)
 
         // Verify span 4: withSpan sync with instant
         let recorded4 = finishedSpans[3]
-        XCTAssertEqual(recorded4.operationName, "withSpan-sync-instant")
-        XCTAssertEqual(recorded4.kind, .consumer)
-        XCTAssertEqual(recorded4.context[TestContextKey.self], "context1")
-        XCTAssertEqual(recorded4.startTimestampNanosSinceEpoch, customInstant3.nanosecondsSinceEpoch)
+        #expect(recorded4.operationName == "withSpan-sync-instant")
+        #expect(recorded4.kind == .consumer)
+        #expect(recorded4.context[TestContextKey.self] == "context1")
+        #expect(recorded4.startTimestampNanosSinceEpoch == customInstant3.nanosecondsSinceEpoch)
 
         // Verify span 5: withSpan sync without instant
         let recorded5 = finishedSpans[4]
-        XCTAssertEqual(recorded5.operationName, "withSpan-sync-default")
-        XCTAssertEqual(recorded5.kind, .internal)
-        XCTAssertEqual(recorded5.context[TestContextKey.self], "context2")
+        #expect(recorded5.operationName == "withSpan-sync-default")
+        #expect(recorded5.kind == .internal)
+        #expect(recorded5.context[TestContextKey.self] == "context2")
 
         // Verify span 6: withSpan sync with instant (alt)
         let recorded6 = finishedSpans[5]
-        XCTAssertEqual(recorded6.operationName, "withSpan-sync-instant-alt")
-        XCTAssertEqual(recorded6.kind, .server)
+        #expect(recorded6.operationName == "withSpan-sync-instant-alt")
+        #expect(recorded6.kind == .server)
 
         // Verify span 7: withSpan async with instant and isolation
         let recorded7 = finishedSpans[6]
-        XCTAssertEqual(recorded7.operationName, "withSpan-async-instant-isolation")
-        XCTAssertEqual(recorded7.kind, .client)
-        XCTAssertEqual(recorded7.context[TestContextKey.self], "context1")
+        #expect(recorded7.operationName == "withSpan-async-instant-isolation")
+        #expect(recorded7.kind == .client)
+        #expect(recorded7.context[TestContextKey.self] == "context1")
 
         // Verify span 8: withSpan async without instant but with isolation
         let recorded8 = finishedSpans[7]
-        XCTAssertEqual(recorded8.operationName, "withSpan-async-default-isolation")
-        XCTAssertEqual(recorded8.kind, .producer)
-        XCTAssertEqual(recorded8.context[TestContextKey.self], "context2")
+        #expect(recorded8.operationName == "withSpan-async-default-isolation")
+        #expect(recorded8.kind == .producer)
+        #expect(recorded8.context[TestContextKey.self] == "context2")
 
         // Verify span 9: withSpan async with instant and isolation (alt)
         let recorded9 = finishedSpans[8]
-        XCTAssertEqual(recorded9.operationName, "withSpan-async-instant-isolation-alt")
-        XCTAssertEqual(recorded9.kind, .consumer)
+        #expect(recorded9.operationName == "withSpan-async-instant-isolation-alt")
+        #expect(recorded9.kind == .consumer)
     }
 }
 

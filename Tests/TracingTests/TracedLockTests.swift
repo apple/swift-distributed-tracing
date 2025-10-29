@@ -12,14 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
 @testable import Instrumentation
 
-final class TracedLockTests: XCTestCase {
-    func test_tracesLockedTime() {
+@Suite("TracedLock")
+struct TracedLockTests {
+    @Test("Traces locked time")
+    func tracesLockedTime() {
         let tracer = TracedLockPrintlnTracer()
         let lock = TracedLock(name: "my-cool-lock")
 

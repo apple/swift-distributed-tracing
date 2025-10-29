@@ -12,12 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import Instrumentation
 import ServiceContextModule
-import XCTest
+import Testing
 
-final class InstrumentTests: XCTestCase {
-    func testMultiplexInvokesAllInstruments() {
+@Suite("MultiplexInstrument")
+struct InstrumentTests {
+    @Test("MultiplexInstrument invokes all instruments")
+    func multiplexInvokesAllInstruments() {
         let instrument = MultiplexInstrument([
             FirstFakeTracer(),
             SecondFakeTracer(),
@@ -26,15 +29,14 @@ final class InstrumentTests: XCTestCase {
         var context = ServiceContext.topLevel
         instrument.extract([String: String](), into: &context, using: DictionaryExtractor())
 
-        XCTAssertEqual(context[FirstFakeTracer.TraceIDKey.self], FirstFakeTracer.defaultTraceID)
-        XCTAssertEqual(context[SecondFakeTracer.TraceIDKey.self], SecondFakeTracer.defaultTraceID)
+        #expect(context[FirstFakeTracer.TraceIDKey.self] == FirstFakeTracer.defaultTraceID)
+        #expect(context[SecondFakeTracer.TraceIDKey.self] == SecondFakeTracer.defaultTraceID)
 
         var subsequentRequestHeaders = ["Accept": "application/json"]
         instrument.inject(context, into: &subsequentRequestHeaders, using: DictionaryInjector())
 
-        XCTAssertEqual(
-            subsequentRequestHeaders,
-            [
+        #expect(
+            subsequentRequestHeaders == [
                 "Accept": "application/json",
                 FirstFakeTracer.headerName: FirstFakeTracer.defaultTraceID,
                 SecondFakeTracer.headerName: SecondFakeTracer.defaultTraceID,

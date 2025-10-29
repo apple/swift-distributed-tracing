@@ -12,11 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(Testing)
+@_spi(Testing) import InMemoryTracing
 @_spi(Locking) import Instrumentation
 import Testing
 import Tracing
-@_spi(Testing) import InMemoryTracing
 
 @Suite("InMemoryTracer")
 struct InMemoryTracerTests {
@@ -437,5 +436,3 @@ private final class MockClock {
         Instant(nanosecondsSinceEpoch: self._now)
     }
 }
-
-#endif
