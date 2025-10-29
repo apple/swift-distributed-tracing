@@ -36,6 +36,10 @@ jobs:
       windows_nightly_next_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_nightly_main_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
 
+  wasm-sdk:
+    name: WebAssembly Swift SDK
+    uses: apple/swift-nio/.github/workflows/wasm_swift_sdk.yml@main
+
   benchmarks:
     name: Benchmarks
     uses: apple/swift-nio/.github/workflows/benchmarks.yml@main
