@@ -18,12 +18,8 @@ import XCTest
 
 @testable import Instrumentation
 
+/// This is a compile-time test
 final class ActorTracingTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
-
     func test() {}
 }
 

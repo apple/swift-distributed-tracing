@@ -19,18 +19,8 @@ import XCTest
 @testable import Instrumentation
 
 final class DynamicTracepointTracerTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
-
     func test_adhoc_enableBySourceLoc() {
         let tracer = DynamicTracepointTestTracer()
-
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
 
         let fileID = #fileID
         let fakeLine: UInt = 77  // trick number, see withSpan below.
@@ -71,19 +61,14 @@ final class DynamicTracepointTracerTests: XCTestCase {
     func test_adhoc_enableByFunction() {
         let tracer = DynamicTracepointTestTracer()
 
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
-
         let fileID = #fileID
-        tracer.enableTracepoint(function: "traceMeLogic(fakeLine:)")
+        tracer.enableTracepoint(function: "traceMeLogic(fakeLine:tracer:)")
 
         let fakeLine: UInt = 66
         let fakeNextLine: UInt = fakeLine + 11
 
-        self.logic(fakeLine: 55)
-        self.traceMeLogic(fakeLine: fakeLine)
+        self.logic(fakeLine: 55, tracer: tracer)
+        self.traceMeLogic(fakeLine: fakeLine, tracer: tracer)
 
         XCTAssertEqual(tracer.spans.count, 2)
         for span in tracer.spans {
@@ -93,15 +78,15 @@ final class DynamicTracepointTracerTests: XCTestCase {
         XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
-    func logic(fakeLine: UInt) {
-        InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
+    func logic(fakeLine: UInt, tracer: any Tracer) {
+        tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
             // inside
         }
     }
 
-    func traceMeLogic(fakeLine: UInt) {
-        InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
-            InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
+    func traceMeLogic(fakeLine: UInt, tracer: any Tracer) {
+        tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
+            tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
             }
         }

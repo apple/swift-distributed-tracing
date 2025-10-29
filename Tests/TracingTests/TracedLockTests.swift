@@ -19,15 +19,8 @@ import XCTest
 @testable import Instrumentation
 
 final class TracedLockTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
-
     func test_tracesLockedTime() {
         let tracer = TracedLockPrintlnTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-
         let lock = TracedLock(name: "my-cool-lock")
 
         func launchTask(_ name: String) {
@@ -35,7 +28,7 @@ final class TracedLockTests: XCTestCase {
                 var context = ServiceContext.topLevel
                 context[TaskIDKey.self] = name
 
-                lock.lock(context: context)
+                lock.lock(context: context, tracer: tracer)
                 lock.unlock(context: context)
             }
         }

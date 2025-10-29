@@ -31,7 +31,8 @@ extension InstrumentationSystem {
     }
 }
 
-final class TracingInstrumentationSystemTests: XCTestCase {
+/// This is the only test relying in the global InstrumentationSystem
+final class GlobalTracingInstrumentationSystemTests: XCTestCase {
     override class func tearDown() {
         super.tearDown()
         InstrumentationSystem.bootstrapInternal(nil)
