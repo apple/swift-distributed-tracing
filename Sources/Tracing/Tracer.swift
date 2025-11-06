@@ -346,9 +346,12 @@ public func withSpan<T, Instant: TracerInstant>(
     }
 }
 
-@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 /// Start a new span and automatically end when the operation completes,
 /// including recording the error in case the operation throws.
+///
+/// @DeprecationSummary {
+///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+/// }
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -362,6 +365,7 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - operation: The operation that this span measures.
 /// - Returns: the value returned by `operation`.
 /// - Throws: the error the `operation` throws (if any).
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T, Instant: TracerInstant>(
     _ operationName: String,
@@ -433,10 +437,12 @@ public func withSpan<T>(
     }
 }
 
-@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 /// Start a new span and automatically end when the operation completes,
 /// including recording the error in case the operation throws.
+///
+/// @DeprecationSummary {
+///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+/// }
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -448,6 +454,8 @@ public func withSpan<T>(
 ///   - operation: The operation that this span measures.
 /// - Returns: the value returned by `operation`.
 /// - Throws: the error the `operation` throws (if any).
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public func withSpan<T>(
     _ operationName: String,
     context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -519,9 +527,12 @@ public func withSpan<T>(
     }
 }
 
-@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 /// Start a new span and automatically end when the operation completes,
 /// including recording the error in case the operation throws.
+///
+/// @DeprecationSummary {
+///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+/// }
 ///
 /// - Parameters:
 ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -534,6 +545,7 @@ public func withSpan<T>(
 ///   - operation: The operation that this span measures.
 /// - Returns: the value returned by `operation`.
 /// - Throws: the error the `operation` throws (if any).
+@_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public func withSpan<T>(
     _ operationName: String,

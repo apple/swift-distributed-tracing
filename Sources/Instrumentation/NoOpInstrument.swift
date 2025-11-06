@@ -16,6 +16,7 @@ import ServiceContextModule
 
 /// A "no op" implementation of an Instrument.
 public struct NoOpInstrument: Instrument {
+    /// Creates a new no-op instrument.
     public init() {}
     /// Extract values from a service context and inject them into the given carrier using the provided injector.
     ///

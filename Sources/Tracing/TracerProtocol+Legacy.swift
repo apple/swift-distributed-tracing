@@ -338,9 +338,12 @@ extension LegacyTracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     /// Start a new span and automatically end when the operation completes,
     /// including recording the error in case the operation throws.
+    ///
+    /// @DeprecationSummary {
+    ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+    /// }
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -354,6 +357,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span measures.
     /// - Returns: the value returned by `operation`.
     /// - Throws: the error the `operation` throws (if any).
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T, Instant: TracerInstant>(
         _ operationName: String,
         at instant: @autoclosure () -> Instant,
@@ -439,9 +443,12 @@ extension LegacyTracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     /// Start a new span and automatically end when the operation completes,
     /// including recording the error in case the operation throws.
+    ///
+    /// @DeprecationSummary {
+    ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+    /// }
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -453,6 +460,7 @@ extension LegacyTracer {
     ///   - operation: The operation that this span measures.
     /// - Returns: the value returned by `operation`.
     /// - Throws: the error the `operation` throws (if any).
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
@@ -647,9 +655,12 @@ extension Tracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     /// Start a new span and automatically end when the operation completes,
     /// including recording the error in case the operation throws.
+    ///
+    /// @DeprecationSummary {
+    ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
+    /// }
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
@@ -662,6 +673,7 @@ extension Tracer {
     ///   - operation: The operation that this span measures.
     /// - Returns: the value returned by `operation`.
     /// - Throws: the error the `operation` throws (if any).
+    @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withAnySpan<T>(
         _ operationName: String,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,

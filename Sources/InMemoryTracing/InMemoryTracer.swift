@@ -27,9 +27,12 @@ import Tracing
 /// ``popFinishedSpans()`` or any of the `clear...` methods (such as ``clearFinishedSpans()``)
 public struct InMemoryTracer: Tracer {
 
+    /// The strategy for generating trace and span identifiers.
     public let idGenerator: IDGenerator
 
+    /// A Boolean value that indicates whether the tracer records injected values.
     public let recordInjections: Bool
+    /// A Boolean value that indicates whether the tracer records extracted values.
     public let recordExtractions: Bool
 
     struct State {
