@@ -229,7 +229,7 @@ extension DynamicTracepointTestTracer {
         private let startTimestampNanosSinceEpoch: UInt64
         private(set) var endTimestampNanosSinceEpoch: UInt64?
 
-        public var operationName: String
+        package var operationName: String
         private(set) var context: ServiceContext
         private(set) var isRecording: Bool = false
 
