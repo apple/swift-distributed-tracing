@@ -9,7 +9,8 @@ let package = Package(
         .library(name: "InMemoryTracing", targets: ["InMemoryTracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0")
+        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0"),
+        .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------

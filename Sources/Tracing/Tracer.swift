@@ -358,7 +358,6 @@ public func withSpan<T, Instant: TracerInstant>(
 ///   - instant: The time instant at which the span started.
 ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
 ///   - kind: The ``SpanKind`` of the new ``Span``.
-///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
 ///   - function: The function name in which the span was started.
 ///   - fileID: The `fileID` where the span was started.
 ///   - line: The file line where the span was started.
