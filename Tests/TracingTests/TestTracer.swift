@@ -43,7 +43,7 @@ final class TestTracer: LegacyTracer {
         return span
     }
 
-    public func forceFlush() {}
+    package func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
     where
@@ -122,8 +122,8 @@ final class TestSpan: Span {
 
     private var status: SpanStatus?
 
-    public let startTimestampNanosSinceEpoch: UInt64
-    public private(set) var endTimestampNanosSinceEpoch: UInt64?
+    package let startTimestampNanosSinceEpoch: UInt64
+    package private(set) var endTimestampNanosSinceEpoch: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 

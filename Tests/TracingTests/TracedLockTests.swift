@@ -74,7 +74,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         )
     }
 
-    public func forceFlush() {}
+    package func forceFlush() {}
 
     func inject<Carrier, Inject>(
         _ context: ServiceContext,

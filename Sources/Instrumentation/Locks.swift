@@ -194,10 +194,14 @@ extension ReadWriteLock {
 public final class LockedValueBox<Value: Sendable>: @unchecked Sendable {
     private let lock = ReadWriteLock()
     private var value: Value
+    /// Creates a new locking instance for the value you provide.
     public init(_ value: Value) {
         self.value = value
     }
 
+    /// Provides access to the locked value with a writer lock for the duration of the closure that you provide.
+    /// - Parameter work: The closure that provides the value within a writer lock.
+    /// - Returns: The value that you return from the closure.
     public func withValue<R>(_ work: (inout Value) throws -> R) rethrows -> R {
         try self.lock.withWriterLock {
             try work(&self.value)

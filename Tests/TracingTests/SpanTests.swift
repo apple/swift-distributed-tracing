@@ -300,7 +300,7 @@ extension SpanAttribute {
 }
 
 extension SpanAttributes {
-    public var sampleHttp: HTTPAttributes {
+    package var sampleHttp: HTTPAttributes {
         get {
             .init(attributes: self)
         }
@@ -311,35 +311,35 @@ extension SpanAttributes {
 }
 
 @dynamicMemberLookup
-public struct HTTPAttributes: SpanAttributeNamespace {
-    public var attributes: SpanAttributes
-    public init(attributes: SpanAttributes) {
+package struct HTTPAttributes: SpanAttributeNamespace {
+    package var attributes: SpanAttributes
+    package init(attributes: SpanAttributes) {
         self.attributes = attributes
     }
 
-    public struct NestedSpanAttributes: NestedSpanAttributesProtocol {
-        public init() {}
+    package struct NestedSpanAttributes: NestedSpanAttributesProtocol {
+        package init() {}
 
-        public var statusCode: Key<Int> {
+        package var statusCode: Key<Int> {
             "http.status_code"
         }
 
-        public var codesArray: Key<[Int]> {
+        package var codesArray: Key<[Int]> {
             "http.codes_array"
         }
 
-        public var customType: Key<CustomAttributeValue> {
+        package var customType: Key<CustomAttributeValue> {
             "http.custom_value"
         }
     }
 }
 
-public struct CustomAttributeValue: Equatable, Sendable, CustomStringConvertible, SpanAttributeConvertible {
-    public func toSpanAttribute() -> SpanAttribute {
+package struct CustomAttributeValue: Equatable, Sendable, CustomStringConvertible, SpanAttributeConvertible {
+    package func toSpanAttribute() -> SpanAttribute {
         .stringConvertible(self)
     }
 
-    public var description: String {
+    package var description: String {
         "CustomAttributeValue()"
     }
 }
