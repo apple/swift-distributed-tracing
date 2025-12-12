@@ -2,7 +2,7 @@
 
 A Distributed Tracing API for Swift.
 
-This is a collection of Swift libraries enabling the instrumentation of server side applications using tools such as tracers. Our goal is to provide a common foundation that allows to freely choose how to instrument systems with minimal changes to your actual code.
+This is a collection of Swift types enabling the instrumentation of server side applications using tools such as tracers. Our goal is to provide a common foundation that allows to freely choose how to instrument systems with minimal changes to your actual code.
 
 While Swift Distributed Tracing allows building all kinds of _instruments_, which can co-exist in applications transparently, its primary use is instrumenting multi-threaded and distributed systems with Distributed Traces.
 
@@ -16,40 +16,36 @@ This project uses the context propagation type defined independently in:
 
 ## Compatibility
 
-This project is designed in a very open and extensible manner, such that various instrumentation and tracing systems can be built on top of it. 
+This project is designed in a very open and extensible manner, such that various instrumentation and tracing systems can be built on top of it.
 
 The purpose of the tracing package is to serve as common API for all tracer and instrumentation implementations. Thanks to this, libraries may only need to be instrumented once, and then be used with any tracer which conforms to this API.
 
 <a name="backends"></a>
 ### Tracing Backends
- 
+
 Compatible `Tracer` implementations:
 
 | Library | Status                     | Description |
 | ------- |----------------------------| ----------- |
-| [@slashmo](https://github.com/slashmo) / [Swift **OTel**](https://github.com/slashmo/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
-| [@pokrywka](https://github.com/pokryfka) / [AWS **xRay** SDK Swift](https://github.com/pokryfka/aws-xray-sdk-swift) | 🟠 Not updated for 1.0        | ... |
+| [@swift-otel](https://github.com/swift-otel) / [Swift **OTel**](https://github.com/swift-otel/swift-otel) | 🟢 Updated for 1.0 | Exports spans to [**OpenTelemetry Collector**](https://opentelemetry.io/docs/collector/); Compatible with **Zipkin**, **X-Ray** **Jaeger**, and more. |
 | _Your library?_ | ...                        | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
-### Libraries & Frameworks
+### Supported Libraries & Frameworks
 
-As this API package was just released, no projects have yet fully adopted it, the following table for not serves as reference to prior work in adopting tracing work. As projects move to adopt tracing completely, the table will be used to track adoption phases of the various libraries.
+The following is a, non-complete, list of a few libraries and frameworks which provide built-in support for distributed tracing.
+This list is not complete, however if you'd like to feature your library in the list below, feel free to open a pull request adding it.
 
-| HTTP Servers/Frameworks  | Integrates     | Status                                                |
+
+| Library / Framework      | Integrates     | Status                                                |
 |--------------------------|----------------|-------------------------------------------------------|
+| [AsyncHTTPClient](https://github.com/swift-server/async-http-client) 1.29.0+ | Tracing | 🟢 Built-in support |
 | [Hummingbird](https://github.com/hummingbird-project/hummingbird) | Tracing | 🟢 Built-in support |
-| [Vapor](https://github.com/vapor/vapor) | Tracing | [Support planned](https://github.com/vapor/vapor/issues/3033) |
-| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
-
-
-| Client libraries          |                |                                                       |
-| ------------------------- | -------------- | ----------------------------------------------------- |
-| AsyncHTTPClient           | Tracing        | 🟠 Pending                                               |
-| Swift gRPC                | Tracing        | 🟠 Pending                                               |
-| Swift Distributed Cluster | Tracing        | 🟠 Pending                                            |
-| _Your library?_           | ...            | [Get in touch!](https://forums.swift.org/c/server/43) | 
+| [Vapor](https://github.com/vapor/vapor) | Tracing | 🟢 Built-in support |
+| [Valkey Swift](https://github.com/valkey-io/valkey-swift) | Tracing | 🟢 Built-in support |
+| [gRPC Swift 2](https://github.com/grpc/grpc-swift-2) | Tracing | 🟢 `grpc-swift-extras` middleware |
+| _Your library?_          | ...            | [Get in touch!](https://forums.swift.org/c/server/43) |
 
 If you know of any other library please send in a [pull request](https://github.com/apple/swift-distributed-tracing/compare) to add it to the list, thank you!
 
@@ -58,21 +54,3 @@ If you know of any other library please send in a [pull request](https://github.
 ## Reference Documentation
 
 Please refer to the **[reference documentation](https://swiftpackageindex.com/apple/swift-distributed-tracing/documentation/tracing)** for detailed guides about adopting distributed tracing in your applications, libraries and frameworks.
-
----
-
-## Contributing
-
-Please make sure to run the `./scripts/soundness.sh` script when contributing, it checks formatting and similar things.
-
-You can ensure it always is run and passes before you push by installing a pre-push hook with git:
-
-``` sh
-echo './scripts/soundness.sh' > .git/hooks/pre-push
-```
-
-### Formatting 
-
-We use a specific version of [`nicklockwood/swiftformat`](https://github.com/nicklockwood/swiftformat).
-Please take a look at our [`Dockerfile`](docker/Dockerfile) to see which version is currently being used and install it
-on your machine before running the script.

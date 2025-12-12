@@ -8,8 +8,8 @@ exporters:
   logging:
     verbosity: detailed
 
-  jaeger:
-    endpoint: "jaeger:14250"
+  otlp:
+    endpoint: jaeger:4317
     tls:
       insecure: true
 
@@ -21,4 +21,4 @@ service:
   pipelines:
     traces:
       receivers: otlp
-      exporters: [logging, jaeger, zipkin]
+      exporters: [logging, otlp, zipkin]

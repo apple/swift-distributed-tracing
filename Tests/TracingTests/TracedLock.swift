@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -30,10 +30,10 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock = NSLock()
     }
 
-    func lock(context: ServiceContext) {
+    func lock(context: ServiceContext, tracer: any Tracer) {
         // time here
         self.underlyingLock.lock()
-        self.activeSpan = InstrumentationSystem.legacyTracer.startAnySpan(self.name, context: context)
+        self.activeSpan = tracer.startSpan(self.name, context: context)
     }
 
     func unlock(context: ServiceContext) {
@@ -42,8 +42,8 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock.unlock()
     }
 
-    func withLock(context: ServiceContext, _ closure: () -> Void) {
-        self.lock(context: context)
+    func withLock(context: ServiceContext, tracer: any Tracer, _ closure: () -> Void) {
+        self.lock(context: context, tracer: tracer)
         defer { self.unlock(context: context) }
         closure()
     }

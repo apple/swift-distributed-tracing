@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,15 +14,13 @@
 
 import ServiceContextModule
 
-/// `InstrumentationSystem` is a global facility where the default cross-cutting tool can be configured.
+/// A global facility where the default cross-cutting tool can be configured.
+///
 /// It is set up just once in a given program to select the desired ``Instrument`` implementation.
 ///
-/// # Bootstrap multiple Instruments
+/// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
-///
-/// # Access the Instrument
-/// ``instrument``: Returns whatever you passed to ``bootstrap(_:)`` as an ``Instrument``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
     /// performed manually using locks.
@@ -34,7 +32,8 @@ public enum InstrumentationSystem {
         func bootstrap(_ instrument: Instrument) {
             self.lock.withWriterLock {
                 precondition(
-                    !self._isInitialized, """
+                    !self._isInitialized,
+                    """
                     InstrumentationSystem can only be initialized once per process. Consider using MultiplexInstrument if
                     you need to use multiple instruments.
                     """
@@ -72,7 +71,8 @@ public enum InstrumentationSystem {
     /// Globally select the desired ``Instrument`` implementation.
     ///
     /// - Parameter instrument: The ``Instrument`` you want to share globally within your system.
-    /// - Warning: Do not call this method more than once. This will lead to a crash.
+    ///
+    /// > Warning: Do not call this method more than once. This will lead to a crash.
     public static func bootstrap(_ instrument: Instrument) {
         self.shared.bootstrap(instrument)
     }
@@ -84,7 +84,7 @@ public enum InstrumentationSystem {
         self.shared.bootstrapInternal(instrument)
     }
 
-    /// Returns the globally configured ``Instrument``.
+    /// Returns the globally configured instrument.
     ///
     /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
     public static var instrument: Instrument {
@@ -92,7 +92,7 @@ public enum InstrumentationSystem {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {

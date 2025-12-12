@@ -54,29 +54,40 @@ We require that your commit messages match our template. The easiest way to do t
 
      git config commit.template dev/git.commit.template
 
-### Run `./scripts/soundness.sh`
+### Run CI checks locally
 
-The scripts directory contains a [soundness.sh script](https://github.com/apple/swift-distributed-tracing/blob/main/scripts/soundness.sh)
-that enforces additional checks, like license headers and formatting style.
+You can run the Github Actions workflows locally using
+[act](https://github.com/nektos/act). To run all the jobs that run on a pull
+request, use the following command:
 
-Please make sure to `./scripts/soundness.sh` before pushing a change upstream, otherwise it is likely the PR validation will fail
-on minor changes such as a missing `self.` or similar formatting issues.
+```
+% act pull_request
+```
 
-> The script also executes the above mentioned `generate_linux_tests.rb`.
-For frequent contributors, we recommend adding the script as a [git pre-push hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks), which you can do via executing the following command in the project root directory:
+To run just a single job, use `workflow_call -j <job>`, and specify the inputs
+the job expects. For example, to run just shellcheck:
 
- ```bash
- cat << EOF > .git/hooks/pre-push
- #!/bin/bash
- if [[ -f "scripts/soundness.sh" ]]; then
-   scripts/soundness.sh
- fi
- EOF
- ```
+```
+% act workflow_call -j soundness --input shell_check_enabled=true
+```
 
-Which makes the script execute, and only allow the `git push` to complete if the check has passed.
+To bind-mount the working directory to the container, rather than a copy, use
+`--bind`. For example, to run just the formatting, and have the results
+reflected in your working directory:
 
-In the case of formatting issues, you can then `git add` the formatting changes, and attempt the push again.
+```
+% act --bind workflow_call -j soundness --input format_check_enabled=true
+```
+
+If you'd like `act` to always run with certain flags, these can be be placed in
+an `.actrc` file either in the current working directory or your home
+directory, for example:
+
+```
+--container-architecture=linux/amd64
+--remote-name upstream
+--action-offline-mode
+```
 
 ## How to contribute your work
 

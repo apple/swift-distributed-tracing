@@ -2,25 +2,29 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
-final class ActorTracingTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
+@testable import Instrumentation
+
+/// This is a compile-time test
+@Suite("Actor Tracing Compatibility")
+struct ActorTracingTests {
+    @Test("Compiles with actor isolation")
+    func compilesWithActorIsolation() {
+        // This test exists purely to verify that the code compiles
+        // with Swift's strict concurrency checking
     }
 }
 

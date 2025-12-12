@@ -2,22 +2,25 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import Instrumentation
 import ServiceContextModule
-import XCTest
+import Testing
 
-final class InstrumentTests: XCTestCase {
-    func testMultiplexInvokesAllInstruments() {
+@Suite("MultiplexInstrument")
+struct InstrumentTests {
+    @Test("MultiplexInstrument invokes all instruments")
+    func multiplexInvokesAllInstruments() {
         let instrument = MultiplexInstrument([
             FirstFakeTracer(),
             SecondFakeTracer(),
@@ -26,17 +29,19 @@ final class InstrumentTests: XCTestCase {
         var context = ServiceContext.topLevel
         instrument.extract([String: String](), into: &context, using: DictionaryExtractor())
 
-        XCTAssertEqual(context[FirstFakeTracer.TraceIDKey.self], FirstFakeTracer.defaultTraceID)
-        XCTAssertEqual(context[SecondFakeTracer.TraceIDKey.self], SecondFakeTracer.defaultTraceID)
+        #expect(context[FirstFakeTracer.TraceIDKey.self] == FirstFakeTracer.defaultTraceID)
+        #expect(context[SecondFakeTracer.TraceIDKey.self] == SecondFakeTracer.defaultTraceID)
 
         var subsequentRequestHeaders = ["Accept": "application/json"]
         instrument.inject(context, into: &subsequentRequestHeaders, using: DictionaryInjector())
 
-        XCTAssertEqual(subsequentRequestHeaders, [
-            "Accept": "application/json",
-            FirstFakeTracer.headerName: FirstFakeTracer.defaultTraceID,
-            SecondFakeTracer.headerName: SecondFakeTracer.defaultTraceID,
-        ])
+        #expect(
+            subsequentRequestHeaders == [
+                "Accept": "application/json",
+                FirstFakeTracer.headerName: FirstFakeTracer.defaultTraceID,
+                SecondFakeTracer.headerName: SecondFakeTracer.defaultTraceID,
+            ]
+        )
     }
 }
 
@@ -63,16 +68,15 @@ private final class FirstFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
-        where Inject: Injector, Carrier == Inject.Carrier
-    {
+    where Inject: Injector, Carrier == Inject.Carrier {
         guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
-        where Extract: Extractor, Carrier == Extract.Carrier
-    {
-        let traceID = extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
+    where Extract: Extractor, Carrier == Extract.Carrier {
+        let traceID =
+            extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
 }
@@ -88,9 +92,11 @@ private final class SecondFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(
-        _ context: ServiceContext, into carrier: inout Carrier, using injector: Inject
+        _ context: ServiceContext,
+        into carrier: inout Carrier,
+        using injector: Inject
     )
-        where
+    where
         Inject: Injector,
         Carrier == Inject.Carrier
     {
@@ -99,13 +105,16 @@ private final class SecondFakeTracer: Instrument {
     }
 
     func extract<Carrier, Extract>(
-        _ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract
+        _ carrier: Carrier,
+        into context: inout ServiceContext,
+        using extractor: Extract
     )
-        where
+    where
         Extract: Extractor,
         Carrier == Extract.Carrier
     {
-        let traceID = extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
+        let traceID =
+            extractor.extract(key: SecondFakeTracer.headerName, from: carrier) ?? SecondFakeTracer.defaultTraceID
         context[TraceIDKey.self] = traceID
     }
 }

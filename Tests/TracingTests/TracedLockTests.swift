@@ -2,31 +2,28 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
+import Foundation
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
-final class TracedLockTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
+@testable import Instrumentation
 
-    func test_tracesLockedTime() {
+@Suite("TracedLock")
+struct TracedLockTests {
+    @Test("Traces locked time")
+    func tracesLockedTime() {
         let tracer = TracedLockPrintlnTracer()
-        InstrumentationSystem.bootstrapInternal(tracer)
-
         let lock = TracedLock(name: "my-cool-lock")
 
         func launchTask(_ name: String) {
@@ -34,7 +31,7 @@ final class TracedLockTests: XCTestCase {
                 var context = ServiceContext.topLevel
                 context[TaskIDKey.self] = name
 
-                lock.lock(context: context)
+                lock.lock(context: context, tracer: tracer)
                 lock.unlock(context: context)
             }
         }
@@ -77,25 +74,27 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         )
     }
 
-    public func forceFlush() {}
+    package func forceFlush() {}
 
     func inject<Carrier, Inject>(
         _ context: ServiceContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
-        where
+    where
         Inject: Injector,
-        Carrier == Inject.Carrier {}
+        Carrier == Inject.Carrier
+    {}
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
         into context: inout ServiceContext,
         using extractor: Extract
     )
-        where
+    where
         Extract: Extractor,
-        Carrier == Extract.Carrier {}
+        Carrier == Extract.Carrier
+    {}
 
     final class TracedLockPrintlnSpan: Tracing.Span {
         private let kind: SpanKind
@@ -135,7 +134,9 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             self.context = context
             self.kind = kind
 
-            print("  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start")
+            print(
+                "  span [\(self.operationName): \(self.context[TaskIDKey.self] ?? "no-name")] @ \(self.startTimeMillis): start"
+            )
         }
 
         func setStatus(_ status: SpanStatus) {
@@ -151,7 +152,11 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             self.events.append(event)
         }
 
-        func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {}
+        func recordError<Instant: TracerInstant>(
+            _ error: Error,
+            attributes: SpanAttributes,
+            at instant: @autoclosure () -> Instant
+        ) {}
 
         func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
             let time = instant()
@@ -161,7 +166,6 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
     }
 }
 
-#if swift(>=5.7.0)
 extension TracedLockPrintlnTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -180,9 +184,8 @@ extension TracedLockPrintlnTracer: Tracer {
         )
     }
 }
-#endif
 
-#if compiler(>=5.6.0)
 extension TracedLockPrintlnTracer: Sendable {}
-extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {} // only intended for single threaded testing
-#endif
+
+// only intended for single threaded testing
+extension TracedLockPrintlnTracer.TracedLockPrintlnSpan: @unchecked Sendable {}

@@ -2,11 +2,11 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -43,10 +43,10 @@ final class TestTracer: LegacyTracer {
         return span
     }
 
-    public func forceFlush() {}
+    package func forceFlush() {}
 
     func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
-        where
+    where
         Extract: Extractor,
         Carrier == Extract.Carrier
     {
@@ -55,7 +55,7 @@ final class TestTracer: LegacyTracer {
     }
 
     func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
-        where
+    where
         Inject: Injector,
         Carrier == Inject.Carrier
     {
@@ -64,7 +64,6 @@ final class TestTracer: LegacyTracer {
     }
 }
 
-#if swift(>=5.7.0)
 extension TestTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
@@ -86,7 +85,6 @@ extension TestTracer: Tracer {
         return span
     }
 }
-#endif
 
 extension TestTracer {
     enum TraceIDKey: ServiceContextKey {
@@ -120,12 +118,12 @@ extension ServiceContext {
 
 /// Only intended to be used in single-threaded testing.
 final class TestSpan: Span {
-    private let kind: SpanKind
+    let kind: SpanKind
 
     private var status: SpanStatus?
 
-    public let startTimestampNanosSinceEpoch: UInt64
-    public private(set) var endTimestampNanosSinceEpoch: UInt64?
+    package let startTimestampNanosSinceEpoch: UInt64
+    package private(set) var endTimestampNanosSinceEpoch: UInt64?
 
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
@@ -177,7 +175,11 @@ final class TestSpan: Span {
         self.events.append(event)
     }
 
-    func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
+    func recordError<Instant: TracerInstant>(
+        _ error: Error,
+        attributes: SpanAttributes,
+        at instant: @autoclosure () -> Instant
+    ) {
         self.recordedErrors.append((error, attributes))
     }
 
@@ -187,5 +189,5 @@ final class TestSpan: Span {
     }
 }
 
-extension TestTracer: @unchecked Sendable {} // only intended for single threaded testing
-extension TestSpan: @unchecked Sendable {} // only intended for single threaded testing
+extension TestTracer: @unchecked Sendable {}  // only intended for single threaded testing
+extension TestSpan: @unchecked Sendable {}  // only intended for single threaded testing

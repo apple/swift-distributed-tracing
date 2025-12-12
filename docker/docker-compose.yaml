@@ -28,7 +28,9 @@ services:
 
   test:
     <<: *common
-    command: /bin/bash -xcl "swift test -Xswiftc -warnings-as-errors $${FORCE_TEST_DISCOVERY-} $${SANITIZER_ARG-} $${STRICT_CONCURRENCY_ARG-}"
+    # FIXME: We cannot use -warnings-as-errors because we inherit from a deprecated type in the Tracer type,
+    #        and we need to keep supporting the old type still. This was introduced as we dropped Swift 5.6 and added 5.9/5.10.
+    command: /bin/bash -xcl "swift test $${FORCE_TEST_DISCOVERY-} $${SANITIZER_ARG-} $${STRICT_CONCURRENCY_ARG-}"
 
   # util
 

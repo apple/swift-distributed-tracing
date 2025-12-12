@@ -1,4 +1,4 @@
-# ``Tracing``
+# ``/Tracing``
 
 A Distributed Tracing API for Swift.
 
@@ -26,3 +26,49 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 - <doc:TraceYourApplication>
 - <doc:InstrumentYourLibrary>
 - <doc:ImplementATracer>
+
+### Boostrapping Tracing
+
+- ``Tracing/Instrumentation/InstrumentationSystem``
+- ``Tracing/Tracer``
+- ``TracerInstant``
+- ``LegacyTracer``
+
+### Creating Spans
+
+- ``withSpan(_:context:ofKind:function:file:line:_:)-65bom``
+- ``withSpan(_:at:context:ofKind:function:file:line:_:)-7pdo8``
+- ``withSpan(_:context:ofKind:isolation:function:file:line:_:)``
+- ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-6e2id``
+- ``withSpan(_:context:ofKind:at:isolation:function:file:line:_:)``
+
+- ``withSpan(_:context:ofKind:function:file:line:_:)-tj8``
+- ``withSpan(_:at:context:ofKind:function:file:line:_:)-3h6gv``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v``
+
+### Manually Managing Spans
+
+- ``startSpan(_:context:ofKind:function:file:line:)``
+- ``startSpan(_:at:context:ofKind:function:file:line:)``
+- ``startSpan(_:context:ofKind:at:function:file:line:)``
+- ``Span/end()``
+
+### Inspecting Spans
+
+- ``Span``
+- ``SpanAttributeConvertible``
+- ``SpanAttributeNamespace``
+- ``NestedSpanAttributesProtocol``
+- ``SpanAttributes``
+- ``SpanAttributeKey``
+- ``SpanAttribute``
+- ``SpanEvent``
+- ``SpanLink``
+- ``SpanStatus``
+- ``SpanKind``
+
+### Default Tracers
+
+- ``DefaultTracerClock``
+- ``NoOpTracer``

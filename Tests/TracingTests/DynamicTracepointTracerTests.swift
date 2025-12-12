@@ -2,37 +2,31 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project
-// authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Instrumentation
+import Foundation
 import ServiceContextModule
+import Testing
 import Tracing
-import XCTest
 
-final class DynamicTracepointTracerTests: XCTestCase {
-    override class func tearDown() {
-        super.tearDown()
-        InstrumentationSystem.bootstrapInternal(nil)
-    }
+@testable import Instrumentation
 
-    func test_adhoc_enableBySourceLoc() {
+@Suite("Dynamic Tracepoint Tracer Tests")
+struct DynamicTracepointTracerTests {
+    @Test("Ad-hoc tracepoint enable by source location")
+    func adhoc_enableBySourceLoc() {
         let tracer = DynamicTracepointTestTracer()
 
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
-
         let fileID = #fileID
-        let fakeLine: UInt = 77 // trick number, see withSpan below.
+        let fakeLine: UInt = 77  // trick number, see withSpan below.
         let fakeNextLine: UInt = fakeLine + 11
         tracer.enableTracepoint(fileID: fileID, line: fakeLine)
         // Imagine this is set via some "ops command", e.g. `<control> <pid, or ssh or something> trace enable Sample.swift:1234`
@@ -48,7 +42,6 @@ final class DynamicTracepointTracerTests: XCTestCase {
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
-        #if swift(>=5.7.0)
         tracer.withSpan("dont") { _ in
             // don't capture this span...
         }
@@ -58,72 +51,49 @@ final class DynamicTracepointTracerTests: XCTestCase {
                 // since the parent of this span was captured, this shall be captured as well
             }
         }
-        #endif
 
-        #if swift(>=5.7.0)
-        XCTAssertEqual(tracer.spans.count, 4)
-        #else
-        XCTAssertEqual(tracer.spans.count, 2)
-        #endif
+        #expect(tracer.spans.count == 4)
 
         for span in tracer.spans {
-            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            #expect(span.context.traceID == "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #expect(tracer.spans[0].context.spanID == "span-id-fake-\(fileID)-\(fakeLine)")
+        #expect(tracer.spans[1].context.spanID == "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
-    func test_adhoc_enableByFunction() {
+    @Test("Ad-hoc tracepoint enable by function")
+    func adhoc_enableByFunction() {
         let tracer = DynamicTracepointTestTracer()
 
-        InstrumentationSystem.bootstrapInternal(tracer)
-        defer {
-            InstrumentationSystem.bootstrapInternal(NoOpTracer())
-        }
-
         let fileID = #fileID
-        tracer.enableTracepoint(function: "traceMeLogic(fakeLine:)")
+        tracer.enableTracepoint(function: "traceMeLogic(fakeLine:tracer:)")
 
         let fakeLine: UInt = 66
         let fakeNextLine: UInt = fakeLine + 11
 
-        self.logic(fakeLine: 55)
-        self.traceMeLogic(fakeLine: fakeLine)
+        self.logic(fakeLine: 55, tracer: tracer)
+        self.traceMeLogic(fakeLine: fakeLine, tracer: tracer)
 
-        XCTAssertEqual(tracer.spans.count, 2)
+        #expect(tracer.spans.count == 2)
         for span in tracer.spans {
-            XCTAssertEqual(span.context.traceID, "trace-id-fake-\(fileID)-\(fakeLine)")
+            #expect(span.context.traceID == "trace-id-fake-\(fileID)-\(fakeLine)")
         }
-        XCTAssertEqual(tracer.spans[0].context.spanID, "span-id-fake-\(fileID)-\(fakeLine)")
-        XCTAssertEqual(tracer.spans[1].context.spanID, "span-id-fake-\(fileID)-\(fakeNextLine)")
+        #expect(tracer.spans[0].context.spanID == "span-id-fake-\(fileID)-\(fakeLine)")
+        #expect(tracer.spans[1].context.spanID == "span-id-fake-\(fileID)-\(fakeNextLine)")
     }
 
-    func logic(fakeLine: UInt) {
-        #if swift(>=5.7)
-        InstrumentationSystem.tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
+    func logic(fakeLine: UInt, tracer: any Tracer) {
+        tracer.withSpan("\(#function)-dont", line: fakeLine) { _ in
             // inside
         }
-        #else
-        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-dont", line: fakeLine) { _ in
-            // inside
-        }
-        #endif
     }
 
-    func traceMeLogic(fakeLine: UInt) {
-        #if swift(>=5.7)
-        InstrumentationSystem.tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
-            InstrumentationSystem.tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
+    func traceMeLogic(fakeLine: UInt, tracer: any Tracer) {
+        tracer.withSpan("\(#function)-yes", line: fakeLine) { _ in
+            tracer.withSpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
                 // inside
             }
         }
-        #else
-        InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes", line: fakeLine) { _ in
-            InstrumentationSystem.legacyTracer.withAnySpan("\(#function)-yes-inside", line: fakeLine + 11) { _ in
-                // inside
-            }
-        }
-        #endif
     }
 }
 
@@ -140,19 +110,19 @@ final class DynamicTracepointTestTracer: LegacyTracer {
             var match = true
             if let fun = self.function {
                 match = match && fun == tracepoint.function
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
             if let fid = self.fileID {
                 match = match && fid == tracepoint.fileID
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
             if let l = self.line {
                 match = match && l == tracepoint.line
-                if !match { // short-circuit further checks
+                if !match {  // short-circuit further checks
                     return false
                 }
             }
@@ -193,7 +163,6 @@ final class DynamicTracepointTestTracer: LegacyTracer {
     }
 
     private func shouldRecord(tracepoint: TracepointID) -> Bool {
-        #if swift(>=5.5) && canImport(_Concurrency)
         if self.isActive(tracepoint: tracepoint) {
             // this tracepoint was specifically activated!
             return true
@@ -212,9 +181,6 @@ final class DynamicTracepointTestTracer: LegacyTracer {
         // there is some active trace already, so we should record as well
         // TODO: this logic may need to become smarter
         return true
-        #else
-        return false
-        #endif
     }
 
     func isActive(tracepoint: TracepointID) -> Bool {
@@ -238,12 +204,14 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract) where Extract: Extractor, Extract.Carrier == Carrier {
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         context.traceID = traceID
     }
 
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject) where Inject: Injector, Inject.Carrier == Carrier {
+    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    where Inject: Injector, Inject.Carrier == Carrier {
         guard let traceID = context.traceID else {
             return
         }
@@ -261,7 +229,7 @@ extension DynamicTracepointTestTracer {
         private let startTimestampNanosSinceEpoch: UInt64
         private(set) var endTimestampNanosSinceEpoch: UInt64?
 
-        public var operationName: String
+        package var operationName: String
         private(set) var context: ServiceContext
         private(set) var isRecording: Bool = false
 
@@ -315,7 +283,11 @@ extension DynamicTracepointTestTracer {
             // nothing
         }
 
-        func recordError<Instant: TracerInstant>(_ error: Error, attributes: SpanAttributes, at instant: @autoclosure () -> Instant) {
+        func recordError<Instant: TracerInstant>(
+            _ error: Error,
+            attributes: SpanAttributes,
+            at instant: @autoclosure () -> Instant
+        ) {
             print("")
         }
 
@@ -330,7 +302,6 @@ extension DynamicTracepointTestTracer {
     }
 }
 
-#if compiler(>=5.7.0)
 extension DynamicTracepointTestTracer: Tracer {
     typealias Span = TracepointSpan
 
@@ -361,7 +332,8 @@ extension DynamicTracepointTestTracer: Tracer {
         return span
     }
 }
-#endif
 
-extension DynamicTracepointTestTracer: @unchecked Sendable {} // only intended for single threaded testing
-extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {} // only intended for single threaded testing
+// only intended for single threaded testing
+extension DynamicTracepointTestTracer: @unchecked Sendable {}
+// only intended for single threaded testing
+extension DynamicTracepointTestTracer.TracepointSpan: @unchecked Sendable {}

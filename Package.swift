@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
@@ -6,10 +6,10 @@ let package = Package(
     products: [
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
+        .library(name: "InMemoryTracing", targets: ["InMemoryTracing"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0")
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
@@ -18,13 +18,13 @@ let package = Package(
         .target(
             name: "Instrumentation",
             dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
+                .product(name: "ServiceContextModule", package: "swift-service-context")
             ]
         ),
         .testTarget(
             name: "InstrumentationTests",
             dependencies: [
-                .target(name: "Instrumentation"),
+                .target(name: "Instrumentation")
             ]
         ),
 
@@ -34,33 +34,43 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
+                .product(name: "ServiceContextModule", package: "swift-service-context"),
                 .target(name: "Instrumentation"),
+                .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
             ]
         ),
         .testTarget(
             name: "TracingTests",
             dependencies: [
-                .target(name: "Tracing"),
+                .target(name: "Tracing")
+            ]
+        ),
+        .target(
+            name: "InMemoryTracing",
+            dependencies: [
+                .target(name: "Tracing")
+            ]
+        ),
+        .testTarget(
+            name: "InMemoryTracingTests",
+            dependencies: [
+                .target(name: "InMemoryTracing")
             ]
         ),
 
         // ==== --------------------------------------------------------------------------------------------------------
-        // MARK: Performance / Benchmarks
+        // MARK: Wasm Support
 
-        .executableTarget(
-            name: "_TracingBenchmarks",
-            dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
-                .target(name: "Tracing"),
-                .target(name: "_TracingBenchmarkTools"),
-            ]
-        ),
+        // Provides C shims for compiling to wasm
         .target(
-            name: "_TracingBenchmarkTools",
-            dependencies: [
-                .target(name: "Instrumentation"),
-            ],
-            exclude: ["README_SWIFT.md"]
+            name: "_CWASI",
+            dependencies: []
         ),
     ]
 )
+
+for target in package.targets {
+    var settings = target.swiftSettings ?? []
+    settings.append(.enableExperimentalFeature("StrictConcurrency=complete"))
+    target.swiftSettings = settings
+}
