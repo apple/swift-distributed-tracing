@@ -229,6 +229,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -333,6 +334,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -383,6 +385,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -437,6 +440,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -485,6 +489,7 @@ extension LegacyTracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
