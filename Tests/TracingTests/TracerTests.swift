@@ -78,7 +78,11 @@ struct TracerTests {
         let tracer = TestTracer()
 
         var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        var spanStatus: SpanStatus? = nil
+        tracer.onEndSpan = { span in
+            spanEnded = true
+            spanStatus = span.status
+        }
 
         do {
             _ = try tracer.withAnySpan("hello", context: .topLevel) { _ in
@@ -86,6 +90,7 @@ struct TracerTests {
             }
         } catch {
             #expect(spanEnded == true)
+            #expect(spanStatus?.code == .error)
             #expect(error as? ExampleSpanError == ExampleSpanError())
             return
         }
@@ -117,7 +122,11 @@ struct TracerTests {
         let tracer = TestTracer()
 
         var spanEnded = false
-        tracer.onEndSpan = { _ in spanEnded = true }
+        var spanStatus: SpanStatus? = nil
+        tracer.onEndSpan = { span in
+            spanEnded = true
+            spanStatus = span.status
+        }
 
         func operation(span: any Tracing.Span) throws -> String {
             throw ExampleSpanError()
@@ -127,6 +136,7 @@ struct TracerTests {
             _ = try tracer.withAnySpan("hello", operation)
         } catch {
             #expect(spanEnded == true)
+            #expect(spanStatus?.code == .error)
             #expect(error as? ExampleSpanError == ExampleSpanError())
             return
         }
@@ -181,8 +191,8 @@ struct TracerTests {
     func withSpan_automaticBaggagePropagation_async_throws() async throws {
         let tracer = TestTracer()
 
-        let spanEnded: LockedValueBox<Bool> = .init(false)
-        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
+        let endedSpan: LockedValueBox<TestSpan?> = .init(nil)
+        tracer.onEndSpan = { span in endedSpan.withValue { $0 = span } }
 
         let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
@@ -191,7 +201,7 @@ struct TracerTests {
         do {
             _ = try await tracer.withAnySpan("hello", operation)
         } catch {
-            #expect(spanEnded.withValue { $0 } == true)
+            #expect(endedSpan.withValue { $0?.status?.code } == .error)
             #expect(error as? ExampleSpanError == ExampleSpanError())
             return
         }
@@ -202,8 +212,8 @@ struct TracerTests {
     func static_Tracer_withSpan_automaticBaggagePropagation_async_throws() async throws {
         let tracer = TestTracer()
 
-        let spanEnded: LockedValueBox<Bool> = .init(false)
-        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
+        let endedSpan: LockedValueBox<TestSpan?> = .init(nil)
+        tracer.onEndSpan = { span in endedSpan.withValue { $0 = span } }
 
         let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
@@ -212,7 +222,7 @@ struct TracerTests {
         do {
             _ = try await tracer.withSpan("hello", operation)
         } catch {
-            #expect(spanEnded.withValue { $0 } == true)
+            #expect(endedSpan.withValue { $0?.status?.code } == .error)
             #expect(error as? ExampleSpanError == ExampleSpanError())
             return
         }
@@ -223,8 +233,8 @@ struct TracerTests {
     func static_Tracer_withSpan_automaticBaggagePropagation_throws() async throws {
         let tracer = TestTracer()
 
-        let spanEnded: LockedValueBox<Bool> = .init(false)
-        tracer.onEndSpan = { _ in spanEnded.withValue { $0 = true } }
+        let endedSpan: LockedValueBox<TestSpan?> = .init(nil)
+        tracer.onEndSpan = { span in endedSpan.withValue { $0 = span } }
 
         let operation: @Sendable (any Tracing.Span) async throws -> String = { _ in
             throw ExampleSpanError()
@@ -233,7 +243,7 @@ struct TracerTests {
         do {
             _ = try await tracer.withSpan("hello", operation)
         } catch {
-            #expect(spanEnded.withValue { $0 } == true)
+            #expect(endedSpan.withValue { $0?.status?.code } == .error)
             #expect(error as? ExampleSpanError == ExampleSpanError())
             return
         }
