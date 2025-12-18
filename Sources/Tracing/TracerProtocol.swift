@@ -180,6 +180,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -231,6 +232,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -284,6 +286,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -321,6 +324,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -375,6 +379,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }
@@ -425,6 +430,7 @@ extension Tracer {
             }
         } catch {
             span.recordError(error)
+            span.setStatus(.init(code: .error))
             throw error  // rethrow
         }
     }

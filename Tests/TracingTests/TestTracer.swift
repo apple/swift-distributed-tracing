@@ -120,7 +120,7 @@ extension ServiceContext {
 final class TestSpan: Span {
     let kind: SpanKind
 
-    private var status: SpanStatus?
+    var status: SpanStatus?
 
     package let startTimestampNanosSinceEpoch: UInt64
     package private(set) var endTimestampNanosSinceEpoch: UInt64?
