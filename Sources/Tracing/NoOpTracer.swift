@@ -139,6 +139,13 @@ public struct NoOpTracer: LegacyTracer {
             }
         }
 
+
+        /// Update the span attributes in a block instead of individually.
+        /// 
+        /// The NoOpSpan implementation does not call the closure as setting attributes
+        /// on a NoOpSpan does nothing.
+        public func updateAttributes(_ update: (inout SpanAttributes) -> Void) {}
+
         /// Finishes the span.
         /// - Parameter instant: the time instant the span completed.
         public func end<Instant: TracerInstant>(at instant: @autoclosure () -> Instant) {
