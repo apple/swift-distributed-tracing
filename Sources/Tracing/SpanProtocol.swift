@@ -724,6 +724,11 @@ extension SpanAttributes {
     public var isEmpty: Bool {
         self._attributes.isEmpty
     }
+
+    /// Reserves enough space to store the specified number of attributes.
+    public mutating func reserveCapacity(_ minimumCapacity: Int) {
+        self._attributes.reserveCapacity(minimumCapacity)
+    }
 }
 
 extension SpanAttributes {
