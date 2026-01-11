@@ -1,5 +1,5 @@
-ARG swift_version=5.2
-ARG ubuntu_version=bionic
+ARG swift_version=6.0
+ARG ubuntu_version=noble
 ARG base_image=swift:$swift_version-$ubuntu_version
 FROM $base_image
 # needed to do again after FROM due to docker limitation
@@ -25,7 +25,7 @@ RUN echo 'export PATH="$HOME/.tools:$PATH"' >> $HOME/.profile
 
 # swiftformat (until part of the toolchain)
 
-ARG swiftformat_version=0.48.11
+ARG swiftformat_version=0.58.7
 RUN git clone --branch $swiftformat_version --depth 1 https://github.com/nicklockwood/SwiftFormat $HOME/.tools/swift-format
 RUN cd $HOME/.tools/swift-format && swift build -c release
 RUN ln -s $HOME/.tools/swift-format/.build/release/swiftformat $HOME/.tools/swiftformat
