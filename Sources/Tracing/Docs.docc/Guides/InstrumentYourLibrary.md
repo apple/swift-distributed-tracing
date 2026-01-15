@@ -260,7 +260,7 @@ func handler(request: HTTPRequest) async {
       // 3.1) Set useful attributes:on the span:
       span.attributes["http.method"] = request.method
       // ... 
-      // See also: Open Telemetry typed attributes in swift-distributed-tracing-extras
+      // See also: Open Telemetry typed attributes in https://github.com/swift-otel/swift-otel-semantic-conventions
                                                                     
       // 4) user code will have the apropriate Span context restored:
       await userCode(request)
