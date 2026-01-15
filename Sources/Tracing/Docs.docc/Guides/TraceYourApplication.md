@@ -298,7 +298,7 @@ withSpan("showAttributes") { span in
 
 Once the span is ``Span/end()``-ed the attributes are flushed along with it to the backend tracing system.
 
-> Tip: Some "well known" attributes are pre-defined for you in [swift-distributed-tracing-extras](https://github.com/apple/swift-distributed-tracing-extras). Or you may decide to define a number of type-safe attributes yourself. 
+> Tip: Some "well known" attributes are pre-defined for you in [swift-otel/swift-otel-semantic-conventions](https://github.com/swift-otel/swift-otel-semantic-conventions). Or you may decide to define a number of type-safe attributes yourself. 
 
 Attributes show up when you click on a specific ``Span`` in a trace visualization system. For example, like this in Jaeger:
 
@@ -308,9 +308,9 @@ Note that some attributes, like for example the information about the process em
 
 #### Predefined type-safe Span Attributes
 
-The tracing API provides a way to declare and re-use well known span attributes in a type-safe way. Many of those are defined in `swift-distributed-tracing-extras`, and allow e.g. for setting HTTP values like this:
+The tracing API provides a way to declare and re-use well known span attributes in a type-safe way. Many of those are defined in [swift-otel/swift-otel-semantic-conventions](https://github.com/swift-otel/swift-otel-semantic-conventions), and allow e.g. for setting HTTP values like this:
 
-For example, you can include the `TracingOpenTelemetrySemanticConventions` into your project like this:
+For example, you can include the `OTelSemanticConventions` library into your project like this:
 
 ```swift
 import PackageDescription
@@ -319,14 +319,14 @@ let package = Package(
     // ...
     dependencies: [
         .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: "..."),
-        .package(url: "https://github.com/apple/swift-distributed-tracing-extras.git", from: "..."),
+        .package(url: "https://github.com/swift-otel/swift-otel-semantic-conventions.git", from: "..."),
     ],
     targets: [
         .target(
             name: "MyTarget",
             dependencies: [
                 .product(name: "Tracing", package: "swift-distributed-tracing"),
-                .product(name: "TracingOpenTelemetrySemanticConventions", package: "swift-distributed-tracing-extras"),
+                .product(name: "OTelSemanticConventions", package: "swift-otel-semantic-conventions"),
             ]
         ),
       // ...
@@ -334,9 +334,7 @@ let package = Package(
 )
 ```
 
-> Note: The extras library is versioned separately from the core tracing package, and at this point has not reached a source-stable 1.0 release yet.
-
-In order to gain a whole set of well-typed attributes which are pre-defined by the [OpenTelemetry](http://opentelemetry.io) initiative. 
+This will provide a whole set of well-typed attributes which are pre-defined by the [OpenTelemetry](http://opentelemetry.io) initiative. 
 
 For example, like these for HTTP:
 
