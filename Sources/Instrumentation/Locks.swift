@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2026 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -16,7 +16,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2017-2018 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2017-2026 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -26,20 +26,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(WASILibc)
-// No locking on WASILibc
-#elseif canImport(Darwin)
+#if canImport(Darwin)
 import Darwin
 #elseif os(Windows)
+import ucrt
 import WinSDK
 #elseif canImport(Glibc)
-import Glibc
+@preconcurrency import Glibc
 #elseif canImport(Android)
-import Android
+@preconcurrency import Android
 #elseif canImport(Musl)
-import Musl
+@preconcurrency import Musl
+#elseif canImport(Bionic)
+@preconcurrency import Bionic
+#elseif canImport(WASILibc)
+@preconcurrency import WASILibc
+#if canImport(wasi_pthread)
+import wasi_pthread
+#endif
 #else
-#error("Unsupported runtime")
+#error("The concurrency lock module was unable to identify your C library.")
 #endif
 
 /// A reader/writer threading lock based on `libpthread` instead of `libdispatch`.
@@ -55,6 +61,9 @@ public final class ReadWriteLock: @unchecked Sendable {
     fileprivate let rwlock: UnsafeMutablePointer<SRWLOCK> =
         UnsafeMutablePointer.allocate(capacity: 1)
     fileprivate var shared: Bool = true
+    #elseif os(FreeBSD) || os(OpenBSD)
+    fileprivate let rwlock: UnsafeMutablePointer<pthread_rwlock_t?> =
+        UnsafeMutablePointer.allocate(capacity: 1)
     #else
     fileprivate let rwlock: UnsafeMutablePointer<pthread_rwlock_t> =
         UnsafeMutablePointer.allocate(capacity: 1)
@@ -62,23 +71,18 @@ public final class ReadWriteLock: @unchecked Sendable {
 
     /// Create a new lock.
     public init() {
-        #if canImport(WASILibc)
-        // WASILibc is single threaded, provides no locks
-        #elseif os(Windows)
+        #if os(Windows)
         InitializeSRWLock(self.rwlock)
-        #else
+        #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
         let err = pthread_rwlock_init(self.rwlock, nil)
         precondition(err == 0, "\(#function) failed in pthread_rwlock with error \(err)")
         #endif
     }
 
     deinit {
-        #if canImport(WASILibc)
-        // WASILibc is single threaded, provides no locks
-        #elseif os(Windows)
-        // SRWLOCK does not need to be free'd
+        #if os(Windows)
         self.rwlock.deallocate()
-        #else
+        #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
         let err = pthread_rwlock_destroy(self.rwlock)
         precondition(err == 0, "\(#function) failed in pthread_rwlock with error \(err)")
         self.rwlock.deallocate()
@@ -90,12 +94,10 @@ public final class ReadWriteLock: @unchecked Sendable {
     /// Whenever possible, consider using `withReaderLock` instead of this
     /// method and `unlock`, to simplify lock handling.
     public func lockRead() {
-        #if canImport(WASILibc)
-        // WASILibc is single threaded, provides no locks
-        #elseif os(Windows)
+        #if os(Windows)
         AcquireSRWLockShared(self.rwlock)
         self.shared = true
-        #else
+        #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
         let err = pthread_rwlock_rdlock(self.rwlock)
         precondition(err == 0, "\(#function) failed in pthread_rwlock with error \(err)")
         #endif
@@ -106,12 +108,10 @@ public final class ReadWriteLock: @unchecked Sendable {
     /// Whenever possible, consider using `withWriterLock` instead of this
     /// method and `unlock`, to simplify lock handling.
     public func lockWrite() {
-        #if canImport(WASILibc)
-        // WASILibc is single threaded, provides no locks
-        #elseif os(Windows)
+        #if os(Windows)
         AcquireSRWLockExclusive(self.rwlock)
         self.shared = false
-        #else
+        #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
         let err = pthread_rwlock_wrlock(self.rwlock)
         precondition(err == 0, "\(#function) failed in pthread_rwlock with error \(err)")
         #endif
@@ -123,15 +123,13 @@ public final class ReadWriteLock: @unchecked Sendable {
     /// instead of this method and `lockRead` and `lockWrite`, to simplify lock
     /// handling.
     public func unlock() {
-        #if canImport(WASILibc)
-        // WASILibc is single threaded, provides no locks
-        #elseif os(Windows)
+        #if os(Windows)
         if self.shared {
             ReleaseSRWLockShared(self.rwlock)
         } else {
             ReleaseSRWLockExclusive(self.rwlock)
         }
-        #else
+        #elseif (compiler(<6.1) && !os(WASI)) || (compiler(>=6.1) && _runtime(_multithreaded))
         let err = pthread_rwlock_unlock(self.rwlock)
         precondition(err == 0, "\(#function) failed in pthread_rwlock with error \(err)")
         #endif
