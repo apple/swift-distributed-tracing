@@ -68,6 +68,9 @@ struct InMemoryTracerTests {
             childSpan.spanContext == InMemorySpanContext(traceID: "trace-1", spanID: "span-2", parentSpanID: "span-1")
         )
         #expect(tracer.finishedSpans.isEmpty)
+        #expect(childSpan.traceID == rootSpan.traceID)
+        #expect(childSpan.spanContext.traceID == rootSpan.spanContext.traceID)
+        #expect(childSpan.spanContext.traceID == childSpan.traceID)
 
         let activeSpan = try #require(tracer.activeSpan(identifiedBy: childSpan.context))
         #expect(activeSpan.operationName == "child")
