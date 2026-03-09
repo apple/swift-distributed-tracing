@@ -86,6 +86,7 @@ struct InMemoryTracerTests {
         #expect(tracer.activeSpan(identifiedBy: rootSpan.context) == nil)
         let finishedRootSpan = try #require(tracer.finishedSpans.last)
         #expect(finishedRootSpan.operationName == "root")
+        #expect(finishedRootSpan.traceID == finishedRootSpan.spanContext.traceID)
     }
 
     @Test("Records force flushes")

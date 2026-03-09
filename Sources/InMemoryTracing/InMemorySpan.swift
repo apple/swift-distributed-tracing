@@ -224,10 +224,10 @@ public struct FinishedInMemorySpan: Sendable {
     /// The ID of the overall trace this span belongs to.
     public var traceID: String {
         get {
-            spanContext.spanID
+            spanContext.traceID
         }
         set {
-            spanContext.spanID = newValue
+            spanContext.traceID = newValue
         }
     }
     /// The ID of this span.
