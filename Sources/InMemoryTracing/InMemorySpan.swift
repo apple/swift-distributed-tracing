@@ -29,7 +29,7 @@ public struct InMemorySpan: Span {
 
     /// The ID of the overall trace this span belongs to.
     public var traceID: String {
-        spanContext.spanID
+        spanContext.traceID
     }
     /// The ID of this concrete span.
     public var spanID: String {
