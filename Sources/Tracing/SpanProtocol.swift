@@ -241,7 +241,7 @@ extension SpanEvent: ExpressibleByStringLiteral {
 // MARK: Span Attribute
 
 /// A span attribute key.
-public struct SpanAttributeKey<T>: Hashable, ExpressibleByStringLiteral where T: SpanAttributeConvertible {
+public struct SpanAttributeKey<T>: Hashable, Sendable, ExpressibleByStringLiteral where T: SpanAttributeConvertible {
     /// The name of the span attribute key.
     public let name: String
 
