@@ -91,6 +91,8 @@ directory, for example:
 
 ## How to contribute your work
 
+For non-trivial changes that affect the public API, it is good practice to have a discussion phase before writing code. Please follow the [proposal process](Sources/Tracing/Docs.docc/Proposals/Proposals.md) to gather feedback and align on the approach with other contributors.
+
 Please open a pull request at https://github.com/apple/swift-distributed-tracing. Make sure the CI passes, and then wait for code review.
 
 ## Automated release process

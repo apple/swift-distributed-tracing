@@ -72,3 +72,7 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 
 - ``DefaultTracerClock``
 - ``NoOpTracer``
+
+### Contribute to the project
+
+- <doc:Proposals>
