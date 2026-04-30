@@ -38,8 +38,8 @@ Focus this section on what will change for the _contributors_ to Swift Distribut
 ### API stability
 
 Discuss the API implications, making sure to consider all of:
-- existing ``Tracer`` implementations
-- existing ``Instrument`` implementations
+- existing `Tracer` implementations
+- existing `Instrument` implementations
 - existing users of the tracing and instrumentation APIs
 
 ### Future directions
