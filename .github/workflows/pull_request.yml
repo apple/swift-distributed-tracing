@@ -39,6 +39,8 @@ jobs:
   wasm-sdk:
     name: WebAssembly Swift SDK
     uses: apple/swift-nio/.github/workflows/wasm_swift_sdk.yml@main
+    with:
+      nightly_next_enabled: false
 
   benchmarks:
     name: Benchmarks
