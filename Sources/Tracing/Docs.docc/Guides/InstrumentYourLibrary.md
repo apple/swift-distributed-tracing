@@ -207,7 +207,7 @@ actor MySampleServer {
 
 While this code is very simple for illustration purposes, and it may seem surprising why there are two separate places where we need to call into user-code separately, in practice such situations can happen when using asynchronous network or database libraries which offer their API in terms of callbacks. Always consider if and when to restore context such that it makes sense for the end user.
 
-#### Manual propogation
+#### Manual propagation
 
 There are circumstances where [task-local variable](https://developer.apple.com/documentation/swift/tasklocal) propagation may be interrupted. One common instance is when using
 [`swift-nio`](https://github.com/apple/swift-nio)'s [`EventLoopFuture`](https://swiftpackageindex.com/apple/swift-nio/main/documentation/niocore/eventloopfuture) to chain asynchronous work. In these circumstances, the library can manually propogate the context metadata by taking the context of the parent span, and providing it into the `context` argument of the child span:
