@@ -15,6 +15,16 @@ The first step to get metadata propagation and tracing working in your applicati
 A complete [list of swift-distributed-tracing implementations](http://github.com/apple/swift-distributed-tracing) 
 is available in this project's README. Select an implementation you'd like to use and follow its bootstrap steps.
 
+There are two ways to set up instrumentation:
+
+- ``InstrumentationSystem/bootstrap(_:)`` — process-wide, called once at startup. The classic path. Simplest
+  when your app uses a single tracer for its whole lifetime and never needs to override it.
+- ``withInstrument(_:_:)`` — makes an instrument active for the current task while a closure runs, through a
+  dedicated task-local instrument it installs as the bootstrap on first use. Useful for parallel-safe tests
+  with per-test tracers, or to override the instrument for a specific subsystem. See
+  [Scoping an instrument with withInstrument](#Scoping-an-instrument-with-withInstrument)
+  later in this guide.
+
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
 > in this guide we'll use the community maintained [`swift-otel`](https://github.com/slashmo/swift-otel) 
 > tracer, as an example of how you'd start using tracing in your real applications.
@@ -70,7 +80,7 @@ of propagating certain `ServiceContext` values across process boundaries, withou
 In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for `Instrument`,
 as well as ``Tracer`` implementations.
 
-Our guide focuses on tracing through, so let's continue with that in mind.
+Our guide focuses on tracing though, so let's continue with that in mind.
 
 #### Recommended bootstrap order
 
@@ -85,8 +95,14 @@ Specifically, it is recommended to bootstrap systems in the following order:
 
 This is because tracing systems may attempt to emit logs or metrics about their status etc.
 
+> Important: Bootstrap telemetry as early as possible in process startup — ideally before any application
+> code runs. Any subsystem or object that reads ``InstrumentationSystem/instrument``,
+> ``InstrumentationSystem/tracer``, `Logger`, or `MetricsFactory` during its initialization captures whatever
+> is in scope at that moment, so bootstrapping first ensures those captures see the real backends rather than
+> no-op placeholders. The same principle applies to logging and metrics.
+
 If you intend to use trace identifiers for log correlation (i.e. logging a `trace-id` in every log statement that is part of a trace),
-then don't forget to also configure a swift-lot `MetadataProvider`.
+then don't forget to also configure a swift-log `MetadataProvider`.
 
 A typical bootstrap could look something like this:
 
@@ -141,6 +157,11 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([
 ```
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
+
+> Note: For scoped alternatives to plain `bootstrap` — for example, binding a tracer inside a test or
+> overriding it for a subsystem — use ``withInstrument(_:_:)`` instead and see
+> [Scoping an instrument with withInstrument](#Scoping-an-instrument-with-withInstrument)
+> later in this guide, after the span introduction.
 
 ### Introducing Trace Spans
 
@@ -437,6 +458,60 @@ Events usually show up in a in a trace view as points on the timeline (note that
 ![An event during the cook span](makeDinner-zipkin-event)
 
 Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
+
+### Scoping an instrument with withInstrument
+
+``withInstrument(_:_:)`` makes an instrument active for the current task while a closure runs. It works
+through a dedicated task-local instrument that the ``InstrumentationSystem`` holds as its bootstrap: the first
+call installs it (a one-time global bootstrap, done only when nothing else is bootstrapped) and every call
+then sets the given instrument as the active instrument for the duration of the closure.
+
+```swift
+// Run the whole application under a scoped tracer.
+try await withInstrument(OTelTracer(configuration: config)) {
+    try await Application.main()
+}
+
+// Parallel-safe. The binding is task-local, so concurrent tests don't interfere.
+@Test func spansAreCaptured() async {
+    let tracer = InMemoryTracer()
+    await withInstrument(tracer) {
+        await withSpan("op") { _ in }
+    }
+    #expect(tracer.spans.count == 1)
+}
+```
+
+The instrument **replaces** the active instrument for the scope — it does not merge with it. A nested
+``withInstrument(_:_:)`` fully replaces the enclosing one, and the previous instrument is restored when the
+closure returns. Discovery (``InstrumentationSystem/tracer``, free-function `withSpan` / `startSpan`) and
+propagation (`inject` / `extract`) resolve through it.
+
+Think of it like ``InstrumentationSystem/bootstrap(_:)``, only scoped. Passing a single ``Tracer`` is the
+common case and does what you expect. To run several instruments at once, pass a ``MultiplexInstrument``
+naming all of them — exactly as you would build one for `bootstrap`:
+
+```swift
+try await withInstrument(MultiplexInstrument([OTelTracer(configuration: config), myPropagator])) {
+    try await Application.main()
+}
+```
+
+Because a scope replaces rather than merges, two things follow. Binding a **non-tracer** instrument on its own
+turns tracing off for the scope — it shadows the tracer, so spans created inside reach no tracer; include a
+tracer in the ``MultiplexInstrument`` when you want both. And you cannot name the currently-active instrument
+to extend it: passing ``InstrumentationSystem/instrument`` back into `withInstrument` (directly or inside a
+``MultiplexInstrument``) is a programmer error and crashes.
+
+> Important: ``withInstrument(_:_:)`` is an application-level facility — call it from code that owns the
+> instrumentation setup, never from a library. It can install its instrument only when the
+> ``InstrumentationSystem`` is otherwise un-bootstrapped. Calling it after a plain ``Instrument`` has been
+> bootstrapped crashes. Libraries emit through ``InstrumentationSystem/instrument`` and `withSpan` / `startSpan`,
+> which already observe whatever is active.
+
+If your application installs a single tracer at startup and never overrides it, prefer plain
+``InstrumentationSystem/bootstrap(_:)``. ``withInstrument(_:_:)`` pays off for parallel-safe testing and
+per-subsystem overrides.
 
 ### Integrations
 
