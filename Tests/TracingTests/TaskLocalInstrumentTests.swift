@@ -19,10 +19,11 @@ import Tracing
 
 // MARK: - withInstrument scoping tests
 //
-// These extend the `.serialized` `GlobalTracingInstrumentationSystemTests` suite so that mutating the global
-// `InstrumentationSystem` doesn't race other tests. `withInstrument(_:_:)` installs the `TaskLocalInstrument`
-// wrapper lazily on first use (over the default `NoOpInstrument`) and sets the scoped override on it, which is
-// then reachable from `InstrumentationSystem.instrument` and the free-function `withSpan` / `startSpan`.
+// These extend the `.serialized` `GlobalTracingInstrumentationSystemTests` suite so tests that read or set the
+// global `InstrumentationSystem` bootstrap don't race each other. `withInstrument(_:_:)` itself only binds a
+// task-local instrument — it never mutates the global bootstrap. `InstrumentationSystem.instrument` and the
+// free-function `withSpan` / `startSpan` resolve that binding ahead of the bootstrapped instrument, falling
+// back to the bootstrap outside the scope.
 
 extension GlobalTracingInstrumentationSystemTests {
 
@@ -39,15 +40,36 @@ extension GlobalTracingInstrumentationSystemTests {
 
     @Test("Scoped instrument is not visible outside the withInstrument closure")
     func scopedNotVisibleOutsideClosure() {
-        let testTracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(nil)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
 
+        let testTracer = TestTracer()
         withInstrument(testTracer) {
             #expect(InstrumentationSystem.tracer is TestTracer)
         }
 
-        // Outside the scope, no scoped tracer is layered. With baseline `TaskLocalInstrument()` (which
-        // wraps `NoOpInstrument`) and no other tracer reachable, discovery returns NoOp.
+        // Outside the scope the task-local is unbound, so resolution falls back to the bootstrap — NoOp here.
         #expect(InstrumentationSystem.tracer is NoOpTracer)
+    }
+
+    // MARK: - Composition with the bootstrap
+
+    @Test("withInstrument overrides the bootstrapped instrument for its scope, falling back after")
+    func overridesBootstrapForScope() {
+        let bootstrapped = TestTracer()
+        let scoped = TestTracer()
+        InstrumentationSystem.bootstrapInternal(bootstrapped)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
+
+        #expect(InstrumentationSystem.tracer as AnyObject === bootstrapped)
+
+        withInstrument(scoped) {
+            // The task-local override resolves ahead of the bootstrap for the scope.
+            #expect(InstrumentationSystem.tracer as AnyObject === scoped)
+        }
+
+        // After the scope, resolution falls back to the still-bootstrapped instrument.
+        #expect(InstrumentationSystem.tracer as AnyObject === bootstrapped)
     }
 
     // MARK: - Nesting
@@ -126,6 +148,38 @@ extension GlobalTracingInstrumentationSystemTests {
         #expect(legacyOnly.startedOperationNames == ["scoped-legacy-op"])
     }
 
+    @Test("Discovery checks direct members only — a Tracer nested in a nested MultiplexInstrument is not found")
+    func nestedMultiplexIsNotDescendedInto() {
+        InstrumentationSystem.bootstrapInternal(nil)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
+
+        let tracer = TestTracer()
+        // The tracer is one level down, inside an inner MultiplexInstrument. Discovery is flat: it checks the
+        // outer multiplex's direct members, none of which is a `Tracer`, so no tracer is found.
+        let nested = MultiplexInstrument([MultiplexInstrument([tracer]), NoOpInstrument()])
+
+        withInstrument(nested) {
+            #expect(InstrumentationSystem.tracer is NoOpTracer)
+            withSpan("buried") { _ in }
+        }
+
+        #expect(tracer.spans.isEmpty)
+    }
+
+    @Test("Augmenting via MultiplexInstrument([InstrumentationSystem.instrument, ...]) resolves without recursion")
+    func augmentWithActiveInstrument() {
+        let tracer = TestTracer()
+
+        withInstrument(tracer) {
+            // Capture the concrete active instrument and scope a multiplex that includes it. Because
+            // `InstrumentationSystem.instrument` returns a concrete value (not a self-referential wrapper),
+            // resolution inside the inner scope terminates and still finds the captured tracer.
+            withInstrument(MultiplexInstrument([InstrumentationSystem.instrument, KeyWriterInstrument(value: "x")])) {
+                #expect(InstrumentationSystem.tracer as AnyObject === tracer)
+            }
+        }
+    }
+
     // MARK: - Replace semantics
 
     @Test("A nested withInstrument replaces the outer instrument for its scope")
@@ -197,32 +251,6 @@ extension GlobalTracingInstrumentationSystemTests {
         }
 
         #expect(carrier.value == "b")
-    }
-
-    // MARK: - Self-reference guard
-
-    // `withInstrument` crashes if handed `InstrumentationSystem.instrument` (the scoping wrapper), directly
-    // or nested in a `MultiplexInstrument`, since re-installing it would recurse forever. The crash itself
-    // is a `fatalError` (not covered here); these cover the detection that drives it.
-
-    @Test("Self-reference detection finds the scoping instrument directly and nested in a MultiplexInstrument")
-    func detectsSelfReference() {
-        #expect(TaskLocalInstrument.isOrContainsScopingInstrument(TaskLocalInstrument()))
-        #expect(
-            TaskLocalInstrument.isOrContainsScopingInstrument(
-                MultiplexInstrument([NoOpInstrument(), MultiplexInstrument([TaskLocalInstrument()])])
-            )
-        )
-    }
-
-    @Test("Self-reference detection passes instruments that don't contain the scoping wrapper")
-    func detectsNonSelfReference() {
-        #expect(!TaskLocalInstrument.isOrContainsScopingInstrument(TestTracer()))
-        #expect(
-            !TaskLocalInstrument.isOrContainsScopingInstrument(
-                MultiplexInstrument([NoOpInstrument(), TestTracer()])
-            )
-        )
     }
 
     // MARK: - Async
@@ -362,6 +390,9 @@ extension GlobalTracingInstrumentationSystemTests {
 
     @Test("Task.detached does not inherit scoped instrument")
     func detachedTaskDoesNotInherit() async {
+        InstrumentationSystem.bootstrapInternal(nil)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
+
         let testTracer = TestTracer()
 
         await withInstrument(testTracer) {
@@ -371,6 +402,7 @@ extension GlobalTracingInstrumentationSystemTests {
                 InstrumentationSystem.tracer
             }.value
 
+            // The detached task does not inherit the task-local, so it falls back to the bootstrap (NoOp).
             #expect(resolvedInDetached is NoOpTracer)
         }
     }
@@ -399,41 +431,6 @@ extension GlobalTracingInstrumentationSystemTests {
         }
 
         #expect(testTracer.spans.count == 3)
-    }
-
-    // MARK: - Lazy install of the scoping wrapper
-    //
-    // These reset to the default `NoOpInstrument` first to exercise the install-on-first-use path of
-    // `withInstrument(_:_:)`. The crash path (a plain, non-scoping instrument was bootstrapped) is a
-    // `fatalError` and is therefore not covered by an automated test.
-
-    @Test("withInstrument lazily installs the scoping wrapper over an un-bootstrapped system")
-    func lazilyInstallsWrapperOverNoOp() {
-        InstrumentationSystem.bootstrapInternal(nil)
-        #expect(InstrumentationSystem.instrument is NoOpInstrument)
-
-        let testTracer = TestTracer()
-        withInstrument(testTracer) {
-            #expect(InstrumentationSystem.tracer as AnyObject === testTracer)
-        }
-
-        // The wrapper persists after the scope returns; only the scoped layer is unwound. With its inner
-        // `NoOpInstrument` and no scope active, discovery falls back to NoOp.
-        #expect(InstrumentationSystem.instrument is TaskLocalInstrument)
-        #expect(InstrumentationSystem.tracer is NoOpTracer)
-    }
-
-    @Test("Repeated withInstrument calls reuse the installed wrapper")
-    func repeatedCallsReuseInstalledWrapper() {
-        InstrumentationSystem.bootstrapInternal(nil)
-
-        withInstrument(TestTracer()) {}
-        let afterFirst = InstrumentationSystem.instrument as? TaskLocalInstrument
-        #expect(afterFirst != nil)
-
-        withInstrument(TestTracer()) {}
-        // Installing is idempotent: the second call reuses the same wrapper rather than installing a new one.
-        #expect(InstrumentationSystem.instrument is TaskLocalInstrument)
     }
 }
 

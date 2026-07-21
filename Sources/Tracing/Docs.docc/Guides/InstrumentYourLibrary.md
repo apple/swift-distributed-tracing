@@ -400,7 +400,7 @@ import InMemoryTracing
     await withInstrument(tracer) {
         await MyLibrary().doWork()
     }
-    #expect(tracer.spans.map(\.operationName) == ["my-library.do-work"])
+    #expect(tracer.finishedSpans.map(\.operationName) == ["my-library.do-work"])
 }
 ```
 

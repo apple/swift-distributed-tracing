@@ -21,8 +21,9 @@ import ServiceContextModule
 /// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
-/// To enable scoped overrides (per-test, per-subsystem), use ``withInstrument(_:_:)``, which installs a
-/// dedicated task-local instrument as the bootstrap on first use and sets the active instrument on it.
+/// To override the active instrument for a scope — a test, a subsystem — without touching the process-wide
+/// bootstrap, use ``withInstrument(_:_:)``. It binds a task-local instrument that ``instrument`` and discovery
+/// resolve ahead of the bootstrapped one, for the duration of a closure.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
@@ -52,63 +53,56 @@ public enum InstrumentationSystem {
             }
         }
 
-        /// Ensure a ``TaskLocalInstrument`` is installed so a scope can be entered, installing one lazily
-        /// over the default ``NoOpInstrument`` when nothing has been bootstrapped.
-        ///
-        /// Uses double-checked locking: the common case — a ``TaskLocalInstrument`` is already installed —
-        /// is satisfied under a reader lock, matching the cost of reading ``instrument``. Only the one-time
-        /// install (or the crash) takes the writer lock.
-        ///
-        /// - NoOp bootstrap (nothing installed): install an empty `TaskLocalInstrument()` so the wrapper is
-        ///   reachable from discovery and propagation for the duration of any scope.
-        /// - ``TaskLocalInstrument`` already installed: nothing to do.
-        /// - Any other bootstrapped instrument: crash. The task-local instrument can only be installed when
-        ///   the system is otherwise un-bootstrapped. It cannot replace an instrument the application chose to
-        ///   bootstrap. `withInstrument` is an application-level facility and must not be called against a
-        ///   non-scoping bootstrap (typically from library code).
-        @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-        func installTaskLocalInstrumentIfNeeded() {
-            // Fast path: already scoping-capable, no write needed.
-            if self.lock.withReaderLock({ self._instrument is TaskLocalInstrument }) {
-                return
-            }
-            // Slow path: install over NoOp, or crash. Re-check under the writer lock.
-            self.lock.withWriterLock {
-                if self._instrument is TaskLocalInstrument {
-                    return
-                }
-                guard self._instrument is NoOpInstrument else {
-                    fatalError(
-                        """
-                        withInstrument(_:_:) requires either an un-bootstrapped InstrumentationSystem or one \
-                        already using task-local scoping, but a \(type(of: self._instrument)) was bootstrapped. \
-                        It cannot replace a plain bootstrapped instrument. withInstrument(_:_:) is an \
-                        application-level facility and must not be called from library code.
-                        """
-                    )
-                }
-                self._instrument = TaskLocalInstrument()
-            }
-        }
-
         var instrument: Instrument {
             self.lock.withReaderLock { self._instrument }
         }
 
-        func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+        func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
             self.lock.withReaderLock {
-                if let container = self._instrument as? _InstrumentContainer {
-                    return container.firstInstrument(where: predicate)
-                } else if predicate(self._instrument) {
-                    return self._instrument
-                } else {
-                    return nil
-                }
+                InstrumentationSystem.firstInstrument(in: self._instrument, where: predicate)
             }
         }
     }
 
     private static let shared = Storage()
+
+    /// Task-local instrument override set by ``withInstrument(_:_:)``.
+    ///
+    /// Resolved ahead of the bootstrapped instrument by ``instrument`` and ``_findInstrument(where:)`` for the
+    /// duration of a scope. Internal storage — callers set it by calling ``withInstrument(_:_:)``.
+    @TaskLocal
+    @usableFromInline
+    internal static var _taskLocalInstrument: (any Instrument)?
+
+    /// Runs `operation` with `instrument` bound to the task-local override. Backs ``withInstrument(_:_:)``.
+    @usableFromInline
+    static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        operation: () throws -> Result
+    ) rethrows -> Result {
+        try Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+
+    #if compiler(>=6.2)
+    /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
+    @usableFromInline
+    nonisolated(nonsending) static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        operation: nonisolated(nonsending) () async throws -> Result
+    ) async rethrows -> Result {
+        try await Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+    #else
+    /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
+    @usableFromInline
+    static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        isolation: isolated (any Actor)? = #isolation,
+        operation: () async throws -> Result
+    ) async rethrows -> Result {
+        try await Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+    #endif
 
     /// Globally select the desired ``Instrument`` implementation.
     ///
@@ -126,27 +120,12 @@ public enum InstrumentationSystem {
         self.shared.bootstrapInternal(instrument)
     }
 
-    /// Ensures the system can enter a task-local scope, installing a ``TaskLocalInstrument`` over the
-    /// default ``NoOpInstrument`` if nothing has been bootstrapped. Backs ``withInstrument(_:_:)``.
+    /// The currently active ``Instrument``.
     ///
-    /// Crashes if a plain (non-scoping) instrument was bootstrapped. See
-    /// ``Storage/installTaskLocalInstrumentIfNeeded()`` for the full semantics.
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    internal static func installTaskLocalInstrumentIfNeeded() {
-        self.shared.installTaskLocalInstrumentIfNeeded()
-    }
-
-    /// Returns the currently bootstrapped ``Instrument``, or a ``NoOpInstrument`` if none was set.
-    ///
-    /// When an override has been set via ``withInstrument(_:_:)``, it participates when the returned
-    /// instrument's methods are invoked — `inject` / `extract` and discovery (``tracer``,
-    /// ``_findInstrument(where:)``) resolve through it.
-    ///
-    /// > Warning: Do not pass this value to ``withInstrument(_:_:)`` (directly or inside a
-    /// > ``MultiplexInstrument``). It is task-local-backed, so re-installing it would resolve a scope that
-    /// > contains itself; `withInstrument` rejects it with a crash.
+    /// This is the instrument bound by the innermost enclosing ``withInstrument(_:_:)`` scope, if any,
+    /// otherwise the one set with ``bootstrap(_:)`` — and a ``NoOpInstrument`` if neither was set.
     public static var instrument: Instrument {
-        shared.instrument
+        Self._taskLocalInstrument ?? self.shared.instrument
     }
 }
 
@@ -154,10 +133,29 @@ public enum InstrumentationSystem {
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     ///
-    /// Walks the bootstrapped instrument for the first member matching `predicate`. Recurses into
-    /// `_InstrumentContainer` members, including ``MultiplexInstrument`` members and the task-local override
-    /// installed by ``withInstrument(_:_:)``.
+    /// Finds the first instrument matching `predicate` in the currently active instrument — the
+    /// ``withInstrument(_:_:)`` override if one is in scope, otherwise the bootstrapped instrument. If the
+    /// active instrument is a ``MultiplexInstrument``, its direct members are checked in order.
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        self.shared._findInstrument(where: predicate)
+        if let scoped = Self._taskLocalInstrument {
+            return Self.firstInstrument(in: scoped, where: predicate)
+        }
+        return self.shared.firstInstrument(where: predicate)
+    }
+
+    /// Returns the first match for `predicate`: `instrument` itself, or — when it is a ``MultiplexInstrument``
+    /// — its first direct member satisfying `predicate`. This is not recursive: a ``MultiplexInstrument``
+    /// nested inside another is tested as a whole, not descended into.
+    fileprivate static func firstInstrument(
+        in instrument: Instrument,
+        where predicate: (Instrument) -> Bool
+    ) -> Instrument? {
+        if let multiplex = instrument as? MultiplexInstrument {
+            return multiplex.firstInstrument(where: predicate)
+        } else if predicate(instrument) {
+            return instrument
+        } else {
+            return nil
+        }
     }
 }

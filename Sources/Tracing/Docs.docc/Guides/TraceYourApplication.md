@@ -19,8 +19,8 @@ There are two ways to set up instrumentation:
 
 - ``InstrumentationSystem/bootstrap(_:)`` — process-wide, called once at startup. The classic path. Simplest
   when your app uses a single tracer for its whole lifetime and never needs to override it.
-- ``withInstrument(_:_:)`` — makes an instrument active for the current task while a closure runs, through a
-  dedicated task-local instrument it installs as the bootstrap on first use. Useful for parallel-safe tests
+- ``withInstrument(_:_:)`` — makes an instrument active for the current task while a closure runs, resolved
+  ahead of the bootstrapped instrument and falling back to it outside the scope. Useful for parallel-safe tests
   with per-test tracers, or to override the instrument for a specific subsystem. See
   [Scoping an instrument with withInstrument](#Scoping-an-instrument-with-withInstrument)
   later in this guide.
@@ -447,7 +447,7 @@ withSpan("showEvents") { span in
 
 An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/nanosecondsSinceEpoch`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
 
-Events usually show up in a in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
+Events usually show up in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
 
 **Jaeger:**
 
@@ -461,57 +461,72 @@ Events cannot be "failed" or "successful", that is a property of a ``Span``, and
 
 ### Scoping an instrument with withInstrument
 
-``withInstrument(_:_:)`` makes an instrument active for the current task while a closure runs. It works
-through a dedicated task-local instrument that the ``InstrumentationSystem`` holds as its bootstrap: the first
-call installs it (a one-time global bootstrap, done only when nothing else is bootstrapped) and every call
-then sets the given instrument as the active instrument for the duration of the closure.
+``withInstrument(_:_:)`` makes an instrument active for the current task while a closure runs. Inside the
+closure it is resolved ahead of whatever ``InstrumentationSystem/bootstrap(_:)`` set. Outside the closure — and
+in tasks that do not inherit the binding, such as `Task.detached` — resolution falls back to the bootstrapped
+instrument. The binding is task-local, so it flows into the structured child tasks the closure spawns, as well
+as an unstructured `Task { }`.
+
+Its two intended uses are **parallel-safe testing** and **per-subsystem overrides** on top of a process-wide
+``InstrumentationSystem/bootstrap(_:)``:
 
 ```swift
-// Run the whole application under a scoped tracer.
-try await withInstrument(OTelTracer(configuration: config)) {
-    try await Application.main()
-}
-
-// Parallel-safe. The binding is task-local, so concurrent tests don't interfere.
+// Parallel-safe: the binding is task-local, so concurrent tests don't interfere.
 @Test func spansAreCaptured() async {
     let tracer = InMemoryTracer()
     await withInstrument(tracer) {
         await withSpan("op") { _ in }
     }
-    #expect(tracer.spans.count == 1)
+    #expect(tracer.finishedSpans.count == 1)
 }
 ```
+
+> Important: ``withInstrument(_:_:)`` chooses the active *instrument* (the backend). It does **not** propagate
+> trace *context* — that is ``ServiceContext``'s job, carried on its own task-local via
+> `ServiceContext.withValue` and, across process boundaries, `inject` / `extract`. The two are independent
+> task-locals: at any span-creation or propagation site you need both the intended instrument and the right
+> ``ServiceContext`` in scope. Neither crosses a `Task.detached` or manual (callback / `EventLoopFuture`)
+> boundary — re-establish both on the other side. See <doc:InstrumentYourLibrary> for context propagation.
 
 The instrument **replaces** the active instrument for the scope — it does not merge with it. A nested
 ``withInstrument(_:_:)`` fully replaces the enclosing one, and the previous instrument is restored when the
 closure returns. Discovery (``InstrumentationSystem/tracer``, free-function `withSpan` / `startSpan`) and
-propagation (`inject` / `extract`) resolve through it.
+propagation (`inject` / `extract`) resolve it for the duration of the scope, and fall back to the bootstrap
+outside it.
 
-Think of it like ``InstrumentationSystem/bootstrap(_:)``, only scoped. Passing a single ``Tracer`` is the
-common case and does what you expect. To run several instruments at once, pass a ``MultiplexInstrument``
-naming all of them — exactly as you would build one for `bootstrap`:
+To run several instruments at once, pass a ``MultiplexInstrument`` naming all of them — exactly as you would
+build one for `bootstrap`. Propagation (`inject` / `extract`) runs every member, while span creation uses the
+**first** ``Tracer`` in the multiplex:
 
 ```swift
 try await withInstrument(MultiplexInstrument([OTelTracer(configuration: config), myPropagator])) {
-    try await Application.main()
+    try await subsystem.run()
 }
 ```
 
-Because a scope replaces rather than merges, two things follow. Binding a **non-tracer** instrument on its own
-turns tracing off for the scope — it shadows the tracer, so spans created inside reach no tracer; include a
-tracer in the ``MultiplexInstrument`` when you want both. And you cannot name the currently-active instrument
-to extend it: passing ``InstrumentationSystem/instrument`` back into `withInstrument` (directly or inside a
-``MultiplexInstrument``) is a programmer error and crashes.
+Because a scope replaces rather than merges, binding a **non-tracer** instrument on its own turns tracing off
+for the scope — it shadows the tracer, so spans created inside reach no tracer. Include a tracer in the
+``MultiplexInstrument`` when you want both. To *augment* whatever is already active rather than replace it,
+build the ``MultiplexInstrument`` from ``InstrumentationSystem/instrument``, which returns the concrete active
+instrument:
 
-> Important: ``withInstrument(_:_:)`` is an application-level facility — call it from code that owns the
-> instrumentation setup, never from a library. It can install its instrument only when the
-> ``InstrumentationSystem`` is otherwise un-bootstrapped. Calling it after a plain ``Instrument`` has been
-> bootstrapped crashes. Libraries emit through ``InstrumentationSystem/instrument`` and `withSpan` / `startSpan`,
-> which already observe whatever is active.
+```swift
+try await withInstrument(MultiplexInstrument([InstrumentationSystem.instrument, myPropagator])) {
+    try await subsystem.run()
+}
+```
 
-If your application installs a single tracer at startup and never overrides it, prefer plain
-``InstrumentationSystem/bootstrap(_:)``. ``withInstrument(_:_:)`` pays off for parallel-safe testing and
-per-subsystem overrides.
+> Important: ``withInstrument(_:_:)`` overrides the active instrument for its scope, like
+> ``InstrumentationSystem/bootstrap(_:)`` but scoped rather than process-wide, and resolution falls back to the
+> bootstrapped one outside it. ``InstrumentationSystem/instrument`` and `withSpan` / `startSpan` already
+> observe whichever is active.
+
+Prefer ``InstrumentationSystem/bootstrap(_:)`` for the application's **process-wide** tracer, and reach for
+``withInstrument(_:_:)`` to override it for a **bounded scope** — a test, or a subsystem. Scoping the whole
+application is possible but rarely what you want for tracing: work that escapes the closure's task tree (a
+`Task.detached`, an `EventLoopFuture` callback, a long-lived background task) does not inherit the scope and
+falls back to the bootstrapped instrument, so a whole-application `withInstrument` can silently drop spans and
+context at exactly those boundaries.
 
 ### Integrations
 

@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Tracing open source project
 //
-// Copyright (c) 2020-2025 Apple Inc. and the Swift Distributed Tracing project authors
+// Copyright (c) 2020-2023 Apple Inc. and the Swift Distributed Tracing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -17,9 +17,7 @@ import ServiceContextModule
 /// A pseudo instrument to use to instrument using multiple instruments across a
 /// common service context.
 public struct MultiplexInstrument {
-    /// The members this multiplex fans out to. Readable within the module so the scoping guard in
-    /// ``withInstrument(_:_:)`` can walk for a nested ``TaskLocalInstrument``.
-    var instruments: [Instrument]
+    private var instruments: [Instrument]
 
     /// Create a multiplex instrument.
     ///
@@ -31,9 +29,7 @@ public struct MultiplexInstrument {
     }
 }
 
-extension MultiplexInstrument: _InstrumentContainer {
-    /// Returns the first member that satisfies `predicate`. Conforming to `_InstrumentContainer` lets
-    /// ``InstrumentationSystem`` discovery (and a scoped ``TaskLocalInstrument``) descend into the multiplex.
+extension MultiplexInstrument {
     func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         self.instruments.first(where: predicate)
     }
