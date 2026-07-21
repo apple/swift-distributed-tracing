@@ -16,29 +16,80 @@ import Benchmark
 import Tracing
 
 let benchmarks: @Sendable () -> Void = {
-    let defaultMetrics: [BenchmarkMetric] = [
-        .mallocCountTotal
-    ]
+    let configurationWithMalloc: Benchmark.Configuration = .init(
+        metrics: [
+            .mallocCountTotal
+        ],
+        timeUnits: .nanoseconds
+    )
+
+    let configurationWithMallocAndInstructions: Benchmark.Configuration = .init(
+        metrics: [
+            .mallocCountTotal,
+            .instructions,
+        ],
+        timeUnits: .nanoseconds
+    )
 
     Benchmark(
         "NoopTracing.startSpan_endSpan",
-        configuration: .init(
-            metrics: defaultMetrics,
-            timeUnits: .nanoseconds,
-            scalingFactor: .mega
-        )
+        configuration: configurationWithMalloc
     ) { benchmark in
         let span = startSpan("name")
         defer { span.end() }
     }
 
     Benchmark(
+        "NoopTracing.withSpan",
+        configuration: configurationWithMallocAndInstructions
+    ) { benchmark in
+        withSpan("name") { span in
+            blackHole(span)
+        }
+    }
+
+    Benchmark(
+        "NoopTracing.startSpan_endSpan.withInstrumentScope",
+        configuration: configurationWithMallocAndInstructions
+    ) { benchmark in
+        withInstrument(NoOpInstrument()) {
+            benchmark.startMeasurement()
+            let span = startSpan("name")
+            blackHole(span)
+            span.end()
+            benchmark.stopMeasurement()
+        }
+    }
+
+    Benchmark(
+        "NoopTracing.withSpan.withInstrumentScope",
+        configuration: configurationWithMallocAndInstructions
+    ) { benchmark in
+        withInstrument(NoOpInstrument()) {
+            benchmark.startMeasurement()
+            withSpan("name") { span in
+                blackHole(span)
+            }
+            benchmark.stopMeasurement()
+        }
+    }
+
+    Benchmark(
+        "NoopTracing.startSpan_endSpan.withMultiplexScope",
+        configuration: configurationWithMallocAndInstructions
+    ) { benchmark in
+        withInstrument(MultiplexInstrument([NoOpInstrument(), NoOpInstrument()])) {
+            benchmark.startMeasurement()
+            let span = startSpan("name")
+            blackHole(span)
+            span.end()
+            benchmark.stopMeasurement()
+        }
+    }
+
+    Benchmark(
         "NoopTracing.attribute. set, span.attributes['http.status_code'] = 200",
-        configuration: .init(
-            metrics: defaultMetrics,
-            timeUnits: .nanoseconds,
-            scalingFactor: .mega
-        )
+        configuration: configurationWithMalloc
     ) { benchmark in
         let span = startSpan("name")
         span.attributes["http.status_code"] = 200
@@ -47,11 +98,7 @@ let benchmarks: @Sendable () -> Void = {
 
     Benchmark(
         "NoopTracing.attribute. set, span.attributes.http.status_code = 200",
-        configuration: .init(
-            metrics: defaultMetrics,
-            timeUnits: .nanoseconds,
-            scalingFactor: .mega
-        )
+        configuration: configurationWithMalloc
     ) { benchmark in
         let span = startSpan("name")
         span.attributes.http.statusCode = 200
