@@ -19,10 +19,10 @@ There are two ways to set up instrumentation:
 
 - ``InstrumentationSystem/bootstrap(_:)`` — process-wide, called once at startup. The classic path. Simplest
   when your app uses a single tracer for its whole lifetime and never needs to override it.
-- ``withInstrument(_:_:)`` — makes an instrument active for the current task while a closure runs, resolved
+- ``withTracer(_:_:)`` — makes a tracer active for the current task while a closure runs, resolved
   ahead of the bootstrapped instrument and falling back to it outside the scope. Useful for parallel-safe tests
-  with per-test tracers, or to override the instrument for a specific subsystem. See
-  [Scoping an instrument with withInstrument](#Scoping-an-instrument-with-withInstrument)
+  with per-test tracers, or to override the tracer for a specific subsystem. See
+  [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
   later in this guide.
 
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
@@ -159,8 +159,8 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
 > Note: For scoped alternatives to plain `bootstrap` — for example, binding a tracer inside a test or
-> overriding it for a subsystem — use ``withInstrument(_:_:)`` instead and see
-> [Scoping an instrument with withInstrument](#Scoping-an-instrument-with-withInstrument)
+> overriding it for a subsystem — use ``withTracer(_:_:)`` instead and see
+> [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
 > later in this guide, after the span introduction.
 
 ### Introducing Trace Spans
@@ -459,11 +459,11 @@ Events usually show up in a trace view as points on the timeline (note that some
 
 Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
-### Scoping an instrument with withInstrument
+### Scoping a tracer with withTracer
 
-``withInstrument(_:_:)`` makes an instrument active for the current task while a closure runs. Inside the
-closure it is resolved ahead of whatever ``InstrumentationSystem/bootstrap(_:)`` set. Outside the closure — and
-in tasks that do not inherit the binding, such as `Task.detached` — resolution falls back to the bootstrapped
+``withTracer(_:_:)`` makes a ``Tracer`` active for the current task while a closure runs. Inside the closure
+it is resolved ahead of whatever ``InstrumentationSystem/bootstrap(_:)`` set. Outside the closure — and in
+tasks that do not inherit the binding, such as `Task.detached` — resolution falls back to the bootstrapped
 instrument. The binding is task-local, so it flows into the structured child tasks the closure spawns, as well
 as an unstructured `Task { }`.
 
@@ -474,58 +474,49 @@ Its two intended uses are **parallel-safe testing** and **per-subsystem override
 // Parallel-safe: the binding is task-local, so concurrent tests don't interfere.
 @Test func spansAreCaptured() async {
     let tracer = InMemoryTracer()
-    await withInstrument(tracer) {
+    await withTracer(tracer) {
         await withSpan("op") { _ in }
     }
     #expect(tracer.finishedSpans.count == 1)
 }
 ```
 
-> Important: ``withInstrument(_:_:)`` chooses the active *instrument* (the backend). It does **not** propagate
+> Important: ``withTracer(_:_:)`` chooses the active *instrument* (the backend). It does **not** propagate
 > trace *context* — that is ``ServiceContext``'s job, carried on its own task-local via
 > `ServiceContext.withValue` and, across process boundaries, `inject` / `extract`. The two are independent
 > task-locals: at any span-creation or propagation site you need both the intended instrument and the right
 > ``ServiceContext`` in scope. Neither crosses a `Task.detached` or manual (callback / `EventLoopFuture`)
 > boundary — re-establish both on the other side. See <doc:InstrumentYourLibrary> for context propagation.
 
-The instrument **replaces** the active instrument for the scope — it does not merge with it. A nested
-``withInstrument(_:_:)`` fully replaces the enclosing one, and the previous instrument is restored when the
+The tracer **replaces** the active instrument for the scope — it does not merge with it. A nested
+``withTracer(_:_:)`` fully replaces the enclosing one, and the previous instrument is restored when the
 closure returns. Discovery (``InstrumentationSystem/tracer``, free-function `withSpan` / `startSpan`) and
 propagation (`inject` / `extract`) resolve it for the duration of the scope, and fall back to the bootstrap
-outside it.
+outside it — a ``Tracer`` is also an ``Instrument``, so `inject` / `extract` observe the scope too, not just
+span creation.
 
-To run several instruments at once, pass a ``MultiplexInstrument`` naming all of them — exactly as you would
-build one for `bootstrap`. Propagation (`inject` / `extract`) runs every member, while span creation uses the
-**first** ``Tracer`` in the multiplex:
-
-```swift
-try await withInstrument(MultiplexInstrument([OTelTracer(configuration: config), myPropagator])) {
-    try await subsystem.run()
-}
-```
-
-Because a scope replaces rather than merges, binding a **non-tracer** instrument on its own turns tracing off
-for the scope — it shadows the tracer, so spans created inside reach no tracer. Include a tracer in the
-``MultiplexInstrument`` when you want both. To *augment* whatever is already active rather than replace it,
-build the ``MultiplexInstrument`` from ``InstrumentationSystem/instrument``, which returns the concrete active
-instrument:
+``withTracer(_:_:)`` only accepts a ``Tracer``, so it can't be handed a ``MultiplexInstrument`` directly. If a
+scope needs several tracers active at once (or a whole-process combination that never scopes), install the
+``MultiplexInstrument`` naming all of them once, at ``InstrumentationSystem/bootstrap(_:)``:
 
 ```swift
-try await withInstrument(MultiplexInstrument([InstrumentationSystem.instrument, myPropagator])) {
-    try await subsystem.run()
-}
+InstrumentationSystem.bootstrap(MultiplexInstrument([OTelTracer(configuration: config), myPropagator]))
 ```
 
-> Important: ``withInstrument(_:_:)`` overrides the active instrument for its scope, like
+There is currently no supported way to task-locally combine a tracer with extra propagators, or several
+tracers, in a single scope — `withTracer(_:_:)` only accepts a `Tracer`, and `MultiplexInstrument` isn't one.
+Install the combination once, at `bootstrap`, if you need it process-wide.
+
+> Important: ``withTracer(_:_:)`` overrides the active instrument for its scope, like
 > ``InstrumentationSystem/bootstrap(_:)`` but scoped rather than process-wide, and resolution falls back to the
 > bootstrapped one outside it. ``InstrumentationSystem/instrument`` and `withSpan` / `startSpan` already
 > observe whichever is active.
 
 Prefer ``InstrumentationSystem/bootstrap(_:)`` for the application's **process-wide** tracer, and reach for
-``withInstrument(_:_:)`` to override it for a **bounded scope** — a test, or a subsystem. Scoping the whole
+``withTracer(_:_:)`` to override it for a **bounded scope** — a test, or a subsystem. Scoping the whole
 application is possible but rarely what you want for tracing: work that escapes the closure's task tree (a
 `Task.detached`, an `EventLoopFuture` callback, a long-lived background task) does not inherit the scope and
-falls back to the bootstrapped instrument, so a whole-application `withInstrument` can silently drop spans and
+falls back to the bootstrapped instrument, so a whole-application `withTracer` can silently drop spans and
 context at exactly those boundaries.
 
 ### Integrations

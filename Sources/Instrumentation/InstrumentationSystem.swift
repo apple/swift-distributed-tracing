@@ -22,8 +22,8 @@ import ServiceContextModule
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
 /// To override the active instrument for a scope — a test, a subsystem — without touching the process-wide
-/// bootstrap, use ``withInstrument(_:_:)``. It binds a task-local instrument that ``instrument`` and discovery
-/// resolve ahead of the bootstrapped one, for the duration of a closure.
+/// bootstrap, the Tracing module provides `withTracer(_:_:)`, which binds a task-local override that
+/// ``instrument`` and discovery resolve ahead of the bootstrapped one, for the duration of a closure.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
@@ -66,17 +66,18 @@ public enum InstrumentationSystem {
 
     private static let shared = Storage()
 
-    /// Task-local instrument override set by ``withInstrument(_:_:)``.
+    /// Task-local instrument override set by `withTracer(_:_:)` (Tracing module).
     ///
     /// Resolved ahead of the bootstrapped instrument by ``instrument`` and ``_findInstrument(where:)`` for the
-    /// duration of a scope. Internal storage — callers set it by calling ``withInstrument(_:_:)``.
+    /// duration of a scope.
     @TaskLocal
     @usableFromInline
     internal static var _taskLocalInstrument: (any Instrument)?
 
-    /// Runs `operation` with `instrument` bound to the task-local override. Backs ``withInstrument(_:_:)``.
+    /// Runs `operation` with `instrument` bound to the task-local override. Backs `withTracer(_:_:)` in the
+    /// Tracing module — `package`, not `internal`, so that module can call it.
     @usableFromInline
-    static func withTaskLocalInstrument<Result>(
+    package static func withTaskLocalInstrument<Result>(
         _ instrument: any Instrument,
         operation: () throws -> Result
     ) rethrows -> Result {
@@ -86,7 +87,7 @@ public enum InstrumentationSystem {
     #if compiler(>=6.2)
     /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
     @usableFromInline
-    nonisolated(nonsending) static func withTaskLocalInstrument<Result>(
+    package nonisolated(nonsending) static func withTaskLocalInstrument<Result>(
         _ instrument: any Instrument,
         operation: nonisolated(nonsending) () async throws -> Result
     ) async rethrows -> Result {
@@ -95,7 +96,7 @@ public enum InstrumentationSystem {
     #else
     /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
     @usableFromInline
-    static func withTaskLocalInstrument<Result>(
+    package static func withTaskLocalInstrument<Result>(
         _ instrument: any Instrument,
         isolation: isolated (any Actor)? = #isolation,
         operation: () async throws -> Result
@@ -122,7 +123,7 @@ public enum InstrumentationSystem {
 
     /// The currently active ``Instrument``.
     ///
-    /// This is the instrument bound by the innermost enclosing ``withInstrument(_:_:)`` scope, if any,
+    /// This is the instrument bound by the innermost enclosing `withTracer(_:_:)` scope, if any,
     /// otherwise the one set with ``bootstrap(_:)`` — and a ``NoOpInstrument`` if neither was set.
     public static var instrument: Instrument {
         Self._taskLocalInstrument ?? self.shared.instrument
@@ -134,7 +135,7 @@ extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     ///
     /// Finds the first instrument matching `predicate` in the currently active instrument — the
-    /// ``withInstrument(_:_:)`` override if one is in scope, otherwise the bootstrapped instrument. If the
+    /// `withTracer(_:_:)` override if one is in scope, otherwise the bootstrapped instrument. If the
     /// active instrument is a ``MultiplexInstrument``, its direct members are checked in order.
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         if let scoped = Self._taskLocalInstrument {

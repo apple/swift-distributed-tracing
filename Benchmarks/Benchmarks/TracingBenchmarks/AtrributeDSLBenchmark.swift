@@ -49,10 +49,10 @@ let benchmarks: @Sendable () -> Void = {
     }
 
     Benchmark(
-        "NoopTracing.startSpan_endSpan.withInstrumentScope",
+        "NoopTracing.startSpan_endSpan.withTracerScope",
         configuration: configurationWithMallocAndInstructions
     ) { benchmark in
-        withInstrument(NoOpInstrument()) {
+        withTracer(NoOpTracer()) {
             benchmark.startMeasurement()
             let span = startSpan("name")
             blackHole(span)
@@ -62,27 +62,14 @@ let benchmarks: @Sendable () -> Void = {
     }
 
     Benchmark(
-        "NoopTracing.withSpan.withInstrumentScope",
+        "NoopTracing.withSpan.withTracerScope",
         configuration: configurationWithMallocAndInstructions
     ) { benchmark in
-        withInstrument(NoOpInstrument()) {
+        withTracer(NoOpTracer()) {
             benchmark.startMeasurement()
             withSpan("name") { span in
                 blackHole(span)
             }
-            benchmark.stopMeasurement()
-        }
-    }
-
-    Benchmark(
-        "NoopTracing.startSpan_endSpan.withMultiplexScope",
-        configuration: configurationWithMallocAndInstructions
-    ) { benchmark in
-        withInstrument(MultiplexInstrument([NoOpInstrument(), NoOpInstrument()])) {
-            benchmark.startMeasurement()
-            let span = startSpan("name")
-            blackHole(span)
-            span.end()
             benchmark.stopMeasurement()
         }
     }

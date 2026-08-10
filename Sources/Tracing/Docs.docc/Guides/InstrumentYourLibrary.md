@@ -379,14 +379,14 @@ On the other hand, it may be valuable for testing scenarios to be able to set a 
 
 #### Honoring a caller's scope
 
-A library observes a caller's ``withInstrument(_:_:)`` scope only if it resolves the instrument *per call* —
+A library observes a caller's ``withTracer(_:_:)`` scope only if it resolves the instrument *per call* —
 through the free-function `withSpan` / `startSpan` or ``InstrumentationSystem/instrument`` at the emission
 site. A library that captures a `Tracer` once at construction ignores any scope entered later, so resolve per
 call unless you deliberately want to pin one instrument to an instance.
 
 #### Testing your library's instrumentation
 
-``withInstrument(_:_:)`` is the recommended way to test span emission and context propagation from a library.
+``withTracer(_:_:)`` is the recommended way to test span emission and context propagation from a library.
 Each test sets its own in-memory tracer as the active instrument for the duration of a closure. Because the
 binding is task-local, tests run in parallel without serialization or global-state cleanup.
 
@@ -397,7 +397,7 @@ import InMemoryTracing
 
 @Test func emitsExpectedSpan() async throws {
     let tracer = InMemoryTracer()
-    await withInstrument(tracer) {
+    await withTracer(tracer) {
         await MyLibrary().doWork()
     }
     #expect(tracer.finishedSpans.map(\.operationName) == ["my-library.do-work"])
@@ -406,4 +406,4 @@ import InMemoryTracing
 
 The active tracer is the one the test set, so it captures emission directly. For propagation tests, call
 `InstrumentationSystem.instrument.inject(...)` / `.extract(...)` inside the closure and assert on the carrier
-or context. See <doc:TraceYourApplication#Scoping-an-instrument-with-withInstrument> for the full semantics.
+or context. See <doc:TraceYourApplication#Scoping-a-tracer-with-withTracer> for the full semantics.
