@@ -1,6 +1,6 @@
 # SDT-0001: task-local instrument
 
-A `withTracer(_:_:)` free function that binds a ``Tracer`` to the current task. It takes priority over the
+A ``withTracer(_:_:)`` free function that binds a ``Tracer`` to the current task. It takes priority over the
 process-wide ``InstrumentationSystem/bootstrap(_:)`` for the scope, then falls back to it.
 
 ## Overview
@@ -15,7 +15,7 @@ process-wide ``InstrumentationSystem/bootstrap(_:)`` for the scope, then falls b
 
 This proposal adds the ``withTracer(_:_:)`` free function. It runs a closure with a chosen ``Tracer`` active
 for the current task and any child tasks it spawns. Unlike ``InstrumentationSystem/bootstrap(_:)``, which is
-set once per process, `withTracer(_:_:)` can bind a different tracer per region of work, for example per test.
+set once per process, ``withTracer(_:_:)`` can bind a different tracer per region of work, for example per test.
 
 ### Motivation
 
@@ -43,7 +43,7 @@ Inside the closure, and in any child tasks it spawns, `tracer` is the active ins
 (``InstrumentationSystem/tracer``, `withSpan` / `startSpan`) and propagation (`inject` / `extract`) give it
 priority over whatever ``InstrumentationSystem/bootstrap(_:)`` set, because a ``Tracer`` is an ``Instrument``.
 Outside the closure, or in tasks that don't inherit the binding, resolution falls back to the bootstrapped
-instrument. Nesting `withTracer` overrides `tracer` for the inner scope only.
+instrument. Nesting ``withTracer(_:_:)`` overrides `tracer` for the inner scope only.
 
 ``withTracer(_:_:)`` only accepts a ``Tracer``, not an arbitrary ``Instrument``. `MultiplexInstrument` is not
 a `Tracer` either, so while several tools can still be installed together at
@@ -80,7 +80,6 @@ within one task-local scope, see Future directions.
 ///   - operation: The closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     _ operation: () throws(Failure) -> Result
@@ -96,7 +95,6 @@ public func withTracer<Result, Failure: Error>(
 ///   - operation: The async closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     _ operation: nonisolated(nonsending) () async throws(Failure) -> Result
@@ -111,7 +109,6 @@ public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
 ///   - operation: The async closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     isolation: isolated (any Actor)? = #isolation,
@@ -133,10 +130,10 @@ wrapper instrument, and nothing is installed on first use.
 
 ### Future directions
 
-- **Combining several tools in one scope.** `withTracer(_:_:)` only takes one `Tracer`. There is no built-in
+- **Combining several tools in one scope.** ``withTracer(_:_:)`` only takes one `Tracer`. There is no built-in
   way to task-locally combine a tracer with extra propagators, or several tracers at once. A wrapper type
   that groups several instruments behind one `Tracer` conformance, something like a `MultiplexTracer`, could
-  close this gap without changing `withTracer(_:_:)` itself.
+  close this gap without changing ``withTracer(_:_:)`` itself.
 
 ### Alternatives considered
 
@@ -159,7 +156,7 @@ simpler and easier to reason about.
 
 **A separate task-local slot typed for `Tracer` alone.** Give ``InstrumentationSystem`` a second `@TaskLocal`
 `(any Tracer)?`, checked only by ``InstrumentationSystem/tracer``, and leave ``InstrumentationSystem/instrument``
-resolving only the bootstrap. This is not what this proposal does. `withTracer(_:_:)` binds the *existing*
+resolving only the bootstrap. This is not what this proposal does. ``withTracer(_:_:)`` binds the *existing*
 `(any Instrument)?` task-local, upcasting its `any Tracer` argument, so ``InstrumentationSystem/instrument``,
 and therefore `extract` / `inject`, see the scope too. A dedicated Tracer-only slot is rejected here. It would
 leave ``InstrumentationSystem/instrument`` global, so a scoped test would capture spans but miss incoming
