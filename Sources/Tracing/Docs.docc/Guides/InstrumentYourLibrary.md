@@ -379,7 +379,7 @@ On the other hand, it may be valuable for testing scenarios to be able to set a 
 
 #### Honoring a caller's scope
 
-A library observes a caller's ``withTracer(_:_:)`` scope only if it resolves the instrument *per call* —
+A library observes a caller's ``withTracer(_:_:)`` scope only if it resolves the instrument *per call*,
 through the free-function `withSpan` / `startSpan` or ``InstrumentationSystem/instrument`` at the emission
 site. A library that captures a `Tracer` once at construction ignores any scope entered later, so resolve per
 call unless you deliberately want to pin one instrument to an instance.

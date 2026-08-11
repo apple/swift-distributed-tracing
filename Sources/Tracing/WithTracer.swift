@@ -39,7 +39,6 @@
 ///   - operation: The closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     _ operation: () throws(Failure) -> Result
@@ -48,8 +47,8 @@ public func withTracer<Result, Failure: Error>(
         return try InstrumentationSystem.withTaskLocalInstrument(tracer, operation: operation)
     } catch {
         // FIXME: remove when `TaskLocal.withValue` gains typed-throws support.
-        // Safe today: `operation` has typed throws `throws(Failure)`, and `TaskLocal.withValue` is `rethrows`
-        // — it introduces no errors of its own, so every error reaching this catch originated from `operation`
+        // Safe today: `operation` has typed throws `throws(Failure)`, and `TaskLocal.withValue` is `rethrows`.
+        // It introduces no errors of its own, so every error reaching this catch originated from `operation`
         // and is therefore of type `Failure`.
         throw error as! Failure
     }
@@ -65,7 +64,6 @@ public func withTracer<Result, Failure: Error>(
 ///   - operation: The async closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     _ operation: nonisolated(nonsending) () async throws(Failure) -> Result
@@ -88,7 +86,6 @@ public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
 ///   - operation: The async closure to run with `tracer` active.
 /// - Returns: The value returned by the closure.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-@inlinable
 public func withTracer<Result, Failure: Error>(
     _ tracer: any Tracer,
     isolation: isolated (any Actor)? = #isolation,
