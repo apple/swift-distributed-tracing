@@ -150,17 +150,24 @@ applications that only ``InstrumentationSystem/bootstrap(_:)`` and never scope. 
 introduces a self-reference hazard when ``InstrumentationSystem/instrument`` is passed back in, and needs
 install-on-first-use. The always-checked slot is simpler and composes with any bootstrap.
 
+**Store the tracer inside `ServiceContext`, not a separate slot.** Save the scoped tracer as a value inside
+`ServiceContext` itself, alongside whatever it already carries, instead of on a dedicated task-local on
+``InstrumentationSystem``. Code that already threads an explicit `ServiceContext`, rather than relying on the
+ambient `ServiceContext.current`, gets the tracer propagated for free. That would also make it safe for an
+application to move fully from ``bootstrap(_:)`` to `withTracer(_:_:)`, since no branch of the call graph could
+silently lose the override. Rejected. It creates two public APIs, from two different packages, that can each
+change the active tracer: `withTracer(_:_:)`, and `ServiceContext`'s own `$current.withValue(_:)`. Only the
+first knows the tracer's key exists, so binding a freshly created `ServiceContext` through the second, an
+ordinary and legitimate thing to do, has no way to carry the current tracer forward, and silently drops it with
+no diagnostic. The separate task-local slot has the mirror problem, however. Some code manually saves and restores
+`ServiceContext.current` across a boundary outside the task hierarchy, an event loop callback, for example.
+That code restores the context, but not the tracer, because the two live in different places. Until someone
+updates it to restore the tracer too, spans on that branch use the bootstrapped tracer instead of the scoped
+one, which might not be installed at all.
+
 **Accumulate nested scopes instead of replacing.** Push onto a task-local stack so a nested scope adds to,
 rather than replaces, the enclosing one. Rejected. It is a hidden, surprising accumulation, and replacing is
 simpler and easier to reason about.
-
-**A separate task-local slot typed for `Tracer` alone.** Give ``InstrumentationSystem`` a second `@TaskLocal`
-`(any Tracer)?`, checked only by ``InstrumentationSystem/tracer``, and leave ``InstrumentationSystem/instrument``
-resolving only the bootstrap. This is not what this proposal does. ``withTracer(_:_:)`` binds the *existing*
-`(any Instrument)?` task-local, upcasting its `any Tracer` argument, so ``InstrumentationSystem/instrument``,
-and therefore `extract` / `inject`, see the scope too. A dedicated Tracer-only slot is rejected here. It would
-leave ``InstrumentationSystem/instrument`` global, so a scoped test would capture spans but miss incoming
-trace IDs, because propagation would keep resolving through the bootstrap.
 
 **Expose `bootstrapInternal` for tests.** Rejected. It solves only testing, keeps the one-shot global model,
 and gives libraries no per-request scoping.
