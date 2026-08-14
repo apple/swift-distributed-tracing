@@ -61,6 +61,11 @@ within one task-local scope, see Future directions.
 /// set. An unstructured `Task { }` inherits the binding. `Task.detached` does not. Nesting
 /// `withTracer(_:_:)` overrides `tracer` for the inner scope only.
 ///
+/// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
+/// inside this scope returns from the task-local directly and never touches the bootstrapped storage. An
+/// application that only calls ``InstrumentationSystem/bootstrap(_:)`` pays for that extra check on
+/// every lookup.
+///
 /// ```swift
 /// // Parallel-safe. The binding is task-local, so concurrent tests don't interfere.
 /// @Test func spansAreCaptured() async {
@@ -118,15 +123,19 @@ public func withTracer<Result, Failure: Error>(
 ````
 
 The scope is backed by an `@TaskLocal` on ``InstrumentationSystem`` typed `(any Instrument)?`. There is no
-wrapper instrument, and nothing is installed on first use.
+wrapper instrument, and nothing is installed on first use. ``InstrumentationSystem/instrument`` and the other
+resolution methods (``InstrumentationSystem/tracer``, ``InstrumentationSystem/_findInstrument(where:)``) check
+that task-local first, and only read the bootstrapped instrument if it is not set.
 
 ### API stability
 
 - Purely additive: a new free function and an internal task-local. Existing signatures are unchanged.
 - Applications that never call ``withTracer(_:_:)`` see no behavioral change. Instrument lookup now checks a
   task-local before falling back to the bootstrapped instrument.
-- That task-local read happens on every lookup, including the per-span `withSpan` / `startSpan` path. The
-  added cost is negligible next to the work a real tracer already does per span.
+- That task-local read happens on every lookup, including the per-span `withSpan` / `startSpan` path. An
+  application that only calls ``bootstrap(_:)`` pays for this extra check every time, negligible next to what a
+  real tracer already does per span. A resolution inside `withTracer(_:_:)` returns from the task-local
+  directly, and never reads the bootstrapped storage at all.
 
 ### Future directions
 

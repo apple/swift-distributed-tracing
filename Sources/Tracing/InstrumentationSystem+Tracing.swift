@@ -22,6 +22,11 @@ extension InstrumentationSystem {
     /// If the active instrument is a `MultiplexInstrument` this function attempts to locate the _first_
     /// tracing instrument passed to it. If none is found, a ``NoOpTracer`` is returned.
     ///
+    /// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
+    /// inside `withTracer(_:_:)` returns from the task-local directly and never touches the bootstrapped
+    /// storage. An application that only calls ``bootstrap(_:)`` pays for that extra check on every
+    /// lookup.
+    ///
     /// - Returns: A ``Tracer`` if one is active, and ``NoOpTracer`` otherwise.
     public static var tracer: any Tracer {
         let found: (any Tracer)? =

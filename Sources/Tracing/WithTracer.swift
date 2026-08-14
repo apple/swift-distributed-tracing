@@ -20,6 +20,11 @@
 /// set. An unstructured `Task { }` inherits the binding. `Task.detached` does not. Nesting
 /// `withTracer(_:_:)` overrides `tracer` for the inner scope only.
 ///
+/// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
+/// inside this scope returns from the task-local directly and never touches the bootstrapped storage. An
+/// application that only calls ``InstrumentationSystem/bootstrap(_:)`` pays for that extra check on
+/// every lookup.
+///
 /// ```swift
 /// // Parallel-safe. The binding is task-local, so concurrent tests don't interfere.
 /// @Test func spansAreCaptured() async {

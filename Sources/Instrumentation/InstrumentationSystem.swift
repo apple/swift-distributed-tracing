@@ -125,6 +125,11 @@ public enum InstrumentationSystem {
     ///
     /// This is the instrument bound by the innermost enclosing `withTracer(_:_:)` scope, if any,
     /// otherwise the one set with ``bootstrap(_:)``. Returns a ``NoOpInstrument`` if neither was set.
+    ///
+    /// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
+    /// inside `withTracer(_:_:)` returns from the task-local directly and never touches the bootstrapped
+    /// storage. An application that only calls ``bootstrap(_:)`` pays for that extra check on every
+    /// lookup.
     public static var instrument: Instrument {
         Self._taskLocalInstrument ?? self.shared.instrument
     }
