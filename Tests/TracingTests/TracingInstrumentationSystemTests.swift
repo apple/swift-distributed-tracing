@@ -68,6 +68,35 @@ struct GlobalTracingInstrumentationSystemTests {
         #expect(InstrumentationSystem.tracer is TestTracer)
     }
 
+    @Test("Multiplex tracing forwards spans to every tracer")
+    func multiplexTracingForwardsSpansToEveryTracer() {
+        InstrumentationSystem.bootstrapInternal(nil)
+        defer { InstrumentationSystem.bootstrapInternal(nil) }
+
+        let firstTracer = TestTracer()
+        let secondTracer = TestTracer()
+        InstrumentationSystem.bootstrapInternal(MultiplexInstrument([firstTracer, secondTracer]))
+
+        let span = InstrumentationSystem.tracer.startSpan(
+            "multiplexed-span",
+            context: .topLevel,
+            ofKind: .internal,
+            at: DefaultTracerClock.now,
+            function: #function,
+            file: #fileID,
+            line: #line
+        )
+        span.end()
+
+        #expect(firstTracer.spans.count == 1)
+        #expect(secondTracer.spans.count == 1)
+
+        withSpan("multiplexed-global-span") { _ in }
+
+        #expect(firstTracer.spans.count == 2)
+        #expect(secondTracer.spans.count == 2)
+    }
+
     @Test("Global tracing methods preserve arguments")
     func globalTracingMethods() async throws {
         // Clean state before test

@@ -33,6 +33,10 @@ extension MultiplexInstrument {
     func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         self.instruments.first(where: predicate)
     }
+
+    package func matchingInstruments(where predicate: (Instrument) -> Bool) -> [Instrument] {
+        self.instruments.filter(predicate)
+    }
 }
 
 extension MultiplexInstrument: Instrument {
