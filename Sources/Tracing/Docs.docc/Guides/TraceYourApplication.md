@@ -17,9 +17,9 @@ is available in this project's README. Select an implementation you'd like to us
 
 There are two ways to set up instrumentation:
 
-- ``InstrumentationSystem/bootstrap(_:)``. Process-wide, called once at startup. The classic path. Simplest
+- `InstrumentationSystem/bootstrap(_:)`. Process-wide, called once at startup. The classic path. Simplest
   when your app uses a single tracer for its whole lifetime and never needs to override it.
-- ``withTracer(_:_:)``. Makes a tracer active for the current task while a closure runs. It takes priority
+- `withTracer(_:_:)`. Makes a tracer active for the current task while a closure runs. It takes priority
   over the bootstrapped instrument and falls back to it outside the scope. Useful for parallel-safe tests
   with per-test tracers, or to override the tracer for a specific subsystem. See
   [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
@@ -78,7 +78,7 @@ This is because it is also possible to use various instrumentation systems, e.g.
 of propagating certain `ServiceContext` values across process boundaries, without using tracing itself.
 
 In other words, all tracers are instruments, and the `InstrumentationSystem` works equally for `Instrument`,
-as well as ``Tracer`` implementations.
+as well as `Tracer` implementations.
 
 Our guide focuses on tracing through, so let's continue with that in mind.
 
@@ -96,8 +96,8 @@ Specifically, it is recommended to bootstrap systems in the following order:
 This is because tracing systems may attempt to emit logs or metrics about their status etc.
 
 > Important: Bootstrap telemetry as early as possible in process startup, ideally before any application
-> code runs. Any subsystem or object that reads ``InstrumentationSystem/instrument``,
-> ``InstrumentationSystem/tracer``, `Logger`, or `MetricsFactory` during its initialization captures whatever
+> code runs. Any subsystem or object that reads `InstrumentationSystem/instrument`,
+> `InstrumentationSystem/tracer`, `Logger`, or `MetricsFactory` during its initialization captures whatever
 > is in scope at that moment, so bootstrapping first ensures those captures see the real backends rather than
 > no-op placeholders. The same principle applies to logging and metrics.
 
@@ -159,13 +159,13 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
 > Note: For scoped alternatives to plain `bootstrap`, for example binding a tracer inside a test or
-> overriding it for a subsystem, use ``withTracer(_:_:)`` instead and see
+> overriding it for a subsystem, use `withTracer(_:_:)` instead and see
 > [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
 > later in this guide, after the span introduction.
 
 ### Introducing Trace Spans
 
-The primary way you interact with distributed tracing is by starting ``Span``s.
+The primary way you interact with distributed tracing is by starting `Span`s.
 
 Spans form hierarchies with their parent spans, and end up being visualized using various tools, usually in a format similar to gant charts. So for example, if we had multiple operations that compose making dinner, they would be modelled as child spans of a main `makeDinner` span. Any sub tasks are again modelled as child spans of any given operation, and so on.
 
@@ -279,7 +279,7 @@ This was just a quick introduction to tracing, but hopefully you are now excited
 
 ### Efficiently working with Spans
 
-We already saw the basic API to spawn a trace span, the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
+We already saw the basic API to spawn a trace span, the `withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v` method, but we didn't discuss it in depth yet. In this section we'll discuss how to efficiently work with spans and some common patterns and practices.
 
 Firstly, spans are created using a `withSpan` call and performing the operation contained within the span in the trailing operation closure body. This is important because it automatically, and correctly, delimits the lifetime of the span: from its creation, until the operation closure returns:
 
@@ -300,15 +300,15 @@ A `Span` is an in memory representation of the trace span that can be enriched w
 
 Throwing an error out of the withSpan's operation closure automatically records an error in the `span`, and ends the span.
 
-> Warning: A ``Span`` must not be ended multiple times and doing so is a programmer error.
+> Warning: A `Span` must not be ended multiple times and doing so is a programmer error.
 
 #### Span Attributes
 
-Span ``Span/attributes`` are additional information you can record in a ``Span`` which are then associated with the span and accessible in tracing visualization systems. 
+Span `Span/attributes` are additional information you can record in a `Span` which are then associated with the span and accessible in tracing visualization systems. 
 
 While you are free to record any information you want in attributes, it usually is best to  to stick to "well known" and standardized values, in order to make querying for them _across_ services more consistent. We will discuss pre-defined attributes below.
 
-Recording extra attributes in a Span is simple. You can record any information you want into the ``Span/attributes`` object using the subscript syntax, like this: 
+Recording extra attributes in a Span is simple. You can record any information you want into the `Span/attributes` object using the subscript syntax, like this: 
 
 ```swift
 withSpan("showAttributes") { span in 
@@ -317,11 +317,11 @@ withSpan("showAttributes") { span in
 }
 ```
 
-Once the span is ``Span/end()``-ed the attributes are flushed along with it to the backend tracing system.
+Once the span is `Span/end()`-ed the attributes are flushed along with it to the backend tracing system.
 
 > Tip: Some "well known" attributes are pre-defined for you in [swift-otel/swift-otel-semantic-conventions](https://github.com/swift-otel/swift-otel-semantic-conventions). Or you may decide to define a number of type-safe attributes yourself. 
 
-Attributes show up when you click on a specific ``Span`` in a trace visualization system. For example, like this in Jaeger:
+Attributes show up when you click on a specific `Span` in a trace visualization system. For example, like this in Jaeger:
 
 ![Attributes show up under the Span in Jaeger](jaeger-attribute)
 
@@ -427,7 +427,7 @@ public struct HTTPAttributes: SpanAttributeNamespace {
 
 ### Span Events
 
-Events are similar to logs in the sense that they signal "something happened" during the execution of the ``Span``.
+Events are similar to logs in the sense that they signal "something happened" during the execution of the `Span`.
 
 > Note: There is a general tension between logs and trace events, as they can be used to achieve very similar outcomes. Consult the documentation of your tracing solution and how you'll be reading and investigating logs correlated to traces, and vice versa, and stick to a pattern that works best for your project.
 
@@ -445,7 +445,7 @@ withSpan("showEvents") { span in
 }
 ```
 
-An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/nanosecondsSinceEpoch`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
+An event is actually a value of the `SpanEvent` type, and carries along with it a `SpanEvent/nanosecondsSinceEpoch` as well as additional `SpanEvent/attributes` related to this specific event. In other words, if a `Span` represents an interval–something with a beginning and an end–a `SpanEvent` represents something that happened at a specific point-in-time during that span's execution.
 
 Events usually show up in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
 
@@ -457,18 +457,18 @@ Events usually show up in a trace view as points on the timeline (note that some
 
 ![An event during the cook span](makeDinner-zipkin-event)
 
-Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
+Events cannot be "failed" or "successful", that is a property of a `Span`, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
 ### Scoping a tracer with withTracer
 
-``withTracer(_:_:)`` makes a ``Tracer`` active for the current task while a closure runs. Inside the closure
-it takes priority over whatever ``InstrumentationSystem/bootstrap(_:)`` set. Outside the closure, and in
+`withTracer(_:_:)` makes a `Tracer` active for the current task while a closure runs. Inside the closure
+it takes priority over whatever `InstrumentationSystem/bootstrap(_:)` set. Outside the closure, and in
 tasks that do not inherit the binding, such as `Task.detached`, resolution falls back to the bootstrapped
 instrument. The binding is task-local, so it flows into the structured child tasks the closure spawns, as well
 as an unstructured `Task { }`.
 
 Its two intended uses are **parallel-safe testing** and **per-subsystem overrides** on top of a process-wide
-``InstrumentationSystem/bootstrap(_:)``:
+`InstrumentationSystem/bootstrap(_:)`:
 
 ```swift
 // Parallel-safe: the binding is task-local, so concurrent tests don't interfere.
@@ -481,20 +481,20 @@ Its two intended uses are **parallel-safe testing** and **per-subsystem override
 }
 ```
 
-> Important: ``withTracer(_:_:)`` chooses the active *instrument* (the backend). It does **not** propagate
-> trace *context*. That is ``ServiceContext``'s job, carried on its own task-local via
+> Important: `withTracer(_:_:)` chooses the active *instrument* (the backend). It does **not** propagate
+> trace *context*. That is `ServiceContext`'s job, carried on its own task-local via
 > `ServiceContext.withValue` and, across process boundaries, `inject` / `extract`. The two are independent
 > task-locals. At any span-creation or propagation site you need both the intended instrument and the right
-> ``ServiceContext`` in scope. Neither crosses a `Task.detached` or manual (callback / `EventLoopFuture`)
+> `ServiceContext` in scope. Neither crosses a `Task.detached` or manual (callback / `EventLoopFuture`)
 > boundary. Re-establish both on the other side. See <doc:InstrumentYourLibrary> for context propagation.
 
-A nested ``withTracer(_:_:)`` fully replaces the enclosing one, and the previous instrument is restored
-when the closure returns. Because a ``Tracer`` is also an ``Instrument``, `inject` / `extract` observe the
+A nested `withTracer(_:_:)` fully replaces the enclosing one, and the previous instrument is restored
+when the closure returns. Because a `Tracer` is also an `Instrument`, `inject` / `extract` observe the
 scope too, not just span creation.
 
-``withTracer(_:_:)`` only accepts a ``Tracer``, so it can't be handed a ``MultiplexInstrument`` directly. If a
+`withTracer(_:_:)` only accepts a `Tracer`, so it can't be handed a `MultiplexInstrument` directly. If a
 scope needs several tracers active at once (or a whole-process combination that never scopes), install the
-``MultiplexInstrument`` naming all of them once, at ``InstrumentationSystem/bootstrap(_:)``:
+`MultiplexInstrument` naming all of them once, at `InstrumentationSystem/bootstrap(_:)`:
 
 ```swift
 InstrumentationSystem.bootstrap(MultiplexInstrument([OTelTracer(configuration: config), myPropagator]))
@@ -504,8 +504,8 @@ There is currently no supported way to task-locally combine a tracer with extra 
 tracers, in a single scope. `withTracer(_:_:)` only accepts a `Tracer`, and `MultiplexInstrument` isn't one.
 Install the combination once, at `bootstrap`, if you need it process-wide.
 
-Prefer ``InstrumentationSystem/bootstrap(_:)`` for the application's **process-wide** tracer, and reach for
-``withTracer(_:_:)`` to override it for a **bounded scope**, a test or a subsystem. Scoping the whole
+Prefer `InstrumentationSystem/bootstrap(_:)` for the application's **process-wide** tracer, and reach for
+`withTracer(_:_:)` to override it for a **bounded scope**, a test or a subsystem. Scoping the whole
 application is possible but rarely what you want for tracing: work that escapes the closure's task tree (a
 `Task.detached`, an `EventLoopFuture` callback, a long-lived background task) does not inherit the scope and
 falls back to the bootstrapped instrument, so a whole-application `withTracer` can silently misroute spans
