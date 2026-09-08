@@ -15,14 +15,14 @@
 /// Makes `tracer` the active instrument for the current task and the child tasks it spawns, for the
 /// duration of `operation`.
 ///
-/// ``InstrumentationSystem/instrument``, ``InstrumentationSystem/tracer``, `withSpan` / `startSpan`, and
-/// propagation (`inject` / `extract`) all favor `tracer` over whatever ``InstrumentationSystem/bootstrap(_:)``
+/// `InstrumentationSystem/instrument`, `InstrumentationSystem/tracer`, `withSpan` / `startSpan`, and
+/// propagation (`inject` / `extract`) all favor `tracer` over whatever `InstrumentationSystem/bootstrap(_:)`
 /// set. An unstructured `Task { }` inherits the binding. `Task.detached` does not. Nesting
 /// `withTracer(_:_:)` overrides `tracer` for the inner scope only.
 ///
 /// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
 /// inside this scope returns from the task-local directly and never touches the bootstrapped storage. An
-/// application that only calls ``InstrumentationSystem/bootstrap(_:)`` pays for that extra check on
+/// application that only calls `InstrumentationSystem/bootstrap(_:)` pays for that extra check on
 /// every lookup.
 ///
 /// ```swift
@@ -36,8 +36,8 @@
 /// }
 /// ```
 ///
-/// A ``Tracer`` is also an ``Instrument``, so this replaces propagation too, not just span creation. To keep
-/// several tools active at once, install a ``MultiplexInstrument`` at ``InstrumentationSystem/bootstrap(_:)``.
+/// A `Tracer` is also an `Instrument`, so this replaces propagation too, not just span creation. To keep
+/// several tools active at once, install a `MultiplexInstrument` at `InstrumentationSystem/bootstrap(_:)`.
 ///
 /// - Parameters:
 ///   - tracer: The tracer to make active for the duration of `operation`.
