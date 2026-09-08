@@ -73,6 +73,6 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 - ``DefaultTracerClock``
 - ``NoOpTracer``
 
-### Proposals
+### Proposal Process
 
 - <doc:Proposals>
