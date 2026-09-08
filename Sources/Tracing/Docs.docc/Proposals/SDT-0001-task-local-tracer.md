@@ -1,6 +1,6 @@
 # SDT-0001: task-local tracer
 
-A ``withTracer(_:_:)`` free function that binds a ``Tracer`` to the current task. It takes priority over the
+A `withTracer(_:_:)` free function that binds a ``Tracer`` to the current task. It takes priority over the
 process-wide ``InstrumentationSystem/bootstrap(_:)`` for the scope, then falls back to it.
 
 ## Overview
@@ -13,9 +13,9 @@ process-wide ``InstrumentationSystem/bootstrap(_:)`` for the scope, then falls b
 
 ### Introduction
 
-This proposal adds the ``withTracer(_:_:)`` free function. It runs a closure with a chosen ``Tracer`` active
+This proposal adds the `withTracer(_:_:)` free function. It runs a closure with a chosen ``Tracer`` active
 for the current task and any child tasks it spawns. Unlike ``InstrumentationSystem/bootstrap(_:)``, which is
-set once per process, ``withTracer(_:_:)`` can bind a different tracer per region of work, for example per test.
+set once per process, `withTracer(_:_:)` can bind a different tracer per region of work, for example per test.
 
 ### Motivation
 
@@ -26,7 +26,7 @@ instrument. This fits "one tracer for the whole application." Per-test tracers a
 
 ### Proposed solution
 
-``withTracer(_:_:)`` runs a closure with a tracer active for the current task:
+`withTracer(_:_:)` runs a closure with a tracer active for the current task:
 
 ```swift
 // Parallel-safe unit test. The binding is task-local, so concurrent tests don't interfere.
@@ -43,9 +43,9 @@ Inside the closure, and in any child tasks it spawns, `tracer` is the active ins
 (``InstrumentationSystem/tracer``, `withSpan` / `startSpan`) and propagation (`inject` / `extract`) give it
 priority over whatever ``InstrumentationSystem/bootstrap(_:)`` set, because a ``Tracer`` is an ``Instrument``.
 Outside the closure, or in tasks that don't inherit the binding, resolution falls back to the bootstrapped
-instrument. Nesting ``withTracer(_:_:)`` overrides `tracer` for the inner scope only.
+instrument. Nesting `withTracer(_:_:)` overrides `tracer` for the inner scope only.
 
-``withTracer(_:_:)`` only accepts a ``Tracer``, not an arbitrary ``Instrument``. `MultiplexInstrument` is not
+`withTracer(_:_:)` only accepts a ``Tracer``, not an arbitrary ``Instrument``. `MultiplexInstrument` is not
 a `Tracer` either, so while several tools can still be installed together at
 ``InstrumentationSystem/bootstrap(_:)`` for the whole process, there is no supported way to combine them
 within one task-local scope, see Future directions.
@@ -130,7 +130,7 @@ that task-local first, and only read the bootstrapped instrument if it is not se
 ### API stability
 
 - Purely additive: a new free function and an internal task-local. Existing signatures are unchanged.
-- Applications that never call ``withTracer(_:_:)`` see no behavioral change. Instrument lookup now checks a
+- Applications that never call `withTracer(_:_:)` see no behavioral change. Instrument lookup now checks a
   task-local before falling back to the bootstrapped instrument.
 - That task-local read happens on every lookup, including the per-span `withSpan` / `startSpan` path. An
   application that only calls ``bootstrap(_:)`` pays for this extra check every time, negligible next to what a
@@ -139,10 +139,10 @@ that task-local first, and only read the bootstrapped instrument if it is not se
 
 ### Future directions
 
-- **Combining several tools in one scope.** ``withTracer(_:_:)`` only takes one `Tracer`. There is no built-in
+- **Combining several tools in one scope.** `withTracer(_:_:)` only takes one `Tracer`. There is no built-in
   way to task-locally combine a tracer with extra propagators, or several tracers at once. A wrapper type
   that groups several instruments behind one `Tracer` conformance, something like a `MultiplexTracer`, could
-  close this gap without changing ``withTracer(_:_:)`` itself.
+  close this gap without changing `withTracer(_:_:)` itself.
 
 ### Alternatives considered
 
@@ -155,7 +155,7 @@ with no compiler warning. Narrowing the parameter to `Tracer` turns that mistake
 task-local directly, install a dedicated wrapper instrument as the bootstrap that holds the task-local and
 falls back to an inner ``NoOpInstrument``. This keeps the task-local read off the resolution path for
 applications that only ``InstrumentationSystem/bootstrap(_:)`` and never scope. Rejected. It couples
-``withTracer(_:_:)`` to the bootstrap state (it cannot be installed over a plainly-bootstrapped instrument),
+`withTracer(_:_:)` to the bootstrap state (it cannot be installed over a plainly-bootstrapped instrument),
 introduces a self-reference hazard when ``InstrumentationSystem/instrument`` is passed back in, and needs
 install-on-first-use. The always-checked slot is simpler and composes with any bootstrap.
 
