@@ -369,24 +369,25 @@ which is equivalent to surrounding the `withSpan` call with a binding of the con
 
 ### Global vs. "Stored" Tracers and Instruments
 
-Tracing works similarly to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using `InstrumentationSystem/tracer` gets the "right" tracer at runtime.
+Tracing works similarly to swift-log and swift-metrics, in the sense that there is a global "backend" configured at application start, by end-users (developers) of an application. And this is how using `Tracing/InstrumentationSystem/tracer` gets the "right" tracer at runtime.
 
 #### Should my library accept a tracer parameter?
 
 You may be tempted to allow users to configure a tracer as part of your applications initialization. Generally we advise against that pattern, because it makes it confusing which library needs to be configured, how, and where -- and if libraries are composed, perhaps the setting is not available to the actual "end-user" anymore.
 
-On the other hand, it may be valuable for testing scenarios to be able to set a tracer on a specific instance of your library. Therefore, if you really want to offer a configurable `Instrument` or `Tracer` then we suggest defaulting this setting to `nil`, and if it is `nil`, reaching to the global `InstrumentationSystem/instrument` or `InstrumentationSystem/tracer` - this way it is possible to override a tracer for testing on a per-instance basis, but the default mode of operation that end-users expect from libraries remains working.
+On the other hand, it may be valuable for testing scenarios to be able to set a tracer on a specific instance of your library. Therefore, if you really want to offer a configurable `Instrument` or `Tracer` then we suggest defaulting this setting to `nil`, and if it is `nil`, reaching to the global `InstrumentationSystem/instrument` or `Tracing/InstrumentationSystem/tracer` - this way it is possible to override a tracer for testing on a per-instance basis, but the default mode of operation that end-users expect from libraries remains working.
 
 #### Honoring a caller's scope
 
-A library observes a caller's `withTracer(_:_:)` scope only if it resolves the instrument *per call*,
+A library observes a caller's ``withTracer(_:_:)-mixl`` scope only if it resolves the instrument *per call*,
 through the free-function `withSpan` / `startSpan` or `InstrumentationSystem/instrument` at the emission
 site. A library that captures a `Tracer` once at construction ignores any scope entered later, so resolve per
 call unless you deliberately want to pin one instrument to an instance.
 
 #### Testing your library's instrumentation
 
-`withTracer(_:_:)` is the recommended way to test span emission and context propagation from a library.
+``withTracer(_:_:)-mixl``
+is the recommended way to test span emission and context propagation from a library.
 Each test sets its own in-memory tracer as the active instrument for the duration of a closure. Because the
 binding is task-local, tests run in parallel without serialization or global-state cleanup.
 
@@ -406,4 +407,4 @@ import InMemoryTracing
 
 The active tracer is the one the test set, so it captures emission directly. For propagation tests, call
 `InstrumentationSystem.instrument.inject(...)` / `.extract(...)` inside the closure and assert on the carrier
-or context. See <doc:TraceYourApplication#Scoping-a-tracer-with-withTracer> for the full semantics.
+or context. See <doc:TraceYourApplication#Scoping-a-tracer-using-withTracer> for the full semantics.

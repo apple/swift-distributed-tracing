@@ -17,12 +17,12 @@ is available in this project's README. Select an implementation you'd like to us
 
 There are two ways to set up instrumentation:
 
-- ``InstrumentationSystem/bootstrap(_:)``. Process-wide, called once at startup. The classic path. Simplest
+- `InstrumentationSystem/bootstrap(_:)`. Process-wide, called once at startup. The classic path. Simplest
   when your app uses a single tracer for its whole lifetime and never needs to override it.
-- ``withTracer(_:_:)-(_,)``. Makes a tracer active for the current task while a closure runs. It takes priority
+- ``withTracer(_:_:)-mixl``. Makes a tracer active for the current task while a closure runs. It takes priority
   over the bootstrapped instrument and falls back to it outside the scope. Useful for parallel-safe tests
   with per-test tracers, or to override the tracer for a specific subsystem. See
-  [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
+  [Scoping a tracer with withTracer](#Scoping-a-tracer-using-withTracer)
   later in this guide.
 
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
@@ -96,8 +96,8 @@ Specifically, it is recommended to bootstrap systems in the following order:
 This is because tracing systems may attempt to emit logs or metrics about their status etc.
 
 > Important: Bootstrap telemetry as early as possible in process startup, ideally before any application
-> code runs. Any subsystem or object that reads ``InstrumentationSystem/instrument``,
-> ``InstrumentationSystem/tracer``, `Logger`, or `MetricsFactory` during its initialization captures whatever
+> code runs. Any subsystem or object that reads `InstrumentationSystem/instrument`,
+> `Tracing/InstrumentationSystem/tracer`, `Logger`, or `MetricsFactory` during its initialization captures whatever
 > is in scope at that moment, so bootstrapping first ensures those captures see the real backends rather than
 > no-op placeholders. The same principle applies to logging and metrics.
 
@@ -159,8 +159,8 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
 
 > Note: For scoped alternatives to plain `bootstrap`, for example binding a tracer inside a test or
-> overriding it for a subsystem, use ``withTracer(_:_:)-(_,)`` instead and see
-> [Scoping a tracer with withTracer](#Scoping-a-tracer-with-withTracer)
+> overriding it for a subsystem, use ``withTracer(_:_:)-mixl`` instead and see
+> [Scoping a tracer with withTracer](#Scoping-a-tracer-using-withTracer)
 > later in this guide, after the span introduction.
 
 ### Introducing Trace Spans
@@ -459,16 +459,16 @@ Events usually show up in a trace view as points on the timeline (note that some
 
 Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
-### Scoping a tracer using `withTracer`
+### Scoping a tracer using withTracer
 
-``withTracer(_:_:)-(_,)`` makes a ``Tracer`` active for the current task while a closure runs. Inside the closure
-it takes priority over whatever ``InstrumentationSystem/bootstrap(_:)`` set. Outside the closure, and in
+``withTracer(_:_:)-mixl`` makes a ``Tracer`` active for the current task while a closure runs. Inside the closure
+it takes priority over whatever `InstrumentationSystem/bootstrap(_:)` set. Outside the closure, and in
 tasks that do not inherit the binding, such as `Task.detached`, resolution falls back to the bootstrapped
 instrument. The binding is task-local, so it flows into the structured child tasks the closure spawns, as well
 as an unstructured `Task { }`.
 
 Its two intended uses are **parallel-safe testing** and **per-subsystem overrides** on top of, or instead of
-a process-wide ``InstrumentationSystem/bootstrap(_:)``:
+a process-wide `InstrumentationSystem/bootstrap(_:)`:
 
 ```swift
 // Parallel-safe: the binding is task-local, so concurrent tests don't interfere.
@@ -486,13 +486,13 @@ Scoping the whole application is possible, but be aware that work that escapes t
 falls back to the bootstrapped instrument, so a whole-application `withTracer` can silently misroute spans
 and propagated carrier data to the bootstrapped instrument at exactly those boundaries.
 
-A nested ``withTracer(_:_:)-(_,)`` fully replaces the enclosing one, and the previous instrument is restored
-when the closure returns. Because a ``Tracer`` is also an ``Instrument``, `inject` / `extract` observe the
+A nested ``withTracer(_:_:)-mixl`` fully replaces the enclosing one, and the previous instrument is restored
+when the closure returns. Because a ``Tracer`` is also an `Instrument`, `inject` / `extract` observe the
 scope too, not just span creation.
 
-``withTracer(_:_:)-(_,)`` only accepts a ``Tracer``, so it can't be handed a ``MultiplexInstrument`` directly. If a
+``withTracer(_:_:)-mixl`` only accepts a ``Tracer``, so it can't be handed a `MultiplexInstrument` directly. If a
 scope needs several tracers active at once (or a whole-process combination that never scopes), install the
-``MultiplexInstrument`` naming all of them once, at ``InstrumentationSystem/bootstrap(_:)``:
+`MultiplexInstrument` naming all of them once, at `InstrumentationSystem/bootstrap(_:)`:
 
 ```swift
 InstrumentationSystem.bootstrap(MultiplexInstrument([OTelTracer(configuration: config), myPropagator]))
@@ -501,7 +501,7 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([OTelTracer(configuration: c
 There is currently no supported way to task-locally combine a tracer with extra propagators, or several
 tracers, in a single scope.
 
-> Important: ``withTracer(_:_:)-(_,)`` chooses the active *instrument*. It does **not** propagate
+> Important: ``withTracer(_:_:)-mixl`` chooses the active *instrument*. It does **not** propagate
 > trace *context*. That is `ServiceContext`'s job, carried on its own task-local via
 > `ServiceContext.withValue` and, across process boundaries, `inject` / `extract`. The two are independent
 > task-locals. At any span-creation or propagation site you need both the intended instrument and the right
