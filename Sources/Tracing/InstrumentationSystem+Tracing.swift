@@ -24,7 +24,7 @@ extension InstrumentationSystem {
     ///
     /// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
     /// inside ``withTracer(_:_:)-mixl`` returns from the task-local directly and never touches the bootstrapped
-    /// storage. An application that only calls ``bootstrap(_:)`` pays for that extra check on every
+    /// storage. An application that only calls `bootstrap(_:)` pays for that extra check on every
     /// lookup.
     ///
     /// - Returns: A ``Tracer`` if one is active, and ``NoOpTracer`` otherwise.
