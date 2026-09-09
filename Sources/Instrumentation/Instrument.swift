@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceContextModule
+import ContextStorage
 
 /// A type that allows extracting values from an associated carrier.
 ///
@@ -67,17 +67,17 @@ public protocol Instrument: Sendable {
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
-    ///   - context: The `ServiceContext` into which these values should be injected.
+    ///   - context: The `TracingContext` into which these values should be injected.
     ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout TracingContext, using extractor: Extract)
     where Extract: Extractor, Extract.Carrier == Carrier
 
     /// Extract values from a service context and inject them into the given carrier using the provided injector.
     ///
     /// - Parameters:
-    ///   - context: The `ServiceContext` from which relevant information is extracted.
+    ///   - context: The `TracingContext` from which relevant information is extracted.
     ///   - carrier: The `Carrier` into which this information is injected.
-    ///   - injector: The ``Injector`` to use to inject extracted `ServiceContext` into the given `Carrier`.
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    ///   - injector: The ``Injector`` to use to inject extracted `TracingContext` into the given `Carrier`.
+    func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Inject.Carrier == Carrier
 }

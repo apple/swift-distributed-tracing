@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Instrumentation
-@_exported import ServiceContextModule
+@_exported import ContextStorage
 
 #if canImport(Darwin)
 import Darwin

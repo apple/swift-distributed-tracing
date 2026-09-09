@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceContextModule
+import ContextStorage
 
 /// A global facility where the default cross-cutting tool can be configured.
 ///
@@ -20,7 +20,7 @@ import ServiceContextModule
 ///
 /// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal TracingContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
     /// performed manually using locks.
@@ -92,7 +92,7 @@ public enum InstrumentationSystem {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal TracingContext
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {

@@ -75,4 +75,4 @@ as the subsequent guides dive deeper into patterns and details of instrumenting 
 
 ### Contribute to the project
 
-- <doc:Proposals>
+- <doc:Proposals-article>

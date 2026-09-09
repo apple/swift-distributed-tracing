@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import ServiceContextModule
+import ContextStorage
 import Testing
 import Tracing
 
@@ -137,7 +137,7 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> TracingContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -169,7 +169,7 @@ final class DynamicTracepointTestTracer: LegacyTracer {
         }
 
         // else, perhaps there is already an active span, if so, attach to it
-        guard let context = ServiceContext.current else {
+        guard let context = TracingContext.current else {
             return false
         }
 
@@ -204,13 +204,13 @@ final class DynamicTracepointTestTracer: LegacyTracer {
 
     func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout TracingContext, using extractor: Extract)
     where Extract: Extractor, Extract.Carrier == Carrier {
         let traceID = extractor.extract(key: "trace-id", from: carrier) ?? UUID().uuidString
         context.traceID = traceID
     }
 
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Inject.Carrier == Carrier {
         guard let traceID = context.traceID else {
             return
@@ -230,7 +230,7 @@ extension DynamicTracepointTestTracer {
         private(set) var endTimestampNanosSinceEpoch: UInt64?
 
         package var operationName: String
-        private(set) var context: ServiceContext
+        private(set) var context: TracingContext
         private(set) var isRecording: Bool = false
 
         let onEnd: (TracepointSpan) -> Void
@@ -252,7 +252,7 @@ extension DynamicTracepointTestTracer {
         init<Instant: TracerInstant>(
             operationName: String,
             startTime: Instant,
-            context: ServiceContext,
+            context: TracingContext,
             kind: SpanKind,
             file fileID: String,
             line: UInt,
@@ -307,7 +307,7 @@ extension DynamicTracepointTestTracer: Tracer {
 
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> TracingContext,
         ofKind kind: Tracing.SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,

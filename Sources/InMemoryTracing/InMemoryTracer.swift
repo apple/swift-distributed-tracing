@@ -78,7 +78,7 @@ extension InMemoryTracer {
     /// - Returns: An in-memory span.
     public func startSpan<Instant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> TracingContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -144,7 +144,7 @@ extension InMemoryTracer {
     ///
     /// The service context provides the span, trace, and parent IDs
     /// stored in the `inMemorySpanContext`
-    public func activeSpan(identifiedBy context: ServiceContext) -> InMemorySpan? {
+    public func activeSpan(identifiedBy context: TracingContext) -> InMemorySpan? {
         guard let spanContext = context.inMemorySpanContext else { return nil }
         return _state.withValue { $0.activeSpans[spanContext] }
     }
@@ -204,7 +204,7 @@ extension InMemoryTracer {
     ///   - carrier: The service implementation into which to add the service context.
     ///   - injector: The type that transfers service context into a carrier.
     public func inject<Carrier, Inject: Injector>(
-        _ context: ServiceContext,
+        _ context: TracingContext,
         into carrier: inout Carrier,
         using injector: Inject
     ) where Carrier == Inject.Carrier {
@@ -241,7 +241,7 @@ extension InMemoryTracer {
     /// A type that represents a recorded call to the In-memory tracer's inject method.
     public struct Injection: Sendable {
         /// The context from which values were being injected.
-        public let context: ServiceContext
+        public let context: TracingContext
         /// The injected values;  the trace and span identifiers of the propagated span.
         public let values: [String: String]
     }
@@ -256,7 +256,7 @@ extension InMemoryTracer {
     ///   - extractor: The type that transfers service context from a carrier.
     public func extract<Carrier, Extract: Extractor>(
         _ carrier: Carrier,
-        into context: inout ServiceContext,
+        into context: inout TracingContext,
         using extractor: Extract
     ) where Carrier == Extract.Carrier {
         defer {
@@ -278,7 +278,7 @@ extension InMemoryTracer {
     /// Lists all recorded calls to this tracer's extract method.
     ///
     /// Lists calls to `Instrument/extract(_:into:using:)`.
-    /// This may be used to inspect the span identifiers extracted from an incoming carrier object into `ServiceContext`.
+    /// This may be used to inspect the span identifiers extracted from an incoming carrier object into `TracingContext`.
     public var performedContextExtractions: [Extraction] {
         _state.withValue { $0.extractions }
     }
@@ -288,7 +288,7 @@ extension InMemoryTracer {
         /// The carrier object from which the context values were extracted from, such as  an HTTP request.
         public let carrier: any Sendable
         /// The constructed service context, containing the extracted in-memory span context.
-        public let context: ServiceContext
+        public let context: TracingContext
     }
 }
 
