@@ -15,11 +15,11 @@ Other examples of libraries which would benefit _the most_ from being instrument
 - any other library which can emit meaningful span information about tasks it is performing.
 
 The most important libraries to instrument are "edge" libraries, which serve to connect between systems, because
-it is them who must inject and extract context metadata to enable distributed trace `Span` propagation.
+it is them who must inject and extract context metadata to enable distributed trace ``Span`` propagation.
 
 Following those, any database or other complex library which may be able to emit useful information about its internals are
 also good candidates to being instrumented. Note that libraries may do so optionally, or hide the "verboseness" of such traces
-behind options, or only attach information if a `Span` is already active etc. Please review your library's documentation to learn
+behind options, or only attach information if a ``Span`` is already active etc. Please review your library's documentation to learn
 more about it has integrated tracing support.
 
 ### Propagating context metadata
@@ -51,7 +51,7 @@ When a library makes an "outgoing" request or message interaction, it should inv
 
 > Note: A library _itself_ cannot really know what information to propagate, since that depends on the used tracing or instrumentation system. The library does however understand its carrier type, and thus can implement the `Instrumentation/Injector` protocol.
 
-For example, an HTTP client e.g. should inject the current context (which could be carrying trace `Span` information) into the HTTP headers as follows:
+For example, an HTTP client e.g. should inject the current context (which could be carrying trace ``Span`` information) into the HTTP headers as follows:
 
 ```swift
 func get(url: String) -> HTTPResponse {
@@ -85,7 +85,7 @@ struct HTTPRequestInjector: Injector {
 
 Once the metadata has been injected, the request--including all the additional metadata--is sent over the network.
 
-> Note: The actual logic of deciding what context values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a `Tracer`.
+> Note: The actual logic of deciding what context values to inject depend on the tracer implementation, and thus we are not covering it in this _end-user_ focused guide. Refer to <doc:ImplementATracer> if you'd like to learn about implementing a ``Tracer``.
 
 #### Handling inbound requests
 
@@ -163,7 +163,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This sets the task-local value `ServiceContext.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as `Tracer` APIs in order to later "*pick up*" the context and e.g. include it in log statements, or start new trace spans using the information stored in the context.
+This sets the task-local value `ServiceContext.current` which is used by [swift-log](https://github.com/apple/swift-log), as well as ``Tracer`` APIs in order to later "*pick up*" the context and e.g. include it in log statements, or start new trace spans using the information stored in the context.
 
 > Note: The end goal here being that when end-users of your library write `log.info("Hello")` the logger is able to pick up the context information and include the e.g. the `trace-id` in such log statement automatically! This way, every log made during the handling of this request would include the `trace-id` automatically, e.g. like this: 
 >
@@ -269,7 +269,7 @@ func handler(request: HTTPRequest) async {
 }
 ```
 
-This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the context again. In order to avoid this duplicate work, it is beneficial to use the `withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v` overload, which also accepts a `ServiceContext` as parameter, rather than picking it up from the task-local value:
+This is introducing multiple layers of nesting, and we have un-necessarily restored, picked-up, and restored the context again. In order to avoid this duplicate work, it is beneficial to use the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` overload, which also accepts a `ServiceContext` as parameter, rather than picking it up from the task-local value:
 
 ```swift
 // BETTER
@@ -288,9 +288,9 @@ This method will only restore the context once, after the tracer has had a chanc
 
 #### Manual Span Lifetime Management
 
-While the `withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
+While the ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` API is preferable in most situations, it may not be possible to use when the lifetime of a span only terminates in yet another callback API. In such situations, it may be impossible to "wrap" the entire piece of code that would logically represent "the span" using a `withSpan(...) { ... }` call.
 
-In such situations you can resort to using the `startSpan(_:context:ofKind:at:function:file:line:)` and `Span/end()` APIs explicitly. Those APIs can then be used like this:
+In such situations you can resort to using the ``startSpan(_:context:ofKind:at:function:file:line:)`` and ``Span/end()`` APIs explicitly. Those APIs can then be used like this:
 
 ```swift
 // Callback heavy APIs may need to store and manage spans manually:
@@ -312,7 +312,7 @@ It is very important to _always_ end spans that are started, as attached resourc
 
 The manual way of managing spans also means that error paths need to be treated with increased attention. This is something that `withSpan` APIs handle automatically, but we cannot rely on `withSpan` detecting an error thrown out of its body closure anymore when using the `startSpan`/`Span.end` APIs.
 
-When an error is thrown, or if the span should be considered errored for some reason, you should invoke the `Span/recordError(_:)` method and pass an `Swift.Error` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
+When an error is thrown, or if the span should be considered errored for some reason, you should invoke the ``Span/recordError(_:)`` method and pass an `Swift.Error` that should be recorded on the span. Since failed spans usually show up in very visually distinct ways, and are most often the first thing a developer inspecting an application using tracing is looking for, it is important to get error reporting right in your library. Here is a simple example how this might look like:
 
 ```swift
 var span: any Span

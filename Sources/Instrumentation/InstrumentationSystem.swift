@@ -66,7 +66,7 @@ public enum InstrumentationSystem {
 
     private static let shared = Storage()
 
-    /// Task-local instrument override set by `withTracer(_:_:)` (Tracing module).
+    /// Task-local instrument override set by `withTracer(_:_:)`.
     ///
     /// ``instrument`` and ``_findInstrument(where:)`` check this first, for the duration of a scope, before
     /// falling back to the bootstrapped instrument.
@@ -151,7 +151,7 @@ extension InstrumentationSystem {
 
     /// Returns the first match for `predicate`. This is `instrument` itself, or, when it is a
     /// ``MultiplexInstrument``, its first direct member satisfying `predicate`. This is not recursive. A
-    /// ``MultiplexInstrument`` nested inside another is tested as a whole, not descended into.
+    /// ``MultiplexInstrument`` nested inside another is tested as a whole, not stepped into.
     fileprivate static func firstInstrument(
         in instrument: Instrument,
         where predicate: (Instrument) -> Bool
