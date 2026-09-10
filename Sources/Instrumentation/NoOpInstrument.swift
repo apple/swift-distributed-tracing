@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceContextModule
+import ContextStorage
 
 /// A "no op" implementation of an Instrument.
 public struct NoOpInstrument: Instrument {
@@ -21,10 +21,10 @@ public struct NoOpInstrument: Instrument {
     /// Extract values from a service context and inject them into the given carrier using the provided injector.
     ///
     /// - Parameters:
-    ///   - context: The `ServiceContext` from which relevant information is extracted.
+    ///   - context: The `TracingContext` from which relevant information is extracted.
     ///   - carrier: The `Carrier` into which this information is injected.
-    ///   - injector: The ``Injector`` to use to inject extracted `ServiceContext` into the given `Carrier`.
-    public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    ///   - injector: The ``Injector`` to use to inject extracted `TracingContext` into the given `Carrier`.
+    public func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Carrier == Inject.Carrier {
         // no-op
     }
@@ -33,11 +33,11 @@ public struct NoOpInstrument: Instrument {
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
-    ///   - context: The `ServiceContext` into which these values should be injected.
+    ///   - context: The `TracingContext` into which these values should be injected.
     ///   - extractor: The ``Extractor`` that extracts values from the given `Carrier`.
     public func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into context: inout ServiceContext,
+        into context: inout TracingContext,
         using extractor: Extract
     )
     where Extract: Extractor, Carrier == Extract.Carrier {

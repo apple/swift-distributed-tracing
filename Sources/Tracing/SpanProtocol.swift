@@ -12,16 +12,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import ServiceContextModule
+@_exported import ContextStorage
 
 /// A span represents an interval from the start of an operation to its end, along with additional metadata included
 /// with it.
 ///
-/// A `Span` can be created from a `ServiceContext` or `LoggingContext` which MAY contain existing span identifiers,
+/// A `Span` can be created from a `TracingContext` or `LoggingContext` which MAY contain existing span identifiers,
 /// in which case this span should be considered as child of the previous span.
 ///
 /// Spans are created by invoking the `withSpan` method that delegates to the currently configured bootstrapped
-/// tracer. By default tracers use the current task-local `ServiceContext` to perform this association.
+/// tracer. By default tracers use the current task-local `TracingContext` to perform this association.
 ///
 /// ### Reference semantics
 ///
@@ -34,7 +34,7 @@
 /// - SeeAlso: For more details refer to the [OpenTelemetry Specification: Span](https://github.com/open-telemetry/opentelemetry-specification/blob/v0.7.0/specification/trace/api.md#span) which this type is compatible with.
 public protocol Span: Sendable {
     /// The read-only service context of this span, set when it starts.
-    var context: ServiceContext { get }
+    var context: TracingContext { get }
 
     /// The name of the operation this span represents.
     ///
@@ -652,7 +652,7 @@ extension SpanAttributes {
     /// Accesses the span attribute with the given name for reading and writing.
     ///
     /// Please be cautious to not abuse this APIs power to read attributes to "smuggle" values between calls.
-    /// Only `ServiceContext` is intended to carry information in a readable fashion between functions / processes / nodes.
+    /// Only `TracingContext` is intended to carry information in a readable fashion between functions / processes / nodes.
     /// The API does allow reading in order to support the subscript-based dynamic member lookup implementation of
     /// attributes which allows accessing them as `span.attributes.http.statusCode`, forcing us to expose a get operation on the attributes,
     /// due to the lack of set-only subscripts.
@@ -815,7 +815,7 @@ public enum SpanKind {
 /// further describe the span the link indicates.
 public struct SpanLink {
     /// A service context that contains identifying information about the link target span.
-    public let context: ServiceContext
+    public let context: TracingContext
 
     /// Span attributes that further describe the connection between the spans.
     public let attributes: SpanAttributes
@@ -823,9 +823,9 @@ public struct SpanLink {
     /// Creates a span link.
     ///
     /// - Parameters:
-    ///   - context: The `ServiceContext` identifying the targeted ``Span``.
+    ///   - context: The `TracingContext` identifying the targeted ``Span``.
     ///   - attributes: ``SpanAttributes`` that further describe the link. Defaults to no attributes.
-    public init(context: ServiceContext, attributes: SpanAttributes) {
+    public init(context: TracingContext, attributes: SpanAttributes) {
         self.context = context
         self.attributes = attributes
     }

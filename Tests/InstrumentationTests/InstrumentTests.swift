@@ -14,7 +14,7 @@
 
 import Foundation
 import Instrumentation
-import ServiceContextModule
+import ContextStorage
 import Testing
 
 @Suite("MultiplexInstrument")
@@ -26,7 +26,7 @@ struct InstrumentTests {
             SecondFakeTracer(),
         ])
 
-        var context = ServiceContext.topLevel
+        var context = TracingContext.topLevel
         instrument.extract([String: String](), into: &context, using: DictionaryExtractor())
 
         #expect(context[FirstFakeTracer.TraceIDKey.self] == FirstFakeTracer.defaultTraceID)
@@ -58,7 +58,7 @@ private struct DictionaryExtractor: Extractor {
 }
 
 private final class FirstFakeTracer: Instrument {
-    enum TraceIDKey: ServiceContextKey {
+    enum TraceIDKey: TracingContextKey {
         typealias Value = String
 
         static let name: String? = "FirstFakeTraceID"
@@ -67,13 +67,13 @@ private final class FirstFakeTracer: Instrument {
     static let headerName = "first-fake-trace-id"
     static let defaultTraceID = UUID().uuidString
 
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Carrier == Inject.Carrier {
         guard let traceID = context[TraceIDKey.self] else { return }
         injector.inject(traceID, forKey: FirstFakeTracer.headerName, into: &carrier)
     }
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout TracingContext, using extractor: Extract)
     where Extract: Extractor, Carrier == Extract.Carrier {
         let traceID =
             extractor.extract(key: FirstFakeTracer.headerName, from: carrier) ?? FirstFakeTracer.defaultTraceID
@@ -82,7 +82,7 @@ private final class FirstFakeTracer: Instrument {
 }
 
 private final class SecondFakeTracer: Instrument {
-    enum TraceIDKey: ServiceContextKey {
+    enum TraceIDKey: TracingContextKey {
         typealias Value = String
 
         static let name: String? = "SecondFakeTraceID"
@@ -92,7 +92,7 @@ private final class SecondFakeTracer: Instrument {
     static let defaultTraceID = UUID().uuidString
 
     func inject<Carrier, Inject>(
-        _ context: ServiceContext,
+        _ context: TracingContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
@@ -106,7 +106,7 @@ private final class SecondFakeTracer: Instrument {
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into context: inout ServiceContext,
+        into context: inout TracingContext,
         using extractor: Extract
     )
     where

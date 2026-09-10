@@ -85,10 +85,10 @@ struct GlobalTracingInstrumentationSystemTests {
         let customInstant3 = clock.now
 
         // Create custom contexts to verify they're preserved
-        var customContext1 = ServiceContext.topLevel
+        var customContext1 = TracingContext.topLevel
         customContext1[TestContextKey.self] = "context1"
 
-        var customContext2 = ServiceContext.topLevel
+        var customContext2 = TracingContext.topLevel
         customContext2[TestContextKey.self] = "context2"
 
         // Test 1: startSpan with custom instant
@@ -250,6 +250,6 @@ struct GlobalTracingInstrumentationSystemTests {
 }
 
 // Test context key for verification
-private enum TestContextKey: ServiceContextKey {
+private enum TestContextKey: TracingContextKey {
     typealias Value = String
 }

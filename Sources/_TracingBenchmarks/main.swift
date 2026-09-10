@@ -43,7 +43,7 @@ private func registerBenchmark(
     registerBenchmark(BenchmarkInfo(name: name, runFunction: function, tags: tags))
 }
 
-if #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) {  // for TaskLocal ServiceContext
+if #available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *) {  // for TaskLocal TracingContext
     registerBenchmark(DSLBenchmarks.SpanAttributesDSLBenchmarks)
     main()
 }

@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Instrumentation
-@_exported import ServiceContextModule
+@_exported import ContextStorage
 
 /// Tracer that ignores all operations, used when no tracing is required.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal TracingContext
 public struct NoOpTracer: LegacyTracer {
 
     /// The type used to represent a span.
@@ -28,7 +28,7 @@ public struct NoOpTracer: LegacyTracer {
     /// Start a new span using the global bootstrapped tracer implementation.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `TracingContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -36,7 +36,7 @@ public struct NoOpTracer: LegacyTracer {
     ///   - line: The file line where the span was started.
     public func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> TracingContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -57,10 +57,10 @@ public struct NoOpTracer: LegacyTracer {
     /// Extract values from a service context and inject them into the given carrier using the provided injector.
     ///
     /// - Parameters:
-    ///   - context: The `ServiceContext` from which relevant information is extracted.
+    ///   - context: The `TracingContext` from which relevant information is extracted.
     ///   - carrier: The `Carrier` into which this information is injected.
-    ///   - injector: The `Injector` to use to inject extracted `ServiceContext` into the given `Carrier`.
-    public func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    ///   - injector: The `Injector` to use to inject extracted `TracingContext` into the given `Carrier`.
+    public func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Carrier == Inject.Carrier {
         // no-op
     }
@@ -69,11 +69,11 @@ public struct NoOpTracer: LegacyTracer {
     ///
     /// - Parameters:
     ///   - carrier: The `Carrier` that was used to propagate values across boundaries.
-    ///   - context: The `ServiceContext` into which these values should be injected.
+    ///   - context: The `TracingContext` into which these values should be injected.
     ///   - extractor: The `Extractor` that extracts values from the given `Carrier`.
     public func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into context: inout ServiceContext,
+        into context: inout TracingContext,
         using extractor: Extract
     )
     where Extract: Extractor, Carrier == Extract.Carrier {
@@ -85,7 +85,7 @@ public struct NoOpTracer: LegacyTracer {
     /// This span maintains its context, but does not record events, links, or errors and provides no attributes.
     public struct NoOpSpan: Tracing.Span {
         /// The service context of the span.
-        public let context: ServiceContext
+        public let context: TracingContext
         /// A Boolean value that indicates whether the span is actively recording updates.
         public var isRecording: Bool {
             false
@@ -103,7 +103,7 @@ public struct NoOpTracer: LegacyTracer {
 
         /// Creates a new no-op span with the context you provide.
         /// - Parameter context: The service context.
-        public init(context: ServiceContext) {
+        public init(context: TracingContext) {
             self.context = context
         }
         /// Updates the status of the span to the value you provide.
@@ -152,7 +152,7 @@ extension NoOpTracer: Tracer {
     /// Start a new span using the global bootstrapped tracer implementation.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, database call, ...
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `TracingContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started
     ///   - function: The function name in which the span was started
@@ -160,7 +160,7 @@ extension NoOpTracer: Tracer {
     ///   - line: The file line where the span was started.
     public func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> TracingContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,

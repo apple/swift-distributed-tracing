@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceContextModule
+import ContextStorage
 import Testing
 import Tracing
 
@@ -24,7 +24,7 @@ import Tracing
 
 @Suite("Tracer Tests")
 struct TracerTests {
-    @Test("Context propagation")
+    @Test("TracingContext propagation")
     func contextPropagation() {
         let tracer = TestTracer()
         let httpServer = FakeHTTPServer { context, _, client -> FakeHTTPResponse in
@@ -40,11 +40,11 @@ struct TracerTests {
         }
     }
 
-    @Test("Context propagation with NoOp span")
+    @Test("TracingContext propagation with NoOp span")
     func contextPropagationWithNoOpSpan() {
         let tracer = TestTracer()
         let httpServer = FakeHTTPServer { _, _, client -> FakeHTTPResponse in
-            var context = ServiceContext.topLevel
+            var context = TracingContext.topLevel
             context.traceID = "test"
             client.performRequest(context, request: FakeHTTPRequest(path: "/test", headers: []), tracer: tracer)
             return FakeHTTPResponse(status: 418)
@@ -109,7 +109,7 @@ struct TracerTests {
         }
 
         let value = tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
-            #expect(span.context.traceID == ServiceContext.current?.traceID)
+            #expect(span.context.traceID == TracingContext.current?.traceID)
             return operation(span: span)
         }
 
@@ -155,7 +155,7 @@ struct TracerTests {
         }
 
         let value = try await tracer.withAnySpan("hello") { (span: any Tracing.Span) -> String in
-            #expect(span.context.traceID == ServiceContext.current?.traceID)
+            #expect(span.context.traceID == TracingContext.current?.traceID)
             return try await operation(span)
         }
 
@@ -174,11 +174,11 @@ struct TracerTests {
             "world"
         }
 
-        var fromNonAsyncWorld = ServiceContext.topLevel
+        var fromNonAsyncWorld = TracingContext.topLevel
         fromNonAsyncWorld.traceID = "1234-5678"
         let value = await tracer.withAnySpan("hello", context: fromNonAsyncWorld) {
             (span: any Tracing.Span) -> String in
-            #expect(span.context.traceID == ServiceContext.current?.traceID)
+            #expect(span.context.traceID == TracingContext.current?.traceID)
             #expect(span.context.traceID == fromNonAsyncWorld.traceID)
             return await operation(span)
         }
@@ -328,7 +328,7 @@ struct FakeHTTPResponse {
 }
 
 struct FakeHTTPServer {
-    typealias Handler = (ServiceContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
+    typealias Handler = (TracingContext, FakeHTTPRequest, FakeHTTPClient) -> FakeHTTPResponse
 
     private let catchAllHandler: Handler
     let client: FakeHTTPClient
@@ -339,7 +339,7 @@ struct FakeHTTPServer {
     }
 
     func receive(_ request: FakeHTTPRequest, tracer: any Tracer & Instrument) {
-        var context = ServiceContext.topLevel
+        var context = TracingContext.topLevel
         tracer.extract(request.headers, into: &context, using: HTTPHeadersExtractor())
 
         let span = tracer.startSpan("GET \(request.path)", context: context)
@@ -354,9 +354,9 @@ struct FakeHTTPServer {
 // MARK: - Fake HTTP Client
 
 final class FakeHTTPClient {
-    private(set) var contexts = [ServiceContext]()
+    private(set) var contexts = [TracingContext]()
 
-    func performRequest(_ context: ServiceContext, request: FakeHTTPRequest, tracer: any LegacyTracer) {
+    func performRequest(_ context: TracingContext, request: FakeHTTPRequest, tracer: any LegacyTracer) {
         var request = request
         let span = tracer.startAnySpan("GET \(request.path)", context: context)
 
