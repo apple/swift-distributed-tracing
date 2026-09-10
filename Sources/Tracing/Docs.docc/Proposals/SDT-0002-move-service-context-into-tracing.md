@@ -9,8 +9,10 @@ Move the `ServiceContext` implementation into swift-distributed-tracing, rename 
 - Proposal: SDT-0002
 - Author(s): [Vladimir Kukushkin](https://github.com/kukushechkin)
 - Status: **Awaiting Review**
-- Issue: TBA
-- Implementation: TBA
+- Issue: -
+- Implementation:
+    - [swift-distributed-tracing#240](https://github.com/apple/swift-distributed-tracing/pull/240)
+    - [swift-service-context#92](https://github.com/apple/swift-service-context/pull/92)
 - Related links:
     - [Lightweight proposals process description](https://github.com/apple/swift-distributed-tracing/blob/main/Sources/Tracing/Docs.docc/Proposals/Proposals.md)
 
