@@ -15,6 +15,14 @@ The first step to get metadata propagation and tracing working in your applicati
 A complete [list of swift-distributed-tracing implementations](http://github.com/apple/swift-distributed-tracing) 
 is available in this project's README. Select an implementation you'd like to use and follow its bootstrap steps.
 
+There are two ways to set up instrumentation:
+
+- `InstrumentationSystem/bootstrap(_:)`: process-wide, called once at startup. Simplest for a single tracer
+  used for the app's whole lifetime.
+- ``withTracer(_:_:)-mixl``: makes a tracer active for the current task while a closure runs, taking priority
+  over the bootstrapped instrument. Useful for parallel-safe tests or per-subsystem overrides. See
+  [Scoping a tracer with withTracer](#Scoping-a-tracer-using-withTracer).
+
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
 > in this guide we'll use the community maintained [`swift-otel`](https://github.com/slashmo/swift-otel) 
 > tracer, as an example of how you'd start using tracing in your real applications.
@@ -35,7 +43,7 @@ Next, add the dependency to your application target. You should follow the [inst
 
 ### Bootstrapping the Tracer
 
-Similar to [swift-log](https://github.com/apple/swift-log) and [swift-metrics](https://github.com/apple/swift-metrics),
+Similar to [Swift Log](https://github.com/apple/swift-log) and [Swift Metrics](https://github.com/apple/swift-metrics),
 the first thing you'll need to do in your application to use tracing, is to bootstrap the global instance of the tracing system.
 
 This will allow not only your code, that we're about to write, to use tracing, but also all other libraries which
@@ -85,8 +93,13 @@ Specifically, it is recommended to bootstrap systems in the following order:
 
 This is because tracing systems may attempt to emit logs or metrics about their status etc.
 
+> Important: Bootstrap telemetry as early as possible, ideally before any application code runs. Code that
+> reads `InstrumentationSystem/instrument`, `Logger`, or `MetricsFactory` during its own initialization
+> captures whatever is bootstrapped at that moment, so bootstrapping late leaves those captures with a
+> no-op placeholder.
+
 If you intend to use trace identifiers for log correlation (i.e. logging a `trace-id` in every log statement that is part of a trace),
-then don't forget to also configure a swift-lot `MetadataProvider`.
+then don't forget to also configure a Swift Log `MetadataProvider`.
 
 A typical bootstrap could look something like this:
 
@@ -109,7 +122,7 @@ extension Logger.MetadataProvider {
     }
 }
 
-// 1) bootstrap swift-log: stdout-logger
+// 1) bootstrap Swift Log: stdout-logger
 LoggingSystem.bootstrap(
   StreamLogHandler.standardOutput,
   metadataProvider: .otel
@@ -141,6 +154,9 @@ InstrumentationSystem.bootstrap(MultiplexInstrument([
 ```
 
 `MultiplexInstrument` will then call out to each instrument it has been initialized with.
+
+> Note: For scoped alternatives, such as per-test or per-subsystem tracers, use ``withTracer(_:_:)-mixl``. See
+> [Scoping a tracer with withTracer](#Scoping-a-tracer-using-withTracer).
 
 ### Introducing Trace Spans
 
@@ -426,7 +442,7 @@ withSpan("showEvents") { span in
 
 An event is actually a value of the ``SpanEvent`` type, and carries along with it a ``SpanEvent/nanosecondsSinceEpoch`` as well as additional ``SpanEvent/attributes`` related to this specific event. In other words, if a ``Span`` represents an interval–something with a beginning and an end–a ``SpanEvent`` represents something that happened at a specific point-in-time during that span's execution.
 
-Events usually show up in a in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
+Events usually show up in a trace view as points on the timeline (note that some tracing systems are able to do exactly the same when a log statement includes a correlation trace and span ID in its metadata):
 
 **Jaeger:**
 
@@ -438,11 +454,46 @@ Events usually show up in a in a trace view as points on the timeline (note that
 
 Events cannot be "failed" or "successful", that is a property of a ``Span``, and they do not have anything that would be equivalent to a log level. When a trace span is recorded and collected, so will all events related to it. In that sense, events are different from log statements, because one can easily change a logger to include the "debug level" log statements, but technically no such concept exists for events (although you could simulate it with attributes).
 
+### Scope a tracer using withTracer
+
+``withTracer(_:_:)-mixl`` makes a ``Tracer`` active for the current task while a closure runs, taking
+priority over the bootstrapped instrument. The binding propagates into child tasks, including an
+unstructured `Task { }`. It does not propagate into `Task.detached` or other work that escapes the closure's task
+tree, such as an `EventLoopFuture` callback or a long-lived background task. That work falls back to the
+bootstrapped instrument instead, so a whole-application `withTracer` call can silently misroute spans and
+carrier data at those boundaries.
+
+Use it for parallel-safe tests and per-subsystem overrides:
+
+```swift
+@Test func spansAreCaptured() async {
+    let tracer = InMemoryTracer()
+    await withTracer(tracer) {
+        await withSpan("op") { _ in }
+    }
+    #expect(tracer.finishedSpans.count == 1)
+}
+```
+
+Nesting replaces the enclosing tracer for the inner scope, and restores it afterward. A `Tracer` is also an
+`Instrument`, so this scopes `inject` / `extract` too, not just span creation.
+
+``withTracer(_:_:)-mixl`` only accepts one ``Tracer``, not a `MultiplexInstrument`. To combine several tools,
+install a `MultiplexInstrument` at `InstrumentationSystem/bootstrap(_:)` instead:
+
+```swift
+InstrumentationSystem.bootstrap(MultiplexInstrument([OTelTracer(configuration: config), myPropagator]))
+```
+
+> Important: `withTracer(_:_:)` scopes the active *instrument*, not trace *context*. `ServiceContext`
+> propagates separately, through `ServiceContext.withValue` and `inject` / `extract`, and needs the same
+> manual re-establishment at those same boundaries. See <doc:InstrumentYourLibrary> for context propagation.
+
 ### Integrations
 
-#### Swift-log integration
+#### Swift Log integration
 
-Swift-log, the logging package for the server ecosystem, offers native integration with task local values using the `Logger/MetadataProvider`, and its primary application is logging tracing metadata values.
+Swift Log, the logging package for the server ecosystem, offers native integration with task local values using the `Logger/MetadataProvider`, and its primary application is logging tracing metadata values.
 
 The snippet below shows how one can write a metadata provider and manually extract the context and associated metadata value to be included in log statements automatically:
 
