@@ -21,9 +21,7 @@ import ServiceContextModule
 /// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
 ///
-/// To override the active instrument for a scope, such as a test or a subsystem, without touching the
-/// process-wide bootstrap, the Tracing module provides `withTracer(_:_:)`. It binds a task-local override
-/// that ``instrument`` and discovery check first, for the duration of a closure.
+/// To override the active instrument for a scope use the Tracing module's `withTracer(_:_:)`.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
@@ -66,16 +64,12 @@ public enum InstrumentationSystem {
 
     private static let shared = Storage()
 
-    /// Task-local instrument override set by `withTracer(_:_:)`.
-    ///
-    /// ``instrument`` and ``_findInstrument(where:)`` check this first, for the duration of a scope, before
-    /// falling back to the bootstrapped instrument.
+    /// Task-local instrument set by `withTracer(_:_:)`. Overrides the bootstrapped instrument.
     @TaskLocal
     @usableFromInline
     internal static var _taskLocalInstrument: (any Instrument)?
 
-    /// Runs `operation` with `instrument` bound to the task-local override. Backs `withTracer(_:_:)` in the
-    /// Tracing module. Marked `package`, not `internal`, so that module can call it.
+    /// Runs `operation` with `instrument` bound to the task-local override.
     @usableFromInline
     package static func withTaskLocalInstrument<Result>(
         _ instrument: any Instrument,
@@ -121,15 +115,9 @@ public enum InstrumentationSystem {
         self.shared.bootstrapInternal(instrument)
     }
 
-    /// The currently active ``Instrument``.
-    ///
-    /// This is the instrument bound by the innermost enclosing `withTracer(_:_:)` scope, if any,
-    /// otherwise the one set with ``bootstrap(_:)``. Returns a ``NoOpInstrument`` if neither was set.
-    ///
-    /// Checks the task-local first, and only reads the bootstrapped instrument if it is not set. A resolution
-    /// inside `withTracer(_:_:)` returns from the task-local directly and never touches the bootstrapped
-    /// storage. An application that only calls ``bootstrap(_:)`` pays for that extra check on every
-    /// lookup.
+    /// The currently active ``Instrument``: the one bound by the innermost enclosing `withTracer(_:_:)`
+    /// scope, if any, otherwise the one set with ``bootstrap(_:)``. Returns a ``NoOpInstrument`` if neither
+    /// was set.
     public static var instrument: Instrument {
         Self._taskLocalInstrument ?? self.shared.instrument
     }
@@ -139,9 +127,8 @@ public enum InstrumentationSystem {
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
     ///
-    /// Finds the first instrument matching `predicate` in the currently active instrument. This is the
-    /// `withTracer(_:_:)` override if one is in scope, otherwise the bootstrapped instrument. If the
-    /// active instrument is a ``MultiplexInstrument``, its direct members are checked in order.
+    /// Returns the first instrument matching `predicate`: the one found in the task-local override, if any,
+    /// otherwise the one found in the bootstrapped instrument.
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
         if let scoped = Self._taskLocalInstrument {
             return Self.firstInstrument(in: scoped, where: predicate)
@@ -149,9 +136,9 @@ extension InstrumentationSystem {
         return self.shared.firstInstrument(where: predicate)
     }
 
-    /// Returns the first match for `predicate`. This is `instrument` itself, or, when it is a
-    /// ``MultiplexInstrument``, its first direct member satisfying `predicate`. This is not recursive. A
-    /// ``MultiplexInstrument`` nested inside another is tested as a whole, not stepped into.
+    /// Returns the first match for `predicate`: `instrument` itself, or, if it's a ``MultiplexInstrument``,
+    /// its first direct member that satisfies `predicate`. This search is not recursive. A nested
+    /// ``MultiplexInstrument`` is tested as a whole.
     fileprivate static func firstInstrument(
         in instrument: Instrument,
         where predicate: (Instrument) -> Bool
