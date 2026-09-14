@@ -17,11 +17,11 @@ is available in this project's README. Select an implementation you'd like to us
 
 There are two ways to set up instrumentation:
 
-- `InstrumentationSystem/bootstrap(_:)`: process-wide, called once at startup. Simplest for a single tracer
-  used for the app's whole lifetime.
 - ``withTracer(_:_:)-mixl``: makes a tracer active for the current task while a closure runs, taking priority
   over the bootstrapped instrument. Useful for parallel-safe tests or per-subsystem overrides. See
   [Scoping a tracer with withTracer](#Scope-a-tracer-using-withTracer).
+- `InstrumentationSystem/bootstrap(_:)`: process-wide, called once at startup. Simplest for a single tracer
+  used for the app's whole lifetime.
 
 > Note: Since instrumenting an **application** in practice will always need to pull in an existing tracer implementation,
 > in this guide we'll use the community maintained [`swift-otel`](https://github.com/slashmo/swift-otel) 
@@ -463,7 +463,7 @@ tree, such as an `EventLoopFuture` callback or a long-lived background task. Tha
 bootstrapped instrument instead, so a whole-application `withTracer` call can silently misroute spans and
 carrier data at those boundaries.
 
-Use it for parallel-safe tests and per-subsystem overrides:
+Use it for all new code, and it's especially useful for parallel-safe tests and per-subsystem overrides:
 
 ```swift
 @Test func spansAreCaptured() async {
