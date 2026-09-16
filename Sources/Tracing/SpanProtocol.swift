@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import ServiceContextModule
+@_documentation(visibility: internal) @_exported import ServiceContextModule
 
 /// A span represents an interval from the start of an operation to its end, along with additional metadata included
 /// with it.

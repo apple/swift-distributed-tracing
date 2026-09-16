@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Instrumentation
-@_exported import ServiceContextModule
+@_documentation(visibility: internal) @_exported import ServiceContextModule
 
 /// Start a new span using the global bootstrapped tracer reimplementation.
 ///

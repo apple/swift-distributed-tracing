@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_exported import Instrumentation
-@_exported import ServiceContextModule
+@_documentation(visibility: internal) @_exported import ServiceContextModule
 
 /// A tracer protocol that supports Swift 5.6.
 ///
