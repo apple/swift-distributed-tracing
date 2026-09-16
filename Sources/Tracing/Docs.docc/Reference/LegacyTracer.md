@@ -2,7 +2,7 @@
 
 ## Topics
 
-### Creating Spans
+### Creating spans
 
 - ``withAnySpan(_:context:ofKind:function:file:line:_:)-9jni8``
 - ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-7fz6i``
@@ -12,7 +12,7 @@
 - ``withAnySpan(_:context:ofKind:function:file:line:_:)-369ou``
 - ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-6jzit``
 
-### Manually Managing Spans
+### Manually managing spans
 
 - ``startAnySpan(_:context:ofKind:function:file:line:)``
 - ``startAnySpan(_:at:context:ofKind:function:file:line:)``

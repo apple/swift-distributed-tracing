@@ -2,34 +2,34 @@
 
 ## Topics
 
-### Inspecting Spans
+### Inspecting spans
 
 - ``operationName``
 - ``context``
 - ``isRecording``
 - ``attributes``
 
-### Updating Spans
+### Updating spans
 
 - ``setStatus(_:)``
 - ``updateAttributes(_:)``
 
-### Recording Events
+### Recording events
 
 - ``addEvent(_:)``
 
-### Recording Errors
+### Recording errors
 
 - ``recordError(_:)``
 - ``recordError(_:attributes:)``
 - ``recordError(_:attributes:at:)``
 
-### Recording Links
+### Recording links
 
 - ``addLink(_:)``
 - ``addLink(_:attributes:)``
 
-### Ending Spans
+### Ending spans
 
 - ``end()``
 - ``end(at:)``

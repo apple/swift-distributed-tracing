@@ -2,7 +2,7 @@
 
 ## Topics
 
-### Creating Spans
+### Creating spans
 
 - ``withSpan(_:context:ofKind:function:file:line:_:)-9r5mu``
 - ``withSpan(_:context:ofKind:isolation:function:file:line:_:)``
@@ -25,7 +25,7 @@
 - ``startSpan(_:context:ofKind:at:function:file:line:)``
 - ``Span/end()``
 
-### Accessing Spans
+### Accessing spans
 
 - ``activeSpan(identifiedBy:)-4ttod``
 - ``activeSpan(identifiedBy:)-4mers``

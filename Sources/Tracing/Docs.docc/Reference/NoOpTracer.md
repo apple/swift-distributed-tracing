@@ -8,7 +8,7 @@
 - ``startAnySpan(_:context:ofKind:at:function:file:line:)``
 - ``Span``
 
-### Tracer Methods
+### Tracer methods
 
 - ``extract(_:into:using:)``
 - ``inject(_:into:using:)``

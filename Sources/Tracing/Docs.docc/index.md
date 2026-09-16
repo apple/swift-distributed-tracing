@@ -20,13 +20,13 @@ The subsequent guides explore the patterns and details of instrumenting systems 
 
 ## Topics
 
-### Quickstart Guides
+### Quickstart guides
 
 - <doc:TraceYourApplication>
 - <doc:InstrumentYourLibrary>
 - <doc:ImplementATracer>
 
-### Boostrapping Tracing
+### Boostrapping tracing
 
 - ``Tracing/Instrumentation/InstrumentationSystem``
 - ``Tracing/Tracer``
@@ -38,7 +38,7 @@ The subsequent guides explore the patterns and details of instrumenting systems 
 - ``withTracer(_:_:)-28xx1``
 - ``withTracer(_:_:)-mixl``
 
-### Creating Spans
+### Creating spans
 
 - ``withSpan(_:context:ofKind:function:file:line:_:)-65bom``
 - ``withSpan(_:at:context:ofKind:function:file:line:_:)-7pdo8``
@@ -51,14 +51,14 @@ The subsequent guides explore the patterns and details of instrumenting systems 
 - ``withSpan(_:at:context:ofKind:function:file:line:_:)-3h6gv``
 - ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v``
 
-### Manually Managing Spans
+### Manually managing spans
 
 - ``startSpan(_:context:ofKind:function:file:line:)``
 - ``startSpan(_:at:context:ofKind:function:file:line:)``
 - ``startSpan(_:context:ofKind:at:function:file:line:)``
 - ``Span/end()``
 
-### Inspecting Spans
+### Inspecting spans
 
 - ``Span``
 - ``SpanEvent``
@@ -66,7 +66,7 @@ The subsequent guides explore the patterns and details of instrumenting systems 
 - ``SpanStatus``
 - ``SpanKind``
 
-### Span Attributes
+### Span attributes
 
 - ``SpanAttributeConvertible``
 - ``SpanAttributeNamespace``
@@ -75,7 +75,7 @@ The subsequent guides explore the patterns and details of instrumenting systems 
 - ``SpanAttributeKey``
 - ``SpanAttribute``
 
-### Default Tracers
+### Default tracers
 
 - ``DefaultTracerClock``
 - ``NoOpTracer``
