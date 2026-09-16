@@ -26,7 +26,7 @@
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 @available(*, deprecated, renamed: "Tracer")
 public protocol LegacyTracer: Instrument {
-    /// Start a new span returning an existential span reference.
+    /// Starts a new span at the time instant you provide, returning an existential span.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -82,7 +82,8 @@ public protocol LegacyTracer: Instrument {
 extension LegacyTracer {
     // ==== startSpan ---------------------------------------------------------
 
-    /// Start a new span returning an existential span reference.
+    /// Starts a new span at the time instant you provide, returning an existential span, with
+    /// convenient default values for the remaining parameters.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -131,7 +132,7 @@ extension LegacyTracer {
         )
     }
 
-    /// Start a new span returning an existential span reference.
+    /// Starts a new span using the default clock, returning an existential span.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -180,8 +181,9 @@ extension LegacyTracer {
 
     // ==== withAnySpan + sync ------------------------------------------------
 
-    /// Start a new ``Span`` and automatically end when the `operation` completes,
-    /// including recording the `error` in case the operation throws.
+    /// Starts a new span at the time instant you provide, and ends it automatically when the
+    /// synchronous operation completes, returning an existential span and recording the error in
+    /// case it throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -234,8 +236,8 @@ extension LegacyTracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, and ends it automatically when the synchronous
+    /// operation completes, returning an existential span and recording the error in case it throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -281,8 +283,9 @@ extension LegacyTracer {
 
     // ==== withAnySpan async -------------------------------------------------
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span at the time instant you provide, and ends it when the asynchronous
+    /// operation completes, returning an existential span, inheriting the caller's isolation and
+    /// recording any thrown error.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -340,8 +343,8 @@ extension LegacyTracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span at the time instant you provide, returning an existential span, without
+    /// preserving the caller's actor isolation.
     ///
     /// @DeprecationSummary {
     ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
@@ -390,8 +393,9 @@ extension LegacyTracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, and ends it when the asynchronous operation
+    /// completes, returning an existential span, inheriting the caller's isolation and recording
+    /// any thrown error.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -446,8 +450,8 @@ extension LegacyTracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, returning an existential span, without
+    /// preserving the caller's actor isolation.
     ///
     /// @DeprecationSummary {
     ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
@@ -546,8 +550,9 @@ extension Tracer {
         )
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, and ends it automatically
+    /// when the synchronous operation completes, returning an existential span and recording the
+    /// error in case it throws.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -601,8 +606,9 @@ extension Tracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, and ends it when the
+    /// asynchronous operation completes, returning an existential span, inheriting the caller's
+    /// isolation and recording any thrown error.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
@@ -659,8 +665,8 @@ extension Tracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, returning an existential
+    /// span, without preserving the caller's actor isolation.
     ///
     /// @DeprecationSummary {
     ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.

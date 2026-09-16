@@ -346,7 +346,7 @@ public func withSpan<T, Instant: TracerInstant>(
     }
 }
 
-/// Deprecated: starts a new span at the time instant you provide, without preserving the
+/// Starts a new span at the time instant you provide, without preserving the
 /// caller's actor isolation.
 ///
 /// @DeprecationSummary {
@@ -436,7 +436,7 @@ public func withSpan<T>(
     }
 }
 
-/// Deprecated: starts a new span using the default clock, without preserving the caller's
+/// Starts a new span using the default clock, without preserving the caller's
 /// actor isolation.
 ///
 /// @DeprecationSummary {
@@ -526,7 +526,7 @@ public func withSpan<T>(
     }
 }
 
-/// Deprecated: starts a new span, optionally at a time instant you provide, without
+/// Starts a new span, optionally at a time instant you provide, without
 /// preserving the caller's actor isolation.
 ///
 /// @DeprecationSummary {

@@ -15,6 +15,7 @@
 ### Manually managing spans
 
 - ``startAnySpan(_:context:ofKind:function:file:line:)``
+- ``forceFlush()``
+
 - ``startAnySpan(_:at:context:ofKind:function:file:line:)``
 - ``startAnySpan(_:context:ofKind:at:function:file:line:)``
-- ``forceFlush()``

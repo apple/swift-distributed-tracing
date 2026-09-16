@@ -15,9 +15,6 @@ different audiences: application developers, library and framework developers, a
 implementers. See <doc:TraceYourApplication>, <doc:InstrumentYourLibrary>, and <doc:ImplementATracer>
 below to find the guide for your role.
 
-If unsure which you want, start with the first guide listed below and continue to read until satisfied.
-The subsequent guides explore the patterns and details of instrumenting systems and building instruments yourself.
-
 ## Topics
 
 ### Quickstart guides
