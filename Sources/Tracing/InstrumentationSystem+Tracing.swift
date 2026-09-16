@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Instrumentation
+@_documentation(visibility: internal) @_exported import Instrumentation
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension InstrumentationSystem {
@@ -29,7 +29,7 @@ extension InstrumentationSystem {
     }
 
     /// Returns the active ``Tracer``: the one bound by the innermost enclosing ``withTracer(_:_:)-mixl`` scope
-    /// if any, otherwise the one bootstrapped as part of the ``InstrumentationSystem``.
+    /// if any, otherwise the one bootstrapped as part of the `InstrumentationSystem`.
     ///
     /// If the active instrument is a `MultiplexInstrument`, this looks for the first tracing instrument in it.
     ///

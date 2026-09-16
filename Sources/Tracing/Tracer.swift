@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Instrumentation
+@_documentation(visibility: internal) @_exported import Instrumentation
 @_documentation(visibility: internal) @_exported import ServiceContextModule
 
 /// Start a new span using the global bootstrapped tracer reimplementation.
@@ -156,8 +156,8 @@ public func startSpan(
 
 // ==== withSpan + sync ---------------------------------------------------
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span at the time instant you provide, and ends it automatically when the
+/// synchronous operation completes, including recording the error in case it throws.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -203,8 +203,8 @@ public func withSpan<T, Instant: TracerInstant>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span using the default clock, and ends it automatically when the synchronous
+/// operation completes, including recording the error in case it throws.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -248,8 +248,8 @@ public func withSpan<T>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span, optionally at a time instant you provide, and ends it automatically when
+/// the synchronous operation completes, including recording the error in case it throws.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -297,8 +297,8 @@ public func withSpan<T>(
 
 // ==== withSpan + async --------------------------------------------------
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span at the time instant you provide, and ends it when the asynchronous
+/// operation completes, inheriting the caller's isolation and recording any thrown error.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -346,8 +346,8 @@ public func withSpan<T, Instant: TracerInstant>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Deprecated: starts a new span at the time instant you provide, without preserving the
+/// caller's actor isolation.
 ///
 /// @DeprecationSummary {
 ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
@@ -389,8 +389,8 @@ public func withSpan<T, Instant: TracerInstant>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span using the default clock, and ends it when the asynchronous operation
+/// completes, inheriting the caller's isolation and recording any thrown error.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -436,8 +436,8 @@ public func withSpan<T>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Deprecated: starts a new span using the default clock, without preserving the caller's
+/// actor isolation.
 ///
 /// @DeprecationSummary {
 ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
@@ -477,8 +477,8 @@ public func withSpan<T>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Starts a new span, optionally at a time instant you provide, and ends it when the
+/// asynchronous operation completes, inheriting the caller's isolation and recording any thrown error.
 ///
 /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
 /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -526,8 +526,8 @@ public func withSpan<T>(
     }
 }
 
-/// Start a new span and automatically end when the operation completes,
-/// including recording the error in case the operation throws.
+/// Deprecated: starts a new span, optionally at a time instant you provide, without
+/// preserving the caller's actor isolation.
 ///
 /// @DeprecationSummary {
 ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.

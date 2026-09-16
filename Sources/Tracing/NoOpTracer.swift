@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Instrumentation
+@_documentation(visibility: internal) @_exported import Instrumentation
 @_documentation(visibility: internal) @_exported import ServiceContextModule
 
 /// Tracer that ignores all operations, used when no tracing is required.

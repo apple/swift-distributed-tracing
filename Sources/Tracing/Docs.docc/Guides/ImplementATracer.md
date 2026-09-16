@@ -1,5 +1,8 @@
 # Implement a Tracer
 
+Implement a custom tracer or instrument to collect and export distributed tracing metadata from
+your systems.
+
 ## Overview
 
 This guide is aimed at ``Tracer`` and `Instrument` protocol implementation authors.

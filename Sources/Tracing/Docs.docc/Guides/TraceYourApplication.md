@@ -1,5 +1,8 @@
 # Trace Your Application
 
+Instrument your server-side application with distributed tracing to gain visibility into its
+production behavior.
+
 ## Overview
 
 This guide is aimed at **application developers** who have some server-side system and want to make use of distributed tracing

@@ -12,7 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Makes the tracer the active instrument for the current task and any child tasks it spawns.
+/// Makes the tracer the active instrument for the current task and any child tasks it spawns, for the
+/// duration of a synchronous closure.
 ///
 /// The task-local tracer exists for the duration of `operation`. Takes priority over the bootstrapped
 /// instrument for both span creation and propagation, since a `Tracer` is an `Instrument`.
@@ -51,7 +52,8 @@ public func withTracer<Result, Failure: Error>(
 }
 
 #if compiler(>=6.2)
-/// Makes the tracer the active instrument for the current task and any child tasks it spawns.
+/// Makes the tracer the active instrument for the current task and any child tasks it spawns, for the
+/// duration of an asynchronous closure that inherits the caller's isolation.
 ///
 /// The task-local tracer exists for the duration of `operation`. Takes priority over the bootstrapped
 /// instrument for both span creation and propagation, since a `Tracer` is an `Instrument`.
@@ -87,7 +89,8 @@ public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
     }
 }
 #else
-/// Makes the tracer the active instrument for the current task and any child tasks it spawns.
+/// Makes the tracer the active instrument for the current task and any child tasks it spawns, for the
+/// duration of an asynchronous closure, optionally isolated to an actor you specify.
 ///
 /// The task-local tracer exists for the duration of `operation`. Takes priority over the bootstrapped
 /// instrument for both span creation and propagation, since a `Tracer` is an `Instrument`.
