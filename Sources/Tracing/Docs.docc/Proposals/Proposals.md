@@ -44,4 +44,5 @@ If you have any questions, ask in an issue on GitHub.
 
 ## Topics
 
+- <doc:SDT-0001-task-local-tracer>
 - <doc:SDT-NNNN>

@@ -7,7 +7,7 @@ process-wide `InstrumentationSystem/bootstrap(_:)` for the scope, then falls bac
 
 - Proposal: SDT-0001
 - Author(s): [Vladimir Kukushkin](https://github.com/kukushechkin)
-- Status: **Ready for Implementation**
+- Status: **Approved**
 - Issue: [apple/swift-distributed-tracing#168](https://github.com/apple/swift-distributed-tracing/issues/168)
 - Implementation: on the `SDT-0001-task-local-instrument-implementation` branch
 

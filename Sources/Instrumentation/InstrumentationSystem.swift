@@ -20,6 +20,8 @@ import ServiceContextModule
 ///
 /// Set up the instrumentation using ``bootstrap(_:)``, and access the globally available instrument using ``instrument``.
 /// If you need to use more that one cross-cutting tool you can do so by using ``MultiplexInstrument``.
+///
+/// To override the active instrument for a scope use the Tracing module's `withTracer(_:_:)`.
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 public enum InstrumentationSystem {
     /// Marked as @unchecked Sendable due to the synchronization being
@@ -53,20 +55,49 @@ public enum InstrumentationSystem {
             self.lock.withReaderLock { self._instrument }
         }
 
-        func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
+        func firstInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
             self.lock.withReaderLock {
-                if let multiplex = self._instrument as? MultiplexInstrument {
-                    return multiplex.firstInstrument(where: predicate)
-                } else if predicate(self._instrument) {
-                    return self._instrument
-                } else {
-                    return nil
-                }
+                InstrumentationSystem.firstInstrument(in: self._instrument, where: predicate)
             }
         }
     }
 
     private static let shared = Storage()
+
+    /// Task-local instrument set by `withTracer(_:_:)`. Overrides the bootstrapped instrument.
+    @TaskLocal
+    @usableFromInline
+    internal static var _taskLocalInstrument: (any Instrument)?
+
+    /// Runs `operation` with `instrument` bound to the task-local override.
+    @usableFromInline
+    package static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        operation: () throws -> Result
+    ) rethrows -> Result {
+        try Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+
+    #if compiler(>=6.2)
+    /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
+    @usableFromInline
+    package nonisolated(nonsending) static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        operation: nonisolated(nonsending) () async throws -> Result
+    ) async rethrows -> Result {
+        try await Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+    #else
+    /// Async variant of ``withTaskLocalInstrument(_:operation:)``.
+    @usableFromInline
+    package static func withTaskLocalInstrument<Result>(
+        _ instrument: any Instrument,
+        isolation: isolated (any Actor)? = #isolation,
+        operation: () async throws -> Result
+    ) async rethrows -> Result {
+        try await Self.$_taskLocalInstrument.withValue(instrument, operation: operation)
+    }
+    #endif
 
     /// Globally select the desired ``Instrument`` implementation.
     ///
@@ -84,18 +115,40 @@ public enum InstrumentationSystem {
         self.shared.bootstrapInternal(instrument)
     }
 
-    /// Returns the globally configured instrument.
-    ///
-    /// Defaults to a no-op ``Instrument`` if ``bootstrap(_:)`` wasn't called before.
+    /// The currently active ``Instrument``: the one bound by the innermost enclosing `withTracer(_:_:)`
+    /// scope, if any, otherwise the one set with ``bootstrap(_:)``. Returns a ``NoOpInstrument`` if neither
+    /// was set.
     public static var instrument: Instrument {
-        shared.instrument
+        Self._taskLocalInstrument ?? self.shared.instrument
     }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
 extension InstrumentationSystem {
     /// INTERNAL API: Do Not Use
+    ///
+    /// Returns the first instrument matching `predicate`: the one found in the task-local override, if any,
+    /// otherwise the one found in the bootstrapped instrument.
     public static func _findInstrument(where predicate: (Instrument) -> Bool) -> Instrument? {
-        self.shared._findInstrument(where: predicate)
+        if let scoped = Self._taskLocalInstrument {
+            return Self.firstInstrument(in: scoped, where: predicate)
+        }
+        return self.shared.firstInstrument(where: predicate)
+    }
+
+    /// Returns the first match for `predicate`: `instrument` itself, or, if it's a ``MultiplexInstrument``,
+    /// its first direct member that satisfies `predicate`. This search is not recursive. A nested
+    /// ``MultiplexInstrument`` is tested as a whole.
+    fileprivate static func firstInstrument(
+        in instrument: Instrument,
+        where predicate: (Instrument) -> Bool
+    ) -> Instrument? {
+        if let multiplex = instrument as? MultiplexInstrument {
+            return multiplex.firstInstrument(where: predicate)
+        } else if predicate(instrument) {
+            return instrument
+        } else {
+            return nil
+        }
     }
 }
