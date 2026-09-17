@@ -1,6 +1,6 @@
 # Trace Your Application
 
-Instrument your server-side application with distributed tracing to gain visibility into its
+Instrument your application with distributed tracing to gain visibility into its
 production behavior.
 
 ## Overview
