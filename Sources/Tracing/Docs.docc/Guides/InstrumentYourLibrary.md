@@ -1,7 +1,7 @@
 # Instrument Your Library or Framework
 
 Add distributed tracing support to the libraries and frameworks you maintain, so applications that
-depend on them get tracing for free.
+depend on them can understand better what they do during profiling.
 
 ## Overview 
 
