@@ -11,8 +11,8 @@ While Swift Distributed Tracing allows building all kinds of _instruments_, whic
 ### Guides
 
 We provide a number of guides aimed at getting started with tracing your systems, targeted at three
-different audiences: application developers, library and framework developers, and instrument
-implementers. See <doc:TraceYourApplication>, <doc:InstrumentYourLibrary>, and <doc:ImplementATracer>
+different audiences: application developers, library and framework developers, and tracing instrument
+developers. See <doc:TraceYourApplication>, <doc:InstrumentYourLibrary>, and <doc:ImplementATracer>
 below to find the guide for your role.
 
 ## Topics
