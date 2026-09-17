@@ -54,6 +54,7 @@ import wasi_pthread
 /// of lock is safe to use with `libpthread`-based threading models, such as the
 /// one used by NIO. On Windows, the lock is based on the substantially similar
 /// `SRWLOCK` type.
+@_spi(Locking)  // Use the `package` access modifier once min Swift version is increased.
 public final class ReadWriteLock: @unchecked Sendable {
     #if canImport(WASILibc)
     // WASILibc is single threaded, provides no locks

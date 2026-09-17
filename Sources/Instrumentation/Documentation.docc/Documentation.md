@@ -12,7 +12,3 @@ Base set of types which can be used to instrument libraries, excluding tracing s
 - ``Instrument``
 - ``Extractor``
 - ``Injector``
-
-### Supporting types
-
-- ``ReadWriteLock``
