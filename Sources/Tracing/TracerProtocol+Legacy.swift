@@ -132,7 +132,8 @@ extension LegacyTracer {
         )
     }
 
-    /// Starts a new span using the default clock, returning an existential span.
+    /// Starts a new span using the default clock and convenient default values for the
+    /// remaining parameters, returning an existential span.
     ///
     /// - Warning: This method will be deprecated in favor of `Tracer/withSpan` as soon as this project is able to require Swift 5.7.
     ///
