@@ -1,5 +1,8 @@
 # Instrument Your Library or Framework
 
+Add distributed tracing support to the libraries and frameworks you maintain, so applications that
+depend on them can understand better what they do during profiling.
+
 ## Overview 
 
 This guide is aimed at library and framework developers who wish to instrument their code using distributed tracing.

@@ -2,7 +2,7 @@
 
 ## Topics
 
-### Span Status Codes
+### Span status codes
 
 - ``ok``
 - ``error``

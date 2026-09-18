@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_exported import Instrumentation
-@_exported import ServiceContextModule
+@_documentation(visibility: internal) @_exported import Instrumentation
+@_documentation(visibility: internal) @_exported import ServiceContextModule
 
 // ==== -----------------------------------------------------------------------
 // MARK: Tracer protocol
@@ -131,8 +131,8 @@ extension Tracer {
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension Tracer {
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, and ends it automatically when the
+    /// synchronous operation completes, including recording the error in case it throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -185,8 +185,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, and ends it automatically when the synchronous
+    /// operation completes, including recording the error in case it throws.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -237,8 +237,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new span and automatically end when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, and ends it when the asynchronous operation
+    /// completes, inheriting the caller's isolation and recording any thrown error.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -292,8 +292,8 @@ extension Tracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    /// Start a new span and automatically end it when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span using the default clock, without preserving the caller's
+    /// actor isolation.
     ///
     /// @DeprecationSummary {
     ///    Use ``withSpan(_:context:ofKind:isolation:function:file:line:_:)`` instead
@@ -329,8 +329,8 @@ extension Tracer {
         }
     }
 
-    /// Start a new span and automatically end it when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, and ends it when the
+    /// asynchronous operation completes, inheriting the caller's isolation and recording any thrown error.
     ///
     /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
@@ -385,8 +385,8 @@ extension Tracer {
     }
 
     // swift-format-ignore: Spacing // fights with formatter
-    /// Start a new span and automatically end it when the operation completes,
-    /// including recording the error in case the operation throws.
+    /// Starts a new span, optionally at a time instant you provide, without
+    /// preserving the caller's actor isolation.
     ///
     /// @DeprecationSummary {
     ///    Use ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)`` instead.
