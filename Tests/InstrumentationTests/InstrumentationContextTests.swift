@@ -14,13 +14,13 @@
 
 import Testing
 
-@testable import ContextStorage
+@testable import Instrumentation
 
-@Suite("TracingContext Tests")
-struct TracingContextTests {
-    @Test("Top-level TracingContext is empty")
-    func topLevelTracingContextIsEmpty() {
-        let context = TracingContext.topLevel
+@Suite("InstrumentationContext Tests")
+struct InstrumentationContextTests {
+    @Test("Top-level InstrumentationContext is empty")
+    func topLevelInstrumentationContextIsEmpty() {
+        let context = InstrumentationContext.topLevel
 
         #expect(context.isEmpty)
         #expect(context.count == 0)
@@ -28,7 +28,7 @@ struct TracingContextTests {
 
     @Test("Read and write values through subscript")
     func readAndWriteThroughSubscript() throws {
-        var context = TracingContext.topLevel
+        var context = InstrumentationContext.topLevel
         #expect(context[FirstTestKey.self] == nil)
         #expect(context[SecondTestKey.self] == nil)
 
@@ -41,15 +41,15 @@ struct TracingContextTests {
         #expect(context[SecondTestKey.self] == 42.0)
     }
 
-    @Test("TracingContext forEach iterates over all context items")
-    func forEachIteratesOverAllTracingContextItems() {
-        var context = TracingContext.topLevel
+    @Test("InstrumentationContext forEach iterates over all context items")
+    func forEachIteratesOverAllInstrumentationContextItems() {
+        var context = InstrumentationContext.topLevel
 
         context[FirstTestKey.self] = 42
         context[SecondTestKey.self] = 42.0
         context[ThirdTestKey.self] = "test"
 
-        var contextItems = [AnyTracingContextKey: Any]()
+        var contextItems = [AnyInstrumentationContextKey: Any]()
         // swift-format-ignore: ReplaceForEachWithForLoop
         context.forEach { key, value in
             contextItems[key] = value
@@ -63,40 +63,40 @@ struct TracingContextTests {
         #expect(contextItems.contains(where: { $0.value as? String == "test" }))
     }
 
-    @Test("TODO TracingContext does not crash without explicit compiler flag")
+    @Test("TODO InstrumentationContext does not crash without explicit compiler flag")
     func TODO_doesNotCrashWithoutExplicitCompilerFlag() {
-        _ = TracingContext.TODO(#function)
+        _ = InstrumentationContext.TODO(#function)
     }
 
-    @Test("TracingContextKey name defaults to type name without override")
-    func tracingContextKeyName_withoutOverride() {
+    @Test("InstrumentationContextKey name defaults to type name without override")
+    func instrumentationContextKeyName_withoutOverride() {
         let name = FirstTestKey.name
         #expect(name == "FirstTestKey")
     }
 
-    @Test("TracingContextKey name uses explicit override when provided")
-    func tracingContextKeyName_withOverride() {
+    @Test("InstrumentationContextKey name uses explicit override when provided")
+    func instrumentationContextKeyName_withOverride() {
         let name = ThirdTestKey.name
         #expect(name == "explicit")
     }
 
-    @Test("AnyTracingContextKey name defaults to type name without override")
-    func anyTracingContextKeyName_withoutOverride() {
-        let anyKey = AnyTracingContextKey(FirstTestKey.self)
+    @Test("AnyInstrumentationContextKey name defaults to type name without override")
+    func anyInstrumentationContextKeyName_withoutOverride() {
+        let anyKey = AnyInstrumentationContextKey(FirstTestKey.self)
         #expect(anyKey.name == "FirstTestKey")
     }
 
-    @Test("AnyTracingContextKey name uses explicit override when provided")
-    func anyTracingContextKeyName_withOverride() {
-        let anyKey = AnyTracingContextKey(ThirdTestKey.self)
+    @Test("AnyInstrumentationContextKey name uses explicit override when provided")
+    func anyInstrumentationContextKeyName_withOverride() {
+        let anyKey = AnyInstrumentationContextKey(ThirdTestKey.self)
         #expect(anyKey.name == "explicit")
     }
 
-    @Test("TracingContextKey name matches AnyTracingContextKey name")
-    func tracingContextKeyName_matchesAnyTracingContextKeyName() {
-        #expect(FirstTestKey.name == AnyTracingContextKey(FirstTestKey.self).name)
-        #expect(SecondTestKey.name == AnyTracingContextKey(SecondTestKey.self).name)
-        #expect(ThirdTestKey.name == AnyTracingContextKey(ThirdTestKey.self).name)
+    @Test("InstrumentationContextKey name matches AnyInstrumentationContextKey name")
+    func instrumentationContextKeyName_matchesAnyInstrumentationContextKeyName() {
+        #expect(FirstTestKey.name == AnyInstrumentationContextKey(FirstTestKey.self).name)
+        #expect(SecondTestKey.name == AnyInstrumentationContextKey(SecondTestKey.self).name)
+        #expect(ThirdTestKey.name == AnyInstrumentationContextKey(ThirdTestKey.self).name)
     }
 
     @Test("Automatic propagation through task-local storage")
@@ -106,77 +106,77 @@ struct TracingContextTests {
             return
         }
 
-        #expect(TracingContext.current == nil)
+        #expect(InstrumentationContext.current == nil)
 
-        var context = TracingContext.topLevel
+        var context = InstrumentationContext.topLevel
         context[FirstTestKey.self] = 42
 
-        var propagatedTracingContext: TracingContext?
+        var propagatedInstrumentationContext: InstrumentationContext?
         func exampleFunction() {
-            propagatedTracingContext = TracingContext.current
+            propagatedInstrumentationContext = InstrumentationContext.current
         }
 
-        let c = TracingContext.$current
+        let c = InstrumentationContext.$current
         c.withValue(context, operation: exampleFunction)
 
-        #expect(propagatedTracingContext?.count == 1)
-        #expect(propagatedTracingContext?[FirstTestKey.self] == 42)
+        #expect(propagatedInstrumentationContext?.count == 1)
+        #expect(propagatedInstrumentationContext?[FirstTestKey.self] == 42)
     }
 
     actor SomeActor {
         var value: Int = 0
 
         func check() async {
-            TracingContext.$current.withValue(.topLevel) {
+            InstrumentationContext.$current.withValue(.topLevel) {
                 value = 12  // should produce no warnings
             }
-            TracingContext.withValue(.topLevel) {
+            InstrumentationContext.withValue(.topLevel) {
                 value = 12  // should produce no warnings
             }
-            await TracingContext.withValue(.topLevel) { () async in
+            await InstrumentationContext.withValue(.topLevel) { () async in
                 value = 12  // should produce no warnings
             }
         }
     }
 
     @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContext alias.")
-    @Test("Deprecated ServiceContext alias is the same type as TracingContext")
+    @Test("Deprecated ServiceContext alias is the same type as InstrumentationContext")
     func deprecatedServiceContextAliasStillWorks() {
         var context: ServiceContext = .topLevel
         context[FirstTestKey.self] = 1
 
-        let asTracingContext: TracingContext = context
-        #expect(asTracingContext[FirstTestKey.self] == 1)
+        let asInstrumentationContext: InstrumentationContext = context
+        #expect(asInstrumentationContext[FirstTestKey.self] == 1)
     }
 
     @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContextKey alias.")
-    @Test("Deprecated ServiceContextKey alias is the same protocol as TracingContextKey")
+    @Test("Deprecated ServiceContextKey alias is the same protocol as InstrumentationContextKey")
     func deprecatedServiceContextKeyAliasStillWorks() {
         enum LegacyKey: ServiceContextKey {
             typealias Value = String
         }
 
-        var context = TracingContext.topLevel
+        var context = InstrumentationContext.topLevel
         context[LegacyKey.self] = "legacy"
         #expect(context[LegacyKey.self] == "legacy")
     }
 
     @available(*, deprecated, message: "Intentionally exercises the deprecated AnyServiceContextKey alias.")
-    @Test("Deprecated AnyServiceContextKey alias is the same type as AnyTracingContextKey")
+    @Test("Deprecated AnyServiceContextKey alias is the same type as AnyInstrumentationContextKey")
     func deprecatedAnyServiceContextKeyAliasStillWorks() {
-        let anyKey: AnyServiceContextKey = AnyTracingContextKey(FirstTestKey.self)
+        let anyKey: AnyServiceContextKey = AnyInstrumentationContextKey(FirstTestKey.self)
         #expect(anyKey.name == "FirstTestKey")
     }
 
-    private enum FirstTestKey: TracingContextKey {
+    private enum FirstTestKey: InstrumentationContextKey {
         typealias Value = Int
     }
 
-    private enum SecondTestKey: TracingContextKey {
+    private enum SecondTestKey: InstrumentationContextKey {
         typealias Value = Double
     }
 
-    private enum ThirdTestKey: TracingContextKey {
+    private enum ThirdTestKey: InstrumentationContextKey {
         typealias Value = String
 
         static let nameOverride: String? = "explicit"

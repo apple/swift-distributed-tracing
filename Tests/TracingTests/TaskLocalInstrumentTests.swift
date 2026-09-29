@@ -146,7 +146,7 @@ extension GlobalTracingInstrumentationSystemTests {
         let outerWriter = KeyWriterTracer(value: "outer")
         let innerWriter = KeyWriterTracer(value: "inner")
 
-        var context = TracingContext.topLevel
+        var context = InstrumentationContext.topLevel
         let dummy = DummyCarrier()
 
         // A nested `withTracer` replaces the active instrument, so only the inner tracer's `extract` runs —
@@ -170,7 +170,7 @@ extension GlobalTracingInstrumentationSystemTests {
         withTracer(outerWriter) {
             withTracer(innerWriter) {
                 InstrumentationSystem.instrument.inject(
-                    TracingContext.topLevel,
+                    InstrumentationContext.topLevel,
                     into: &carrier,
                     using: KeyWriterInjector()
                 )
@@ -363,8 +363,8 @@ extension GlobalTracingInstrumentationSystemTests {
 
 // MARK: - Fixtures for propagation precedence tests
 
-/// `TracingContext` key written by `KeyWriterTracer` on extract.
-private enum WrittenValueKey: TracingContextKey {
+/// `InstrumentationContext` key written by `KeyWriterTracer` on extract.
+private enum WrittenValueKey: InstrumentationContextKey {
     typealias Value = String
     static var nameOverride: String? { "written-value" }
 }
@@ -386,7 +386,7 @@ private final class KeyWriterTracer: Tracer, @unchecked Sendable {
 
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> TracingContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -398,12 +398,16 @@ private final class KeyWriterTracer: Tracer, @unchecked Sendable {
 
     func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout TracingContext, using extractor: Extract)
+    func extract<Carrier, Extract>(
+        _ carrier: Carrier,
+        into context: inout InstrumentationContext,
+        using extractor: Extract
+    )
     where Extract: Extractor, Extract.Carrier == Carrier {
         context[WrittenValueKey.self] = self.value
     }
 
-    func inject<Carrier, Inject>(_ context: TracingContext, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: InstrumentationContext, into carrier: inout Carrier, using injector: Inject)
     where Inject: Injector, Inject.Carrier == Carrier {
         injector.inject(self.value, forKey: "written-value", into: &carrier)
     }

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ContextStorage
+import Instrumentation
 import Testing
 import Tracing
 
@@ -200,7 +200,7 @@ struct SpanTests {
 
     @Test("Span parent convenience")
     func spanParentConvenience() {
-        var parentBaggage = TracingContext.topLevel
+        var parentBaggage = InstrumentationContext.topLevel
         parentBaggage[TestBaggageContextKey.self] = "test"
 
         let parent = TestSpan(
@@ -210,7 +210,7 @@ struct SpanTests {
             kind: .client,
             onEnd: { _ in }
         )
-        let childBaggage = TracingContext.topLevel
+        let childBaggage = InstrumentationContext.topLevel
         let child = TestSpan(
             operationName: "server",
             startTime: DefaultTracerClock.now,
@@ -236,7 +236,7 @@ struct SpanTests {
 
     @Test("SpanAttribute setter/getter")
     func spanAttributeSetterGetter() {
-        var parentBaggage = TracingContext.topLevel
+        var parentBaggage = InstrumentationContext.topLevel
         parentBaggage[TestBaggageContextKey.self] = "test"
 
         let parent = TestSpan(
@@ -246,7 +246,7 @@ struct SpanTests {
             kind: .client,
             onEnd: { _ in }
         )
-        let childBaggage = TracingContext.topLevel
+        let childBaggage = InstrumentationContext.topLevel
         let child = TestSpan(
             operationName: "server",
             startTime: DefaultTracerClock.now,
@@ -276,7 +276,7 @@ struct SpanTests {
         let span = TestSpan(
             operationName: "client",
             startTime: DefaultTracerClock.now,
-            context: TracingContext.topLevel,
+            context: InstrumentationContext.topLevel,
             kind: .client,
             onEnd: { _ in }
         )
@@ -344,6 +344,6 @@ package struct CustomAttributeValue: Equatable, Sendable, CustomStringConvertibl
     }
 }
 
-private struct TestBaggageContextKey: TracingContextKey {
+private struct TestBaggageContextKey: InstrumentationContextKey {
     typealias Value = String
 }

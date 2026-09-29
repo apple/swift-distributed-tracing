@@ -21,7 +21,7 @@ import Tracing
 public struct InMemorySpan: Span {
 
     /// The service context of the span.
-    public let context: TracingContext
+    public let context: InstrumentationContext
     /// The in-memory span context.
     public var spanContext: InMemorySpanContext {
         context.inMemorySpanContext!
@@ -66,7 +66,7 @@ public struct InMemorySpan: Span {
     ///   - onEnd: A closure invoked when the span completes, providing access to the finished span.
     public init(
         operationName: String,
-        context: TracingContext,
+        context: InstrumentationContext,
         spanContext: InMemorySpanContext,
         kind: SpanKind,
         startInstant: any TracerInstant,
@@ -210,7 +210,7 @@ public struct FinishedInMemorySpan: Sendable {
     public var operationName: String
 
     /// The service context of the finished span.
-    public var context: TracingContext
+    public var context: InstrumentationContext
     /// The in-memory span context.
     public var spanContext: InMemorySpanContext {
         get {

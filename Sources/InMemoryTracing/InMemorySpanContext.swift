@@ -12,11 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ContextStorage
+import Instrumentation
 
 /// A type that encapsulates the trace ID, span ID, and parent span ID of an in-memory span.
 ///
-/// Generally used through the `TracingContext/inMemorySpanContext` task local value.
+/// Generally used through the `InstrumentationContext/inMemorySpanContext` task local value.
 public struct InMemorySpanContext: Sendable, Hashable {
     /// The idenfifier of top-level trace of which this span is a part of.
     public var traceID: String
@@ -39,7 +39,7 @@ public struct InMemorySpanContext: Sendable, Hashable {
     }
 }
 
-extension TracingContext {
+extension InstrumentationContext {
     /// A task-local value that represents the current tracing span as set by the in-memory tracer.
     public var inMemorySpanContext: InMemorySpanContext? {
         get {
@@ -51,6 +51,6 @@ extension TracingContext {
     }
 }
 
-private struct InMemorySpanContextKey: TracingContextKey {
+private struct InMemorySpanContextKey: InstrumentationContextKey {
     typealias Value = InMemorySpanContext
 }

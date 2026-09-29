@@ -12,22 +12,22 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// TracingContext keys provide type-safe access to service contexts by declaring the type of value they key at compile-time.
+/// InstrumentationContext keys provide type-safe access to service contexts by declaring the type of value they key at compile-time.
 ///
-/// To give your `TracingContextKey` an explicit name, override the ``TracingContextKey/nameOverride`` property.
+/// To give your `InstrumentationContextKey` an explicit name, override the ``InstrumentationContextKey/nameOverride`` property.
 ///
-/// In general, any `TracingContextKey` should be `internal` or `private` to the part of a system using it.
+/// In general, any `InstrumentationContextKey` should be `internal` or `private` to the part of a system using it.
 ///
 /// All access to context items should be performed through an accessor computed property you define as shown below:
 ///
 /// ```swift
 /// /// The Key type should be internal (or private).
-/// enum TestIDKey: TracingContextKey {
+/// enum TestIDKey: InstrumentationContextKey {
 ///     typealias Value = String
 ///     static var nameOverride: String? { "test-id" }
 /// }
 ///
-/// extension TracingContext {
+/// extension InstrumentationContext {
 ///     /// This is some useful property documentation.
 ///     public internal(set) var testID: String? {
 ///         get {
@@ -41,7 +41,7 @@
 /// ```
 ///
 /// This pattern allows library authors fine-grained control over which values may be set, and which only get by end-users.
-public protocol TracingContextKey: Sendable {
+public protocol InstrumentationContextKey: Sendable {
     /// The type of value uniquely identified by this key.
     associatedtype Value: Sendable
 
@@ -60,20 +60,20 @@ public protocol TracingContextKey: Sendable {
     static var nameOverride: String? { get }
 }
 
-extension TracingContextKey {
+extension InstrumentationContextKey {
     /// A human-readable name to use for this key instead of the type name.
     public static var nameOverride: String? { nil }
 
     /// A human-readable String representation of the underlying key.
     ///
     /// If no explicit name is returned by `nameOverride`, the type name is used.
-    public static var name: String { AnyTracingContextKey(self).name }
+    public static var name: String { AnyInstrumentationContextKey(self).name }
 }
 
 /// A type-erased service context key that you use when iterating through the service context.
 ///
-/// Iterate through an ``TracingContext`` using its ``TracingContext/forEach(_:)`` method.
-public struct AnyTracingContextKey: Sendable {
+/// Iterate through an ``InstrumentationContext`` using its ``InstrumentationContext/forEach(_:)`` method.
+public struct AnyInstrumentationContextKey: Sendable {
     /// The key's type erased to `Any.Type`.
     public let keyType: Any.Type
 
@@ -86,19 +86,19 @@ public struct AnyTracingContextKey: Sendable {
         self._nameOverride ?? String(describing: self.keyType.self)
     }
 
-    init<Key: TracingContextKey>(_ keyType: Key.Type) {
+    init<Key: InstrumentationContextKey>(_ keyType: Key.Type) {
         self.keyType = keyType
         self._nameOverride = keyType.nameOverride
     }
 }
 
-extension AnyTracingContextKey: Hashable {
+extension AnyInstrumentationContextKey: Hashable {
     /// A Boolean value that indicates whether two service context keys are equivalent.
     /// - Parameters:
     ///   - lhs: The first service context key.
     ///   - rhs: The second service context key.
     /// - Returns: `true` if equivalent; otherwise `false`.
-    public static func == (lhs: AnyTracingContextKey, rhs: AnyTracingContextKey) -> Bool {
+    public static func == (lhs: AnyInstrumentationContextKey, rhs: AnyInstrumentationContextKey) -> Bool {
         ObjectIdentifier(lhs.keyType) == ObjectIdentifier(rhs.keyType)
     }
 
@@ -109,10 +109,10 @@ extension AnyTracingContextKey: Hashable {
     }
 }
 
-/// The former name of ``TracingContextKey``.
-@available(*, deprecated, renamed: "TracingContextKey")
-public typealias ServiceContextKey = TracingContextKey
+/// The former name of ``InstrumentationContextKey``.
+@available(*, deprecated, renamed: "InstrumentationContextKey")
+public typealias ServiceContextKey = InstrumentationContextKey
 
-/// The former name of ``AnyTracingContextKey``.
-@available(*, deprecated, renamed: "AnyTracingContextKey")
-public typealias AnyServiceContextKey = AnyTracingContextKey
+/// The former name of ``AnyInstrumentationContextKey``.
+@available(*, deprecated, renamed: "AnyInstrumentationContextKey")
+public typealias AnyServiceContextKey = AnyInstrumentationContextKey

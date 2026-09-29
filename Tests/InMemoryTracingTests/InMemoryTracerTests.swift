@@ -25,7 +25,7 @@ struct InMemoryTracerTests {
         let clock = DefaultTracerClock()
 
         let startInstant = clock.now
-        var context = TracingContext.topLevel
+        var context = InstrumentationContext.topLevel
         context[UnrelatedContextKey.self] = 42
 
         #expect(tracer.activeSpan(identifiedBy: context) == nil)
@@ -55,7 +55,7 @@ struct InMemoryTracerTests {
     @Test("Starts child span")
     func childSpan() throws {
         let tracer = InMemoryTracer()
-        var rootContext = TracingContext.topLevel
+        var rootContext = InstrumentationContext.topLevel
         rootContext[UnrelatedContextKey.self] = 42
 
         #expect(tracer.activeSpan(identifiedBy: rootContext) == nil)
@@ -100,12 +100,12 @@ struct InMemoryTracerTests {
         }
     }
 
-    @Suite("TracingContext Propagation")
+    @Suite("InstrumentationContext Propagation")
     struct ContextPropagationTests {
         @Test("Injects span context into carrier and records injection")
         func injectWithSpanContext() throws {
             let tracer = InMemoryTracer()
-            var context = TracingContext.topLevel
+            var context = InstrumentationContext.topLevel
             let spanContext = InMemorySpanContext(
                 traceID: "stub",
                 spanID: "stub",
@@ -126,7 +126,7 @@ struct InMemoryTracerTests {
         @Test("Does not inject context without span context but records attempt")
         func injectWithoutSpanContext() throws {
             let tracer = InMemoryTracer()
-            let context = TracingContext.topLevel
+            let context = InstrumentationContext.topLevel
 
             var values = [String: String]()
             tracer.inject(context, into: &values, using: DictionaryInjector())
@@ -141,7 +141,7 @@ struct InMemoryTracerTests {
         @Test("Extracts span context from carrier and records extraction")
         func extractWithValues() throws {
             let tracer = InMemoryTracer()
-            var context = TracingContext.topLevel
+            var context = InstrumentationContext.topLevel
 
             let values = [InMemoryTracer.traceIDKey: "stub", InMemoryTracer.spanIDKey: "stub"]
             tracer.extract(values, into: &context, using: DictionaryExtractor())
@@ -158,7 +158,7 @@ struct InMemoryTracerTests {
         @Test("Does not extract span context without values but records extraction")
         func extractWithoutValues() throws {
             let tracer = InMemoryTracer()
-            var context = TracingContext.topLevel
+            var context = InstrumentationContext.topLevel
 
             let values = ["foo": "bar"]
             tracer.extract(values, into: &context, using: DictionaryExtractor())
@@ -216,7 +216,7 @@ struct InMemoryTracerTests {
             #expect(span.links.isEmpty)
 
             let spanContext1 = InMemorySpanContext(traceID: "1", spanID: "1", parentSpanID: nil)
-            var context1 = TracingContext.topLevel
+            var context1 = InstrumentationContext.topLevel
             context1.inMemorySpanContext = spanContext1
             span.addLink(SpanLink(context: context1, attributes: ["foo": "1"]))
             let link1 = try #require(span.links.first)
@@ -224,7 +224,7 @@ struct InMemoryTracerTests {
             #expect(link1.attributes == ["foo": "1"])
 
             let spanContext2 = InMemorySpanContext(traceID: "2", spanID: "2", parentSpanID: nil)
-            var context2 = TracingContext.topLevel
+            var context2 = InstrumentationContext.topLevel
             context2.inMemorySpanContext = spanContext2
             span.addLink(SpanLink(context: context2, attributes: ["foo": "2"]))
             let link2 = try #require(span.links.last)
@@ -286,7 +286,7 @@ struct InMemoryTracerTests {
             span.attributes["foo"] = "bar"
             span.addEvent("foo")
             let otherSpanContext = InMemorySpanContext(traceID: "other", spanID: "other", parentSpanID: nil)
-            var otherContext = TracingContext.topLevel
+            var otherContext = InstrumentationContext.topLevel
             otherContext.inMemorySpanContext = otherSpanContext
             span.addLink(SpanLink(context: otherContext, attributes: [:]))
             struct TestError: Error {}
@@ -348,7 +348,7 @@ struct InMemoryTracerTests {
             // simulate injecting/extracting HTTP headers
             var headers = [String: String]()
             clientTracer.inject(clientSpan.context, into: &headers, using: DictionaryInjector())
-            var serverContext = TracingContext.topLevel
+            var serverContext = InstrumentationContext.topLevel
             serverTracer.extract(headers, into: &serverContext, using: DictionaryExtractor())
 
             let serverSpan = serverTracer.startSpan("server", context: serverContext, ofKind: .server)
@@ -416,7 +416,7 @@ private struct DictionaryExtractor: Extractor {
     }
 }
 
-private struct UnrelatedContextKey: TracingContextKey {
+private struct UnrelatedContextKey: InstrumentationContextKey {
     typealias Value = Int
 }
 

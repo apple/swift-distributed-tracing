@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ContextStorage
+import Instrumentation
 import Testing
 import Tracing
 

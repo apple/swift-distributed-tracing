@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ContextStorage
 import Foundation
+import Instrumentation
 import Testing
 import Tracing
 
@@ -28,7 +28,7 @@ struct TracedLockTests {
 
         func launchTask(_ name: String) {
             DispatchQueue.global().async {
-                var context = TracingContext.topLevel
+                var context = InstrumentationContext.topLevel
                 context[TaskIDKey.self] = name
 
                 lock.lock(context: context, tracer: tracer)
@@ -47,7 +47,7 @@ struct TracedLockTests {
 // ==== ------------------------------------------------------------------------
 // MARK: test keys
 
-enum TaskIDKey: TracingContextKey {
+enum TaskIDKey: InstrumentationContextKey {
     typealias Value = String
     static let name: String? = "LockedOperationNameKey"
 }
@@ -59,7 +59,7 @@ enum TaskIDKey: TracingContextKey {
 private final class TracedLockPrintlnTracer: LegacyTracer {
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> TracingContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -77,7 +77,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
     package func forceFlush() {}
 
     func inject<Carrier, Inject>(
-        _ context: TracingContext,
+        _ context: InstrumentationContext,
         into carrier: inout Carrier,
         using injector: Inject
     )
@@ -88,7 +88,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 
     func extract<Carrier, Extract>(
         _ carrier: Carrier,
-        into context: inout TracingContext,
+        into context: inout InstrumentationContext,
         using extractor: Extract
     )
     where
@@ -105,7 +105,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
         private(set) var endTimeMillis: UInt64?
 
         var operationName: String
-        let context: TracingContext
+        let context: InstrumentationContext
 
         private var links = [SpanLink]()
 
@@ -127,7 +127,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
             operationName: String,
             startTime: Instant,
             kind: SpanKind,
-            context: TracingContext
+            context: InstrumentationContext
         ) {
             self.operationName = operationName
             self.startTimeMillis = startTime.millisecondsSinceEpoch
@@ -169,7 +169,7 @@ private final class TracedLockPrintlnTracer: LegacyTracer {
 extension TracedLockPrintlnTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> TracingContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,

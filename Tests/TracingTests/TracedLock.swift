@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ContextStorage
 import Foundation
 import Instrumentation
 import Tracing
@@ -30,19 +29,19 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock = NSLock()
     }
 
-    func lock(context: TracingContext, tracer: any Tracer) {
+    func lock(context: InstrumentationContext, tracer: any Tracer) {
         // time here
         self.underlyingLock.lock()
         self.activeSpan = tracer.startSpan(self.name, context: context)
     }
 
-    func unlock(context: TracingContext) {
+    func unlock(context: InstrumentationContext) {
         self.activeSpan?.end()
         self.activeSpan = nil
         self.underlyingLock.unlock()
     }
 
-    func withLock(context: TracingContext, tracer: any Tracer, _ closure: () -> Void) {
+    func withLock(context: InstrumentationContext, tracer: any Tracer, _ closure: () -> Void) {
         self.lock(context: context, tracer: tracer)
         defer { self.unlock(context: context) }
         closure()

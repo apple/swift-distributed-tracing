@@ -1,4 +1,4 @@
-# ``Tracing/Instrumentation/InstrumentationSystem``
+# ``Tracing/InstrumentationSystem``
 
 ## Topics
 

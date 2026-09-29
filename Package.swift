@@ -4,33 +4,16 @@ import PackageDescription
 let package = Package(
     name: "swift-distributed-tracing",
     products: [
-        .library(name: "ContextStorage", targets: ["ContextStorage"]),
         .library(name: "Instrumentation", targets: ["Instrumentation"]),
         .library(name: "Tracing", targets: ["Tracing"]),
         .library(name: "InMemoryTracing", targets: ["InMemoryTracing"]),
     ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
-        // MARK: ContextStorage
-
-        .target(
-            name: "ContextStorage"
-        ),
-        .testTarget(
-            name: "ContextStorageTests",
-            dependencies: [
-                .target(name: "ContextStorage")
-            ]
-        ),
-
-        // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Instrumentation
 
         .target(
-            name: "Instrumentation",
-            dependencies: [
-                .target(name: "ContextStorage")
-            ]
+            name: "Instrumentation"
         ),
         .testTarget(
             name: "InstrumentationTests",
@@ -45,7 +28,6 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
-                .target(name: "ContextStorage"),
                 .target(name: "Instrumentation"),
                 .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
             ]
