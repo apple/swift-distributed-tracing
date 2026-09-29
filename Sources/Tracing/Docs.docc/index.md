@@ -25,7 +25,7 @@ below to find the guide for your role.
 
 ### Boostrapping tracing
 
-- ``InstrumentationSystem``
+- ``Tracing/Instrumentation/InstrumentationSystem``
 - ``Tracing/Tracer``
 - ``TracerInstant``
 - ``LegacyTracer``
