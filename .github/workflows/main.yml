@@ -37,11 +37,26 @@ jobs:
     with:
       benchmark_package_path: "Benchmarks"
 
+  macos-benchmarks:
+    name: macOS benchmarks
+    uses: apple/swift-nio/.github/workflows/macos_benchmarks.yml@main
+    with:
+      runner_pool: nightly
+      benchmark_package_paths: '["Benchmarks/TracingBenchmarks"]'
+      macos_swift_6_2_enabled: true
+      macos_swift_6_3_enabled: true
+      macos_swift_6_4_enabled: true
+
   macos-tests:
     name: macOS tests
     uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
     with:
+      runner_pool: nightly
       build_scheme: swift-distributed-tracing-Package
+      swift_6_1_enabled: false
+      swift_6_2_enabled: true
+      swift_6_3_enabled: true
+      swift_6_4_enabled: true
 
   wasm-sdk:
     name: WebAssembly Swift SDK

@@ -36,6 +36,17 @@ jobs:
       windows_nightly_next_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_nightly_main_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
 
+  macos-tests:
+    name: macOS tests
+    uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
+    with:
+      runner_pool: general
+      build_scheme: swift-distributed-tracing-Package
+      swift_6_1_enabled: false
+      swift_6_2_enabled: true
+      swift_6_3_enabled: true
+      swift_6_4_enabled: true
+
   wasm-sdk:
     name: WebAssembly Swift SDK
     uses: apple/swift-nio/.github/workflows/wasm_swift_sdk.yml@main
@@ -47,6 +58,16 @@ jobs:
     uses: apple/swift-nio/.github/workflows/benchmarks.yml@main
     with:
       benchmark_package_path: "Benchmarks"
+
+  macos-benchmarks:
+    name: macOS benchmarks
+    uses: apple/swift-nio/.github/workflows/macos_benchmarks.yml@main
+    with:
+      macos_runner_pool: general
+      benchmark_package_paths: '["Benchmarks/TracingBenchmarks"]'
+      macos_swift_6_2_enabled: true
+      macos_swift_6_3_enabled: true
+      macos_swift_6_4_enabled: true
 
   cxx-interop:
     name: Cxx interop
