@@ -51,7 +51,6 @@ public func withTracer<Result, Failure: Error>(
     }
 }
 
-#if compiler(>=6.2)
 /// Makes the tracer the active instrument for the current task and any child tasks it spawns, for the
 /// duration of an asynchronous closure that inherits the caller's isolation.
 ///
@@ -88,46 +87,3 @@ public nonisolated(nonsending) func withTracer<Result, Failure: Error>(
         throw error as! Failure
     }
 }
-#else
-/// Makes the tracer the active instrument for the current task and any child tasks it spawns, for the
-/// duration of an asynchronous closure, optionally isolated to an actor you specify.
-///
-/// The task-local tracer exists for the duration of `operation`. Takes priority over the bootstrapped
-/// instrument for both span creation and propagation, since a `Tracer` is an `Instrument`.
-///
-/// ```swift
-/// @Test func spansAreCaptured() async {
-///     let tracer = InMemoryTracer()
-///     await withTracer(tracer) {
-///         await withSpan("op") { _ in }   // emits into `tracer`
-///     }
-///     #expect(tracer.finishedSpans.count == 1)
-/// }
-/// ```
-///
-/// See <doc:TraceYourApplication#Scope-a-tracer-using-withTracer> for task inheritance, nesting, and
-/// multi-instrument scoping.
-///
-/// - Parameters:
-///   - tracer: The tracer to make active for the duration of `operation`.
-///   - operation: The async closure to run with `tracer` active.
-/// - Returns: The value returned by the closure.
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public func withTracer<Result, Failure: Error>(
-    _ tracer: any Tracer,
-    isolation: isolated (any Actor)? = #isolation,
-    _ operation: () async throws(Failure) -> Result
-) async throws(Failure) -> Result {
-    do {
-        return try await InstrumentationSystem.withTaskLocalInstrument(
-            tracer,
-            isolation: isolation,
-            operation: operation
-        )
-    } catch {
-        // FIXME: remove when `TaskLocal.withValue` gains typed-throws support. Safe for the same reason as the
-        // synchronous variant above.
-        throw error as! Failure
-    }
-}
-#endif
