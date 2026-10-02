@@ -14,19 +14,19 @@ jobs:
     name: Unit tests
     uses: apple/swift-nio/.github/workflows/unit_tests.yml@main
     with:
-      linux_6_1_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       linux_6_2_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       linux_6_3_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
+      linux_6_4_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       linux_nightly_next_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       linux_nightly_main_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
-      windows_6_1_enabled: true
       windows_6_2_enabled: true
       windows_6_3_enabled: true
+      windows_6_4_enabled: true
       windows_nightly_next_enabled: true
       windows_nightly_main_enabled: true
-      windows_6_1_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_6_2_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_6_3_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
+      windows_6_4_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_nightly_next_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
       windows_nightly_main_arguments_override: "--explicit-target-dependency-import-check error -Xswiftc -require-explicit-sendable"
 
@@ -37,11 +37,26 @@ jobs:
     with:
       benchmark_package_path: "Benchmarks"
 
+  macos-benchmarks:
+    name: macOS benchmarks
+    uses: apple/swift-nio/.github/workflows/macos_benchmarks.yml@main
+    with:
+      runner_pool: nightly
+      benchmark_package_paths: '["Benchmarks"]'
+      macos_swift_6_2_enabled: true
+      macos_swift_6_3_enabled: true
+      macos_swift_6_4_enabled: true
+
   macos-tests:
     name: macOS tests
     uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
     with:
+      runner_pool: nightly
       build_scheme: swift-distributed-tracing-Package
+      swift_6_1_enabled: false
+      swift_6_2_enabled: true
+      swift_6_3_enabled: true
+      swift_6_4_enabled: true
 
   wasm-sdk:
     name: WebAssembly Swift SDK
