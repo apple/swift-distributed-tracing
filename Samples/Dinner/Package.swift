@@ -1,4 +1,4 @@
-// swift-tools-version:6.1
+// swift-tools-version:6.2
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift Distributed Tracing open source project
