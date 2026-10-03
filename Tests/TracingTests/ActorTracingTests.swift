@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceContextModule
+import Instrumentation
 import Testing
 import Tracing
 

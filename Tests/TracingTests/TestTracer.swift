@@ -15,7 +15,6 @@
 import Dispatch
 import Foundation
 import Instrumentation
-import ServiceContextModule
 import Tracing
 
 /// Only intended to be used in single-threaded testing.
@@ -25,7 +24,7 @@ final class TestTracer: LegacyTracer {
 
     func startAnySpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -45,7 +44,11 @@ final class TestTracer: LegacyTracer {
 
     package func forceFlush() {}
 
-    func extract<Carrier, Extract>(_ carrier: Carrier, into context: inout ServiceContext, using extractor: Extract)
+    func extract<Carrier, Extract>(
+        _ carrier: Carrier,
+        into context: inout InstrumentationContext,
+        using extractor: Extract
+    )
     where
         Extract: Extractor,
         Carrier == Extract.Carrier
@@ -54,7 +57,7 @@ final class TestTracer: LegacyTracer {
         context.traceID = traceID
     }
 
-    func inject<Carrier, Inject>(_ context: ServiceContext, into carrier: inout Carrier, using injector: Inject)
+    func inject<Carrier, Inject>(_ context: InstrumentationContext, into carrier: inout Carrier, using injector: Inject)
     where
         Inject: Injector,
         Carrier == Inject.Carrier
@@ -67,7 +70,7 @@ final class TestTracer: LegacyTracer {
 extension TestTracer: Tracer {
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -87,16 +90,16 @@ extension TestTracer: Tracer {
 }
 
 extension TestTracer {
-    enum TraceIDKey: ServiceContextKey {
+    enum TraceIDKey: InstrumentationContextKey {
         typealias Value = String
     }
 
-    enum SpanIDKey: ServiceContextKey {
+    enum SpanIDKey: InstrumentationContextKey {
         typealias Value = String
     }
 }
 
-extension ServiceContext {
+extension InstrumentationContext {
     var traceID: String? {
         get {
             self[TestTracer.TraceIDKey.self]
@@ -128,7 +131,7 @@ final class TestSpan: Span {
     private(set) var recordedErrors: [(Error, SpanAttributes)] = []
 
     var operationName: String
-    let context: ServiceContext
+    let context: InstrumentationContext
 
     private(set) var events = [SpanEvent]() {
         didSet {
@@ -151,7 +154,7 @@ final class TestSpan: Span {
     init<Instant: TracerInstant>(
         operationName: String,
         startTime: Instant,
-        context: ServiceContext,
+        context: InstrumentationContext,
         kind: SpanKind,
         onEnd: @escaping (TestSpan) -> Void
     ) {

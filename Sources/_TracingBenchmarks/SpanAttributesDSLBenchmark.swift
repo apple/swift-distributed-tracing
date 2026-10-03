@@ -17,7 +17,7 @@ import Tracing
 import _TracingBenchmarkTools
 
 // swift-format-ignore: DontRepeatTypeInStaticProperties
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal InstrumentationContext
 enum DSLBenchmarks {
     /// Built-in span attribute DSL benchmarks
     public static let SpanAttributesDSLBenchmarks: [BenchmarkInfo] = [
@@ -162,7 +162,7 @@ enum DSLBenchmarks {
     }
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal InstrumentationContext
 extension SpanAttributes {
     var http: DSLBenchmarks.HTTPAttributes {
         get {

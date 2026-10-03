@@ -4,13 +4,13 @@
 
 ### Creating spans
 
-- ``withAnySpan(_:context:ofKind:function:file:line:_:)-9jni8``
-- ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-7fz6i``
+- ``withAnySpan(_:context:ofKind:function:file:line:_:)-i694``
+- ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-1ceel``
 - ``withAnySpan(_:context:ofKind:isolation:function:file:line:_:)``
 - ``withAnySpan(_:at:context:ofKind:isolation:function:file:line:_:)``
 
-- ``withAnySpan(_:context:ofKind:function:file:line:_:)-369ou``
-- ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-6jzit``
+- ``withAnySpan(_:context:ofKind:function:file:line:_:)-5tnb4``
+- ``withAnySpan(_:at:context:ofKind:function:file:line:_:)-2ze4c``
 
 ### Manually managing spans
 

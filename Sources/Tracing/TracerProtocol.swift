@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 @_documentation(visibility: internal) @_exported import Instrumentation
-@_documentation(visibility: internal) @_exported import ServiceContextModule
 
 // ==== -----------------------------------------------------------------------
 // MARK: Tracer protocol
@@ -21,20 +20,20 @@
 /// A tracer capable of creating new trace spans.
 ///
 /// A tracer is a special kind of instrument with the added ability to start a ``Span``.
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal InstrumentationContext
 public protocol Tracer: LegacyTracer {
     /// The concrete type of span this tracer produces.
     associatedtype Span: Tracing.Span
 
     /// Start a new span with the given service context.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` to start
+    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-6dc3v`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
@@ -44,7 +43,7 @@ public protocol Tracer: LegacyTracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: The time instant at which the span started.
     ///   - function: The function name in which the span started.
@@ -52,7 +51,7 @@ public protocol Tracer: LegacyTracer {
     ///   - line: The file line where the span started.
     func startSpan<Instant: TracerInstant>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext,
+        context: @autoclosure () -> InstrumentationContext,
         ofKind kind: SpanKind,
         at instant: @autoclosure () -> Instant,
         function: String,
@@ -65,21 +64,21 @@ public protocol Tracer: LegacyTracer {
     /// - Note: This API does not enable look up of completed spans.
     /// It was added retroactively with a default implementation returning `nil` and therefore isn't guaranteed to be implemented by all Tracers.
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
-    /// - Returns: The span identified by the given `ServiceContext` in case it's still recording.
-    func activeSpan(identifiedBy context: ServiceContext) -> Span?
+    /// - Returns: The span identified by the given `InstrumentationContext` in case it's still recording.
+    func activeSpan(identifiedBy context: InstrumentationContext) -> Span?
 }
 
-@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal ServiceContext
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal InstrumentationContext
 extension Tracer {
     /// Start a new span with the current, or the explicitly passed, service context.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
     /// stored away previously,
     ///
-    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v`` to start
+    /// - Note: Prefer ``withSpan(_:context:ofKind:at:function:file:line:_:)-6dc3v`` to start
     ///   a span as it automatically takes care of ending the span, and recording errors when thrown.
     ///   Use `startSpan` iff you need to pass the span manually to a different
     ///   location in your source code to end it.
@@ -89,7 +88,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: The time instant at which the span started.
     ///   - function: The function name in which the span started.
@@ -97,7 +96,7 @@ extension Tracer {
     ///   - line: The file line where the span started.
     public func startSpan(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -121,7 +120,7 @@ extension Tracer {
     ///
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
     /// - Returns: `nil`.
-    public func activeSpan(identifiedBy context: ServiceContext) -> Span? {
+    public func activeSpan(identifiedBy context: InstrumentationContext) -> Span? {
         nil
     }
 }
@@ -134,7 +133,7 @@ extension Tracer {
     /// Starts a new span, optionally at a time instant you provide, and ends it automatically when the
     /// synchronous operation completes, including recording the error in case it throws.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
@@ -145,7 +144,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: The time instant at which the span started.
     ///   - function: The function name in which the span started.
@@ -156,7 +155,7 @@ extension Tracer {
     /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -175,7 +174,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try ServiceContext.$current.withValue(span.context) {
+            return try InstrumentationContext.$current.withValue(span.context) {
                 try operation(span)
             }
         } catch {
@@ -188,7 +187,7 @@ extension Tracer {
     /// Starts a new span using the default clock, and ends it automatically when the synchronous
     /// operation completes, including recording the error in case it throws.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
@@ -199,7 +198,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - function: The function name in which the span started.
     ///   - fileID: The `fileID` where the span started.
@@ -209,7 +208,7 @@ extension Tracer {
     /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         function: String = #function,
         file fileID: String = #fileID,
@@ -227,7 +226,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try ServiceContext.$current.withValue(span.context) {
+            return try InstrumentationContext.$current.withValue(span.context) {
                 try operation(span)
             }
         } catch {
@@ -240,7 +239,7 @@ extension Tracer {
     /// Starts a new span using the default clock, and ends it when the asynchronous operation
     /// completes, inheriting the caller's isolation and recording any thrown error.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
@@ -251,7 +250,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
     ///   - function: The function name in which the span started.
@@ -262,7 +261,7 @@ extension Tracer {
     /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         isolation: isolated (any Actor)? = #isolation,
         function: String = #function,
@@ -281,7 +280,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await ServiceContext.$current.withValue(span.context) {
+            return try await InstrumentationContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {
@@ -301,7 +300,7 @@ extension Tracer {
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         function: String = #function,
         file fileID: String = #fileID,
@@ -319,7 +318,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await ServiceContext.$current.withValue(span.context) {
+            return try await InstrumentationContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {
@@ -332,7 +331,7 @@ extension Tracer {
     /// Starts a new span, optionally at a time instant you provide, and ends it when the
     /// asynchronous operation completes, inheriting the caller's isolation and recording any thrown error.
     ///
-    /// The current task-local `ServiceContext` is picked up and provided to the underlying tracer.
+    /// The current task-local `InstrumentationContext` is picked up and provided to the underlying tracer.
     /// It is also possible to pass a specific `context` explicitly, in which case attempting
     /// to pick up the task-local context is prevented. This can be useful when we know that
     /// we're about to start a top-level span, or if a span should be started from a different,
@@ -342,7 +341,7 @@ extension Tracer {
     ///   operation closure returning the span will be closed automatically.
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started.
     ///   - isolation: Defaulted parameter for inheriting isolation of calling actor.
@@ -354,7 +353,7 @@ extension Tracer {
     /// - Throws: the error the `operation` throws (if any).
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         isolation: isolated (any Actor)? = #isolation,
@@ -374,7 +373,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await ServiceContext.$current.withValue(span.context) {
+            return try await InstrumentationContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {
@@ -394,7 +393,7 @@ extension Tracer {
     ///
     /// - Parameters:
     ///   - operationName: The name of the operation being traced. This may be a handler function, a database call, and so on.
-    ///   - context: The `ServiceContext` providing information on where to start the new ``Span``.
+    ///   - context: The `InstrumentationContext` providing information on where to start the new ``Span``.
     ///   - kind: The ``SpanKind`` of the new ``Span``.
     ///   - instant: the time instant at which the span started.
     ///   - function: The function name in which the span started.
@@ -406,7 +405,7 @@ extension Tracer {
     @_disfavoredOverload @available(*, deprecated, message: "Prefer #isolation version of this API")
     public func withSpan<T>(
         _ operationName: String,
-        context: @autoclosure () -> ServiceContext = .current ?? .topLevel,
+        context: @autoclosure () -> InstrumentationContext = .current ?? .topLevel,
         ofKind kind: SpanKind = .internal,
         at instant: @autoclosure () -> some TracerInstant = DefaultTracerClock.now,
         function: String = #function,
@@ -425,7 +424,7 @@ extension Tracer {
         )
         defer { span.end() }
         do {
-            return try await ServiceContext.$current.withValue(span.context) {
+            return try await InstrumentationContext.$current.withValue(span.context) {
                 try await operation(span)
             }
         } catch {

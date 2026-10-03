@@ -8,18 +8,12 @@ let package = Package(
         .library(name: "Tracing", targets: ["Tracing"]),
         .library(name: "InMemoryTracing", targets: ["InMemoryTracing"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-service-context.git", from: "1.1.0")
-    ],
     targets: [
         // ==== --------------------------------------------------------------------------------------------------------
         // MARK: Instrumentation
 
         .target(
-            name: "Instrumentation",
-            dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context")
-            ]
+            name: "Instrumentation"
         ),
         .testTarget(
             name: "InstrumentationTests",
@@ -34,7 +28,6 @@ let package = Package(
         .target(
             name: "Tracing",
             dependencies: [
-                .product(name: "ServiceContextModule", package: "swift-service-context"),
                 .target(name: "Instrumentation"),
                 .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
             ]
