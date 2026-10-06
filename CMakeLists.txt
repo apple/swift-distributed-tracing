@@ -1,4 +1,16 @@
-# SPDX-License-Identifier: Apache-2.0
+##===----------------------------------------------------------------------===##
+##
+## This source file is part of the Swift Distributed Tracing open source project
+##
+## Copyright (c) 2026 Apple Inc. and the Swift Distributed Tracing project authors
+## Licensed under Apache License v2.0
+##
+## See LICENSE.txt for license information
+## See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
+##
+## SPDX-License-Identifier: Apache-2.0
+##
+##===----------------------------------------------------------------------===##
 
 cmake_minimum_required(VERSION 3.29)
 project(SwiftDistributedTracing LANGUAGES C Swift)
@@ -28,7 +40,7 @@ add_library(Instrumentation
   Sources/Instrumentation/Instrument.swift
 )
 add_library(SwiftDistributedTracing::Instrumentation ALIAS Instrumentation)
-swift_library(Instrumentation)
+_swift_distributed_tracing_library(Instrumentation)
 target_link_libraries(Instrumentation PUBLIC ${service_context_target})
 
 add_library(Tracing
@@ -42,7 +54,7 @@ add_library(Tracing
   Sources/Tracing/NoOpTracer.swift
 )
 add_library(SwiftDistributedTracing::Tracing ALIAS Tracing)
-swift_library(Tracing)
+_swift_distributed_tracing_library(Tracing)
 target_link_libraries(Tracing PUBLIC Instrumentation ${service_context_target})
 
 add_library(InMemoryTracing
@@ -51,7 +63,7 @@ add_library(InMemoryTracing
   Sources/InMemoryTracing/InMemoryTracer.swift
 )
 add_library(SwiftDistributedTracing::InMemoryTracing ALIAS InMemoryTracing)
-swift_library(InMemoryTracing)
+_swift_distributed_tracing_library(InMemoryTracing)
 target_link_libraries(InMemoryTracing PUBLIC Tracing)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
