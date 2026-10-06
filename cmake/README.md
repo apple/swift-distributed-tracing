@@ -3,6 +3,9 @@
 CMake 3.29 or newer, Ninja, and Swift 6.2 or newer are required. Ninja Multi-Config
 requires CMake 4.0 or newer. SwiftPM remains the test runner for the Swift unit tests.
 
+On Windows, run CMake from a Visual Studio developer command prompt so the MSVC
+linker and Windows SDK are available.
+
 Configure, build, and install the libraries:
 
 ```sh
