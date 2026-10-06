@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(SwiftServiceContext CONFIG)
+include("${CMAKE_CURRENT_LIST_DIR}/SwiftDistributedTracingTargets.cmake")
+check_required_components(SwiftDistributedTracing)

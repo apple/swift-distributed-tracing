@@ -1,0 +1,84 @@
+# SPDX-License-Identifier: Apache-2.0
+
+cmake_minimum_required(VERSION 3.29)
+project(SwiftDistributedTracing LANGUAGES C Swift)
+
+if(CMAKE_Swift_COMPILER_VERSION VERSION_LESS 6.2)
+  message(FATAL_ERROR "Swift 6.2 or newer is required")
+endif()
+set(CMAKE_Swift_LANGUAGE_VERSION 6)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(cmake/SwiftLibrary.cmake)
+
+if(TARGET SwiftServiceContext::ServiceContextModule)
+  set(service_context_target SwiftServiceContext::ServiceContextModule)
+elseif(TARGET ServiceContextModule)
+  set(service_context_target ServiceContextModule)
+else()
+  find_package(SwiftServiceContext CONFIG REQUIRED)
+  set(service_context_target SwiftServiceContext::ServiceContextModule)
+endif()
+
+add_library(Instrumentation
+  Sources/Instrumentation/Locks.swift
+  Sources/Instrumentation/NoOpInstrument.swift
+  Sources/Instrumentation/MultiplexInstrument.swift
+  Sources/Instrumentation/InstrumentationSystem.swift
+  Sources/Instrumentation/Instrument.swift
+)
+add_library(SwiftDistributedTracing::Instrumentation ALIAS Instrumentation)
+swift_library(Instrumentation)
+target_link_libraries(Instrumentation PUBLIC ${service_context_target})
+
+add_library(Tracing
+  Sources/Tracing/TracerProtocol+Legacy.swift
+  Sources/Tracing/Tracer.swift
+  Sources/Tracing/TracingTime.swift
+  Sources/Tracing/TracerProtocol.swift
+  Sources/Tracing/SpanProtocol.swift
+  Sources/Tracing/InstrumentationSystem+Tracing.swift
+  Sources/Tracing/WithTracer.swift
+  Sources/Tracing/NoOpTracer.swift
+)
+add_library(SwiftDistributedTracing::Tracing ALIAS Tracing)
+swift_library(Tracing)
+target_link_libraries(Tracing PUBLIC Instrumentation ${service_context_target})
+
+add_library(InMemoryTracing
+  Sources/InMemoryTracing/InMemorySpan.swift
+  Sources/InMemoryTracing/InMemorySpanContext.swift
+  Sources/InMemoryTracing/InMemoryTracer.swift
+)
+add_library(SwiftDistributedTracing::InMemoryTracing ALIAS InMemoryTracing)
+swift_library(InMemoryTracing)
+target_link_libraries(InMemoryTracing PUBLIC Tracing)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
+  add_library(_CWASI Sources/_CWASI/_CWASI.c)
+  target_include_directories(_CWASI PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Sources/_CWASI/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/_CWASI>")
+  configure_file(Sources/_CWASI/include/_CWASI.h
+    "${CMAKE_CURRENT_BINARY_DIR}/wasi/_CWASI.h" COPYONLY)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/wasi/module.modulemap"
+    "module _CWASI { header \"_CWASI.h\" export * }\n")
+  target_include_directories(_CWASI PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/wasi>")
+  target_link_libraries(Tracing PUBLIC _CWASI)
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/wasi/module.modulemap"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/_CWASI")
+  install(TARGETS _CWASI EXPORT SwiftDistributedTracingTargets)
+  install(DIRECTORY Sources/_CWASI/include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/_CWASI")
+endif()
+
+set(package_directory "${CMAKE_INSTALL_LIBDIR}/cmake/SwiftDistributedTracing")
+configure_package_config_file(cmake/SwiftDistributedTracingConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
+  INSTALL_DESTINATION "${package_directory}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
+  DESTINATION "${package_directory}")
+install(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
+  DESTINATION "${package_directory}")
+export(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingTargets.cmake")
