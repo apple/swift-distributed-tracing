@@ -26,9 +26,10 @@ function(_swift_distributed_tracing_library target)
   set_target_properties(${target} PROPERTIES
     Swift_MODULE_DIRECTORY "${module_directory}"
     POSITION_INDEPENDENT_CODE YES)
-  if(WIN32)
-    # Swift's autolinker uses the lib prefix for MSVC libraries too.
-    set_target_properties(${target} PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
+  get_target_property(library_type ${target} TYPE)
+  if(WIN32 AND library_type STREQUAL "STATIC_LIBRARY")
+    # Swift autolinks lib-prefixed static archives, but unprefixed DLL import libraries.
+    set_target_properties(${target} PROPERTIES PREFIX "lib")
   endif()
   target_compile_options(${target} PRIVATE
     "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-package-name swift_distributed_tracing>"
