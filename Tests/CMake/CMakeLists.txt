@@ -14,6 +14,11 @@
 
 cmake_minimum_required(VERSION 3.29)
 project(CMakeConsumer LANGUAGES C Swift)
+
+# Match the DLL runtime used by the Windows Swift SDK, including Debug builds.
+if(WIN32 AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+endif()
 find_package(SwiftDistributedTracing CONFIG REQUIRED)
 add_executable(CMakeConsumer main.swift)
 target_link_libraries(CMakeConsumer PRIVATE SwiftDistributedTracing::Instrumentation SwiftDistributedTracing::Tracing SwiftDistributedTracing::InMemoryTracing)

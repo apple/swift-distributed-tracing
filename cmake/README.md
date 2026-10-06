@@ -8,7 +8,8 @@ linker and Windows SDK are available. Add `-DCMAKE_C_COMPILER=clang` to each con
 command to use the Clang driver supplied with Swift. Shared builds require this
 GNU-style driver because CMake's MSVC C driver initializes linker flags that Swift
 cannot consume directly. Use the same build configuration for libraries and their
-consumer.
+consumer. The default Windows runtime is `MultiThreadedDLL` to match Swift's SDK;
+set `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL` in independent consumers too.
 
 Configure, build, and install the libraries:
 

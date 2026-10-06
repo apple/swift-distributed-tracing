@@ -15,6 +15,11 @@
 cmake_minimum_required(VERSION 3.29)
 project(SwiftDistributedTracing LANGUAGES C Swift)
 
+# Match the DLL runtime used by the Windows Swift SDK, including Debug builds.
+if(WIN32 AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+endif()
+
 if(CMAKE_Swift_COMPILER_VERSION VERSION_LESS 6.2)
   message(FATAL_ERROR "Swift 6.2 or newer is required")
 endif()
