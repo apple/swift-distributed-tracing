@@ -13,7 +13,7 @@
 ##===----------------------------------------------------------------------===##
 
 cmake_minimum_required(VERSION 3.29)
-project(CMakeConsumer LANGUAGES Swift)
+project(CMakeConsumer LANGUAGES C Swift)
 find_package(SwiftDistributedTracing CONFIG REQUIRED)
 add_executable(CMakeConsumer main.swift)
 target_link_libraries(CMakeConsumer PRIVATE SwiftDistributedTracing::Instrumentation SwiftDistributedTracing::Tracing SwiftDistributedTracing::InMemoryTracing)

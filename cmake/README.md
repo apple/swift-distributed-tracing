@@ -4,7 +4,11 @@ CMake 3.29 or newer, Ninja, and Swift 6.2 or newer are required. Ninja Multi-Con
 requires CMake 4.0 or newer. SwiftPM remains the test runner for the Swift unit tests.
 
 On Windows, run CMake from a Visual Studio developer command prompt so the MSVC
-linker and Windows SDK are available.
+linker and Windows SDK are available. Add `-DCMAKE_C_COMPILER=clang` to each configure
+command to use the Clang driver supplied with Swift. Shared builds require this
+GNU-style driver because CMake's MSVC C driver initializes linker flags that Swift
+cannot consume directly. Use the same build configuration for libraries and their
+consumer.
 
 Configure, build, and install the libraries:
 
@@ -22,7 +26,7 @@ and install prefix both provide a `SwiftDistributedTracing` package configuratio
 The independent consumer verifies that public modules can be imported and linked:
 
 ```sh
-cmake -S Tests/CMake -B consumer -G Ninja -DCMAKE_PREFIX_PATH=/path/to/install
+cmake -S Tests/CMake -B consumer -G Ninja -DCMAKE_PREFIX_PATH="/path/to/install;/path/to/context/install"
 cmake --build consumer
 ctest --test-dir consumer --output-on-failure
 ```
