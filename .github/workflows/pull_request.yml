@@ -42,6 +42,7 @@ jobs:
     with:
       runner_pool: general
       build_scheme: swift-distributed-tracing-Package
+      swift_6_1_enabled: false
       swift_6_2_enabled: true
       swift_6_3_enabled: true
       swift_6_4_enabled: true
@@ -64,6 +65,7 @@ jobs:
     with:
       macos_runner_pool: general
       benchmark_package_paths: '["Benchmarks"]'
+      macos_swift_6_1_enabled: false
       macos_swift_6_2_enabled: true
       macos_swift_6_3_enabled: true
       macos_swift_6_4_enabled: true
