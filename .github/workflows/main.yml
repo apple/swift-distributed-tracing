@@ -41,7 +41,7 @@ jobs:
     name: macOS benchmarks
     uses: apple/swift-nio/.github/workflows/macos_benchmarks.yml@main
     with:
-      runner_pool: nightly
+      macos_runner_pool: nightly
       benchmark_package_paths: '["Benchmarks"]'
       macos_swift_6_2_enabled: true
       macos_swift_6_3_enabled: true
