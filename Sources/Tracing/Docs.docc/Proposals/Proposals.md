@@ -45,4 +45,5 @@ If you have any questions, ask in an issue on GitHub.
 ## Topics
 
 - <doc:SDT-0001-task-local-tracer>
+- <doc:SDT-0002-move-service-context-into-tracing>
 - <doc:SDT-NNNN>

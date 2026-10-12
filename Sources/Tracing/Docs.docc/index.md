@@ -37,16 +37,16 @@ below to find the guide for your role.
 
 ### Creating spans
 
-- ``withSpan(_:context:ofKind:function:file:line:_:)-65bom``
-- ``withSpan(_:at:context:ofKind:function:file:line:_:)-7pdo8``
+- ``withSpan(_:context:ofKind:function:file:line:_:)-4mlt2``
+- ``withSpan(_:at:context:ofKind:function:file:line:_:)-2orzd``
 - ``withSpan(_:context:ofKind:isolation:function:file:line:_:)``
 - ``withSpan(_:at:context:ofKind:isolation:function:file:line:_:)``
-- ``withSpan(_:context:ofKind:at:function:file:line:_:)-6e2id``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-9jvi2``
 - ``withSpan(_:context:ofKind:at:isolation:function:file:line:_:)``
 
-- ``withSpan(_:context:ofKind:function:file:line:_:)-tj8``
-- ``withSpan(_:at:context:ofKind:function:file:line:_:)-3h6gv``
-- ``withSpan(_:context:ofKind:at:function:file:line:_:)-8gw3v``
+- ``withSpan(_:context:ofKind:function:file:line:_:)-7hzzs``
+- ``withSpan(_:at:context:ofKind:function:file:line:_:)-52qzv``
+- ``withSpan(_:context:ofKind:at:function:file:line:_:)-6dc3v``
 
 ### Manually managing spans
 

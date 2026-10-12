@@ -14,7 +14,6 @@
 
 import Foundation
 import Instrumentation
-import ServiceContextModule
 import Tracing
 
 /// Marked as @unchecked Sendable due to the synchronization being
@@ -30,19 +29,19 @@ final class TracedLock: @unchecked Sendable {
         self.underlyingLock = NSLock()
     }
 
-    func lock(context: ServiceContext, tracer: any Tracer) {
+    func lock(context: InstrumentationContext, tracer: any Tracer) {
         // time here
         self.underlyingLock.lock()
         self.activeSpan = tracer.startSpan(self.name, context: context)
     }
 
-    func unlock(context: ServiceContext) {
+    func unlock(context: InstrumentationContext) {
         self.activeSpan?.end()
         self.activeSpan = nil
         self.underlyingLock.unlock()
     }
 
-    func withLock(context: ServiceContext, tracer: any Tracer, _ closure: () -> Void) {
+    func withLock(context: InstrumentationContext, tracer: any Tracer, _ closure: () -> Void) {
         self.lock(context: context, tracer: tracer)
         defer { self.unlock(context: context) }
         closure()
