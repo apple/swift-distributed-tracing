@@ -43,7 +43,7 @@ jobs:
     with:
       macos_runner_pool: nightly
       benchmark_package_paths: '["Benchmarks"]'
-      macos_swift_6_1_enabled: true
+      macos_swift_6_1_enabled: false
       macos_swift_6_2_enabled: true
       macos_swift_6_3_enabled: true
       macos_swift_6_4_enabled: true
