@@ -52,8 +52,8 @@ let package = Package(
             name: "Tracing",
             dependencies: [
                 .target(name: "Instrumentation"),
-                // Not imported by `Tracing`. This makes `import ServiceContextModule` work for clients that only
-                // depend on `Tracing`, as they did when `Instrumentation` depended on swift-service-context.
+                // `Tracing` re-exports `ServiceContextModule`, as it did when `Instrumentation` depended on
+                // swift-service-context. Clients that only depend on `Tracing` can import and name the module.
                 .target(name: "ServiceContextModule"),
                 .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
             ]
