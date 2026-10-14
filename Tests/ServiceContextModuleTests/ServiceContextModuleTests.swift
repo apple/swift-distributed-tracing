@@ -30,6 +30,13 @@ struct ServiceContextModuleTests {
         #expect((any ServiceContextKey).self == (any InstrumentationContextKey).self)
     }
 
+    @Test("Module-qualified names resolve through the re-export")
+    func moduleQualifiedNamesResolve() {
+        #expect(ServiceContextModule.ServiceContext.self == InstrumentationContext.self)
+        #expect(ServiceContextModule.AnyServiceContextKey.self == AnyInstrumentationContextKey.self)
+        #expect(ServiceContextModule.TODOLocation.self == TODOLocation.self)
+    }
+
     @Test("ServiceContext stores and returns a value")
     func storesAndReturnsValue() {
         var context = ServiceContext.topLevel
