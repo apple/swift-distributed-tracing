@@ -41,7 +41,8 @@ let package = Package(
         .testTarget(
             name: "ServiceContextModuleTests",
             dependencies: [
-                .target(name: "ServiceContextModule")
+                .target(name: "ServiceContextModule"),
+                .target(name: "Tracing"),
             ]
         ),
 
