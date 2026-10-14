@@ -26,5 +26,5 @@ enable_testing()
 add_test(NAME CMakeConsumer COMMAND CMakeConsumer)
 if(WIN32)
   set_tests_properties(CMakeConsumer PROPERTIES ENVIRONMENT_MODIFICATION
-    "PATH=path_list_prepend:$<TARGET_FILE_DIR:SwiftDistributedTracing::InMemoryTracing>;PATH=path_list_prepend:$<TARGET_FILE_DIR:SwiftServiceContext::ServiceContextModule>")
+    "PATH=path_list_prepend:$<TARGET_FILE_DIR:SwiftDistributedTracing::InMemoryTracing>")
 endif()

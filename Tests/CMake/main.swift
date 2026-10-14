@@ -14,10 +14,12 @@
 
 import InMemoryTracing
 import Instrumentation
+import ServiceContextModule
 import Tracing
 
+let context: ServiceContextModule.ServiceContext = InstrumentationContext.topLevel
 let tracer = InMemoryTracer()
-let span = tracer.startSpan("CMake")
+let span = tracer.startSpan("CMake", context: context)
 span.end()
 precondition(tracer.popFinishedSpans().count == 1)
 let instrument = NoOpInstrument()

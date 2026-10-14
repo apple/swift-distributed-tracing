@@ -32,16 +32,9 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(cmake/SwiftLibrary.cmake)
 
-if(TARGET SwiftServiceContext::ServiceContextModule)
-  set(service_context_target SwiftServiceContext::ServiceContextModule)
-elseif(TARGET ServiceContextModule)
-  set(service_context_target ServiceContextModule)
-else()
-  find_package(SwiftServiceContext CONFIG REQUIRED)
-  set(service_context_target SwiftServiceContext::ServiceContextModule)
-endif()
-
 add_library(Instrumentation
+  Sources/Instrumentation/InstrumentationContext.swift
+  Sources/Instrumentation/InstrumentationContextKey.swift
   Sources/Instrumentation/Locks.swift
   Sources/Instrumentation/NoOpInstrument.swift
   Sources/Instrumentation/MultiplexInstrument.swift
@@ -50,7 +43,12 @@ add_library(Instrumentation
 )
 add_library(SwiftDistributedTracing::Instrumentation ALIAS Instrumentation)
 _swift_distributed_tracing_library(Instrumentation)
-target_link_libraries(Instrumentation PUBLIC ${service_context_target})
+
+# This re-export-only module has no symbols to produce a Windows DLL import library.
+add_library(ServiceContextModule STATIC Sources/ServiceContextModule/ServiceContextModule.swift)
+add_library(SwiftDistributedTracing::ServiceContextModule ALIAS ServiceContextModule)
+_swift_distributed_tracing_library(ServiceContextModule)
+target_link_libraries(ServiceContextModule PUBLIC Instrumentation)
 
 add_library(Tracing
   Sources/Tracing/TracerProtocol+Legacy.swift
@@ -64,7 +62,7 @@ add_library(Tracing
 )
 add_library(SwiftDistributedTracing::Tracing ALIAS Tracing)
 _swift_distributed_tracing_library(Tracing)
-target_link_libraries(Tracing PUBLIC Instrumentation ${service_context_target})
+target_link_libraries(Tracing PUBLIC Instrumentation ServiceContextModule)
 
 add_library(InMemoryTracing
   Sources/InMemoryTracing/InMemorySpan.swift
