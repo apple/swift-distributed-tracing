@@ -20,6 +20,7 @@ cmake --install build
 ```
 
 Shared libraries are built by default, matching Swift Log and Swift Metrics.
+WASI defaults to static libraries because it does not support dynamic linking.
 Pass `-DBUILD_SHARED_LIBS=OFF` to build static libraries. The re-export-only
 ServiceContextModule shim remains a static archive. An enclosing CMake project
 can also use `add_subdirectory` and link the namespaced targets. The build directory

@@ -15,7 +15,12 @@
 cmake_minimum_required(VERSION 3.19)
 project(SwiftDistributedTracing LANGUAGES C Swift)
 
-option(BUILD_SHARED_LIBS "Build shared libraries by default" YES)
+if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
+  set(default_build_shared_libs NO)
+else()
+  set(default_build_shared_libs YES)
+endif()
+option(BUILD_SHARED_LIBS "Build shared libraries by default" ${default_build_shared_libs})
 
 # Match the DLL runtime used by the Windows Swift SDK, including Debug builds.
 if(WIN32 AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
