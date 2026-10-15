@@ -109,10 +109,8 @@ extension AnyInstrumentationContextKey: Hashable {
     }
 }
 
-/// The former name of ``InstrumentationContextKey``.
-@available(*, deprecated, renamed: "InstrumentationContextKey")
+/// An alias for ``InstrumentationContextKey``, the protocol's name in swift-service-context.
 public typealias ServiceContextKey = InstrumentationContextKey
 
-/// The former name of ``AnyInstrumentationContextKey``.
-@available(*, deprecated, renamed: "AnyInstrumentationContextKey")
+/// An alias for ``AnyInstrumentationContextKey``, the type's name in swift-service-context.
 public typealias AnyServiceContextKey = AnyInstrumentationContextKey

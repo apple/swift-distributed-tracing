@@ -139,9 +139,8 @@ struct InstrumentationContextTests {
         }
     }
 
-    @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContext alias.")
-    @Test("Deprecated ServiceContext alias is the same type as InstrumentationContext")
-    func deprecatedServiceContextAliasStillWorks() {
+    @Test("ServiceContext alias is the same type as InstrumentationContext")
+    func serviceContextAliasWorks() {
         var context: ServiceContext = .topLevel
         context[FirstTestKey.self] = 1
 
@@ -149,9 +148,8 @@ struct InstrumentationContextTests {
         #expect(asInstrumentationContext[FirstTestKey.self] == 1)
     }
 
-    @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContextKey alias.")
-    @Test("Deprecated ServiceContextKey alias is the same protocol as InstrumentationContextKey")
-    func deprecatedServiceContextKeyAliasStillWorks() {
+    @Test("ServiceContextKey alias is the same protocol as InstrumentationContextKey")
+    func serviceContextKeyAliasWorks() {
         enum LegacyKey: ServiceContextKey {
             typealias Value = String
         }
@@ -161,9 +159,8 @@ struct InstrumentationContextTests {
         #expect(context[LegacyKey.self] == "legacy")
     }
 
-    @available(*, deprecated, message: "Intentionally exercises the deprecated AnyServiceContextKey alias.")
-    @Test("Deprecated AnyServiceContextKey alias is the same type as AnyInstrumentationContextKey")
-    func deprecatedAnyServiceContextKeyAliasStillWorks() {
+    @Test("AnyServiceContextKey alias is the same type as AnyInstrumentationContextKey")
+    func anyServiceContextKeyAliasWorks() {
         let anyKey: AnyServiceContextKey = AnyInstrumentationContextKey(FirstTestKey.self)
         #expect(anyKey.name == "FirstTestKey")
     }
