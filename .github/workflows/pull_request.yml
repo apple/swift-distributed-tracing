@@ -77,3 +77,19 @@ jobs:
   release-builds:
     name: Release builds
     uses: apple/swift-nio/.github/workflows/release_builds.yml@main
+
+  cmake-lists:
+    name: Check CMake Lists
+    uses: apple/swift-nio/.github/workflows/cmake_tests.yml@main
+    with:
+      image: "swift:6.2-jammy"
+      update_cmake_lists_config: >-
+        {
+          "targets": [
+            { "name": "Instrumentation", "type": "source", "exceptions": [] },
+            { "name": "ServiceContextModule", "type": "source", "exceptions": [] },
+            { "name": "Tracing", "type": "source", "exceptions": [] },
+            { "name": "InMemoryTracing", "type": "source", "exceptions": [] },
+            { "name": "_CWASI", "type": "source", "exceptions": [] }
+          ]
+        }

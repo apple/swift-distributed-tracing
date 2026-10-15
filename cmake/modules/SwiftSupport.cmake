@@ -12,8 +12,19 @@
 ##
 ##===----------------------------------------------------------------------===##
 
+set(module_triple_command "${CMAKE_Swift_COMPILER}" -print-target-info)
+if(CMAKE_Swift_COMPILER_TARGET)
+  list(APPEND module_triple_command -target "${CMAKE_Swift_COMPILER_TARGET}")
+endif()
+execute_process(COMMAND ${module_triple_command}
+  RESULT_VARIABLE target_info_result OUTPUT_VARIABLE target_info_json)
+if(NOT target_info_result EQUAL 0)
+  message(FATAL_ERROR "Failed to query the Swift compiler target")
+endif()
+string(JSON Swift_MODULE_TRIPLE GET "${target_info_json}" target moduleTriple)
+
 function(_swift_distributed_tracing_library target)
-  set(module_directory "${CMAKE_CURRENT_BINARY_DIR}/swift")
+  set(module_directory "${CMAKE_Swift_MODULE_DIRECTORY}")
   if(CMAKE_CONFIGURATION_TYPES)
     foreach(configuration IN LISTS CMAKE_CONFIGURATION_TYPES)
       file(MAKE_DIRECTORY "${module_directory}/${configuration}")
@@ -34,12 +45,24 @@ function(_swift_distributed_tracing_library target)
   target_compile_options(${target} PRIVATE
     "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-package-name swift_distributed_tracing>"
     "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-enable-experimental-feature StrictConcurrency=complete>")
+  if(library_type STREQUAL "STATIC_LIBRARY")
+    set(swift_directory swift_static)
+  else()
+    set(swift_directory swift)
+  endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(swift_os macosx)
+  else()
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}" swift_os)
+  endif()
+  set(install_module_directory "${CMAKE_INSTALL_LIBDIR}/${swift_directory}/${swift_os}")
   target_include_directories(${target} PUBLIC
     "$<BUILD_INTERFACE:${module_directory}>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_LIBDIR}/swift>")
+    "$<INSTALL_INTERFACE:${install_module_directory}>")
   install(TARGETS ${target} EXPORT SwiftDistributedTracingTargets)
-  install(FILES
-    "${module_directory}/${target}.swiftmodule"
-    "${module_directory}/${target}.swiftdoc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/swift")
+  foreach(extension swiftmodule swiftdoc)
+    install(FILES "${module_directory}/${target}.${extension}"
+      DESTINATION "${install_module_directory}/${target}.swiftmodule"
+      RENAME "${Swift_MODULE_TRIPLE}.${extension}")
+  endforeach()
 endfunction()

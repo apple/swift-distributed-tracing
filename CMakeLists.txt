@@ -12,8 +12,10 @@
 ##
 ##===----------------------------------------------------------------------===##
 
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.19)
 project(SwiftDistributedTracing LANGUAGES C Swift)
+
+option(BUILD_SHARED_LIBS "Build shared libraries by default" YES)
 
 # Match the DLL runtime used by the Windows Swift SDK, including Debug builds.
 if(WIN32 AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
@@ -30,66 +32,15 @@ endif()
 set(CMAKE_Swift_LANGUAGE_VERSION 6)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-include(cmake/SwiftLibrary.cmake)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+include(SwiftSupport)
 
-add_library(Instrumentation
-  Sources/Instrumentation/InstrumentationContext.swift
-  Sources/Instrumentation/InstrumentationContextKey.swift
-  Sources/Instrumentation/Locks.swift
-  Sources/Instrumentation/NoOpInstrument.swift
-  Sources/Instrumentation/MultiplexInstrument.swift
-  Sources/Instrumentation/InstrumentationSystem.swift
-  Sources/Instrumentation/Instrument.swift
-)
-add_library(SwiftDistributedTracing::Instrumentation ALIAS Instrumentation)
-_swift_distributed_tracing_library(Instrumentation)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+set(CMAKE_Swift_MODULE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/swift")
 
-# This re-export-only module has no symbols to produce a Windows DLL import library.
-add_library(ServiceContextModule STATIC Sources/ServiceContextModule/ServiceContextModule.swift)
-add_library(SwiftDistributedTracing::ServiceContextModule ALIAS ServiceContextModule)
-_swift_distributed_tracing_library(ServiceContextModule)
-target_link_libraries(ServiceContextModule PUBLIC Instrumentation)
-
-add_library(Tracing
-  Sources/Tracing/TracerProtocol+Legacy.swift
-  Sources/Tracing/Tracer.swift
-  Sources/Tracing/TracingTime.swift
-  Sources/Tracing/TracerProtocol.swift
-  Sources/Tracing/SpanProtocol.swift
-  Sources/Tracing/InstrumentationSystem+Tracing.swift
-  Sources/Tracing/WithTracer.swift
-  Sources/Tracing/NoOpTracer.swift
-)
-add_library(SwiftDistributedTracing::Tracing ALIAS Tracing)
-_swift_distributed_tracing_library(Tracing)
-target_link_libraries(Tracing PUBLIC Instrumentation ServiceContextModule)
-
-add_library(InMemoryTracing
-  Sources/InMemoryTracing/InMemorySpan.swift
-  Sources/InMemoryTracing/InMemorySpanContext.swift
-  Sources/InMemoryTracing/InMemoryTracer.swift
-)
-add_library(SwiftDistributedTracing::InMemoryTracing ALIAS InMemoryTracing)
-_swift_distributed_tracing_library(InMemoryTracing)
-target_link_libraries(InMemoryTracing PUBLIC Tracing)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
-  add_library(_CWASI Sources/_CWASI/_CWASI.c)
-  target_include_directories(_CWASI PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Sources/_CWASI/include>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/_CWASI>")
-  configure_file(Sources/_CWASI/include/_CWASI.h
-    "${CMAKE_CURRENT_BINARY_DIR}/wasi/_CWASI.h" COPYONLY)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/wasi/module.modulemap"
-    "module _CWASI { header \"_CWASI.h\" export * }\n")
-  target_include_directories(_CWASI PUBLIC
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/wasi>")
-  target_link_libraries(Tracing PUBLIC _CWASI)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/wasi/module.modulemap"
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/_CWASI")
-  install(TARGETS _CWASI EXPORT SwiftDistributedTracingTargets)
-  install(DIRECTORY Sources/_CWASI/include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/_CWASI")
-endif()
+add_subdirectory(Sources)
 
 set(package_directory "${CMAKE_INSTALL_LIBDIR}/cmake/SwiftDistributedTracing")
 configure_package_config_file(cmake/SwiftDistributedTracingConfig.cmake.in
