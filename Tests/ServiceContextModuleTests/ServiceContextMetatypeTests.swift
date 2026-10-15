@@ -16,16 +16,14 @@ import ServiceContextModule
 import Testing
 import Tracing
 
-@Suite("Optional metatype of the former names")
+@Suite("Optional metatype of the ServiceContext names")
 struct OptionalMetatypeTests {
-    @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContext names.")
     @Test("ServiceContext?.self is Optional<ServiceContext>.self")
     func serviceContext() {
         #expect(ObjectIdentifier(ServiceContext?.self) == ObjectIdentifier(Optional<ServiceContext>.self))
         #expect(ObjectIdentifier(ServiceContext?.self) == ObjectIdentifier(Optional<InstrumentationContext>.self))
     }
 
-    @available(*, deprecated, message: "Intentionally exercises the deprecated ServiceContext names.")
     @Test("AnyServiceContextKey?.self is Optional<AnyServiceContextKey>.self")
     func anyServiceContextKey() {
         #expect(ObjectIdentifier(AnyServiceContextKey?.self) == ObjectIdentifier(Optional<AnyServiceContextKey>.self))

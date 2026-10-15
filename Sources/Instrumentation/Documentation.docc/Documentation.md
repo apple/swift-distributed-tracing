@@ -14,8 +14,8 @@ although by itself it doesn't define a specific serialization format.
 This module is the implementation home for ``InstrumentationContext``. Most code should not depend on it
 directly: depend on `Tracing` if you need spans, or on the `ServiceContextModule` product of the
 `swift-service-context` package if you only need context propagation without tracing. Both re-export the
-exact same `InstrumentationContext` type defined here. This package also keeps a deprecated `ServiceContext`
-alias, the type's former name.
+exact same `InstrumentationContext` type defined here. This package also declares `ServiceContext`,
+`ServiceContextKey` and `AnyServiceContextKey` as aliases of the types it defines.
 
 > Note: Automatic propagation through task-locals by using `InstrumentationContext.current` is supported in
 > Swift version 5.5 or later.
