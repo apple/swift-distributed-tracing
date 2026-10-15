@@ -54,3 +54,7 @@ If you know of any other library please send in a [pull request](https://github.
 ## Reference Documentation
 
 Please refer to the **[reference documentation](https://swiftpackageindex.com/apple/swift-distributed-tracing/documentation/tracing)** for detailed guides about adopting distributed tracing in your applications, libraries and frameworks.
+
+## Building with CMake
+
+See [the CMake build instructions](cmake/README.md) for library builds and consumer validation.
