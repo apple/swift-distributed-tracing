@@ -13,6 +13,6 @@
 //===----------------------------------------------------------------------===//
 // This module keeps `import ServiceContextModule` and the qualified names, such as `ServiceContextModule.ServiceContext`,
 // working. It re-exports `Instrumentation`, which declares `ServiceContext`, `ServiceContextKey`, and
-// `AnyServiceContextKey` as the former names of `InstrumentationContext`, `InstrumentationContextKey`, and
+// `AnyServiceContextKey` as aliases of `InstrumentationContext`, `InstrumentationContextKey`, and
 // `AnyInstrumentationContextKey`.
 @_exported import Instrumentation

@@ -294,6 +294,5 @@ extension InstrumentationContext {
     }
 }
 
-/// The former name of ``InstrumentationContext``.
-@available(*, deprecated, renamed: "InstrumentationContext")
+/// An alias for ``InstrumentationContext``, the type's name in swift-service-context.
 public typealias ServiceContext = InstrumentationContext
