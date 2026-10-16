@@ -67,6 +67,25 @@ public protocol Tracer: LegacyTracer {
     /// - Parameter context: The context containing information that uniquely identifies the span being obtained.
     /// - Returns: The span identified by the given `InstrumentationContext` in case it's still recording.
     func activeSpan(identifiedBy context: InstrumentationContext) -> Span?
+
+    /// Set the ID generator that is used to generate identifiers of a span.
+    ///
+    /// - Parameter generator: The random number generator that is used to generate identifiers for newly created spans.
+    mutating func setIDGenerator(_ generator: some RandomNumberGenerator & Sendable)
+}
+
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension Tracer {
+    /// A default implementation for backwards compatibility that implements a noop.
+    @available(
+        *,
+        deprecated,
+        message:
+            "Custom ID Generators are currently not supported by this Tracing backend. Please update your Tracer implementation to support accepting custom ID generators."
+    )
+    public func setIDGenerator(_ generator: some RandomNumberGenerator & Sendable) {
+        // noop
+    }
 }
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)  // for TaskLocal InstrumentationContext
