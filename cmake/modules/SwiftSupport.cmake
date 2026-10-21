@@ -25,15 +25,6 @@ string(JSON Swift_MODULE_TRIPLE GET "${target_info_json}" target moduleTriple)
 
 function(_swift_distributed_tracing_library target)
   set(module_directory "${CMAKE_Swift_MODULE_DIRECTORY}")
-  if(CMAKE_CONFIGURATION_TYPES)
-    foreach(configuration IN LISTS CMAKE_CONFIGURATION_TYPES)
-      file(MAKE_DIRECTORY "${module_directory}/${configuration}")
-    endforeach()
-    set(module_directory "${module_directory}/$<CONFIG>")
-    if(CMAKE_VERSION VERSION_LESS 4.0)
-      message(FATAL_ERROR "Swift multi-configuration builds require CMake 4.0 or newer")
-    endif()
-  endif()
   set_target_properties(${target} PROPERTIES
     Swift_MODULE_DIRECTORY "${module_directory}"
     POSITION_INDEPENDENT_CODE YES)
@@ -43,8 +34,7 @@ function(_swift_distributed_tracing_library target)
     set_target_properties(${target} PROPERTIES PREFIX "lib")
   endif()
   target_compile_options(${target} PRIVATE
-    "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-package-name swift_distributed_tracing>"
-    "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-enable-experimental-feature StrictConcurrency=complete>")
+    "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-package-name swift_distributed_tracing>")
   if(library_type STREQUAL "STATIC_LIBRARY")
     set(swift_directory swift_static)
   else()

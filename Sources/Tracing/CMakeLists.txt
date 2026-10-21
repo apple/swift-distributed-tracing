@@ -25,6 +25,3 @@ add_library(Tracing
 add_library(SwiftDistributedTracing::Tracing ALIAS Tracing)
 _swift_distributed_tracing_library(Tracing)
 target_link_libraries(Tracing PUBLIC Instrumentation ServiceContextModule)
-if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
-  target_link_libraries(Tracing PUBLIC _CWASI)
-endif()

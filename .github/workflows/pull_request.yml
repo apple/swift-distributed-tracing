@@ -89,7 +89,6 @@ jobs:
             { "name": "Instrumentation", "type": "source", "exceptions": [] },
             { "name": "ServiceContextModule", "type": "source", "exceptions": [] },
             { "name": "Tracing", "type": "source", "exceptions": [] },
-            { "name": "InMemoryTracing", "type": "source", "exceptions": [] },
-            { "name": "_CWASI", "type": "source", "exceptions": [] }
+            { "name": "InMemoryTracing", "type": "source", "exceptions": [] }
           ]
         }

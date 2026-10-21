@@ -14,8 +14,5 @@
 
 add_subdirectory(Instrumentation)
 add_subdirectory(ServiceContextModule)
-if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
-  add_subdirectory(_CWASI)
-endif()
 add_subdirectory(Tracing)
 add_subdirectory(InMemoryTracing)

@@ -15,12 +15,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(SwiftDistributedTracing LANGUAGES C Swift)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "WASI")
-  set(default_build_shared_libs NO)
-else()
-  set(default_build_shared_libs YES)
-endif()
-option(BUILD_SHARED_LIBS "Build shared libraries by default" ${default_build_shared_libs})
+option(BUILD_SHARED_LIBS "Build shared libraries by default" YES)
 
 # Match the DLL runtime used by the Windows Swift SDK, including Debug builds.
 if(WIN32 AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
@@ -47,13 +42,4 @@ set(CMAKE_Swift_MODULE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/swift")
 
 add_subdirectory(Sources)
 
-set(package_directory "${CMAKE_INSTALL_LIBDIR}/cmake/SwiftDistributedTracing")
-configure_package_config_file(cmake/SwiftDistributedTracingConfig.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
-  INSTALL_DESTINATION "${package_directory}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
-  DESTINATION "${package_directory}")
-install(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
-  DESTINATION "${package_directory}")
-export(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingTargets.cmake")
+add_subdirectory(cmake/modules)

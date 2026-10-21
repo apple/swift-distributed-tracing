@@ -57,4 +57,4 @@ Please refer to the **[reference documentation](https://swiftpackageindex.com/ap
 
 ## Building with CMake
 
-See [the CMake build instructions](cmake/README.md) for library builds and consumer validation.
+See [the CMake build instructions](cmake/README.md) for library builds.
