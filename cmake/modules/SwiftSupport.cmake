@@ -1,0 +1,58 @@
+##===----------------------------------------------------------------------===##
+##
+## This source file is part of the Swift Distributed Tracing open source project
+##
+## Copyright (c) 2026 Apple Inc. and the Swift Distributed Tracing project authors
+## Licensed under Apache License v2.0
+##
+## See LICENSE.txt for license information
+## See CONTRIBUTORS.txt for the list of Swift Distributed Tracing project authors
+##
+## SPDX-License-Identifier: Apache-2.0
+##
+##===----------------------------------------------------------------------===##
+
+set(module_triple_command "${CMAKE_Swift_COMPILER}" -print-target-info)
+if(CMAKE_Swift_COMPILER_TARGET)
+  list(APPEND module_triple_command -target "${CMAKE_Swift_COMPILER_TARGET}")
+endif()
+execute_process(COMMAND ${module_triple_command}
+  RESULT_VARIABLE target_info_result OUTPUT_VARIABLE target_info_json)
+if(NOT target_info_result EQUAL 0)
+  message(FATAL_ERROR "Failed to query the Swift compiler target")
+endif()
+string(JSON Swift_MODULE_TRIPLE GET "${target_info_json}" target moduleTriple)
+
+function(_swift_distributed_tracing_library target)
+  set(module_directory "${CMAKE_Swift_MODULE_DIRECTORY}")
+  set_target_properties(${target} PROPERTIES
+    Swift_MODULE_DIRECTORY "${module_directory}"
+    POSITION_INDEPENDENT_CODE YES)
+  get_target_property(library_type ${target} TYPE)
+  if(WIN32 AND library_type STREQUAL "STATIC_LIBRARY")
+    # Swift autolinks lib-prefixed static archives, but unprefixed DLL import libraries.
+    set_target_properties(${target} PROPERTIES PREFIX "lib")
+  endif()
+  target_compile_options(${target} PRIVATE
+    "$<$<COMPILE_LANGUAGE:Swift>:SHELL:-package-name swift_distributed_tracing>")
+  if(library_type STREQUAL "STATIC_LIBRARY")
+    set(swift_directory swift_static)
+  else()
+    set(swift_directory swift)
+  endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(swift_os macosx)
+  else()
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}" swift_os)
+  endif()
+  set(install_module_directory "${CMAKE_INSTALL_LIBDIR}/${swift_directory}/${swift_os}")
+  target_include_directories(${target} PUBLIC
+    "$<BUILD_INTERFACE:${module_directory}>"
+    "$<INSTALL_INTERFACE:${install_module_directory}>")
+  install(TARGETS ${target} EXPORT SwiftDistributedTracingTargets)
+  foreach(extension swiftmodule swiftdoc)
+    install(FILES "${module_directory}/${target}.${extension}"
+      DESTINATION "${install_module_directory}/${target}.swiftmodule"
+      RENAME "${Swift_MODULE_TRIPLE}.${extension}")
+  endforeach()
+endfunction()
