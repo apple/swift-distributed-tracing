@@ -14,11 +14,11 @@
 
 set(package_directory "${CMAKE_INSTALL_LIBDIR}/cmake/SwiftDistributedTracing")
 configure_package_config_file(SwiftDistributedTracingConfig.cmake.in
-  "${CMAKE_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
   INSTALL_DESTINATION "${package_directory}")
-install(FILES "${CMAKE_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingConfig.cmake"
   DESTINATION "${package_directory}")
 install(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
   DESTINATION "${package_directory}")
 export(EXPORT SwiftDistributedTracingTargets NAMESPACE SwiftDistributedTracing::
-  FILE "${CMAKE_BINARY_DIR}/SwiftDistributedTracingTargets.cmake")
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/SwiftDistributedTracingTargets.cmake")
