@@ -15,7 +15,8 @@ let package = Package(
         // MARK: Instrumentation
 
         .target(
-            name: "Instrumentation"
+            name: "Instrumentation",
+            exclude: ["CMakeLists.txt"]
         ),
         .testTarget(
             name: "InstrumentationTests",
@@ -36,7 +37,8 @@ let package = Package(
             name: "ServiceContextModule",
             dependencies: [
                 .target(name: "Instrumentation")
-            ]
+            ],
+            exclude: ["CMakeLists.txt"]
         ),
         .testTarget(
             name: "ServiceContextModuleTests",
@@ -57,7 +59,8 @@ let package = Package(
                 // swift-service-context. Clients that only depend on `Tracing` can import and name the module.
                 .target(name: "ServiceContextModule"),
                 .target(name: "_CWASI", condition: .when(platforms: [.wasi])),
-            ]
+            ],
+            exclude: ["CMakeLists.txt"]
         ),
         .testTarget(
             name: "TracingTests",
@@ -69,7 +72,8 @@ let package = Package(
             name: "InMemoryTracing",
             dependencies: [
                 .target(name: "Tracing")
-            ]
+            ],
+            exclude: ["CMakeLists.txt"]
         ),
         .testTarget(
             name: "InMemoryTracingTests",
