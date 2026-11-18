@@ -328,6 +328,19 @@ extension SpanAttributeNamespace {
                 } else {
                     return value as? T
                 }
+            case .int32Array(let value):
+                if T.self == [Int].self {
+                    return (value.map(Int.init) as! T)
+                } else {
+                    return value as? T
+                }
+            case .int64Array(let value):
+                if T.self == [Int].self {
+                    let integers = value.compactMap(Int.init(exactly:))
+                    return integers.count == value.count ? integers as? T : nil
+                } else {
+                    return value as? T
+                }
             default:
                 if let value = spanAttribute?.anyValue {
                     return value as? T
@@ -513,7 +526,10 @@ extension Array where Element == Double {
 extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
     /// Returns the span attribute representation of the array.
     public func toSpanAttribute() -> SpanAttribute {
-        if let value = self as? [Int32] {
+        if Element.self == Int.self, let value = self as? [Int] {
+            // An empty array casts to any element type. Only use the native Int conversion for [Int].
+            return value.toSpanAttribute()
+        } else if let value = self as? [Int32] {
             return .int32Array(value)
         } else if let value = self as? [Int64] {
             return .int64Array(value)

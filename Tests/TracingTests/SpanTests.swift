@@ -154,6 +154,34 @@ struct SpanTests {
         #expect(attributes.sampleHttp.customType == CustomAttributeValue())
     }
 
+    @Test("SpanAttributes stores [Int] as an integer array")
+    func spanAttributesStoresIntArrayAsIntegerArray() {
+        // `.int64Array` on 64-bit platforms, `.int32Array` on 32-bit platforms.
+        let expected = ([1, 2, 3] as [Int]).toSpanAttribute()
+
+        var attributes: SpanAttributes = [:]
+        attributes["integers"] = [1, 2, 3]
+        #expect(attributes.get("integers") == expected)
+
+        attributes["integers"] = [Int]()
+        #expect(attributes.get("integers") == [Int]().toSpanAttribute())
+        attributes["int32"] = [Int32]()
+        #expect(attributes.get("int32") == .int32Array([]))
+
+        attributes.sampleHttp.codesArray = [1, 2, 3]
+        #expect(attributes.get("http.codes_array") == expected)
+        #expect(attributes.sampleHttp.codesArray == [1, 2, 3])
+
+        attributes.set("http.codes_array", value: .int64Array([4, 5]))
+        #expect(attributes.sampleHttp.codesArray == [4, 5])
+
+        attributes.set("http.codes_array", value: .int64Array([0, .max]))
+        #expect(attributes.sampleHttp.codesArray == Int(exactly: Int64.max).map { [0, $0] })
+
+        attributes.set("http.codes_array", value: .int32Array([6, 7]))
+        #expect(attributes.sampleHttp.codesArray == [6, 7])
+    }
+
     @Test("SpanAttributes are iterable")
     func spanAttributesAreIterable() {
         let attributes: SpanAttributes = [
