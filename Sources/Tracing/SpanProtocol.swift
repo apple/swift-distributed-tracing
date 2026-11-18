@@ -92,6 +92,17 @@ public protocol Span: Sendable {
         nonmutating set
     }
 
+    /// Update the span attributes in a block instead of individually.
+    ///
+    /// Updating a span attribute involves some type of thread synchronisation
+    /// primitive to avoid multiple threads updating the attributes at the same
+    /// time. If you update each attribute individually, this can cause slowdown.
+    /// This function updates the attributes in one call to avoid hitting the
+    /// thread synchronisation code multiple times.
+    ///
+    /// - Parameter update: closure used to update span attributes
+    func updateAttributes(_ update: (inout SpanAttributes) -> Void)
+
     /// A Boolean value that indicates whether the span is recording information such as events, attributes, status, and so on.
     var isRecording: Bool { get }
 
