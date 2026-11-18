@@ -58,6 +58,14 @@ public protocol Span: Sendable {
 
     /// Set the status of the span.
     ///
+    /// Status is explicit and is not derived from recorded errors. Calling ``recordError(_:attributes:at:)``
+    /// does not change the span's status. Call this method when the span as a whole should be treated as
+    /// failed or as explicitly succeeded.
+    ///
+    /// Whether a recorded error should also set ``SpanStatus/Code-swift.enum/error`` depends on the use
+    /// case. For example, an HTTP server span often records a client error response as an error event but
+    /// leaves status unset, while a server error response should set status to error.
+    ///
     /// - Parameter status: The status of this `Span`.
     func setStatus(_ status: SpanStatus)
 
@@ -75,6 +83,10 @@ public protocol Span: Sendable {
     func addEvent(_ event: SpanEvent)
 
     /// Record an error and attributes associated with the error into the span.
+    ///
+    /// This records that an error occurred during the span. It does not set the span's ``SpanStatus``.
+    /// Status is independent of recorded errors and must be set with ``setStatus(_:)`` when the span as
+    /// a whole should be considered failed.
     ///
     /// - Parameters:
     ///   - error: The error to be recorded.
@@ -118,6 +130,10 @@ public protocol Span: Sendable {
 extension Span {
     /// Record an error and attributes associated with the error into the span.
     ///
+    /// This records that an error occurred during the span. It does not set the span's ``SpanStatus``.
+    /// Status is independent of recorded errors and must be set with ``setStatus(_:)`` when the span as
+    /// a whole should be considered failed.
+    ///
     /// - Parameters:
     ///   - error: The error to record.
     ///   - attributes: Additional attributes that describe the error.
@@ -152,6 +168,10 @@ extension Span {
 
 extension Span {
     /// Record an error into the span.
+    ///
+    /// This records that an error occurred during the span. It does not set the span's ``SpanStatus``.
+    /// Status is independent of recorded errors and must be set with ``setStatus(_:)`` when the span as
+    /// a whole should be considered failed.
     ///
     /// - Parameters:
     ///   - error: The error to record.
@@ -754,6 +774,10 @@ extension SpanAttributes: ExpressibleByDictionaryLiteral {
 /// The status of a finished span.
 ///
 /// The status is composed of a status code with an optional descriptive message.
+///
+/// Status is not inferred from ``Span/recordError(_:)``. A span can record errors and still leave
+/// status unset, or set ``SpanStatus/Code-swift.enum/ok`` or ``SpanStatus/Code-swift.enum/error``
+/// independently with ``Span/setStatus(_:)``.
 public struct SpanStatus: Equatable {
     /// The status code of the span.
     public let code: Code
