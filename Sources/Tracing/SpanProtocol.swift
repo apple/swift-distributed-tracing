@@ -307,6 +307,14 @@ extension NestedSpanAttributesProtocol {
     public typealias Key = SpanAttributeKey
 }
 
+/// Converts a stored `Double` back to a `Float`.
+///
+/// A `Float` is stored as a `Double`, so it converts back exactly. Returns `nil` for a value that a
+/// `Float` can't represent exactly, such as a `Double` stored by other code.
+private func exactFloat(_ value: Double) -> Float? {
+    value.isNaN ? .nan : Float(exactly: value)
+}
+
 extension SpanAttributeNamespace {
     /// Get or update a span attribute with the keypath you provide.
     public subscript<T>(dynamicMember dynamicMember: KeyPath<NestedSpanAttributes, SpanAttributeKey<T>>) -> T?
@@ -325,6 +333,32 @@ extension SpanAttributeNamespace {
             case .int64(let value):
                 if T.self == Int.self {
                     return (Int(exactly: value) as! T)
+                } else {
+                    return value as? T
+                }
+            case .int32Array(let value):
+                if T.self == [Int].self {
+                    return (value.map { Int($0) } as! T)
+                } else {
+                    return value as? T
+                }
+            case .int64Array(let value):
+                if T.self == [Int].self {
+                    let integers = value.compactMap { Int(exactly: $0) }
+                    return integers.count == value.count ? (integers as! T) : nil
+                } else {
+                    return value as? T
+                }
+            case .double(let value):
+                if T.self == Float.self {
+                    return (exactFloat(value) as! T?)
+                } else {
+                    return value as? T
+                }
+            case .doubleArray(let value):
+                if T.self == [Float].self {
+                    let floats = value.compactMap(exactFloat)
+                    return floats.count == value.count ? (floats as! T) : nil
                 } else {
                     return value as? T
                 }
@@ -513,16 +547,24 @@ extension Array where Element == Double {
 extension Array: SpanAttributeConvertible where Element: SpanAttributeConvertible {
     /// Returns the span attribute representation of the array.
     public func toSpanAttribute() -> SpanAttribute {
-        if let value = self as? [Int32] {
-            return .int32Array(value)
-        } else if let value = self as? [Int64] {
-            return .int64Array(value)
-        } else if let value = self as? [Double] {
-            return .doubleArray(value)
-        } else if let value = self as? [Bool] {
-            return .boolArray(value)
-        } else if let value = self as? [String] {
-            return .stringArray(value)
+        // Match on the element type: casting an empty array to `[Int32]` succeeds for any element type.
+        if Element.self == Int32.self {
+            return .int32Array(self as! [Int32])
+        } else if Element.self == Int64.self {
+            return .int64Array(self as! [Int64])
+        } else if Element.self == Int.self {
+            // Calls through the protocol, such as the `SpanAttributes` subscript, reach this
+            // method rather than the `Array where Element == Int` overload, so forward to it.
+            return (self as! [Int]).toSpanAttribute()
+        } else if Element.self == Double.self {
+            return .doubleArray(self as! [Double])
+        } else if Element.self == Float.self {
+            // Like `Float.toSpanAttribute()`, store the values as `Double`s.
+            return .doubleArray((self as! [Float]).map(Double.init))
+        } else if Element.self == Bool.self {
+            return .boolArray(self as! [Bool])
+        } else if Element.self == String.self {
+            return .stringArray(self as! [String])
         } else if let value = self as? [CustomStringConvertible & Sendable] {
             return .stringConvertibleArray(value)
         }

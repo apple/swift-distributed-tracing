@@ -139,6 +139,74 @@ struct SpanTests {
         #expect(attributes.sampleHttp.codesArray == [1, 2, 3])
     }
 
+    @Test("SpanAttributes stores [Int] and [Float] as numeric arrays")
+    func spanAttributesStoresIntAndFloatArraysAsNumericArrays() {
+        var attributes: SpanAttributes = [:]
+        let integers = [1, Int.max, Int.min]
+
+        attributes["integers"] = integers
+        attributes["floats"] = [Float(0.1), Float(2.5)]
+        #expect(attributes.get("integers") == integers.toSpanAttribute())
+        #expect(attributes.get("floats") == .doubleArray([Double(Float(0.1)), 2.5]))
+        #expect(([1, 2, 3] as any SpanAttributeConvertible).toSpanAttribute() == [1, 2, 3].toSpanAttribute())
+
+        attributes.sampleHttp.codesArray = integers
+        attributes.sampleHttp.floatsArray = [0.1, 2.5]
+        #expect(attributes.get("http.codes_array") == integers.toSpanAttribute())
+        #expect(attributes.get("http.floats_array") == .doubleArray([Double(Float(0.1)), 2.5]))
+        #expect(attributes.sampleHttp.codesArray == integers)
+        #expect(attributes.sampleHttp.floatsArray == [0.1, 2.5])
+
+        attributes.set("http.codes_array", value: .int32Array([1, 2, 3]))
+        #expect(attributes.sampleHttp.codesArray == [1, 2, 3])
+        attributes.set("http.floats_array", value: .doubleArray([1e300]))
+        #expect(attributes.sampleHttp.floatsArray == nil)
+
+        attributes.sampleHttp.floatsArray = [1, .nan, .infinity]
+        let floats = attributes.sampleHttp.floatsArray
+        #expect(floats?.count == 3)
+        #expect(floats?[0] == 1)
+        #expect(floats?[1].isNaN == true)
+        #expect(floats?[2] == .infinity)
+    }
+
+    @Test("SpanAttributes stores empty arrays by their element type")
+    func spanAttributesStoresEmptyArraysByElementType() {
+        var attributes: SpanAttributes = [:]
+
+        attributes["integers"] = [Int]()
+        attributes["floats"] = [Float]()
+        attributes["doubles"] = [Double]()
+        attributes["bools"] = [Bool]()
+        attributes["strings"] = [String]()
+        #expect(attributes.get("integers") == [Int]().toSpanAttribute())
+        #expect(attributes.get("floats") == .doubleArray([]))
+        #expect(attributes.get("doubles") == .doubleArray([]))
+        #expect(attributes.get("bools") == .boolArray([]))
+        #expect(attributes.get("strings") == .stringArray([]))
+
+        attributes.sampleHttp.codesArray = []
+        attributes.sampleHttp.floatsArray = []
+        #expect(attributes.sampleHttp.codesArray == [])
+        #expect(attributes.sampleHttp.floatsArray == [])
+    }
+
+    @Test("SpanAttributes reads back a Float stored with a typed key")
+    func spanAttributesReadsBackTypedFloat() {
+        var attributes: SpanAttributes = [:]
+
+        attributes.sampleHttp.ratio = 0.1
+        #expect(attributes.get("http.ratio") == .double(Double(Float(0.1))))
+        #expect(attributes.sampleHttp.ratio == 0.1)
+
+        attributes.sampleHttp.ratio = .nan
+        #expect(attributes.sampleHttp.ratio?.isNaN == true)
+
+        // A Double that a Float can't hold reads back as nil.
+        attributes.set("http.ratio", value: .double(1e300))
+        #expect(attributes.sampleHttp.ratio == nil)
+    }
+
     @Test("SpanAttributes custom value")
     func spanAttributesCustomValue() {
         var attributes: SpanAttributes = [:]
@@ -326,6 +394,14 @@ package struct HTTPAttributes: SpanAttributeNamespace {
 
         package var codesArray: Key<[Int]> {
             "http.codes_array"
+        }
+
+        package var floatsArray: Key<[Float]> {
+            "http.floats_array"
+        }
+
+        package var ratio: Key<Float> {
+            "http.ratio"
         }
 
         package var customType: Key<CustomAttributeValue> {
